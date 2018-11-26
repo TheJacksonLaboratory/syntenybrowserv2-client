@@ -1,0 +1,81 @@
+<div *ngIf="genomeData" id="genome-view-container">
+  <svg class="genome-view" [attr.viewBox]="'0 0 ' + width + ' ' + width" preserveAspectRatio="xMinYMin meet">
+
+    <g id="reference-plot" [attr.transform]="'translate(' + radius + ', ' + radius + ')'">
+      <g id="ref-blocks">
+        <path *ngFor="let blk of genomeData" [attr.fill]="genomeColors[blk.comp_chr]" class="block-band"
+              (click)="renderSelectionMapForChr(blk.ref_chr)" [attr.d]="getBlockBandPath(referenceRadii, refGenomeMap, blk)">
+        </path>
+      </g>
+
+      <g id="ref-bands">
+        <path *ngFor="let chr of getChromosomes(reference.genome)" class="outer-chr-band" (click)="renderSelectionMapForChr(chr)"
+              [attr.d]="getChrBandPath(referenceRadii, refGenomeMap, chr, reference.genome)">
+        </path>
+      </g>
+
+      <g id="ref-labels">
+        <text *ngFor="let chr of getChromosomes(reference.genome)" class="outer outer-label"
+              text-anchor="middle" (click)="renderSelectionMapForChr(chr)"
+              [attr.transform]="getLabelTransformation(chr, refGenomeMap, reference.genome, referenceRadii.labels)">
+          {{ chr }}
+        </text>
+      </g>
+
+      <g *ngIf="featureBlocks" id="feature-blocks">
+        <path *ngFor="let blk of featureBlocks" [attr.fill]="genomeColors[blk.comp_chr]" class="block-band"
+              (click)="renderSelectionMapForChr(blk.ref_chr)" [attr.d]="getBlockBandPath(featureRadii, refGenomeMap, blk)">
+        </path>
+      </g>
+    </g>
+
+    <g *ngIf="!referenceChromosome" id="comparison-plot" [attr.transform]="'translate(' + radius + ', ' + radius + ')'">
+      <g id="comp-bands">
+        <path *ngFor="let chr of getChromosomes(comparison.genome)" class="inner" [attr.fill]="genomeColors[chr]"
+              [attr.d]="getChrBandPath(comparisonRadii, compGenomeMap, chr, comparison.genome)">
+        </path>
+      </g>
+
+      <g id="comp-labels">
+        <text *ngFor="let chr of getChromosomes(comparison.genome)" text-anchor="middle"
+              [attr.transform]="getLabelTransformation(chr, compGenomeMap, comparison.genome, comparisonRadii.labels)">
+          {{ chr }}
+        </text>
+      </g>
+    </g>
+
+    <g *ngIf="referenceChromosome" id="comparison-plot" [attr.transform]="'translate(' + radius + ', ' + radius + ')'">
+      <g id="ref-band">
+        <!-- Reference Chromosome Band -->
+        <path class="outer-chr-band" [attr.d]="getChrBandPath(comparisonRadii, compGenomeMap, referenceChromosome.chr, tempCompGenome)">
+        </path>
+
+        <!-- Reference Syntenic Bands -->
+        <path *ngFor="let blk of referenceChromosome.blocks" [attr.fill]="genomeColors[blk.comp_chr]"
+              [attr.d]="getBlockBandPath(comparisonRadii, compGenomeMap, blk)">
+        </path>
+      </g>
+
+      <g id="comp-bands">
+        <!-- Comparison Genome Bands -->
+        <path *ngFor="let chr of getChromosomes(comparison.genome)" class="inner" [attr.fill]="genomeColors[chr]"
+              [attr.d]="getChrBandPath(comparisonRadii, compGenomeMap, chr, comparison.genome)">
+        </path>
+      </g>
+
+      <g id="chord-mapping">
+        <!-- Mapping Chords from Reference to Comparison -->
+        <path *ngFor="let blk of referenceChromosome.blocks" class="chord" [attr.fill]="genomeColors[blk.comp_chr]"
+              [attr.stroke]="genomeColors[blk.comp_chr]" [attr.d]="getChordPath(comparisonRadii.ringInner, compGenomeMap, blk)">
+        </path>
+      </g>
+
+      <g id="comp-labels">
+        <text *ngFor="let chr of getChromosomes(tempCompGenome)" text-anchor="middle"
+              [attr.transform]="getLabelTransformation(chr, compGenomeMap, tempCompGenome, comparisonRadii.labels)">
+          {{ chr }}
+        </text>
+      </g>
+    </g>
+  </svg>
+</div>
