@@ -1,1 +1,52 @@
 /* You can add global styles to this file, and also import other style files */
+.top-1 { margin-top: 1rem !important; }
+.top-2 { margin-top: 2rem !important; }
+.bottom-1 { margin-bottom: 1rem !important; }
+.bottom-2 { margin-bottom: 2rem !important; }
+.left-1 { margin-left: 1rem !important; }
+.left-2 { margin-left: 2rem !important; }
+.right-1 { margin-right: 1rem !important; }
+.right-2 { margin-right: 2rem !important; }
+.margin-1 { margin: 1rem !important; }
+.margin-2 { margin: 2rem !important; }
+.row-center { justify-content: center; }
+.clr-control-label { text-transform: uppercase; }
+
+.outer-chr-band {
+  stroke: black;
+  stroke-width: 0.25;
+  fill: transparent;
+}
+
+.block-band {
+  stroke: black;
+  stroke-width: 0.1;
+}
+
+.inner {
+  stroke: black;
+  stroke-width: 0.25;
+}
+
+.ref-block-band { stroke: none; }
+
+#genome-view-container text { font-size: 12px; }
+
+.chord { stroke-width: 0.3; }
+
+.clr-row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#view-selection-overlay {
+  stroke-width: 0.3;
+}
+
+#orientation-indicators path {
+  stroke-width: 0.5;
+}
+
+#reference-genes text, #comparison-genes text {
+  font-size: 8px;
+}
