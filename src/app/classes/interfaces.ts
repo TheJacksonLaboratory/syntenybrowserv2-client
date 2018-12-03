@@ -1,6 +1,6 @@
 export interface Response {
   species?: Array<RawSpecies>;
-  genes?: Array<GeneMetadata|Gene>;
+  genes?: Array<any>;
   blocks?: Array<SyntenyBlock>;
   qtls?: Array<QTLMetadata>;
   ont_genes?: Array<OntologyGeneMetadata>;
@@ -38,16 +38,6 @@ export interface Metadata {
   gene_type?: string;
   chr: string;
   strand?: string;
-  start: number;
-  end: number;
-}
-
-export interface GeneMetadata extends Metadata {
-  gene_id: string;
-  gene_symbol: string;
-  gene_type: string;
-  chr: string;
-  strand: string;
   start: number;
   end: number;
 }
@@ -120,4 +110,14 @@ export interface Gene {
   start_pos?: number;
   strand: string;
   type: string;
+}
+
+export interface GeneMetadata extends Metadata {
+  gene_id: string;
+  gene_symbol: string;
+  gene_type: string;
+  chr: string;
+  strand: string;
+  start: number;
+  end: number;
 }
