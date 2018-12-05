@@ -39,6 +39,9 @@
   margin-right: 0;
 }
 
-#view-selection-overlay {
-  stroke-width: 0.3;
+#view-selection-overlay, rect.selection {
+  fill: #aaa;
+  fill-opacity: 0.3;
+  stroke-width: 0.3px;
+  stroke: black;
 }

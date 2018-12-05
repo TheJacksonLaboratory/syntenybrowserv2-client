@@ -3,7 +3,6 @@ import {Species} from '../classes/species';
 import {ApiService} from '../services/api.service';
 import * as d3 from 'd3';
 import {BrowserInterval, Gene, SyntenyBlock} from '../classes/interfaces';
-import {zoom} from 'd3';
 
 @Component({
   selector: 'app-block-view-browser',
@@ -26,6 +25,7 @@ export class BlockViewBrowserComponent implements OnInit {
   minimumIntervalSize = 500000;
 
   interval: BrowserInterval;
+  brush: boolean = false;
   blocks: Array<SyntenyBlock>;
   referenceGenes: Array<any>;
   comparisonGenes: Array<any>;
@@ -95,88 +95,91 @@ export class BlockViewBrowserComponent implements OnInit {
                                                                .map(gene => this.addHomologDetails(gene))
                                  ).filter(gene => gene.block_id);
 
-        let that = this;
-        let width = Number(d3.select('#browser-bg').attr('width'));
+        /*
+        CREDIT: I would not have been able to get these behaviors so clean and concise without dear Mike Bostock's example,
+                found here: https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172. All hail Mike Bostock!
+        NOTE: I've been making a large effort to keep separate variables to a minimum, but it's worth mentioning for any
+              future devs that keeping these zoom and brush variables are in our best interest to keep these separate
+              as you are able to use 'this'. I found that if I did something like d3.select('#browser').call(d3.zoom()...),
+              I would have to set a 'let that = this' and then have to send 'that' to any methods called from inside the
+              .on() which involved adding an extra optional parameter to all of them. I also noticed a a bug where the
+              zoom function would have reset transformation values after brushing. I'm not seeing the aforementioned bug
+              using this way of format, so change at your own risk!
 
-        let browser = d3.select('#browser')
-                        .call(d3.zoom()
-                                .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
-                                .extent([[0, 0], [width, 0]])
-                                .duration(500)
-                                .on('zoom', () => {
-                                  let t = d3.event.transform;
+              ~ A.L.
+         */
+        let brush = d3.brushX()
+                      .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
+                      .on('brush', () => {
+                        // ignore brush via zoom occurrences
+                        if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
 
-                                  let tempStart = that.refBPToPixels.invert(that.descaleThis((0 - t.x), t.k));
-                                  let tempEnd = that.refBPToPixels.invert(that.descaleThis((that.width - t.x), t.k));
+                        let s = d3.event.selection;
+                        // remove the loaded default overlay
+                        this.brush = true;
 
-                                  let tempSize = tempEnd - tempStart;
+                        // adjust refBPToPixels by scaling s's start, s[0], and end, s[1], with the static scale (used for chromosome view)
+                        this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
 
-                                  // handles end cases to keep from scrolling/zooming too far
-                                  if (tempStart >= 0 && tempEnd <= chrSize) {
-                                    t = that.changeInterval(tempStart, tempEnd, chrSize, t, that);
-                                    browser.attr('transform', t);
-                                  } else if (tempStart < 0 && tempEnd <= chrSize) {
-                                    t = that.changeInterval(0, tempSize, chrSize, t, that);
-                                    browser.attr('transform', t);
-                                  } else if (tempStart >= 0 && tempEnd > chrSize) {
-                                    t = that.changeInterval(chrSize - tempSize, chrSize, chrSize, t, that);
-                                    browser.attr('transform', t);
-                                  }
-                                })
-                        );
+                        // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
+                        this.blocks.forEach(block => this.createCompScaleForBlock(block));
+
+                        // zoom the browser to same section
+                        d3.select('#browser').call(zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
+
+                        this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
+                      });
+
+        let zoom = d3.zoom()
+                     .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
+                     .translateExtent([[0, 0], [this.width, this.height]])
+                     .extent([[0, 0], [this.width, this.height]])
+                     .on('zoom', () => {
+                       // ignore zoom via brush occurrences
+                       if(d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
+
+                       let t = d3.event.transform;
+                       // remove the loaded default overlay
+                       this.brush = true;
+
+                       // adjust the refBPToPixels using a t's rescaled x on the static scale (used for chromosome view)
+                       this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
+
+                       // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
+                       this.blocks.forEach(block => this.createCompScaleForBlock(block));
+
+                       let newExtents = this.refBPToPixels.range().map(t.invertX, t);
+
+                       // move the brush in the chromosome view to match
+                       d3.select('#chr-view-inv-cover').call(brush.move, newExtents);
+
+                       this.setInterval(this.staticRefBPToPixels.invert(newExtents[0]), this.staticRefBPToPixels.invert(newExtents[1]));
+                     });
+
+        // bind the zoom behavior
+        d3.select('#browser').call(zoom);
+
+        // bind the brush behavior and do an initial brush
+        d3.select('#chr-view-inv-cover').call(brush).call(brush.move, this.staticRefBPToPixels.range());
+
       });
     });
   }
 
   /**
-   * Returns the 'descaled' value of the specified value. NOTE: Let me explain the purpose of this as it is here as a result of the
-   * mild trainwreck that is my adaptation of d3.zoom(), scaling g#browser scales all child elements as a result. This includes
-   * heights and y-values of all elements. Thusly, in order to keep these heights and y-values from gettings scaled (the desired
-   * behavior is x-oriented stretching) we negate the scaling done by d3.zoom by dividing by the current scale factor. ~ A.L.
-   * @param {number} value - the value to get 'descaled'
-   * @param {number} scaleFactor - the scaling factor, if passed, or null if not (in which case, we assume the scaling factor is this.scale
+   * Returns the absolute value of the scaled width of a syntenic block in pixels
+   * @param {SyntenyBlock} block - the syntenic block to get the width for
    */
-  descaleThis(value: number|string, scaleFactor: number = null): number {
-    return (scaleFactor) ? value / scaleFactor : value / this.scale;
+  getBlockWidth(block: SyntenyBlock): number {
+    return Math.abs(this.refBPToPixels(block.ref_end) - this.refBPToPixels(block.ref_start));
   }
 
   /**
-   * Changes the interval (bp positions of view) and returns an altered trans object included in d3.zoom to change these values.
-   * YOU MAY BE ASKING: "BUT WHY DO WE HAVE TO MANUALLY CHANGE THESE VALUES? DOESN'T THAT DEFEAT THE PURPOSE OF USING D3.ZOOM?"
-   * and the answer to that is "sort of" but let me explain, as I've been working with several different approaches for about a
-   * week, give or take, and it's been a journey. Firstly, we are using the zoom function on g#browser where as in the previous
-   * version, we were applying transformations to every single element individually. Here, we are scaling the group which trickles
-   * down to all of the children elements. This saves us time and lines of code. However, the default zoom transformation ends up
-   * transforming 2-dimensionally (x AND y) where we only need x transformation; that's why we have to set the y value to
-   * browserOffset as we don't want elements within g#browser to move vertically. Next let's address the scale variable (k). I
-   * didn't really want to futz around with this but after playing around with the default scaling variable, it really wasn't
-   * cutting it and since we are limiting zooming and translation by bp comparison, I figureed we might as well ensure the scale
-   * factor is following through with our other values. Lastly, our translate x variable has been the most troubling of them all
-   * and let me tell you why. D3.ZOOM DOESN'T WANT TO ZOOM BASED ON YOUR MOUSE LOCATION AT ALL. I kept finding that whatever I
-   * did, the more you zoom in, the view continued to inch towards 0 bp, which would most likely keep draggin teh user out of
-   * their desired view. So I decided to take matters into my own hands and manhandle the x value of the zoom transformation.
-   * If you feel like you can do this right, PLEASE. BE MY GUEST. BLOW MY MIND. I BEG YOU. ~ A.L.
-   * @param {number} newStart - the new start value for the interval
-   * @param {number} newEnd - the new end value for the interval
-   * @param {number} chrSize - the size of the current chromosome
-   * @param {any} trans - the transformation object generated by d3.zoom to alter
-   * @param {any} comp - what would be referred to as 'this' in any other circumstances but we're using this method within a
-    *                    d3.zoom function and the 'this' reference ends up getting lost
+   * Returns the absolute value of the scaled width of a gene in pixels
+   * @param {Gene} gene - the gene to get the width for
    */
-  private changeInterval(newStart: number, newEnd: number, chrSize: number, trans: any, comp: any): any {
-    // adjust the interval values
-    comp.interval.start = newStart;
-    comp.interval.end = newEnd;
-    comp.interval.width = newEnd - newStart;
-
-    // compute and return new transformation values
-    comp.scale = 1 / (comp.interval.width / comp.getRefChrSize());
-
-    trans.k = comp.scale;
-    trans.x = -comp.refBPToPixels(comp.interval.start) * comp.scale;
-    trans.y = comp.browserOffset;
-
-    return trans;
+  getGeneWidth(gene: Gene): number {
+    return Math.abs(this.refBPToPixels(gene.end_pos) - this.refBPToPixels(gene.start_pos));
   }
 
   /**
@@ -231,21 +234,23 @@ export class BlockViewBrowserComponent implements OnInit {
   }
 
   /**
-   * Returns the RGBA value of the specified hex with the specified opacity (used from template so this method can't be private)
+   * Returns the rgba value of the specified hex with the specified opacity (used from template so this method can't be private)
    * @param {string} hex - hex color value
    * @param {number} opacity - opacity decimal for the faded color
    */
-  fadeColor = function(hex, opacity): string {
-    let color;
-    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-      color = hex.substring(1).split("");
-      if(color.length === 3){
-        color = [color[0], color[0], color[1], color[1], color[2], color[2]];
-      }
-      color= "0x"+color.join("");
-      return "rgba("+[(color>>16)&255, (color>>8)&255, color&255].join(",")+"," + opacity +")";
+  fadeColor(hex, opacity): string {
+    let color = hex.substring(1).split("");
+
+    // if the hex is only 3 characters, convert to 6
+    if(color.length === 3){
+      color = [color[0], color[0], color[1], color[1], color[2], color[2]];
     }
-    throw new Error("Bad Hex");
+
+    // make into a bit string
+    color= "0x"+color.join("");
+
+    // return the conversion joined with the opacity in rgba format
+    return "rgba("+[(color>>16)&255, (color>>8)&255, color&255].join(",")+"," + opacity +")";
   };
 
   /**
@@ -257,16 +262,16 @@ export class BlockViewBrowserComponent implements OnInit {
    */
   private setInterval(start: number, end: number): void {
     this.interval = {
-      start: start,
-      end: end,
-      width: end - start
-    }
+      start: Math.round(start),
+      end: Math.round(end),
+      width: Math.round(end - start)
+    };
   }
 
   /**
    * Helper method used in this file as well as the template to quickly access the size of the current reference chromosome
    */
-  getRefChrSize() {
+  getRefChrSize(): number {
     return this.reference.genome[this.chromosome];
   }
 
@@ -282,10 +287,10 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {SyntenyBlock} block - the syntenic block to draw orientation indicators for
    */
   getOrientationIndPathCommand(block: SyntenyBlock): string {
-    return 'M ' + this.refBPToPixels(block.ref_start) + ', ' + this.descaleThis(this.trackHeight) +
-           ' L ' + this.refBPToPixels(block.ref_end) + ', ' + this.descaleThis(this.trackHeight + 50) +
-           ' M ' + this.refBPToPixels(block.ref_end) + ', ' + this.descaleThis(this.trackHeight) +
-           ' L ' + this.refBPToPixels(block.ref_start) + ', ' + this.descaleThis(this.trackHeight + 50) +
+    return 'M ' + this.refBPToPixels(block.ref_start) + ', ' + this.trackHeight +
+           ' L ' + this.refBPToPixels(block.ref_end) + ', ' + (this.trackHeight + 50) +
+           ' M ' + this.refBPToPixels(block.ref_end) + ', ' + this.trackHeight +
+           ' L ' + this.refBPToPixels(block.ref_start) + ', ' + (this.trackHeight + 50) +
            ' Z';
   }
 
@@ -370,12 +375,12 @@ export class BlockViewBrowserComponent implements OnInit {
    */
   private createCompScaleForBlock(block: SyntenyBlock): void {
     this.compBPToPixels.match_orientation[block.id] = d3.scaleLinear()
-      .domain(this.getCompScaleDomain(block, 'match_orientation'))
-      .range(this.getCompScaleRange(block));
+                                                        .domain(this.getCompScaleDomain(block, 'match_orientation'))
+                                                        .range(this.getCompScaleRange(block));
 
     this.compBPToPixels.true_orientation[block.id] = d3.scaleLinear()
-      .domain(this.getCompScaleDomain(block, 'true_orientation'))
-      .range(this.getCompScaleRange(block));
+                                                       .domain(this.getCompScaleDomain(block, 'true_orientation'))
+                                                       .range(this.getCompScaleRange(block));
   }
 
   /**
@@ -415,7 +420,7 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {SyntenyBlock} block - the block to create the scale's domain for
    * @param {string} orientationKey - 'true_orientation' or 'match_orientation', depending on what the user has currently selected
    */
-  getCompScaleDomain(block: SyntenyBlock, orientationKey: string): Array<number> {
+  private getCompScaleDomain(block: SyntenyBlock, orientationKey: string): Array<number> {
     return [block[orientationKey].comp_start, block[orientationKey].comp_end];
   }
 
@@ -424,8 +429,8 @@ export class BlockViewBrowserComponent implements OnInit {
    * syntenic block to create a scale range
    * @param {SyntenyBlock} block - the syntenic block to convert to pixel positions
    */
-  getCompScaleRange(block: SyntenyBlock): ReadonlyArray<number> {
-    return [this.refBPToPixels(block.ref_start), this.refBPToPixels(block.ref_end)]
+  private getCompScaleRange(block: SyntenyBlock): ReadonlyArray<number> {
+    return [this.refBPToPixels(block.ref_start), this.refBPToPixels(block.ref_end)];
   }
 
 }
