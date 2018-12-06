@@ -25,12 +25,10 @@ export class BlockViewBrowserComponent implements OnInit {
   minimumIntervalSize = 500000;
 
   interval: BrowserInterval;
-  brush: boolean = false;
   blocks: Array<SyntenyBlock>;
   referenceGenes: Array<any>;
   comparisonGenes: Array<any>;
   staticRefBPToPixels: any;
-  scale: number = 1;
   refBPToPixels: any;
   compBPToPixels: any = {
     match_orientation: {},
@@ -51,16 +49,15 @@ export class BlockViewBrowserComponent implements OnInit {
     this.chromosome = chr;
     this.selectedFeatures = features;
 
-    let chrSize = this.getRefChrSize();
-
-    // set the range maxto 'width - 1' to keep the last tick line from hiding on the right side of the svg
     // this one is going to get updated with transformations
-    this.refBPToPixels = this.createRefScale(chrSize, this.width);
+    this.refBPToPixels = this.createRefScale(this.getRefChrSize(), this.width);
 
     // this one stays the same (to be used for chromosome view)
-    this.staticRefBPToPixels = this.createRefScale(chrSize, this.width);
+    this.staticRefBPToPixels = this.createRefScale(this.getRefChrSize(), this.width);
 
+    // get syntenic block data
     this.http.getChromosomeSynteny(reference.getID(), comparison.getID(), chr).subscribe(blocks => {
+      // create list of necessary block data dictionaries
       this.blocks = blocks.map(block => {
         let blockContent = {
           ref_chr: block.ref_chr,
@@ -79,92 +76,40 @@ export class BlockViewBrowserComponent implements OnInit {
           id: block.id
         };
 
+        // create the comparison scaling function for the current block using new dictionary object
         this.createCompScaleForBlock(blockContent);
 
         return blockContent;
       });
 
-      this.setInterval(0, chrSize);
+      // TODO: check for features; if there are features passed, determine an interval from there, otherwise, load entire chr
+      this.setInterval(0, this.getRefChrSize());
+
+      // create the chromosome view (static) axis
       this.renderChromosomeViewAxis();
 
-      this.http.getGenes(reference.getID(),comparison.getID(), chr).subscribe(genes => {
-        this.referenceGenes = genes.map((gene, i) => this.createHomologID(gene, i));
+      // set the zoom, brush and dynamic axis behaviors/interactions
+      this.bindBrowserBehaviors();
+    });
 
-        this.comparisonGenes = [].concat
-                                 .apply([], this.referenceGenes.filter(gene => gene.homologs)
-                                                               .map(gene => this.addHomologDetails(gene))
-                                 ).filter(gene => gene.block_id);
+    // get gene data for the selected chromosome
+    // KEEP AN EYE ON THIS. I'm fairly confident that http.getChromosomeSynteny() will return faster than http.getGenes()
+    // but it is possible that we may run into a race condition in some weird case. It it becomes an issue, we can move
+    // this directly after the binding of browser behaviors within the subscribe for http.getChromosomeSynteny().
+    this.http.getGenes(reference.getID(),comparison.getID(), chr).subscribe(genes => {
+      // add a homolog id to all of the reference genes
+      this.referenceGenes = genes.map((gene, i) => this.createHomologID(gene, i));
 
-        /*
-        CREDIT: I would not have been able to get these behaviors so clean and concise without dear Mike Bostock's example,
-                found here: https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172. All hail Mike Bostock!
-        NOTE: I've been making a large effort to keep separate variables to a minimum, but it's worth mentioning for any
-              future devs that keeping these zoom and brush variables are in our best interest to keep these separate
-              as you are able to use 'this'. I found that if I did something like d3.select('#browser').call(d3.zoom()...),
-              I would have to set a 'let that = this' and then have to send 'that' to any methods called from inside the
-              .on() which involved adding an extra optional parameter to all of them. I also noticed a a bug where the
-              zoom function would have reset transformation values after brushing. I'm not seeing the aforementioned bug
-              using this way of format, so change at your own risk!
-
-              ~ A.L.
-         */
-        let brush = d3.brushX()
-                      .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
-                      .on('brush', () => {
-                        // ignore brush via zoom occurrences
-                        if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
-
-                        let s = d3.event.selection;
-                        // remove the loaded default overlay
-                        this.brush = true;
-
-                        // adjust refBPToPixels by scaling s's start, s[0], and end, s[1], with the static scale (used for chromosome view)
-                        this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
-
-                        // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-                        this.blocks.forEach(block => this.createCompScaleForBlock(block));
-
-                        // zoom the browser to same section
-                        d3.select('#browser').call(zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
-
-                        this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
-                      });
-
-        let zoom = d3.zoom()
-                     .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
-                     .translateExtent([[0, 0], [this.width, this.height]])
-                     .extent([[0, 0], [this.width, this.height]])
-                     .on('zoom', () => {
-                       // ignore zoom via brush occurrences
-                       if(d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
-
-                       let t = d3.event.transform;
-                       // remove the loaded default overlay
-                       this.brush = true;
-
-                       // adjust the refBPToPixels using a t's rescaled x on the static scale (used for chromosome view)
-                       this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
-
-                       // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-                       this.blocks.forEach(block => this.createCompScaleForBlock(block));
-
-                       let newExtents = this.refBPToPixels.range().map(t.invertX, t);
-
-                       // move the brush in the chromosome view to match
-                       d3.select('#chr-view-inv-cover').call(brush.move, newExtents);
-
-                       this.setInterval(this.staticRefBPToPixels.invert(newExtents[0]), this.staticRefBPToPixels.invert(newExtents[1]));
-                     });
-
-        // bind the zoom behavior
-        d3.select('#browser').call(zoom);
-
-        // bind the brush behavior and do an initial brush
-        d3.select('#chr-view-inv-cover').call(brush).call(brush.move, this.staticRefBPToPixels.range());
-
-      });
+      // create a list of comparison genes from the reference genes' homolog arrays, add the homolog id of the gene's reference
+      // homolog, then filter that list to only the comparison genes that are located within a syntenic region
+      this.comparisonGenes = [].concat
+                               .apply([], this.referenceGenes.filter(gene => gene.homologs)
+                                                             .map(gene => this.addHomologDetails(gene))
+                               ).filter(gene => gene.block_id);
     });
   }
+
+
 
   /**
    * Returns the absolute value of the scaled width of a syntenic block in pixels
@@ -183,54 +128,26 @@ export class BlockViewBrowserComponent implements OnInit {
   }
 
   /**
-   * Renders the static axis for the chromosome view axis (must be done here and not in template as HTML doesn't recognize D3's custom
-   * element. Plus we don't actually ever interact with it, so it's completely safe to generate here)
+   * Returns a scaled width for the specified comparison gene using the respective scaling dictionary. NOTE: occasionally the scaling
+   * functions will return negative values so we always return the absolute value of the calculated width as the width will always be
+   * a positive value, regardless of orientation ~ A.L.
+   * @param {Gene} gene - the gene to calculate the scaled width for
    */
-  private renderChromosomeViewAxis(): void {
-    // create the axis
-    d3.select('.axis')
-      .call(d3.axisBottom(this.staticRefBPToPixels) // the scale to use
-              .tickValues(this.getAxisTickValues(this.chromosome)) // tick values to use
-              .tickFormat((d: number) => Math.round(d / 1000000).toString() + " Mb")) // format for tick labels
-      .selectAll('text')
-        .attr('text-anchor', (d, i) => this.getAxisTickLabelPosition(i)); // set positional attr for tick labels
-
+  getCompWidth(gene: Gene): number {
+    return Math.abs(this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_end_pos) -
+      this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_start_pos));
   }
 
   /**
-   * Takes a chromsome value/name and generates a list of 11 values including 0 and the last BP of the chromosome where the other
-   * 9 values are equally spaced locations for tick values on the chromosome view axis
-   * @param {string} chr - value of current chromosome to be used to reference width
+   * Returns the scaled x-value for the specified comparison gene using the respective scaling dictionary
+   * @param {Gene} gene - the gene to calculate the scaled x-value for
    */
-  private getAxisTickValues(chr: string): Array<number> {
-    let total = this.reference.genome[chr];
-    let values = [];
+  getCompX(gene: Gene): number {
+    // determine if the block the gene occurs in matches the reference in orientation; if it does, calculate the x-value
+    // from the gene's start, else, use the gene's end
+    let start = (this.blocks.filter(block => block.id === gene.block_id)[0].orientation_matches) ? gene.gene_start_pos : gene.gene_end_pos;
 
-    // add all but the last interval values to the list
-    // total - 2 ensures the final tick isn't added by rounding error
-    for(let i = 0; i < total - 2; i += total / 10) {
-      values.push(Math.round(i));
-    }
-
-    values.push(total);
-
-    return values;
-  }
-
-  /**
-   * This is a quick method that basically just generates anchor position to assign to each tick mark. All tick marks minus the first
-   * and last should have their labels centered whereas the first label should appear to the right of its tick mark and the last label
-   * should appear to the left of its tick mark so as both will be completely visible
-   * @param {number} index - the index of the tick we're checking
-   */
-  private getAxisTickLabelPosition(index: number): string {
-    if(index === 0) { // if it's the first tick label:
-      return 'start';
-    } else if(index === 10) { // if it's the last tick label (we know the list is 11 elements long)
-      return 'end';
-    } else { // otherwise, use default value
-      return 'middle';
-    }
+    return this.compBPToPixels[this.blockOrientation][gene.block_id](start);
   }
 
   /**
@@ -252,21 +169,6 @@ export class BlockViewBrowserComponent implements OnInit {
     // return the conversion joined with the opacity in rgba format
     return "rgba("+[(color>>16)&255, (color>>8)&255, color&255].join(",")+"," + opacity +")";
   };
-
-  /**
-   * Quick method that assigns the three interval-associated variables based on specified start and end numeric values; NOTE, I don't
-   * use this method within the changeInterval method as it would require passing 'this' into it in order to use it. I'm not sayin we
-   * can't do that, I'm just choosing not to at this moment in time. ~ A.L.
-   * @param {number} start - the starting value (bp) of the interval
-   * @param {number} end - the end value (bp) of the interval
-   */
-  private setInterval(start: number, end: number): void {
-    this.interval = {
-      start: Math.round(start),
-      end: Math.round(end),
-      width: Math.round(end - start)
-    };
-  }
 
   /**
    * Helper method used in this file as well as the template to quickly access the size of the current reference chromosome
@@ -308,6 +210,118 @@ export class BlockViewBrowserComponent implements OnInit {
   }
 
   /**
+   * Sets the brush and zoom behaviors as well as draws the dynamic axis above the reference track
+   */
+  private bindBrowserBehaviors(): void {
+    let chrSize = this.getRefChrSize();
+
+    // create an axis using the dynamic scale with more precise tick labels in Mb
+    let browserAxis = d3.axisTop(this.refBPToPixels)
+      .tickSizeOuter(0)
+      .tickFormat((d: number) => (d / 1000000).toString() + " Mb");
+
+    /*
+    CREDIT: I would not have been able to get these behaviors so clean and concise without dear Mike Bostock's example,
+            found here: https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172. All hail Mike Bostock!
+    NOTE: I've been making a large effort to keep separate variables to a minimum, but it's worth mentioning for any
+          future devs that keeping these zoom and brush variables are in our best interest to keep these separate
+          as you are able to use 'this'. I found that if I did something like d3.select('#browser').call(d3.zoom()...),
+          I would have to set a 'let that = this' and then have to send 'that' to any methods called from inside the
+          .on() which involved adding an extra optional parameter to all of them. I also noticed a a bug where the
+          zoom function would have reset transformation values after brushing. I'm not seeing the aforementioned bug
+          using this way of format, so change at your own risk!
+
+          ~ A.L.
+     */
+    let brush = d3.brushX()
+      .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
+      .on('brush', () => {
+        // ignore brush via zoom occurrences
+        if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
+
+        let s = d3.event.selection;
+
+        // adjust refBPToPixels by scaling s's start, s[0], and end, s[1], with the static scale (used for chromosome view)
+        this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
+
+        // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
+        this.blocks.forEach(block => this.createCompScaleForBlock(block));
+
+        // zoom the browser to same section
+        d3.select('#browser')
+          .call(zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
+
+        this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
+
+        // update the axis above the reference track (if interval starts at 0, format the first tick label)
+        this.renderBrowserAxis(s[0], browserAxis);
+      });
+
+    let zoom = d3.zoom()
+      .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
+      .translateExtent([[0, 0], [this.width, this.height]])
+      .extent([[0, 0], [this.width, this.height]])
+      .on('zoom', () => {
+        // ignore zoom via brush occurrences
+        if(d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
+
+        let t = d3.event.transform;
+
+        // adjust the refBPToPixels using a t's rescaled x on the static scale (used for chromosome view)
+        this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
+
+        // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
+        this.blocks.forEach(block => this.createCompScaleForBlock(block));
+
+        // get the start and end pixel and bp points of the current interval
+        let pxExtents = this.refBPToPixels.range().map(t.invertX, t);
+        let bpExtents = this.refBPToPixels.domain();
+
+        // move the brush in the chromosome view to match
+        d3.select('#chr-view-inv-cover').call(brush.move, pxExtents);
+
+        // update the interval values
+        this.setInterval(bpExtents[0], bpExtents[1]);
+
+        // update the axis above the reference track (if interval starts at 0, format the first tick label)
+        this.renderBrowserAxis(pxExtents[0], browserAxis);
+      });
+
+    // bind the zoom behavior
+    d3.select('#browser')
+      .call(zoom);
+
+    // bind the brush behavior and set the brush to match the current interval (either the entire chr or the focused section)
+    d3.select('#chr-view-inv-cover')
+      .call(brush)
+      .call(brush.move, [this.staticRefBPToPixels(this.interval.start), this.staticRefBPToPixels(this.interval.end)]);
+  }
+
+  /**
+   * Renders the static axis for the chromosome view (must be done here and not in template as HTML doesn't recognize D3's custom
+   * element. Plus we don't actually ever interact with it, so it's completely safe to generate here)
+   */
+  private renderChromosomeViewAxis(): void {
+    // create the axis
+    d3.select('#chr-view-axis')
+      .call(d3.axisBottom(this.staticRefBPToPixels) // the scale to use
+        .tickValues(this.getAxisTickValues(0, this.reference.genome[this.chromosome])) // tick values to use
+        .tickFormat((d: number) => Math.round(d / 1000000).toString() + " Mb")) // format for tick labels
+      .selectAll('text')
+      .attr('text-anchor', (d, i, x) => this.getAxisTickLabelPosition(i, x.length)); // set positional attr for tick labels
+
+  }
+
+  /**
+   * Renders the dynamic axis for the browser (must be done here and not in template as HTML doesn't recognize D3's custom
+   * element. Plus we don't actually ever interact with it, so it's completely safe to generate here)
+   */
+  private renderBrowserAxis(intervalStart: number, axis: any): void {
+    (intervalStart === 0) ? d3.select('#browser-axis').call(axis).select('text').attr('text-anchor', 'start') :
+      d3.select('#browser-axis').call(axis);
+  }
+
+  /**
    * Returns the id of the block that the specified gene occurs in or null if it doesn't occur in a block
    * @param {Gene} gene - the gene to get the block id for
    */
@@ -322,7 +336,7 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {SyntenyBlock} block - the block to check that the specified gene is in
    */
   private isInBlock(gene: Gene, block: SyntenyBlock): boolean {
-    return (gene.gene_start_pos >= block.true_orientation.comp_start && gene.gene_start_pos <= block.true_orientation.comp_end) ||
+    return (gene.gene_start_pos >= block.true_orientation.comp_start && gene.gene_start_pos <= block.true_orientation.comp_end) &&
            (gene.gene_end_pos <= block.true_orientation.comp_end && gene.gene_end_pos >= block.true_orientation.comp_start)
   }
 
@@ -389,30 +403,60 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {number} pixelWidth - the width of the SVG we're translating the chromosome to
    */
   private createRefScale(BPwidth: number, pixelWidth: number): any {
+    // set the range max to 'width - 1' to keep the last tick line of axes from hiding on the right side of the svg
     return d3.scaleLinear().domain([0, BPwidth]).range([0, pixelWidth - 1]);
   }
 
   /**
-   * Returns a scaled width for the specified comparison gene using the respective scaling dictionary. NOTE: occasionally the scaling
-   * functions will return negative values so we always return the absolute value of the calculated width as the width will always be
-   * a positive value, regardless of orientation ~ A.L.
-   * @param {Gene} gene - the gene to calculate the scaled width for
+   * Quick method that assigns the three interval-associated variables based on specified start and end numeric values; NOTE, I don't
+   * use this method within the changeInterval method as it would require passing 'this' into it in order to use it. I'm not sayin we
+   * can't do that, I'm just choosing not to at this moment in time. ~ A.L.
+   * @param {number} start - the starting value (bp) of the interval
+   * @param {number} end - the end value (bp) of the interval
    */
-  getCompWidth(gene: Gene): number {
-    return Math.abs(this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_end_pos) -
-                    this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_start_pos));
+  private setInterval(start: number, end: number): void {
+    this.interval = {
+      start: Math.round(start),
+      end: Math.round(end),
+      width: Math.round(end - start)
+    };
   }
 
   /**
-   * Returns the scaled x-value for the specified comparison gene using the respective scaling dictionary
-   * @param {Gene} gene - the gene to calculate the scaled x-value for
+   * Takes a chromsome value/name and generates a list of 11 values including 0 and the last BP of the chromosome where the other
+   * 9 values are equally spaced locations for tick values on the chromosome view axis
+   * @param {number} start - the starting point to start generating tick values for
+   * @param {number} end - the ending point to start generating tick values for
    */
-  getCompX(gene: Gene): number {
-    // determine if the block the gene occurs in matches the reference in orientation; if it does, calculate the x-value
-    // from the gene's start, else, use the gene's end
-    let start = (this.blocks.filter(block => block.id === gene.block_id)[0].orientation_matches) ? gene.gene_start_pos : gene.gene_end_pos;
+  private getAxisTickValues(start: number, end: number): Array<number> {
+    let values = [];
 
-    return this.compBPToPixels[this.blockOrientation][gene.block_id](start);
+    // add all but the last interval values to the list
+    // total - 2 ensures the final tick isn't added by rounding error
+    for(let i = start; i < end - 2; i += (end - start) / 10) {
+      values.push(Math.round(i));
+    }
+
+    values.push(end);
+
+    return values;
+  }
+
+  /**
+   * This is a quick method that basically just generates anchor position to assign to each tick mark. All tick marks minus the first
+   * and last should have their labels centered whereas the first label should appear to the right of its tick mark and the last label
+   * should appear to the left of its tick mark so as both will be completely visible
+   * @param {number} index - the index of the tick we're checking
+   * @param {number} listLength - the length of the list of ticks
+   */
+  private getAxisTickLabelPosition(index: number, listLength: number): string {
+    if(index === 0) { // if it's the first tick label:
+      return 'start';
+    } else if(index === listLength - 1) { // if it's the last tick label (we know the list is 11 elements long)
+      return 'end';
+    } else { // otherwise, use default value
+      return 'middle';
+    }
   }
 
   /**

@@ -39,9 +39,19 @@
   margin-right: 0;
 }
 
-#view-selection-overlay, rect.selection {
-  fill: #aaa;
+rect.selection {
+  fill: #ddd;
   fill-opacity: 0.3;
   stroke-width: 0.3px;
   stroke: black;
+}
+
+#browser-axis {
+  line, path {
+    stroke-width: 0.5;
+  }
+
+  text {
+    font-size: 8px;
+  }
 }

@@ -1,15 +1,12 @@
 <div *ngIf="reference && comparison" id="browser-container">
   <svg class="block-view" [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="xMinYMin meet">
     <g id="chromosome-view" [attr.transform]="'translate(0, 0)'">
-      <g class="axis" [attr.transform]="'translate(0, ' + (chromosomeViewHeight + 5) + ')'"></g>
+      <g id="chr-view-axis" [attr.transform]="'translate(0, ' + (chromosomeViewHeight + 5) + ')'"></g>
       <g id="chr-view-blocks">
         <rect *ngFor="let block of blocks" [attr.fill]="fadeColor(genomeColors[block.comp_chr], 0.3)"
               y="15" [attr.x]="staticRefBPToPixels(block.ref_start)" [attr.stroke]="genomeColors[block.comp_chr]"
               [attr.width]="staticRefBPToPixels(block.ref_end - block.ref_start)" [attr.height]="chromosomeViewHeight - 25">
         </rect>
-        <!--<rect *ngIf="interval && !brush" id="view-selection-overlay" y="10" [attr.height]="chromosomeViewHeight - 15"-->
-              <!--[attr.width]="staticRefBPToPixels(interval.width)" [attr.x]="staticRefBPToPixels(interval.start)">-->
-        <!--</rect>-->
         <g id="chr-view-inv-cover">
           <rect y="15" [attr.height]="chromosomeViewHeight - 25" fill="transparent"
                 [attr.width]="staticRefBPToPixels(getRefChrSize())">
@@ -18,8 +15,11 @@
       </g>
     </g>
 
+    <line [attr.x1]="0" [attr.x2]="width" [attr.y1]="browserOffset - 50" [attr.y2]="browserOffset - 50" stroke="#AAA" stroke-width="0.5"></line>
+
     <g id="browser" [attr.transform]="'translate(0, ' + browserOffset + ')'">
       <rect id="browser-bg" [attr.width]="refBPToPixels(getRefChrSize())" [attr.height]="3 * trackHeight" fill="white"></rect>
+      <g id="browser-axis" [attr.transform]="'translate(0, -15)'"></g>
       <g id="reference-genome">
         <g id="reference-blocks">
           <rect *ngFor="let block of blocks" [attr.height]="trackHeight" stroke="#AAA" class="reference"
