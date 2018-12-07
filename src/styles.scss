@@ -12,46 +12,24 @@
 .row-center { justify-content: center; }
 .clr-control-label { text-transform: uppercase; }
 
-.outer-chr-band {
-  stroke: black;
-  stroke-width: 0.25;
-  fill: transparent;
-}
-
-.block-band {
-  stroke: black;
-  stroke-width: 0.1;
-}
-
-.inner {
-  stroke: black;
-  stroke-width: 0.25;
-}
-
-.ref-block-band { stroke: none; }
-
-#genome-view-container text { font-size: 12px; }
-
-.chord { stroke-width: 0.3; }
-
 .clr-row {
   margin-left: 0;
   margin-right: 0;
 }
 
+// The following styles need to be here; any further up in the chain and they won't override D3's
+// default stylings
 rect.selection {
-  fill: #ddd;
+  fill: #DDD;
   fill-opacity: 0.3;
   stroke-width: 0.3px;
   stroke: black;
 }
 
-#browser-axis {
-  line, path {
-    stroke-width: 0.5;
-  }
+#browser {
+  text { font-size: 8px; }
 
-  text {
-    font-size: 8px;
+  #browser-axis {
+    line, path { stroke-width: 0.5; }
   }
 }

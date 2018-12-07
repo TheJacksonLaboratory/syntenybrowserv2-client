@@ -1,6 +1,6 @@
 <div *ngIf="reference && comparison" id="browser-container">
   <svg class="block-view" [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="xMinYMin meet">
-    <g id="chromosome-view" [attr.transform]="'translate(0, 0)'">
+    <g id="chromosome-view">
       <g id="chr-view-axis" [attr.transform]="'translate(0, ' + (chromosomeViewHeight + 5) + ')'"></g>
       <g id="chr-view-blocks">
         <rect *ngFor="let block of blocks" [attr.fill]="fadeColor(genomeColors[block.comp_chr], 0.3)"
@@ -8,43 +8,35 @@
               [attr.width]="staticRefBPToPixels(block.ref_end - block.ref_start)" [attr.height]="chromosomeViewHeight - 25">
         </rect>
         <g id="chr-view-inv-cover">
-          <rect y="15" [attr.height]="chromosomeViewHeight - 25" fill="transparent"
-                [attr.width]="staticRefBPToPixels(getRefChrSize())">
-          </rect>
+          <rect id="bg" y="15" [attr.height]="chromosomeViewHeight - 25" [attr.width]="staticRefBPToPixels(getRefChrSize())"></rect>
         </g>
       </g>
     </g>
 
-    <line [attr.x1]="0" [attr.x2]="width" [attr.y1]="browserOffset - 50" [attr.y2]="browserOffset - 50" stroke="#AAA" stroke-width="0.5"></line>
+    <line class="hor-rule" [attr.x1]="0" [attr.x2]="width" [attr.y1]="browserOffset - 50" [attr.y2]="browserOffset - 50"></line>
 
     <g id="browser" [attr.transform]="'translate(0, ' + browserOffset + ')'">
-      <rect id="browser-bg" [attr.width]="refBPToPixels(getRefChrSize())" [attr.height]="3 * trackHeight" fill="white"></rect>
+      <rect id="browser-bg" [attr.width]="refBPToPixels(getRefChrSize())" [attr.height]="3 * trackHeight"></rect>
       <g id="browser-axis" [attr.transform]="'translate(0, -15)'"></g>
       <g id="reference-genome">
         <g id="reference-blocks">
-          <rect *ngFor="let block of blocks" [attr.height]="trackHeight" stroke="#AAA" class="reference"
-                [attr.fill]="fadeColor('#ccc', 0.3)" [attr.width]="getBlockWidth(block)"
-                [attr.x]="refBPToPixels(block.ref_start)" [attr.stroke-width]="1">
+          <rect *ngFor="let block of blocks" [attr.fill]="fadeColor('#ccc', 0.3)" [attr.width]="getBlockWidth(block)"
+                class="reference" [attr.height]="trackHeight" stroke="#AAA" [attr.x]="refBPToPixels(block.ref_start)">
           </rect>
         </g>
 
         <g *ngIf="referenceGenes" id="reference-genes">
           <g *ngFor="let gene of referenceGenes" [attr.class]="(gene.homolog_id) ? 'hom-' + gene.homolog_id : ''"
              [attr.transform]="'translate(' + refBPToPixels(gene.start_pos) + ', ' + (jitter(gene.start_pos) + 6) + ')'">
-            <text *ngIf="interval.width < 5000000" [attr.font-size]="8">
-              {{ gene.gene_symbol }}
-            </text>
+            <text *ngIf="interval.width < 5000000"> {{ gene.gene_symbol }} </text>
 
-            <rect [attr.height]="5" [attr.width]="getGeneWidth(gene)"
-                  [attr.fill]="fadeColor('#000', 0.5)">
-            </rect>
+            <rect class="gene" [attr.width]="getGeneWidth(gene)"></rect>
           </g>
         </g>
       </g>
 
       <g *ngIf="blocks && blockOrientation === 'match_orientation'" id="orientation-indicators">
-        <path *ngFor="let block of getNonMatchedBlocks()" stroke="red" [attr.d]="getOrientationIndPathCommand(block)"
-              [attr.stroke-width]="0.5">
+        <path *ngFor="let block of getNonMatchedBlocks()" [attr.d]="getOrientationIndPathCommand(block)">
         </path>
       </g>
 
@@ -52,19 +44,16 @@
         <g id="comparison-blocks">
           <rect *ngFor="let block of blocks" [attr.height]="trackHeight" [attr.stroke]="genomeColors[block.comp_chr]"
                 [attr.x]="refBPToPixels(block.ref_start)" [attr.width]="getBlockWidth(block)"
-                class="comparison" [attr.fill]="fadeColor(genomeColors[block.comp_chr], 0.3)" [attr.stroke-width]="1">
+                class="comparison" [attr.fill]="fadeColor(genomeColors[block.comp_chr], 0.3)">
           </rect>
         </g>
 
         <g *ngIf="comparisonGenes" id="comparison-genes">
-          <g *ngFor="let gene of comparisonGenes" [attr.class]="(gene.homolog_id) ? 'hom-' + gene.homolog_id : ''"
+          <g *ngFor="let gene of comparisonGenes" [attr.class]="getCompHomologClass(gene)"
              [attr.transform]="'translate(' + getCompX(gene) + ', ' + (jitter(gene.gene_start_pos) + 6) + ')'">
-            <text *ngIf="interval.width < 5000000" [attr.font-size]="8">
-              {{ gene.gene_symbol }}
-            </text>
+            <text *ngIf="interval.width < 5000000"> {{ gene.gene_symbol }} </text>
 
-            <rect [attr.height]="5" [attr.fill]="fadeColor('#000', 0.5)" [attr.width]="getCompWidth(gene)">
-            </rect>
+            <rect class="gene" [attr.width]="getCompWidth(gene)"></rect>
           </g>
         </g>
       </g>

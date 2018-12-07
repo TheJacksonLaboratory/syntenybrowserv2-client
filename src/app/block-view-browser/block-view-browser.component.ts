@@ -97,19 +97,46 @@ export class BlockViewBrowserComponent implements OnInit {
     // but it is possible that we may run into a race condition in some weird case. It it becomes an issue, we can move
     // this directly after the binding of browser behaviors within the subscribe for http.getChromosomeSynteny().
     this.http.getGenes(reference.getID(),comparison.getID(), chr).subscribe(genes => {
-      // add a homolog id to all of the reference genes
-      this.referenceGenes = genes.map((gene, i) => this.createHomologID(gene, i));
+      // stores homolog id arrays by comparison gene symbol
+      let homLookup = {};
 
-      // create a list of comparison genes from the reference genes' homolog arrays, add the homolog id of the gene's reference
-      // homolog, then filter that list to only the comparison genes that are located within a syntenic region
-      this.comparisonGenes = [].concat
-                               .apply([], this.referenceGenes.filter(gene => gene.homologs)
-                                                             .map(gene => this.addHomologDetails(gene))
-                               ).filter(gene => gene.block_id);
+      // comparison genes; updated every time a reference gene has new/distinct homologs
+      let compGenes = [];
+
+      // add a homolog id to all of the reference genes
+      this.referenceGenes = genes.map((gene, i) => {
+                                        // if there are homologs, figure out homolog ID information and add to compGenes if new
+                                        if(gene.homologs.length !== 0) {
+                                          // for each of the homologs, if the homolog's gene_symbol already has a key/value pair in the
+                                          // homolog lookup, push the reference gene homolog ID to that value list. If the homolog's
+                                          // gene symbol isn't there, make a new key/value pair for the homolog and push the homolog
+                                          // to the compGenes array
+                                          gene.homologs.forEach(hom => {
+                                            if(homLookup[hom.gene_symbol]) {
+                                              homLookup[hom.gene_symbol].push(i);
+                                            } else {
+                                              homLookup[hom.gene_symbol] = [i];
+                                              compGenes.push(hom);
+                                            }
+                                          });
+                                        }
+
+                                        return gene;
+                                      });
+
+      // create a list of comparison genes from the temp compGenes array, add the list of homolog IDs for each, as found from
+      // homLookup, and add a block ID for genes in a syntenic region, then filter that list to only the genes that have a block ID
+      this.comparisonGenes = compGenes.map(gene => this.addHomologDetails(gene, homLookup)).filter(gene => gene.block_id);
     });
   }
 
-
+  /**
+   * Returns a class selector string that contains homolog ids in the form of hom-<homolog id> separated by spaces
+   * @param {Gene} gene - the gene to generate a class selector for
+   */
+  getCompHomologClass(gene: Gene): string {
+    return 'hom-' + gene.homolog_ids.join(' hom-');
+  }
 
   /**
    * Returns the absolute value of the scaled width of a syntenic block in pixels
@@ -201,8 +228,8 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {number} bp - a genomic location to be converted
    */
   jitter(bp: number): number {
-    // 1.12 gets us close enough to edges without any elements overflowing
-    let range = this.trackHeight / 1.12;
+    // 1.11 gets us close enough to edges without any elements overflowing
+    let range = this.trackHeight / 1.11;
     // 1.13 pushes all elements down slightly to accomodate for the labels
     let offset = (((bp % 1000) / 1000) * range) - range / 1.13;
 
@@ -341,39 +368,20 @@ export class BlockViewBrowserComponent implements OnInit {
   }
 
   /**
-   * Returns the same gene as the one passed into the method but with an altered homolog list
+   * Returns the same gene as the one passed into the method but with homolog IDs and a block ID, if applicable
    * @param {Gene} gene - the reference gene of the homologs we're adding details for
+   * @param {object} homLookup - the dictionary of gene symbols mapping to arrays of homolog IDs
    */
-  private addHomologDetails(gene: Gene): Array<Gene> {
-    return gene.homologs.map(g => {
-      // assign the homolog id from the reference gene
-      g['homolog_id'] = gene.homolog_id;
+  private addHomologDetails(gene: Gene, homLookup: object): Gene {
+    // look up the gene symbol and assign the gene the array of homolog ids for that gene
+    gene['homolog_ids'] = homLookup[gene.gene_symbol];
 
-      // determine which id of the block the comparison gene is located in
-      let block = this.determineBlockForGene(g);
+    // determine which id of the block the comparison gene is located in
+    let block = this.determineBlockForGene(gene);
 
-      // if gene is located in a block (some aren't, so this is key), assign the block id to the comparison gene
-      if(block) {
-        g['block_id'] = block;
-      }
-
-      return g;
-    });
-  }
-
-  /**
-   * Returns the same gene as the one passed into the method but altered; if the gene doesn't have any homologs, get rid of the
-   * homologs key/value pair, otherwise, assign a homolog id using the specified index (which is autogenerated index generated by .map
-   * from the parent function
-   * @param {Gene} gene - the gene to check for homologs
-   * @param {number} i - the autogenerated value that will be made a homolog id if the specified gene has homologs to keep track of
-   */
-  private createHomologID(gene: Gene, i: number): Gene {
-    // if there aren't any homologs, get rid of the empty array
-    if(gene.homologs.length === 0) {
-      delete gene.homologs;
-    } else { // if there are homologs, assign a homolog id (by index)
-      gene['homolog_id'] = i;
+    // if gene is located in a block (some aren't, so this is key), assign the block id to the comparison gene
+    if(block) {
+      gene['block_id'] = block;
     }
 
     return gene;
@@ -476,5 +484,4 @@ export class BlockViewBrowserComponent implements OnInit {
   private getCompScaleRange(block: SyntenyBlock): ReadonlyArray<number> {
     return [this.refBPToPixels(block.ref_start), this.refBPToPixels(block.ref_end)];
   }
-
 }

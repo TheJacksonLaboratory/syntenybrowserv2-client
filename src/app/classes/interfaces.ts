@@ -107,6 +107,7 @@ export interface Gene {
   block_id?: string;
   homologs?: Array<Gene>;
   homolog_id?: number;
+  homolog_ids?: Array<number>;
   start_pos?: number;
   strand: string;
   type: string;

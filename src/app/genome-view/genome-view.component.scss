@@ -13,4 +13,19 @@
   left: 0;
 }
 
+.outer-chr-band {
+  stroke: black;
+  stroke-width: 0.25;
+  fill: transparent;
+}
 
+.inner {
+  stroke: black;
+  stroke-width: 0.25;
+}
+
+.ref-block-band { stroke: none; }
+
+.chord { stroke-width: 0.3; }
+
+#genome-view-container text { font-size: 12px; }
