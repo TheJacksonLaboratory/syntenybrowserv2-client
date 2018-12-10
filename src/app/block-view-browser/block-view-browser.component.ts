@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import {Species} from '../classes/species';
 import {ApiService} from '../services/api.service';
 import * as d3 from 'd3';
-import {BrowserInterval, Gene, SyntenyBlock} from '../classes/interfaces';
+import {BrowserInterval, ComparisonLocation, ComparisonScaling, Gene, Metadata, SyntenyBlock} from '../classes/interfaces';
+import {Axis, ScaleLinear} from 'd3';
 
 @Component({
   selector: 'app-block-view-browser',
@@ -12,10 +13,10 @@ import {BrowserInterval, Gene, SyntenyBlock} from '../classes/interfaces';
 export class BlockViewBrowserComponent implements OnInit {
   reference: Species;
   comparison: Species;
-  genomeColors: any;
+  genomeColors: object;
 
   chromosome: string;
-  selectedFeatures: Array<string>;
+  selectedFeatures: Array<Metadata>;
 
   width: number = 1200;
   height: number = 500;
@@ -26,11 +27,13 @@ export class BlockViewBrowserComponent implements OnInit {
 
   interval: BrowserInterval;
   blocks: Array<SyntenyBlock>;
+  blockStartPts: object = {};
+  blockEndPts: object = {};
   referenceGenes: Array<any>;
   comparisonGenes: Array<any>;
   staticRefBPToPixels: any;
-  refBPToPixels: any;
-  compBPToPixels: any = {
+  refBPToPixels: ScaleLinear<number, number>;
+  compBPToPixels: ComparisonScaling = {
     match_orientation: {},
     true_orientation: {}
   };
@@ -41,7 +44,7 @@ export class BlockViewBrowserComponent implements OnInit {
 
   ngOnInit() { }
 
-  render(reference: Species, comparison: Species, genomeColors: any, chr: string, features: Array<string>): void {
+  render(reference: Species, comparison: Species, genomeColors: object, chr: string, features: Array<Metadata>): void {
     this.reference = reference;
     this.comparison = comparison;
     this.genomeColors = genomeColors;
@@ -75,6 +78,9 @@ export class BlockViewBrowserComponent implements OnInit {
           },
           id: block.id
         };
+
+        this.blockStartPts[block.ref_start] = blockContent;
+        this.blockEndPts[block.ref_end] = blockContent;
 
         // create the comparison scaling function for the current block using new dictionary object
         this.createCompScaleForBlock(blockContent);
@@ -131,6 +137,81 @@ export class BlockViewBrowserComponent implements OnInit {
   }
 
   /**
+   * Returns a comparison location of the start of the interval in view in the browser; if the start of the interval is within a
+   * syntenic region, the location is a conversion of the reference location; if the location is outside of a region, the location
+   * is the start of the left-most block in view
+   */
+  getCompStartForInterval(): any {
+    // get the list of end positions of all the blocks and reverse so we start checking from the end of the chromsome
+    let endPts = Object.keys(this.blockEndPts).reverse();
+
+    let startBlock: SyntenyBlock;
+    // iterate through the end positions and once we find a block end point that is less than the start of the interval,
+    // the block we want is the previous block (which in this case is the block to the right, visually, since we reversed
+    // the array) and break from the loop
+    for(let i = 0; i < endPts.length; i++) {
+      if(Number(endPts[i]) < this.interval.start) {
+        startBlock = (i > 0) ? this.blockEndPts[endPts[i-1]] : this.blockEndPts[endPts[0]];
+        break;
+      }
+    }
+
+    // if we didn't find a block, assume that the starting block is the first one
+    if(!startBlock) startBlock = this.blockEndPts[endPts[endPts.length - 1]];
+
+    // TODO: handle cases where the current interval start and end are in between regions
+    // if the start position is inside the region, convert the ref position, else, get the start of the block
+    if(this.interval.start <= startBlock.ref_end && this.interval.start >= startBlock.ref_start) {
+      return {
+        chr: startBlock.comp_chr,
+        loc: Math.round(this.compBPToPixels[this.blockOrientation][startBlock.id].invert(this.refBPToPixels(this.interval.start)))
+      };
+    } else {
+      return {
+        chr: startBlock.comp_chr,
+        loc: startBlock[this.blockOrientation].comp_start
+      };
+    }
+  }
+
+  /**
+   * Returns a comparison location of the end of the interval in view in the browser; if the end of the interval is within a
+   * syntenic region, the location is a conversion of the reference location; if the location is outside of a region, the location
+   * is the end of the right-most block in view
+   */
+  getCompEndForInterval(): ComparisonLocation {
+    // get the list of start positions of all the blocks
+    let startPts = Object.keys(this.blockStartPts);
+
+    let endBlock;
+    // iterate through the start positions and once we find a block start point that is less than the end of the interval,
+    // the block we want is the previous block (which in this case is the block to the left, visually) and break from the loop
+    for(let i = 0; i < startPts.length; i++) {
+      if(Number(startPts[i]) > this.interval.end) {
+        endBlock = (i > 0) ? this.blockStartPts[startPts[i-1]] : this.blockStartPts[startPts[0]];
+        break;
+      }
+    }
+
+    // if we didn't find a block, assume that the starting block is the last one
+    if(!endBlock) endBlock = this.blockStartPts[startPts[startPts.length - 1]];
+
+    // TODO: handle cases where the current interval start and end are in between regions
+    // if the end position is inside the region, convert the ref position, else, get the end of the block
+    if(this.interval.start <= endBlock.ref_end && this.interval.start >= endBlock.ref_start) {
+      return {
+        chr: endBlock.comp_chr,
+        loc: Math.round(this.compBPToPixels[this.blockOrientation][endBlock.id].invert(this.refBPToPixels(this.interval.start)))
+      };
+    } else {
+      return {
+        chr: endBlock.comp_chr,
+        loc: endBlock[this.blockOrientation].comp_end
+      };
+    }
+  }
+
+  /**
    * Returns a class selector string that contains homolog ids in the form of hom-<homolog id> separated by spaces
    * @param {Gene} gene - the gene to generate a class selector for
    */
@@ -162,7 +243,7 @@ export class BlockViewBrowserComponent implements OnInit {
    */
   getCompWidth(gene: Gene): number {
     return Math.abs(this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_end_pos) -
-      this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_start_pos));
+                    this.compBPToPixels[this.blockOrientation][gene.block_id](gene.gene_start_pos));
   }
 
   /**
@@ -182,16 +263,16 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {string} hex - hex color value
    * @param {number} opacity - opacity decimal for the faded color
    */
-  fadeColor(hex, opacity): string {
-    let color = hex.substring(1).split("");
+  fadeColor(hex: string, opacity: number): string {
+    let c = hex.substring(1).split("");
 
     // if the hex is only 3 characters, convert to 6
-    if(color.length === 3){
-      color = [color[0], color[0], color[1], color[1], color[2], color[2]];
+    if(c.length === 3){
+      c = [c[0], c[0], c[1], c[1], c[2], c[2]];
     }
 
     // make into a bit string
-    color= "0x"+color.join("");
+    let color: any = "0x"+c.join("");
 
     // return the conversion joined with the opacity in rgba format
     return "rgba("+[(color>>16)&255, (color>>8)&255, color&255].join(",")+"," + opacity +")";
@@ -244,8 +325,8 @@ export class BlockViewBrowserComponent implements OnInit {
 
     // create an axis using the dynamic scale with more precise tick labels in Mb
     let browserAxis = d3.axisTop(this.refBPToPixels)
-      .tickSizeOuter(0)
-      .tickFormat((d: number) => (d / 1000000).toString() + " Mb");
+                        .tickSizeOuter(0)
+                        .tickFormat((d: number) => (d / 1000000).toString() + " Mb");
 
     /*
     CREDIT: I would not have been able to get these behaviors so clean and concise without dear Mike Bostock's example,
@@ -261,58 +342,58 @@ export class BlockViewBrowserComponent implements OnInit {
           ~ A.L.
      */
     let brush = d3.brushX()
-      .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
-      .on('brush', () => {
-        // ignore brush via zoom occurrences
-        if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
+                  .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
+                  .on('brush', () => {
+                    // ignore brush via zoom occurrences
+                    if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
 
-        let s = d3.event.selection;
+                    let s = d3.event.selection;
 
-        // adjust refBPToPixels by scaling s's start, s[0], and end, s[1], with the static scale (used for chromosome view)
-        this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
+                    // adjust refBPToPixels by scaling s's start, s[0], and end, s[1], with the static scale (used for chromosome view)
+                    this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
 
-        // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-        this.blocks.forEach(block => this.createCompScaleForBlock(block));
+                    // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
+                    this.blocks.forEach(block => this.createCompScaleForBlock(block));
 
-        // zoom the browser to same section
-        d3.select('#browser')
-          .call(zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
+                    // zoom the browser to same section
+                    d3.select('#browser')
+                      .call(zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
 
-        this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
+                    this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
 
-        // update the axis above the reference track (if interval starts at 0, format the first tick label)
-        this.renderBrowserAxis(s[0], browserAxis);
-      });
+                    // update the axis above the reference track (if interval starts at 0, format the first tick label)
+                    this.renderBrowserAxis(s[0], browserAxis);
+                  });
 
     let zoom = d3.zoom()
-      .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
-      .translateExtent([[0, 0], [this.width, this.height]])
-      .extent([[0, 0], [this.width, this.height]])
-      .on('zoom', () => {
-        // ignore zoom via brush occurrences
-        if(d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
+                 .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
+                 .translateExtent([[0, 0], [this.width, this.height]])
+                 .extent([[0, 0], [this.width, this.height]])
+                 .on('zoom', () => {
+                   // ignore zoom via brush occurrences
+                   if(d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
 
-        let t = d3.event.transform;
+                   let t = d3.event.transform;
 
-        // adjust the refBPToPixels using a t's rescaled x on the static scale (used for chromosome view)
-        this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
+                   // adjust the refBPToPixels using a t's rescaled x on the static scale (used for chromosome view)
+                   this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
 
-        // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-        this.blocks.forEach(block => this.createCompScaleForBlock(block));
+                   // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
+                   this.blocks.forEach(block => this.createCompScaleForBlock(block));
 
-        // get the start and end pixel and bp points of the current interval
-        let pxExtents = this.refBPToPixels.range().map(t.invertX, t);
-        let bpExtents = this.refBPToPixels.domain();
+                   // get the start and end pixel and bp points of the current interval
+                   let pxExtents: Array<number> = this.refBPToPixels.range().map(t.invertX, t);
+                   let bpExtents: Array<number> = this.refBPToPixels.domain();
 
-        // move the brush in the chromosome view to match
-        d3.select('#chr-view-inv-cover').call(brush.move, pxExtents);
+                   // move the brush in the chromosome view to match
+                   d3.select('#chr-view-inv-cover').call(brush.move, pxExtents);
 
-        // update the interval values
-        this.setInterval(bpExtents[0], bpExtents[1]);
+                   // update the interval values
+                   this.setInterval(bpExtents[0], bpExtents[1]);
 
-        // update the axis above the reference track (if interval starts at 0, format the first tick label)
-        this.renderBrowserAxis(pxExtents[0], browserAxis);
-      });
+                   // update the axis above the reference track (if interval starts at 0, format the first tick label)
+                   this.renderBrowserAxis(pxExtents[0], browserAxis);
+                 });
 
     // bind the zoom behavior
     d3.select('#browser')
@@ -335,17 +416,19 @@ export class BlockViewBrowserComponent implements OnInit {
         .tickValues(this.getAxisTickValues(0, this.reference.genome[this.chromosome])) // tick values to use
         .tickFormat((d: number) => Math.round(d / 1000000).toString() + " Mb")) // format for tick labels
       .selectAll('text')
-      .attr('text-anchor', (d, i, x) => this.getAxisTickLabelPosition(i, x.length)); // set positional attr for tick labels
+        .attr('text-anchor', (d, i, x) => this.getAxisTickLabelPosition(i, x.length)); // set positional attr for tick labels
 
   }
 
   /**
    * Renders the dynamic axis for the browser (must be done here and not in template as HTML doesn't recognize D3's custom
    * element. Plus we don't actually ever interact with it, so it's completely safe to generate here)
+   * @param {number} intervalStart - the bp location of the start of interval in view
+   * @param {any} axis - the axis object for the browser
    */
   private renderBrowserAxis(intervalStart: number, axis: any): void {
     (intervalStart === 0) ? d3.select('#browser-axis').call(axis).select('text').attr('text-anchor', 'start') :
-      d3.select('#browser-axis').call(axis);
+                            d3.select('#browser-axis').call(axis);
   }
 
   /**
@@ -380,9 +463,7 @@ export class BlockViewBrowserComponent implements OnInit {
     let block = this.determineBlockForGene(gene);
 
     // if gene is located in a block (some aren't, so this is key), assign the block id to the comparison gene
-    if(block) {
-      gene['block_id'] = block;
-    }
+    if(block) gene['block_id'] = block;
 
     return gene;
   }
@@ -410,7 +491,7 @@ export class BlockViewBrowserComponent implements OnInit {
    * @param {number} BPwidth - the size of the current reference chromosome
    * @param {number} pixelWidth - the width of the SVG we're translating the chromosome to
    */
-  private createRefScale(BPwidth: number, pixelWidth: number): any {
+  private createRefScale(BPwidth: number, pixelWidth: number): ScaleLinear<number, number> {
     // set the range max to 'width - 1' to keep the last tick line of axes from hiding on the right side of the svg
     return d3.scaleLinear().domain([0, BPwidth]).range([0, pixelWidth - 1]);
   }
@@ -428,6 +509,8 @@ export class BlockViewBrowserComponent implements OnInit {
       end: Math.round(end),
       width: Math.round(end - start)
     };
+    this.interval.compStart = this.getCompStartForInterval();
+    this.interval.compEnd = this.getCompEndForInterval();
   }
 
   /**

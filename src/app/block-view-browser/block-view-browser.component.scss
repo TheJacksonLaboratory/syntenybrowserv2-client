@@ -38,3 +38,8 @@ rect.gene {
   fill: black;
   fill-opacity: 0.5;
 }
+
+#reference-interval-coordinates text,
+#comparison-interval-coordinates text {
+  font-size: 10px;
+}

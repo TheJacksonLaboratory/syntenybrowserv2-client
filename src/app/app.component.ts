@@ -5,6 +5,7 @@ import {SpeciesSelectionComponent} from './species-selection/species-selection.c
 import {GenomeViewComponent} from './genome-view/genome-view.component';
 import {FeatureSelectionComponent} from './feature-selection/feature-selection.component';
 import {BlockViewBrowserComponent} from './block-view-browser/block-view-browser.component';
+import {Metadata} from './classes/interfaces';
 
 @Component({
   selector: 'app-root',
@@ -64,7 +65,11 @@ export class AppComponent implements OnInit {
     // TODO: REMOVE WHEN FINISHED
     this.viewInBrowser = true;
     this.cdr.detectChanges();
-    this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, "1", []);
+    let features: Array<Metadata> = [
+      {chr: '8', end: 47533470, gene_id: 'MGI:2444585', gene_symbol: 'Trappc11', gene_type: 'protein coding gene', start: 47490115, strand: '-1'},
+      {chr: '8', end: 122616660, gene_id: 'MGI:1916295', gene_symbol: 'Trappc2l', gene_type: 'protein coding gene', start: 122611640, strand: '+1'}
+    ];
+    this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, "8", features);
   }
 
   getChromosomeFeatures() {
@@ -77,6 +82,7 @@ export class AppComponent implements OnInit {
     // allow the block view browser to initialize
     this.cdr.detectChanges();
 
+    console.log(features.features);
     this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, features.chr, features.features);
   }
 

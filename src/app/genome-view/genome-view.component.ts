@@ -66,7 +66,7 @@ export class GenomeViewComponent implements OnInit {
 
     return {
       chr: this.referenceChromosome.chr.replace('ref', ''),
-      features: features.map(feature => (feature.gene_id) ? feature.gene_id : feature.qtl_id)
+      features: features
     }
   }
 
@@ -186,21 +186,17 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Returns a path command for the given four specified coordinates (x, y pairs) and the desired radii
-   * @param {CartesianCoordinate} innerStart - (if band is positioned horizontally) this is the bottom left corner of band
-   * @param {CartesianCoordinate} innerEnd - ("") this is the bottom right corner of band
-   * @param {CartesianCoordinate} outerStart - ("") this is the top left corner of band
-   * @param {CartesianCoordinate} outerEnd - ("") this is the top right corner of band
-   * @param {number} innerRadius - the radius of the inner edge of the band
-   * @param {number} outerRadius - the radius of the outer edge of the band
+   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally) this is the bottom left corner of band
+   * @param {CartesianCoordinate} inEnd - ("") this is the bottom right corner of band
+   * @param {CartesianCoordinate} outStrt - ("") this is the top left corner of band
+   * @param {CartesianCoordinate} outEnd - ("") this is the top right corner of band
+   * @param {number} inRad - the radius of the inner edge of the band
+   * @param {number} outRad - the radius of the outer edge of the band
    */
-  private getBandPathCommand(innerStart: CartesianCoordinate,
-                            innerEnd: CartesianCoordinate,
-                            outerStart: CartesianCoordinate,
-                            outerEnd: CartesianCoordinate,
-                            innerRadius: number,
-                            outerRadius: number): string {
-    return 'M ' + innerStart.x + ' ' + innerStart.y + ' A ' + innerRadius + ' ' + innerRadius + ' 0 0 1 ' + innerEnd.x + ' ' + innerEnd.y +
-           ' L ' + outerEnd.x + ' ' + outerEnd.y + ' A ' + outerRadius + ' ' + outerRadius + ' 0 0 0 ' + outerStart.x + ' ' + outerStart.y +
+  private getBandPathCommand(inStrt: CartesianCoordinate, inEnd: CartesianCoordinate, outStrt: CartesianCoordinate,
+                             outEnd: CartesianCoordinate, inRad: number, outRad: number): string {
+    return 'M ' + inStrt.x + ' ' + inStrt.y + ' A ' + inRad + ' ' + inRad + ' 0 0 1 ' + inEnd.x + ' ' + inEnd.y +
+           ' L ' + outEnd.x + ' ' + outEnd.y + ' A ' + outRad + ' ' + outRad + ' 0 0 0 ' + outStrt.x + ' ' + outStrt.y +
            ' Z';
   }
 
@@ -227,6 +223,11 @@ export class GenomeViewComponent implements OnInit {
     return Object.keys(genome);
   }
 
+  /**
+   * Returns true/false if the specified gene occurs in the specified block (takes into consideration orientation)
+   * @param {Metadata} feature - the feature to check for it's location in the specified block
+   * @param {SyntenyBlock} block - the block to check that the specified gene is in
+   */
   private isInBlock(feature: Metadata, block: SyntenyBlock): boolean {
     return (feature.start >= block.ref_start && feature.start <= block.ref_end) ||
            (feature.end <= block.ref_end && feature.end >= block.ref_start)
