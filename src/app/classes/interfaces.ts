@@ -71,8 +71,8 @@ export interface SyntenyBlock {
   ref_end: number;
   id?: string;
   orientation_matches?: boolean;
-  true_orientation?: object;
-  match_orientation?: object;
+  true_orientation?: ComparisonBlockCoordinates;
+  match_orientation?: ComparisonBlockCoordinates;
 }
 
 export interface CartesianCoordinate {
@@ -89,35 +89,18 @@ export interface BrowserInterval {
   start: number;
   end: number;
   width: number;
-  compEnd?: ComparisonLocation;
-  compStart?: ComparisonLocation;
+  compEnd?: ComparisonMapping;
+  compStart?: ComparisonMapping;
 }
 
-export interface ComparisonLocation {
+export interface ComparisonMapping {
   chr: string;
   loc: number;
 }
 
-export interface Exon {
-  exon_start_pos: number;
-  exon_end_pos: number;
-}
-
-export interface Gene {
-  canonical_transcript: Array<Exon>;
-  end_pos?: number;
-  gene_id: string;
-  gene_symbol: string;
-  gene_start_pos?: number;
-  gene_end_pos?: number;
-  gene_chr?: string;
-  block_id?: string;
-  homologs?: Array<Gene>;
-  homolog_id?: number;
-  homolog_ids?: Array<number>;
-  start_pos?: number;
-  strand: string;
-  type: string;
+export interface ComparisonBlockCoordinates {
+  comp_start: number;
+  comp_end: number;
 }
 
 export interface GeneMetadata extends Metadata {
@@ -131,6 +114,6 @@ export interface GeneMetadata extends Metadata {
 }
 
 export interface ComparisonScaling {
-  match_orientation: object;
-  true_orientation: object;
+  match_orientation: any;
+  true_orientation: any;
 }

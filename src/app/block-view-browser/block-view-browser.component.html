@@ -1,122 +1,191 @@
 <div *ngIf="reference && comparison" id="browser-container">
   <svg class="block-view" [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="xMinYMin meet">
+    <!-- Chromosome View -->
     <g id="chromosome-view">
-      <g id="chr-view-axis" [attr.transform]="'translate(0, ' + (chromosomeViewHeight + 5) + ')'"></g>
+      <!-- Indicators for selected and filtered genes in the reference chromosome -->
+      <g id="ref-indicators">
+        <line *ngFor="let gene of selectedFeatures.reference" y2="8" class="gene-mark"
+              [attr.transform]="translate(gene.getCenterXPos(staticRefBPToPixels), 5)">
+        </line>
+      </g>
+
+      <!-- Chromosome view syntenic blocks (and background)-->
       <g id="chr-view-blocks">
-        <rect *ngFor="let block of blocks" [attr.fill]="fadeColor(genomeColors[block.comp_chr], 0.3)"
-              y="15" [attr.x]="staticRefBPToPixels(block.ref_start)" [attr.stroke]="genomeColors[block.comp_chr]"
+        <!-- Syntenic blocks -->
+        <rect *ngFor="let block of blocks" [ngStyle]="{ 'fill': getBlockColor(block), 'stroke': getBlockColor(block) }"
+              [attr.class]="'chr-' + block.comp_chr" y="15" [attr.x]="staticRefBPToPixels(block.ref_start)"
               [attr.width]="staticRefBPToPixels(block.ref_end - block.ref_start)" [attr.height]="chromosomeViewHeight - 25">
         </rect>
-        <line *ngFor="let feature of selectedFeatures" y2="8" stroke="#F00" shape-rendering="crispEdges"
-              [attr.transform]="'translate(' + staticRefBPToPixels(feature.start) + ', 5)'"></line>
+
+        <!-- Indicators for selected QTLs -->
+        <line *ngFor="let qtl of selectedQTLs" [attr.x2]="staticRefBPToPixels(qtl.end)" class="qtl-mark"
+              [attr.transform]="translate(staticRefBPToPixels(qtl.start), getQTLMarkerYPos(qtl))">
+        </line>
+
+        <!-- Transparent cover for brush (and when rendered, brush elements) -->
         <g id="chr-view-inv-cover">
           <rect id="bg" y="15" [attr.height]="chromosomeViewHeight - 25" [attr.width]="staticRefBPToPixels(getRefChrSize())"></rect>
         </g>
       </g>
+
+      <!-- Indicators for selected and filtereed features in the comparison chromsome -->
+      <g id="comp-indicators">
+        <line *ngFor="let gene of selectedFeatures.comparison" y2="-8" class="gene-mark"
+              [attr.transform]="translate(gene.getCenterXPos(getStaticCompScale(gene)), chromosomeViewHeight)">
+        </line>
+      </g>
+
+      <!-- Static axis for chromsome view -->
+      <g id="chr-view-axis" [attr.transform]="translate(0, chromosomeViewHeight + 5)"></g>
     </g>
 
+    <!-- Horizontal rule to visually separate chromsome view and browser -->
+    <!-- TODO: make this a different component with a just y value and width rather than 4 inputs-->
     <line class="hor-rule" [attr.x1]="0" [attr.x2]="width" [attr.y1]="browserOffset - 50" [attr.y2]="browserOffset - 50"></line>
 
-    <g id="browser" [attr.transform]="'translate(0, ' + (browserOffset + 15) + ')'">
+    <!-- Synteny browser -->
+    <g id="browser" [attr.transform]="translate(0, browserOffset)">
+      <!-- Background -->
       <rect id="browser-bg" [attr.width]="refBPToPixels(getRefChrSize())" [attr.height]="3 * trackHeight"></rect>
 
-      <g *ngIf="interval" id="reference-interval-coordinates" [attr.transform]="'translate(0, -35)'">
-        <text>
-          {{ reference.commonName }}, Chr{{ chromosome }}:{{ interval.start }} b
-        </text>
+      <!-- Interval coordinates for current view extents in reference positions -->
+      <g *ngIf="interval" id="reference-interval-coordinates" [attr.transform]="translate(0, -35)">
+        <!-- Start position -->
+        <text> {{ reference.commonName }}, Chr{{ chromosome }}:{{ interval.start }} b </text>
 
-        <text [attr.transform]="'translate(1200, 0)'" text-anchor="end">
+        <!-- End Position -->
+        <text [attr.transform]="translate(width, 0)" class="end">
           {{ reference.commonName }}, Chr{{ chromosome }}:{{ interval.end }} b
         </text>
       </g>
 
-      <g *ngIf="interval && interval.width < 10000000" id="browser-axis" [attr.transform]="'translate(0, -15)'"></g>
+      <!-- Dynamic axis that scales with browser scaling for more location context of reference track -->
+      <g *ngIf="interval" id="browser-axis" [attr.transform]="translate(0, -15)"></g>
 
+      <!-- Reference chromsome track -->
       <g id="reference-genome">
+        <!-- Reference block coordinates -->
         <g *ngIf="blocks" id="reference-block-coordinates">
-          <g *ngFor="let block of blocks" [attr.transform]="'translate(' + refBPToPixels(block.ref_start) + ', 0)'">
+          <g *ngFor="let block of blocks" [attr.transform]="translate(refBPToPixels(block.ref_start), 0)">
             <g *ngIf="getBlockWidth(block) > 115">
-              <line y2="-8" stroke="#AAA" stroke-width="1" shape-rendering="crispEdges"></line>
-              <text [attr.transform]="'translate(2, -2)'">
-                {{ block.ref_chr }}:{{ block.ref_start }}
-              </text>
+              <!-- Vertical line extending start point of block -->
+              <line y2="-8"></line>
 
-              <text [attr.transform]="'translate(' + (getBlockWidth(block) - 2) + ', -2)'" text-anchor="end">
+              <!-- Starting block coordinate -->
+              <text [attr.transform]="translate(2, -2)"> {{ block.ref_chr }}:{{ block.ref_start }} </text>
+
+              <!-- Ending block coordinate -->
+              <text [attr.transform]="translate(getBlockWidth(block) - 2, -2)" class="end">
                 {{ block.ref_chr }}:{{ block.ref_end }}
               </text>
-              <line [attr.transform]="'translate(' + getBlockWidth(block) + ', 0)'" stroke-width="1" y2="-8"
-                    stroke="#AAA" shape-rendering="crispEdges"></line>
+
+              <!-- Vertical line extending end point of block -->
+              <line [attr.transform]="translate(getBlockWidth(block), 0)" y2="-8">
+              </line>
             </g>
           </g>
         </g>
 
+        <!-- Reference track syntenic blocks -->
         <g id="reference-blocks">
-          <rect *ngFor="let block of blocks" [attr.fill]="fadeColor('#ccc', 0.3)" [attr.width]="getBlockWidth(block)"
-                class="reference" [attr.height]="trackHeight" stroke="#AAA" [attr.x]="refBPToPixels(block.ref_start)">
+          <rect *ngFor="let block of blocks" [attr.width]="getBlockWidth(block)"
+                class="reference" [attr.height]="trackHeight" [attr.x]="refBPToPixels(block.ref_start)">
           </rect>
         </g>
 
+        <!-- Reference genes -->
         <g *ngIf="referenceGenes" id="reference-genes">
-          <g *ngFor="let gene of referenceGenes" [attr.class]="(gene.homolog_id) ? 'hom-' + gene.homolog_id : ''"
-             [attr.transform]="'translate(' + refBPToPixels(gene.start_pos) + ', ' + (jitter(gene.start_pos) + 6) + ')'">
-            <text *ngIf="interval.width < 5000000"> {{ gene.gene_symbol }} </text>
+          <g *ngFor="let gene of referenceGenes" (mouseenter)="highlightRef(gene)" (mouseleave)="unhighlight()"
+             [attr.transform]="translate(gene.getXPos(refBPToPixels), gene.getYPos(trackHeight))">
+            <!-- Gene label -->
+            <text *ngIf="interval.width < 5000000 || gene.hasVisibleLabel()" [ngStyle]="{ 'fill': gene.getColor() }">
+              {{ gene.symbol }}
+            </text>
 
-            <rect class="gene" [attr.width]="getGeneWidth(gene)"></rect>
+            <!-- Gene -->
+            <rect class="gene" [attr.width]="gene.getWidth(refBPToPixels)" [ngStyle]="{ 'fill': gene.getColor() }"></rect>
           </g>
         </g>
       </g>
 
+      <!-- Orientation indicators -->
       <g *ngIf="blocks && blockOrientation === 'match_orientation'" id="orientation-indicators">
         <path *ngFor="let block of getNonMatchedBlocks()" [attr.d]="getOrientationIndPathCommand(block)"></path>
       </g>
 
-      <g id="comparison-genome" [attr.transform]="'translate(0, ' + (trackHeight + 50) + ')'">
+      <!-- Comparison chromosome track -->
+      <g id="comparison-genome" [attr.transform]="translate(0, trackHeight + 30)">
+        <!-- Comparison track syntenic blocks -->
         <g id="comparison-blocks">
           <rect *ngFor="let block of blocks" [attr.height]="trackHeight" [attr.stroke]="genomeColors[block.comp_chr]"
-                [attr.x]="refBPToPixels(block.ref_start)" [attr.width]="getBlockWidth(block)" class="comparison"
-                [attr.fill]="fadeColor(genomeColors[block.comp_chr], 0.3)">
+                [attr.width]="getBlockWidth(block)" [ngStyle]="{ 'fill': getBlockColor(block), 'stroke': getBlockColor(block) }"
+                [attr.x]="refBPToPixels(block.ref_start)" class="comparison">
           </rect>
         </g>
 
+        <!-- Comparison genes -->
         <g *ngIf="comparisonGenes && compBPToPixels && blocks" id="comparison-genes">
-          <g *ngFor="let gene of comparisonGenes" [attr.class]="getCompHomologClass(gene)"
-             [attr.transform]="'translate(' + getCompX(gene) + ', ' + (jitter(gene.gene_start_pos) + 6) + ')'">
-            <text *ngIf="interval.width < 5000000"> {{ gene.gene_symbol }} </text>
+          <g *ngFor="let gene of comparisonGenes" (mouseenter)="highlightComp(gene)" (mouseleave)="unhighlight()"
+             [attr.transform]="translate(gene.getXPos(getScale(gene)), gene.getYPos(trackHeight))">
+            <!-- Gene label -->
+            <text *ngIf="interval.width < 5000000 || gene.hasVisibleLabel()" [ngStyle]="{ 'fill': gene.getColor() }">
+              {{ gene.symbol }}
+            </text>
 
-            <rect class="gene" [attr.width]="getCompWidth(gene)"></rect>
+            <!-- Gene -->
+            <rect class="gene" [attr.width]="gene.getWidth(getScale(gene))" [ngStyle]="{ 'fill': gene.getColor() }"></rect>
           </g>
         </g>
       </g>
 
+      <!-- Comparison block coordinates -->
       <g *ngIf="blocks" id="comparison-block-coordinates">
-        <g *ngFor="let block of blocks"
-           [attr.transform]="'translate(' + refBPToPixels(block.ref_start) + ', ' + (2*trackHeight + 60) + ')'">
+        <g *ngFor="let block of blocks" [attr.transform]="translate(refBPToPixels(block.ref_start), 2*trackHeight + 40)">
           <g *ngIf="getBlockWidth(block) > 115">
-            <line y2="-10" [attr.stroke]="genomeColors[block.comp_chr]" stroke-width="1" shape-rendering="crispEdges"></line>
+            <!-- Vertical line extending start poing of block -->
+            <line y2="-10" [attr.stroke]="genomeColors[block.comp_chr]"></line>
 
-            <text [attr.transform]="'translate(2, -1)'">
+            <!-- Starting block coordinate -->
+            <text [attr.transform]="translate(2, -1)"> {{ block.comp_chr }}:{{ block[blockOrientation].comp_start }} </text>
+
+            <!-- Ending block coordinate -->
+            <text [attr.transform]="translate(getBlockWidth(block) - 2, -1)" class="end">
               {{ block.comp_chr }}:{{ block[blockOrientation].comp_start }}
             </text>
 
-            <text [attr.transform]="'translate(' + (getBlockWidth(block) - 2) + ', -1)'" text-anchor="end">
-              {{ block.comp_chr }}:{{ block[blockOrientation].comp_start }}
-            </text>
-
-            <line [attr.transform]="'translate(' + getBlockWidth(block) + ', 0)'" stroke-width="1" y2="-10"
-                  [attr.stroke]="genomeColors[block.comp_chr]" shape-rendering="crispEdges"></line>
+            <!-- Vertical line extending end point of block -->
+            <line [attr.transform]="translate(getBlockWidth(block), 0)" y2="-10" [attr.stroke]="genomeColors[block.comp_chr]"></line>
           </g>
         </g>
       </g>
 
-      <g *ngIf="interval" id="comparison-interval-coordinates"
-         [attr.transform]="'translate(0, ' + (2*trackHeight + 70) + ')'">
-        <text>
-          {{ comparison.commonName }}, Chr{{ interval.compStart.chr }}:{{ interval.compStart.loc }} b
-        </text>
+      <!-- Interval coordinates for current view extents in comparison positions -->
+      <g *ngIf="interval" id="comparison-interval-coordinates" [attr.transform]="translate(0, 2*trackHeight + 50)">
+        <!-- Start position -->
+        <text> {{ comparison.commonName }}, Chr{{ interval.compStart.chr }}:{{ interval.compStart.loc }} b </text>
 
-        <text [attr.transform]="'translate(1200, 0)'" text-anchor="end">
+        <!-- End Position -->
+        <text [attr.transform]="translate(1200, 0)" class="end">
           {{ comparison.commonName }}, Chr{{ interval.compEnd.chr }}:{{ interval.compEnd.loc }} b
         </text>
+      </g>
+    </g>
+
+    <!-- Comparison genome legend -->
+    <g id="comparison-genome-legend" [attr.transform]="translate(0, legendOffset)">
+      <!-- Title -->
+      <text [attr.transform]="translate(width / 2, 0)"> {{ comparison.commonName }} Genome Key </text>
+
+      <!-- Legend -->
+      <g id="legend" [attr.transform]="translate(getLegendXTrans(), 20)">
+        <g *ngFor="let chr of getCompChromosomes()" [attr.transform]="translate(getLegendItemXTrans(chr), 0)"
+           (mouseenter)="(isChrActive(chr)) ? setCurrentChr(chr): null" (mouseleave)="clearCurrentChr()">
+          <!-- Colored circles -->
+          <circle r="10" [attr.fill]="genomeColors[chr]" [attr.fill-opacity]="getLegendItemOpacity(chr)"></circle>
+
+          <!-- Chromosome label -->
+          <text [attr.transform]="translate(0, 25)" [attr.fill-opacity]="getLegendItemOpacity(chr)"> {{ chr }} </text>
+        </g>
       </g>
     </g>
   </svg>

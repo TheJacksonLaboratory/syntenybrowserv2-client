@@ -23,23 +23,64 @@
   stroke-width: 0.5;
 }
 
-#chromosome-view {
-  #bg { fill: transparent; }
-}
-
 #browser-bg { fill: white; }
 
-rect.reference, rect.comparison {
+rect.comparison, #comparison-block-coordinates line {
   stroke-width: 1;
+}
+
+rect.reference, #reference-block-coordinates line {
+  stroke: #AAA;
+  stroke-width: 1;
+}
+
+rect.reference {
+  fill: #CCC;
+}
+
+rect.reference, rect.comparison, #chr-view-blocks rect {
+  fill-opacity: 0.5;
+}
+
+#bg { fill: transparent; }
+
+.gene-mark {
+  stroke: #F00;
+}
+
+.qtl-mark {
+  stroke: #409;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.end {
+  text-anchor: end;
+}
+
+#legend text {
+  font-size: 12px;
 }
 
 rect.gene {
   height: 5px;
-  fill: black;
   fill-opacity: 0.5;
+}
+
+rect, line {
+  shape-rendering: crispEdges;
+}
+
+#comparison-genome-legend text {
+  text-anchor: middle;
 }
 
 #reference-interval-coordinates text,
 #comparison-interval-coordinates text {
   font-size: 10px;
 }
+
+.selected { fill: #F00 !important; }
+.filtered { fill: #00F; }
+.highlighted { fill: #080 !important; }
+.hidden { display: none; }

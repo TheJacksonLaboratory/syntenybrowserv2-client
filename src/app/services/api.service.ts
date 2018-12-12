@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {environment} from '../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {map} from 'rxjs/operators';
-import {Gene, GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response, SyntenyBlock} from '../classes/interfaces';
+import {GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response, SyntenyBlock} from '../classes/interfaces';
 import {Observable} from 'rxjs';
 
 @Injectable({
@@ -71,7 +71,7 @@ export class ApiService {
                     .pipe(map(resp => resp.blocks));
   }
 
-  getGenes(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<Gene>> {
+  getGenes(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<any>> {
     return this.http.get<Response>(this.root + 'chr-genes/' + refTaxonID + '/' + compTaxonID + '/' +chr).pipe(map(resp => resp.genes));
   }
 

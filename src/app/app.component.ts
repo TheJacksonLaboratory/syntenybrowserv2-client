@@ -65,9 +65,11 @@ export class AppComponent implements OnInit {
     // TODO: REMOVE WHEN FINISHED
     this.viewInBrowser = true;
     this.cdr.detectChanges();
+
     let features: Array<Metadata> = [
       {chr: '8', end: 47533470, gene_id: 'MGI:2444585', gene_symbol: 'Trappc11', gene_type: 'protein coding gene', start: 47490115, strand: '-1'},
-      {chr: '8', end: 122616660, gene_id: 'MGI:1916295', gene_symbol: 'Trappc2l', gene_type: 'protein coding gene', start: 122611640, strand: '+1'}
+      {chr: '8', end: 122616660, gene_id: 'MGI:1916295', gene_symbol: 'Trappc2l', gene_type: 'protein coding gene', start: 122611640, strand: '+1'},
+      {chr: '8', end: 35987996, qtl_id: '1891336', qtl_symbol: 'Eae14', start: 35987864}
     ];
     this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, "8", features);
   }
