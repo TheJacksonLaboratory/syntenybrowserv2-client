@@ -4,11 +4,12 @@
   width: 100%;
   vertical-align: top;
   overflow: hidden;
+  text-align: center;
 }
 
 #block-view {
   display: inline-block;
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
 }
@@ -23,7 +24,7 @@
   stroke-width: 0.5;
 }
 
-#browser-bg { fill: white; }
+#browser-bg { fill: transparent; }
 
 rect.comparison, #comparison-block-coordinates line {
   stroke-width: 1;
@@ -48,8 +49,12 @@ rect.reference, rect.comparison, #chr-view-blocks rect {
   stroke: #F00;
 }
 
-.qtl-mark {
+.qtl {
   stroke: #409;
+  fill: #409;
+  fill-opacity: 0.25;
+}
+.qtl-mark {
   stroke-width: 3;
   stroke-linecap: round;
 }
@@ -60,6 +65,15 @@ rect.reference, rect.comparison, #chr-view-blocks rect {
 
 #legend text {
   font-size: 12px;
+}
+
+#ref-bg {
+  fill: #EEE;
+  fill-opacity: 0.7;
+}
+
+#comp-bg {
+  fill: #FFF;
 }
 
 rect.gene {
@@ -80,7 +94,15 @@ rect, line {
   font-size: 10px;
 }
 
-.selected { fill: #F00 !important; }
-.filtered { fill: #00F; }
-.highlighted { fill: #080 !important; }
-.hidden { display: none; }
+#reference-interval-coordinates line,
+#comparison-interval-coordinates line {
+  stroke: #000;
+  stroke-width: 2;
+}
+
+text.all-caps {
+  font-size: 16px !important;
+  font-weight: bold;
+  fill: #999;
+  text-transform: uppercase;
+}

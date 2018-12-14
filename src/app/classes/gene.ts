@@ -72,10 +72,11 @@ export class Gene {
   hasVisibleLabel(): boolean { return this.highlighted || this.selected || this.filtered; }
 
   /**
-   * Returns an X position (in px) for the gene, using the specified scale
+   * Returns an X position (in px) for the gene, using the specified scale and start (if provided, indicating a comparison gene)
    * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
+   * @param {number} start - if specified, use instead of the real start (used for comparison genes)
    */
-  getXPos(scale: ScaleLinear<number, number>): number { return scale(this.start); }
+  getXPos(scale: ScaleLinear<number, number>, start: number = null): number { return scale((start) ? start : this.start); }
 
   getCenterXPos(scale: ScaleLinear<number, number>): number { return scale(this.start + (this.size / 2 )); }
 

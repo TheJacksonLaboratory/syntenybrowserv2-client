@@ -23,7 +23,8 @@ export class BlockViewBrowserComponent implements OnInit {
     reference: [],
     comparison: []
   };
-  selectedQTLs = [];
+  selectedQTLs: Array<QTLMetadata> = [];
+  progress: number = 0;
 
   width: number = 1200;
   height: number = 500;
@@ -31,7 +32,7 @@ export class BlockViewBrowserComponent implements OnInit {
   browserOffset = 175;
   legendOffset = 450;
   trackHeight = 100;
-  minimumIntervalSize = 500000;
+  minimumIntervalSize = 500;
 
   interval: BrowserInterval;
   blocks: Array<SyntenyBlock>;
@@ -56,9 +57,17 @@ export class BlockViewBrowserComponent implements OnInit {
 
   ngOnInit() { }
 
+  /**
+   * Renders the block view with the specified reference and comparison species, using the specified color dictionary for the
+   * genomes, a list of features to highlight on the specified chromsome
+   * @param {Species} reference - the reference species
+   * @param {Species} comparison - the comparison species
+   * @param {object} genomeColors - the genome color dictionary
+   * @param {string} chr - the chromsome to get syntenic blocks and features for
+   * @param {Array<Metadata>} features - list of selected features to display in red
+   */
   render(reference: Species, comparison: Species, genomeColors: object, chr: string, features: Array<Metadata>): void {
-    // TODO: make a reset function that resets all of the necessary variables
-    this.activeChromosomes = [];
+    this.reset();
 
     this.reference = reference;
     this.comparison = comparison;
@@ -73,112 +82,43 @@ export class BlockViewBrowserComponent implements OnInit {
     this.staticRefBPToPixels = this.createRefScale(this.getRefChrSize(), this.width);
 
     // get syntenic block data
-    this.http.getChromosomeSynteny(reference.getID(), comparison.getID(), chr).subscribe(blocks => {
-      // create list of necessary block data dictionaries
-      this.blocks = blocks.map(block => {
-        let blockContent = {
-          ref_chr: block.ref_chr,
-          ref_start: block.ref_start,
-          ref_end: block.ref_end,
-          comp_chr: block.comp_chr,
-          orientation_matches: block.orientation_matches,
-          match_orientation: {
-            comp_start: (block.orientation_matches) ? block.comp_start : block.comp_end,
-            comp_end: (block.orientation_matches) ? block.comp_end : block.comp_start
-          },
-          true_orientation: {
-            comp_start: block.comp_start,
-            comp_end: block.comp_end
-          },
-          id: block.id
-        };
-
-        // don't worry about repeats
-        this.activeChromosomes.push(block.comp_chr);
-
-        this.blockStartPts[block.ref_start] = blockContent;
-        this.blockEndPts[block.ref_end] = blockContent;
-
-        // create the comparison scaling function for the current block using new dictionary object
-        this.createCompScaleForBlock(blockContent);
-
-        this.staticCompBPToPixels.match_orientation[block.id] = d3.scaleLinear()
-                                                                  .domain(this.getCompScaleDomain(blockContent, 'match_orientation'))
-                                                                  .range(this.getCompScaleRange(blockContent));
-
-        this.staticCompBPToPixels.true_orientation[block.id] = d3.scaleLinear()
-                                                                 .domain(this.getCompScaleDomain(blockContent, 'true_orientation'))
-                                                                 .range(this.getCompScaleRange(blockContent));
-
-        return blockContent;
-      });
-
-      // create the chromosome view (static) axis
-      this.renderChromosomeViewAxis();
-
-
-    });
+    this.getSyntenicBlocks();
 
     // get gene data for the selected chromosome
     // KEEP AN EYE ON THIS. I'm fairly confident that http.getChromosomeSynteny() will return faster than http.getGenes()
     // but it is possible that we may run into a race condition in some weird case. It it becomes an issue, we can move
     // this directly after the binding of browser behaviors within the subscribe for http.getChromosomeSynteny().
-    this.http.getGenes(reference.getID(),comparison.getID(), chr).subscribe(genes => {
-      // stores homolog id arrays by comparison gene symbol
-      let homIDs = {};
+    this.getGenes(features);
+  }
 
-      // comparison genes; updated every time a reference gene has new/distinct homologs
-      let compGenes = [];
+  /**
+   * Resets all of the core variables to make room for a new set of data
+   */
+  reset(): void {
+    this.referenceGenes = null;
+    this.comparisonGenes = null;
+    this.progress = 0;
+    this.blocks = null;
+    this.blockStartPts = {};
+    this.blockEndPts = {};
+    this.refBPToPixels = null;
+    this.staticRefBPToPixels = null;
+    this.currentChromosome = null;
+    this.selectedFeatures.reference = [];
+    this.selectedFeatures.comparison = [];
+    this.selectedQTLs = [];
+    this.staticCompBPToPixels.match_orientation = {};
+    this.staticCompBPToPixels.true_orientation = {};
+    this.compBPToPixels.match_orientation = {};
+    this.compBPToPixels.true_orientation = {};
+    this.activeChromosomes = [];
+  }
 
-      // add a homolog id to all of the reference genes
-      this.referenceGenes = genes.map((gene, i) => {
-                                        // if there are homologs, figure out homolog ID information and add to compGenes if new
-                                        if(gene.homologs.length !== 0) {
-                                          // for each of the homologs, if the homolog's gene_symbol already has a key/value pair in the
-                                          // homolog lookup, push the reference gene homolog ID to that value list. If the homolog's
-                                          // gene symbol isn't there, make a new key/value pair for the homolog and push the homolog
-                                          // to the compGenes array
-                                          gene.homologs.forEach(hom => {
-                                            if(homIDs[hom.gene_symbol]) {
-                                              homIDs[hom.gene_symbol].push(i);
-                                            } else {
-                                              homIDs[hom.gene_symbol] = [i];
-                                              compGenes.push(hom);
-                                            }
-                                          });
-
-                                          let featureSymbols = features.map(feature => feature.gene_symbol);
-                                          if(featureSymbols.indexOf(gene.gene_symbol) >= 0) {
-                                            gene.homologs.forEach(hom => {
-                                              hom.sel = true; // temporary flag
-                                              hom.block_id = this.getBlockForGene(hom);
-                                            });
-                                            return new Gene(gene, [i], true);
-                                          }
-                                        }
-
-                                        return new Gene(gene, [i], false);
-                                      });
-
-      // create a list of comparison genes from the temp compGenes array, add the list of homolog IDs for each, as found from
-      // homLookup, and add a block ID for genes in a syntenic region, then filter that list to only the genes that have a block ID
-      this.comparisonGenes = compGenes.map(gene => new Gene(gene, homIDs[gene.gene_symbol], gene.sel, this.getBlockForGene(gene)))
-                                      .filter(gene => gene.isSyntenic());
-
-      // get selected features
-      this.selectedFeatures.reference = this.referenceGenes.filter(gene => gene.selected);
-      this.selectedFeatures.comparison = this.comparisonGenes.filter(gene => gene.selected);
-      this.selectedQTLs = features.filter(feature => feature.qtl_id);
-
-      // set interval to roughly 5Mb with the first reference feature centered if features are selected, otherwise set interval to entire chr
-      (this.selectedFeatures.reference.length > 0) ?
-        this.setInterval(Math.max(0, this.selectedFeatures.reference[0].start - 2500000),
-                         Math.min(this.getRefChrSize(), this.selectedFeatures.reference[0].end + 2500000)) :
-        this.setInterval(0, this.getRefChrSize());
-
-      // set the zoom, brush and dynamic axis behaviors/interactions
-      this.bindBrowserBehaviors();
-    });
+  /**
+   * Returns a list of the reference genes that are in the current interval
+   */
+  getRefGenesInView(): Array<Gene> {
+    return this.referenceGenes.filter(gene => this.isInView(gene));
   }
 
   /**
@@ -264,8 +204,29 @@ export class BlockViewBrowserComponent implements OnInit {
     return Math.abs(this.refBPToPixels(block.ref_end) - this.refBPToPixels(block.ref_start));
   }
 
+  /**
+   * Returns the absolute value of the specified QTL based on the specified scale
+   * @param {QTLMetadata} qtl - the specified QTL to calcule the width of
+   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width
+   */
+  getQTLWidth(qtl: QTLMetadata, scale: ScaleLinear<number, number>): number {
+    return Math.abs(scale(qtl.end) - scale(qtl.start));
+  }
+
+  /**
+   * Returns the comparison scale matching the block ID of the specified gene
+   * @param {Gene} gene - the gene to get the comparison scale for by the block ID of the block it's located in
+   */
   getScale(gene: Gene): ScaleLinear<number, number> {
     return this.compBPToPixels[this.blockOrientation][gene.blockID];
+  }
+
+  /**
+   * Returns the start position to be used of a comparison gene (based on orientation)
+   * @param {Gene} gene - the gene to get the proper start point based on orientation
+   */
+  getStart(gene: Gene): number {
+    return (this.blocks.filter(block => block.id === gene.blockID)[0].orientation_matches) ? gene.start : gene.end;
   }
 
   getStaticCompScale(gene: Gene): ScaleLinear<number, number> {
@@ -287,6 +248,7 @@ export class BlockViewBrowserComponent implements OnInit {
   getLegendItemXTrans(chr: string): number {
     return this.getCompChromosomes().indexOf(chr) * 35;
   }
+
   getLegendItemOpacity(chr: string): number {
     return (this.isChrActive(chr)) ? 1 : 0.1;
   }
@@ -342,9 +304,9 @@ export class BlockViewBrowserComponent implements OnInit {
    */
   getOrientationIndPathCommand(block: SyntenyBlock): string {
     return 'M ' + this.refBPToPixels(block.ref_start) + ', ' + this.trackHeight +
-           ' L ' + this.refBPToPixels(block.ref_end) + ', ' + (this.trackHeight + 30) +
+           ' L ' + this.refBPToPixels(block.ref_end) + ', ' + (this.trackHeight + 39) +
            ' M ' + this.refBPToPixels(block.ref_end) + ', ' + this.trackHeight +
-           ' L ' + this.refBPToPixels(block.ref_start) + ', ' + (this.trackHeight + 30) +
+           ' L ' + this.refBPToPixels(block.ref_start) + ', ' + (this.trackHeight + 39) +
            ' Z';
   }
 
@@ -360,6 +322,125 @@ export class BlockViewBrowserComponent implements OnInit {
 
   getCompChromosomes(): Array<string> {
     return Object.keys(this.comparison.genome);
+  }
+
+  private getSyntenicBlocks(): void {
+    this.http.getChromosomeSynteny(this.reference.getID(), this.comparison.getID(), this.chromosome).subscribe(blocks => {
+      // create list of necessary block data dictionaries
+      this.blocks = blocks.map(block => {
+        let blockContent = {
+          ref_chr: block.ref_chr,
+          ref_start: block.ref_start,
+          ref_end: block.ref_end,
+          comp_chr: block.comp_chr,
+          orientation_matches: block.orientation_matches,
+          match_orientation: {
+            comp_start: (block.orientation_matches) ? block.comp_start : block.comp_end,
+            comp_end: (block.orientation_matches) ? block.comp_end : block.comp_start
+          },
+          true_orientation: {
+            comp_start: block.comp_start,
+            comp_end: block.comp_end
+          },
+          id: block.id
+        };
+
+        // don't worry about repeats
+        this.activeChromosomes.push(block.comp_chr);
+
+        this.blockStartPts[block.ref_start] = blockContent;
+        this.blockEndPts[block.ref_end] = blockContent;
+
+        // create the comparison scaling function for the current block using new dictionary object
+        this.createCompScaleForBlock(blockContent);
+
+        this.staticCompBPToPixels.match_orientation[block.id] = d3.scaleLinear()
+          .domain(this.getCompScaleDomain(blockContent, 'match_orientation'))
+          .range(this.getCompScaleRange(blockContent));
+
+        this.staticCompBPToPixels.true_orientation[block.id] = d3.scaleLinear()
+          .domain(this.getCompScaleDomain(blockContent, 'true_orientation'))
+          .range(this.getCompScaleRange(blockContent));
+
+        return blockContent;
+      });
+
+      this.progress += 0.10;
+
+      // create the chromosome view (static) axis
+      this.renderChromosomeViewAxis();
+
+      this.progress += 0.05;
+    });
+  }
+
+  private getGenes(features: Array<any>): void {
+    this.http.getGenes(this.reference.getID(), this.comparison.getID(), this.chromosome).subscribe(genes => {
+      // stores homolog id arrays by comparison gene symbol
+      let homIDs = {};
+
+      // comparison genes; updated every time a reference gene has new/distinct homologs
+      let compGenes = [];
+
+      // add a homolog id to all of the reference genes
+      this.referenceGenes = genes.map((gene, i) => {
+        // if there are homologs, figure out homolog ID information and add to compGenes if new
+        if(gene.homologs.length !== 0) {
+          // for each of the homologs, if the homolog's gene_symbol already has a key/value pair in the
+          // homolog lookup, push the reference gene homolog ID to that value list. If the homolog's
+          // gene symbol isn't there, make a new key/value pair for the homolog and push the homolog
+          // to the compGenes array
+          gene.homologs.forEach(hom => {
+            if(homIDs[hom.gene_symbol]) {
+              homIDs[hom.gene_symbol].push(i);
+            } else {
+              homIDs[hom.gene_symbol] = [i];
+              compGenes.push(hom);
+            }
+          });
+
+          let featureSymbols = features.map(feature => feature.gene_symbol);
+          if(featureSymbols.indexOf(gene.gene_symbol) >= 0) {
+            gene.homologs.forEach(hom => {
+              hom.sel = true; // temporary flag
+              hom.block_id = this.getBlockForGene(hom);
+            });
+            return new Gene(gene, [i], true);
+          }
+        }
+
+        return new Gene(gene, [i], false);
+      });
+
+      this.progress += 0.25;
+
+      // create a list of comparison genes from the temp compGenes array, add the list of homolog IDs for each, as found from
+      // homLookup, and add a block ID for genes in a syntenic region, then filter that list to only the genes that have a block ID
+      this.comparisonGenes = compGenes.map(gene => {
+        this.progress += (0.4 / length);
+        return new Gene(gene, homIDs[gene.gene_symbol], gene.sel, this.getBlockForGene(gene))
+      }).filter(gene => gene.isSyntenic());
+
+      this.progress += 0.4;
+
+      // get selected features
+      this.selectedFeatures.reference = this.referenceGenes.filter(gene => gene.selected);
+      this.selectedFeatures.comparison = this.comparisonGenes.filter(gene => gene.selected);
+      this.selectedQTLs = features.filter(feature => feature.qtl_id);
+
+      this.progress += 0.1;
+
+      // set interval to roughly 5Mb with the first reference feature centered if features are selected, otherwise set interval to entire chr
+      (this.selectedFeatures.reference.length > 0) ?
+        this.setInterval(Math.max(0, this.selectedFeatures.reference[0].start - 2500000),
+          Math.min(this.getRefChrSize(), this.selectedFeatures.reference[0].end + 2500000)) :
+        this.setInterval(0, this.getRefChrSize());
+
+      this.progress += 0.1;
+
+      // set the zoom, brush and dynamic axis behaviors/interactions
+      this.bindBrowserBehaviors();
+    });
   }
 
   /**
@@ -493,6 +574,11 @@ export class BlockViewBrowserComponent implements OnInit {
   private isInBlock(gene: any, block: SyntenyBlock): boolean {
     return (gene.gene_start_pos >= block.true_orientation.comp_start && gene.gene_start_pos <= block.true_orientation.comp_end) &&
            (gene.gene_end_pos <= block.true_orientation.comp_end && gene.gene_end_pos >= block.true_orientation.comp_start)
+  }
+
+  private isInView(gene: Gene): boolean {
+    return (gene.start >= this.interval.start && gene.start <= this.interval.end) ||
+      (gene.end <= this.interval.end && gene.end >= this.interval.start)
   }
 
   /**
