@@ -19,7 +19,7 @@ import { BlockViewBrowserComponent } from './block-view-browser/block-view-brows
     SpeciesSelectionComponent,
     FeatureSelectionComponent,
     GenomeViewComponent,
-    BlockViewBrowserComponent,
+    BlockViewBrowserComponent
   ],
   imports: [
     BrowserModule,
