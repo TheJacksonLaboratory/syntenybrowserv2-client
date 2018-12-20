@@ -386,44 +386,43 @@ export class BlockViewBrowserComponent {
   private getSyntenicBlocks(features: Array<Metadata>): void {
     this.http.getChromosomeSynteny(this.reference.getID(), this.comparison.getID(), this.chromosome)
              .subscribe(blocks => {
-                          // create list of necessary block data dictionaries
-                          this.blocks = blocks.map(block => {
-                            let blockContent = {
-                              ref_chr: block.ref_chr,
-                              ref_start: block.ref_start,
-                              ref_end: block.ref_end,
-                              comp_chr: block.comp_chr,
-                              orientation_matches: block.orientation_matches,
-                              match_orientation: {
-                                comp_start: (block.orientation_matches) ? block.comp_start : block.comp_end,
-                                comp_end: (block.orientation_matches) ? block.comp_end : block.comp_start
-                              },
-                              true_orientation: {
-                                comp_start: block.comp_start,
-                                comp_end: block.comp_end
-                              },
-                              id: block.id
-                            };
+               // create list of necessary block data dictionaries
+               this.blocks = blocks.map(block => {
+                 let blockContent = {
+                   ref_chr: block.ref_chr,
+                   ref_start: block.ref_start,
+                   ref_end: block.ref_end,
+                   comp_chr: block.comp_chr,
+                   orientation_matches: block.orientation_matches,
+                   match_orientation: {
+                     comp_start: (block.orientation_matches) ? block.comp_start : block.comp_end,
+                     comp_end: (block.orientation_matches) ? block.comp_end : block.comp_start
+                   },
+                   true_orientation: {
+                     comp_start: block.comp_start,
+                     comp_end: block.comp_end
+                   },
+                   id: block.id
+                 };
 
-                            // don't worry about repeats
-                            this.activeChromosomes.push(block.comp_chr);
+                 // don't worry about repeats
+                 this.activeChromosomes.push(block.comp_chr);
 
-                            this.blockStartPts[block.ref_start] = blockContent;
-                            this.blockEndPts[block.ref_end] = blockContent;
+                 this.blockStartPts[block.ref_start] = blockContent;
+                 this.blockEndPts[block.ref_end] = blockContent;
 
-                            // create the comparison scaling function for the current block using new dictionary object
-                            this.createCompScaleForBlock(blockContent);
+                 // create the comparison scaling function for the current block using new dictionary object
+                 let matchScale = this.createCompScaleForBlock(block, 'match_orientation');
+                 let trueScale = this.createCompScaleForBlock(block, 'true_orientation');
 
-                            this.staticCompBPToPixels.match_orientation[block.id] = d3.scaleLinear()
-                              .domain(this.getCompScaleDomain(blockContent, 'match_orientation'))
-                              .range(this.getCompScaleRange(blockContent));
+                 this.compBPToPixels.match_orientation[block.id] = matchScale;
+                 this.compBPToPixels.true_orientation[block.id] = trueScale;
 
-                            this.staticCompBPToPixels.true_orientation[block.id] = d3.scaleLinear()
-                              .domain(this.getCompScaleDomain(blockContent, 'true_orientation'))
-                              .range(this.getCompScaleRange(blockContent));
+                 this.staticCompBPToPixels.match_orientation[block.id] = matchScale;
+                 this.staticCompBPToPixels.true_orientation[block.id] = trueScale;
 
-                            return blockContent;
-                          });
+                 return blockContent;
+               });
 
       this.progress += 0.10;
 
@@ -439,41 +438,41 @@ export class BlockViewBrowserComponent {
   private getGenes(features: Array<any>): void {
     this.http.getGenes(this.reference.getID(), this.comparison.getID(), this.chromosome)
              .subscribe(genes => {
-                          // stores homolog id arrays by comparison gene symbol
-                          let homIDs = {};
+               // stores homolog id arrays by comparison gene symbol
+               let homIDs = {};
 
-                          // comparison genes; updated every time a reference gene has new/distinct homologs
-                          let compGenes = [];
+               // comparison genes; updated every time a reference gene has new/distinct homologs
+               let compGenes = [];
 
-                          // add a homolog id to all of the reference genes
-                          this.referenceGenes = genes.map((gene, i) => {
-                            // if there are homologs, figure out homolog ID information and add to compGenes if new
-                            if(gene.homologs.length !== 0) {
-                              // for each of the homologs, if the homolog's gene_symbol already has a key/value pair in the
-                              // homolog lookup, push the reference gene homolog ID to that value list. If the homolog's
-                              // gene symbol isn't there, make a new key/value pair for the homolog and push the homolog
-                              // to the compGenes array
-                              gene.homologs.forEach(hom => {
-                                if(homIDs[hom.gene_symbol]) {
-                                  homIDs[hom.gene_symbol].push(i);
-                                } else {
-                                  homIDs[hom.gene_symbol] = [i];
-                                  compGenes.push(hom);
-                                }
-                              });
+               // add a homolog id to all of the reference genes
+               this.referenceGenes = genes.map((gene, i) => {
+                 // if there are homologs, figure out homolog ID information and add to compGenes if new
+                 if(gene.homologs.length !== 0) {
+                   // for each of the homologs, if the homolog's gene_symbol already has a key/value pair in the
+                   // homolog lookup, push the reference gene homolog ID to that value list. If the homolog's
+                   // gene symbol isn't there, make a new key/value pair for the homolog and push the homolog
+                   // to the compGenes array
+                   gene.homologs.forEach(hom => {
+                     if(homIDs[hom.gene_symbol]) {
+                       homIDs[hom.gene_symbol].push(i);
+                     } else {
+                       homIDs[hom.gene_symbol] = [i];
+                       compGenes.push(hom);
+                     }
+                   });
 
-                              let featureSymbols = features.map(feature => feature.gene_symbol);
-                              if(featureSymbols.indexOf(gene.gene_symbol) >= 0) {
-                                gene.homologs.forEach(hom => {
-                                  hom.sel = true; // temporary flag
-                                  hom.block_id = this.getBlockForGene(hom);
-                                });
-                                return new Gene(gene, [i], true);
-                              }
-                            }
+                   let featureSymbols = features.map(feature => feature.gene_symbol);
+                   if(featureSymbols.indexOf(gene.gene_symbol) >= 0) {
+                     gene.homologs.forEach(hom => {
+                       hom.sel = true; // temporary flag
+                       hom.block_id = this.getBlockForGene(hom);
+                     });
+                     return new Gene(gene, [i], true);
+                   }
+                 }
 
-                            return new Gene(gene, [i], false);
-                          });
+                 return new Gene(gene, [i], false);
+               });
 
       this.progress += 0.25;
 
@@ -541,7 +540,10 @@ export class BlockViewBrowserComponent {
                     this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
 
                     // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-                    this.blocks.forEach(block => this.createCompScaleForBlock(block));
+                    this.blocks.forEach(block => {
+                      this.compBPToPixels.match_orientation[block.id] = this.createCompScaleForBlock(block, 'match_orientation');
+                      this.compBPToPixels.true_orientation[block.id] = this.createCompScaleForBlock(block, 'true_orientation');
+                    });
 
                     // zoom the browser to same section
                     d3.select('#browser')
@@ -567,7 +569,10 @@ export class BlockViewBrowserComponent {
                    this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
 
                    // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-                   this.blocks.forEach(block => this.createCompScaleForBlock(block));
+                   this.blocks.forEach(block => {
+                     this.compBPToPixels.match_orientation[block.id] = this.createCompScaleForBlock(block, 'match_orientation');
+                     this.compBPToPixels.true_orientation[block.id] = this.createCompScaleForBlock(block, 'true_orientation');
+                   });
 
                    // get the start and end pixel and bp points of the current interval
                    let pxExtents: Array<number> = this.refBPToPixels.range().map(t.invertX, t);
@@ -648,21 +653,12 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Creates two scaling functions, one for compBPToPixels' 'match_orientation' dictionary and one for it's 'true_orientation'
-   * dictionary; the core difference between the two dictionaries is that 'match_orientation' contains scales from the
-   * 'match_orientation' comp locations from the syntenic block data (meaning that if the orientation doesn't match, the start
-   * value will be greater than the end value) and 'true_orientation' contains scales from the 'true_orientation' comp locations
-   * from the syntenic block data (meaning that the start value will be less than the end value, regardless of orientation)
-   * @param {SyntenyBlock} block - the block to create the scales for
+   * Returns a scaling function for the specified block and orientation mode
+   * @param {SyntenyBlock} block - the block to create the scale for
+   * @param {string} orientationKey - the orientation mode currently in use ('match_orientation' or 'true_orientation')
    */
-  private createCompScaleForBlock(block: SyntenyBlock): void {
-    this.compBPToPixels.match_orientation[block.id] = d3.scaleLinear()
-                                                        .domain(this.getCompScaleDomain(block, 'match_orientation'))
-                                                        .range(this.getCompScaleRange(block));
-
-    this.compBPToPixels.true_orientation[block.id] = d3.scaleLinear()
-                                                       .domain(this.getCompScaleDomain(block, 'true_orientation'))
-                                                       .range(this.getCompScaleRange(block));
+  private createCompScaleForBlock(block: SyntenyBlock, orientationKey: string): ScaleLinear<number, number> {
+    return d3.scaleLinear().domain(this.getCompScaleDomain(block, orientationKey)).range(this.getCompScaleRange(block))
   }
 
   /**

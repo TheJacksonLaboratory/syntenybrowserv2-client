@@ -145,11 +145,11 @@ export class GenomeViewComponent implements OnInit {
    */
   getChrBandPath(radiiDict: any, genomeMap: GenomeMap, chr: string, genome: any): string {
     return this.getBandPathCommand(genomeMap.convertBPToCartesian(chr, 0, radiiDict.ringInner),
-                                  genomeMap.convertBPToCartesian(chr, genome[chr], radiiDict.ringInner),
-                                  genomeMap.convertBPToCartesian(chr, 0, radiiDict.ringOuter),
-                                  genomeMap.convertBPToCartesian(chr, genome[chr], radiiDict.ringOuter),
-                                  radiiDict.ringInner,
-                                  radiiDict.ringOuter);
+                                   genomeMap.convertBPToCartesian(chr, genome[chr], radiiDict.ringInner),
+                                   genomeMap.convertBPToCartesian(chr, 0, radiiDict.ringOuter),
+                                   genomeMap.convertBPToCartesian(chr, genome[chr], radiiDict.ringOuter),
+                                   radiiDict.ringInner,
+                                   radiiDict.ringOuter);
   }
 
   /**
@@ -160,11 +160,11 @@ export class GenomeViewComponent implements OnInit {
    */
   getBlockBandPath(radiiDict: any, genomeMap: GenomeMap, block: SyntenyBlock): string {
     return this.getBandPathCommand(genomeMap.convertBPToCartesian(block.ref_chr, block.ref_start, radiiDict.ringInner),
-                                  genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radiiDict.ringInner),
-                                  genomeMap.convertBPToCartesian(block.ref_chr, block.ref_start, radiiDict.ringOuter),
-                                  genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radiiDict.ringOuter),
-                                  radiiDict.ringInner,
-                                  radiiDict.ringOuter);
+                                   genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radiiDict.ringInner),
+                                   genomeMap.convertBPToCartesian(block.ref_chr, block.ref_start, radiiDict.ringOuter),
+                                   genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radiiDict.ringOuter),
+                                   radiiDict.ringInner,
+                                   radiiDict.ringOuter);
   }
 
   /**
@@ -179,9 +179,8 @@ export class GenomeViewComponent implements OnInit {
     let compStart = genomeMap.convertBPToCartesian(block.comp_chr, block.comp_start, radius);
     let compEnd = genomeMap.convertBPToCartesian(block.comp_chr, block.comp_end, radius);
 
-    return 'M ' + refStart.x + ' ' + refStart.y + ' A 205 205 0 0 1 ' + refEnd.x + ' ' + refEnd.y +
-           ' Q 0 0 ' + compEnd.x + ' ' + compEnd.y + ' A 205 205 0 0 1 ' + compStart.x + ' ' + compStart.y +
-           ' Q 0 0 ' + refStart.x + ' ' + refStart.y + ' Z';
+    return `M${refStart.x},${refStart.y}A205,205 0 0,1 ${refEnd.x},${refEnd.y}Q0,0 ${compEnd.x},${compEnd.y}
+            A 205,205 0 0,1${compStart.x},${compStart.y}Q0,0 ${refStart.x},${refStart.y}Z`;
   }
 
   /**
@@ -195,9 +194,8 @@ export class GenomeViewComponent implements OnInit {
    */
   private getBandPathCommand(inStrt: CartesianCoordinate, inEnd: CartesianCoordinate, outStrt: CartesianCoordinate,
                              outEnd: CartesianCoordinate, inRad: number, outRad: number): string {
-    return 'M ' + inStrt.x + ' ' + inStrt.y + ' A ' + inRad + ' ' + inRad + ' 0 0 1 ' + inEnd.x + ' ' + inEnd.y +
-           ' L ' + outEnd.x + ' ' + outEnd.y + ' A ' + outRad + ' ' + outRad + ' 0 0 0 ' + outStrt.x + ' ' + outStrt.y +
-           ' Z';
+    return `M${inStrt.x},${inStrt.y}A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}L${outEnd.x},${outEnd.y}
+            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
   }
 
   /**
@@ -212,7 +210,7 @@ export class GenomeViewComponent implements OnInit {
 
     // a few small manual adjustments for the x and y values as I notice they don't center with the
     // rings as well when not rotated; this is probably due to not rotating them with the bands
-    return 'translate(' + (pos.x - 2) + ', ' + (pos.y + 4) + ') ';
+    return `translate(${pos.x - 2}, ${pos.y + 4})`;
   }
 
   /**
