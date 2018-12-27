@@ -209,11 +209,11 @@
 
     <!-- Progress bar and loading overlay -->
     <g *ngIf="!(blocks && referenceGenes && comparisonGenes)" id="loading-overlay">
-      <rect width="1200" height="500"></rect>
+      <rect [attr.width]="width" [attr.height]="height"></rect>
 
-      <g id="progress-bar" [attr.transform]="translate(40, 250)">
-        <rect width="1120" height="5" rx="2" ry="2"></rect>
-        <rect [attr.width]="progress * 1120" height="5" rx="2" ry="2"></rect>
+      <g id="progress-bar" [attr.transform]="translate(width * 0.05, height / 2)">
+        <rect [attr.width]="width * 0.9" height="5" rx="2" ry="2" fill-opacity="0.4"></rect>
+        <rect [attr.width]="progress * (width * 0.9)" height="5" rx="2" ry="2" fill-opacity="0.7"></rect>
       </g>
     </g>
   </svg>

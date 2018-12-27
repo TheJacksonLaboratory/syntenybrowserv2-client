@@ -412,8 +412,8 @@ export class BlockViewBrowserComponent {
                  this.blockEndPts[block.ref_end] = blockContent;
 
                  // create the comparison scaling function for the current block using new dictionary object
-                 let matchScale = this.createCompScaleForBlock(block, 'match_orientation');
-                 let trueScale = this.createCompScaleForBlock(block, 'true_orientation');
+                 let matchScale = this.createCompScaleForBlock(blockContent, 'match_orientation');
+                 let trueScale = this.createCompScaleForBlock(blockContent, 'true_orientation');
 
                  this.compBPToPixels.match_orientation[block.id] = matchScale;
                  this.compBPToPixels.true_orientation[block.id] = trueScale;
@@ -435,6 +435,11 @@ export class BlockViewBrowserComponent {
     });
   }
 
+  /**
+   * Gets the genes for the reference chromosome and their homologs within the syntenic regions; forms the list of reference genes,
+   * comparison genes, selected features, and generates homolog IDs
+   * @param {Array<any>} features - the selected features from the genome view
+   */
   private getGenes(features: Array<any>): void {
     this.http.getGenes(this.reference.getID(), this.comparison.getID(), this.chromosome)
              .subscribe(genes => {
@@ -534,7 +539,7 @@ export class BlockViewBrowserComponent {
                     // ignore brush via zoom occurrences
                     if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
 
-                    let s = d3.event.selection;
+                    let s: Array<number> = d3.event.selection;
 
                     // adjust refBPToPixels by scaling start, s[0], and end, s[1], with static scale (used for chromosome view)
                     this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
