@@ -87,6 +87,10 @@ rect.gene {
   fill-opacity: 0.5;
 }
 
+rect.exon {
+  height: 5px;
+}
+
 rect, line {
   shape-rendering: crispEdges;
 }
@@ -121,4 +125,10 @@ text.all-caps {
   fill: #FFF;
   fill-opacity: 0.5;
   stroke: none;
+}
+
+.group-dropdown {
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
 }

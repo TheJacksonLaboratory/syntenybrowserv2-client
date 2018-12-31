@@ -1,4 +1,5 @@
 import {ScaleLinear} from 'd3-scale';
+import {Exon} from './interfaces';
 
 export class Gene {
   start: number;
@@ -11,6 +12,7 @@ export class Gene {
   strand: string;
   type: string;
   blockID: string;
+  transcript: Array<Exon>;
 
   highlighted: boolean = false;
   selected: boolean = false;
@@ -29,6 +31,14 @@ export class Gene {
     this.homologIDs = ids;
     this.blockID = (block) ? block : null;
     this.selected = selected;
+
+    let t = gene.canonical_transcript.map(t => `${t.start_pos}-${t.end_pos}`);
+    let newT: Array<string> = Array.from(new Set(t));
+    this.transcript = newT.map(t => {
+      let coords = t.split('-');
+      return { start: Number(coords[0]), end: Number(coords[1])};
+    })
+
   }
 
   /**
@@ -78,6 +88,10 @@ export class Gene {
    */
   getXPos(scale: ScaleLinear<number, number>, start: number = null): number { return scale((start) ? start : this.start); }
 
+  /**
+   * Returns a central X position (in px) for the gene using the specified scale
+   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
+   */
   getCenterXPos(scale: ScaleLinear<number, number>): number { return scale(this.start + (this.size / 2 )); }
 
   /**
@@ -100,10 +114,28 @@ export class Gene {
   getWidth(scale: ScaleLinear<number, number>): number { return Math.abs(scale(this.end) - scale(this.start)); }
 
   /**
-   * Returns a string to use that generates space-separated class selectors for the group element
-   * TODO: We may be able to remove the concept of homolog ids
+   * Returns the width (in px) of the specified exon using the specified scale
+   * @param {Exon} exon - the exon to calculate the width for
+   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width of the specified exon
    */
-  getHomologClassSelectors(): string { return (this.homologIDs.length > 0) ? 'hom-' + this.homologIDs.join(' hom-') : ''; }
+  getExonWidth(exon: Exon, scale: ScaleLinear<number, number>): number { return Math.abs(scale(exon.end) - scale(exon.start)); }
+
+  /**
+   * Returns an X position (in px) for the specified exon, using the specified scale and gene start position
+   * @param {Exon} exon - the exon to calculate the X position for
+   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
+   * @param {number} geneStart - the (visual) starting position of the comparison gene
+   */
+  getCompExonXPos(exon: Exon, scale: ScaleLinear<number, number>, geneStart: number): number {
+    return (geneStart === this.start) ? Math.abs(scale(exon.start) - scale(geneStart)) : Math.abs(scale(geneStart) - scale(exon.end));
+  }
+
+  /**
+   * Returns the X position (in px) of the specified exon using the specified scale
+   * @param {Exon} exon - the exon to calculate the width for
+   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width of the specified exon
+   */
+  getRefExonXPos(exon: Exon, scale: ScaleLinear<number, number>): number { return Math.abs(scale(exon.start) - scale(this.start)); }
 
   /**
    * Returns the appropriate color of the gene, depending on the status flag states; order is important:

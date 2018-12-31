@@ -1,9 +1,9 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {Species} from '../classes/species';
 import {ApiService} from '../services/api.service';
 import * as d3 from 'd3';
 import {BrowserInterval, ComparisonMapping, ComparisonScaling, Metadata, QTLMetadata, SyntenyBlock} from '../classes/interfaces';
-import {Axis, ScaleLinear} from 'd3';
+import {BrushBehavior, ScaleLinear, ZoomBehavior} from 'd3';
 import {Gene} from '../classes/gene';
 
 @Component({
@@ -25,6 +25,8 @@ export class BlockViewBrowserComponent {
   };
   selectedQTLs: Array<QTLMetadata> = [];
   progress: number = 0;
+  zoom: ZoomBehavior<any, any>;
+  brush: BrushBehavior<any>;
 
   width: number = 1200;
   height: number = 520;
@@ -53,7 +55,7 @@ export class BlockViewBrowserComponent {
   blockOrientation: string = 'match_orientation';
 
 
-  constructor(private http: ApiService, private cd: ChangeDetectorRef) { }
+  constructor(private http: ApiService) { }
 
   /**
    * Renders the block view with the specified reference and comparison species, using the specified color dictionary for the
@@ -107,10 +109,17 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns a list of the reference genes that are in the current interval
+   * Returns a list of the reference genes that are in the current browser's view
    */
   getRefGenesInView(): Array<Gene> {
-    return this.referenceGenes.filter(gene => this.isInView(gene));
+    return this.referenceGenes.filter(gene => this.isRefInView(gene));
+  }
+
+  /**
+   * Returns a list of the comparison genes that are in the current browser's view
+   */
+  getCompGenesInView(): Array<Gene> {
+    return this.comparisonGenes.filter(gene => this.isCompInView(gene));
   }
 
   /**
@@ -232,12 +241,107 @@ export class BlockViewBrowserComponent {
   }
 
   /**
+   * Returns true/false if at least 1 QTL or gene is selected
+   */
+  featuresAreSelected(): boolean {
+    return this.selectedQTLs.length > 0 || this.selectedFeatures.reference.length > 0;
+  }
+
+  /**
    * Returns a translate command in the form of a string to be used in the template for custom translations
    * @param {number} dx - the number of pixels horizontally away from (0, 0), the top left of parent container
    * @param {number} dy - the number of pixels vertically away from (0, 0), the top left of parent container
    */
   translate(dx: number, dy: number): string {
     return `translate(${dx}, ${dy})`;
+  }
+
+  /**
+   * Zoomes the view in by a total of 30%, assuming the interval width would be at least the minimum
+   * interval size; if not, zoom down to the minimum interval size
+   */
+  zoomIn(): void {
+    let basesZoom = this.interval.width * 0.15;
+
+    if(this.interval.width * 0.7 >= this.minimumIntervalSize) {
+      this.brushView(this.interval.start + basesZoom, this.interval.end - basesZoom);
+    } else {
+      let diff = (this.interval.width - this.minimumIntervalSize) / 2;
+      this.brushView(this.interval.start + diff, this.interval.end - diff);
+    }
+  }
+
+  /**
+   * Zooms the view out by a total of 30%, assuming boundaries aren't hit yet; if zoom start or
+   * end would go above or below chromosome extents, zoom only to the extent on that edge
+   */
+  zoomOut(): void {
+    let basesZoom = this.interval.width * 0.15;
+
+    // if the new width would still be a valid width, check for start and end points
+    if(this.interval.width * 1.3 <= this.getRefChrSize()) {
+      // if neither edge conflicts with chromosome start or end, zoom out 15% on each end
+      if(this.interval.start - basesZoom >= 0 && this.interval.end + basesZoom <= this.getRefChrSize()) {
+        this.brushView(this.interval.start - basesZoom, this.interval.end + basesZoom);
+      // if only ew start edge of view is a problem, start = chromosome start, increment end
+      } else if(this.interval.start - basesZoom < 0) {
+        this.brushView(0, this.interval.end + basesZoom);
+      // if only new end edge of view is a problem, end = chromosome end, decrement start
+      } else if(this.interval.end + basesZoom > this.getRefChrSize()) {
+        this.brushView(this.interval.start - basesZoom, this.getRefChrSize());
+      }
+    } else {
+      // get the difference of widths; divide by 2 to get the number for each edge
+      let diff = (this.getRefChrSize() - this.interval.width) / 2;
+
+      // if both edges are within the boundaries of the chromsome, zoom out by diff on each edge
+      if(this.interval.start - diff >= 0 && this.interval.end + diff <= this.getRefChrSize()) {
+        this.brushView(this.interval.start - diff, this.interval.end + diff);
+      // if only new start edge of view is a problem, start = chromsome start, increment end by 2 * diff
+      } else if(this.interval.start - diff < 0) {
+        this.brushView(0, this.interval.end + (2 * diff));
+      // if only new end edge of view is a problem, end = chromosome end,decrement start by 2 * diff
+      } else if(this.interval.end + diff > this.getRefChrSize()) {
+        this.brushView(this.interval.start - (2 * diff), this.getRefChrSize());
+      }
+    }
+  }
+
+  /**
+   * Moves the view 15% of the current width to the left without changing the width
+   */
+  panLeft(): void {
+    let basesPan = this.interval.width * 0.15;
+
+    if(this.interval.start - basesPan >= 0) {
+      this.brushView(this.interval.start - basesPan, this.interval.end - basesPan);
+    } else {
+      this.brushView(0, this.interval.end - this.interval.start);
+    }
+  }
+
+  /**
+   * Moves the view 15% of the current width to the right without changing the width
+   */
+  panRight(): void {
+    let basesPan = this.interval.width * 0.15;
+
+    if(this.interval.end + basesPan <= this.getRefChrSize()) {
+      this.brushView(this.interval.start + basesPan, this.interval.end + basesPan);
+    } else {
+      let diff = this.getRefChrSize() - this.interval.end;
+      this.brushView(this.interval.start + diff, this.getRefChrSize());
+    }
+  }
+
+  /**
+   * Changes the view (moves the brush, which also zooms the browser) to the specified start and end points
+   * @param {number} start - the starting position of the new interval (in bp)
+   * @param {number} end - the ending position of the new interval (in bp)
+   */
+  brushView(start: number, end: number): void {
+    d3.select('#chr-view-inv-cover')
+      .call(this.brush.move, [this.staticRefBPToPixels(start), this.staticRefBPToPixels(end)]);
   }
 
   /**
@@ -357,19 +461,9 @@ export class BlockViewBrowserComponent {
    */
   getOrientationIndPathCommand(block: SyntenyBlock): string {
     return `M${this.refBPToPixels(block.ref_start)},${this.trackHeight}` +
-           `L${this.refBPToPixels(block.ref_end)},${this.trackHeight + 39}` +
+           `L${this.refBPToPixels(block.ref_end)},${this.trackHeight + 30}` +
            `M${this.refBPToPixels(block.ref_end)},${this.trackHeight}` +
-           `L${this.refBPToPixels(block.ref_start)},${this.trackHeight + 39}Z`;
-  }
-
-  /**
-   * Returns true/false if the specified gene/features has been selected (shown in red) from the specified genome's
-   * list of highlighted features
-   * @param {Gene} gene - gene to check if it should be selected (shown in red)
-   * @param {string} type - lookup key to search for features ('reference' if ref genome, 'comparison' if comp genome)
-   */
-  isFeatureSelected(gene: any, type: string): boolean {
-    return this.selectedFeatures[type].map(feature => feature.gene_symbol).indexOf(gene.gene_symbol) >= 0;
+           `L${this.refBPToPixels(block.ref_start)},${this.trackHeight + 30}Z`;
   }
 
   /**
@@ -533,7 +627,7 @@ export class BlockViewBrowserComponent {
 
           ~ A.L.
      */
-    let brush = d3.brushX()
+    this.brush = d3.brushX()
                   .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
                   .on('brush', () => {
                     // ignore brush via zoom occurrences
@@ -552,7 +646,7 @@ export class BlockViewBrowserComponent {
 
                     // zoom the browser to same section
                     d3.select('#browser')
-                      .call(zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
+                      .call(this.zoom.transform, d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0));
 
                     this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
 
@@ -560,7 +654,7 @@ export class BlockViewBrowserComponent {
                     this.renderBrowserAxis(s[0], browserAxis);
                   });
 
-    let zoom = d3.zoom()
+    this.zoom = d3.zoom()
                  .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
                  .translateExtent([[0, 0], [this.width, this.height]])
                  .extent([[0, 0], [this.width, this.height]])
@@ -584,7 +678,7 @@ export class BlockViewBrowserComponent {
                    let bpExtents: Array<number> = this.refBPToPixels.domain();
 
                    // move the brush in the chromosome view to match
-                   d3.select('#chr-view-inv-cover').call(brush.move, pxExtents);
+                   d3.select('#chr-view-inv-cover').call(this.brush.move, pxExtents);
 
                    // update the interval values
                    this.setInterval(bpExtents[0], bpExtents[1]);
@@ -595,12 +689,12 @@ export class BlockViewBrowserComponent {
 
     // bind the zoom behavior
     d3.select('#browser')
-      .call(zoom);
+      .call(this.zoom);
 
     // bind the brush behavior and set the brush to match the current interval (either the entire chr or the focused section)
     d3.select('#chr-view-inv-cover')
-      .call(brush)
-      .call(brush.move, [this.staticRefBPToPixels(this.interval.start), this.staticRefBPToPixels(this.interval.end)]);
+      .call(this.brush)
+      .call(this.brush.move, [this.staticRefBPToPixels(this.interval.start), this.staticRefBPToPixels(this.interval.end)]);
   }
 
   /**
@@ -649,12 +743,22 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns true/false if the specified (reference) gene is located within the current interval
+   * Returns true/false if the specified reference gene is located within the current view
    * @param {Gene} gene - the specified gene to check if it's in view
    */
-  private isInView(gene: Gene): boolean {
-    return (gene.start >= this.interval.start && gene.start <= this.interval.end) ||
-           (gene.end <= this.interval.end && gene.end >= this.interval.start)
+  private isRefInView(gene: Gene): boolean {
+    let xPos = gene.getXPos(this.refBPToPixels);
+    return !(xPos + gene.getWidth(this.refBPToPixels) < 0 || xPos > this.width);
+  }
+
+  /**
+   * Returns true/false if the specified comparison gene is located within the current view
+   * @param {Gene} gene - the specified gene to check if it's in view
+   */
+  private isCompInView(gene: Gene): boolean {
+    let scale = this.getScale(gene);
+    let xPos = gene.getXPos(scale, this.getStart(gene));
+    return !(xPos + gene.getWidth(scale) < 0 || xPos > this.width);
   }
 
   /**

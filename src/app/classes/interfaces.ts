@@ -117,3 +117,8 @@ export interface ComparisonScaling {
   match_orientation: any;
   true_orientation: any;
 }
+
+export interface Exon {
+  start: number;
+  end: number;
+}

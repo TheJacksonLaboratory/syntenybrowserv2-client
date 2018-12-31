@@ -1,5 +1,43 @@
 <div *ngIf="reference && comparison" id="browser-container">
   <h2>{{ reference.commonName }}, Chr{{ chromosome }}</h2>
+
+  <div class="btn-group">
+    <button class="btn btn-outline" (click)="panLeft()" [disabled]="!interval || interval.start === 0">
+      <clr-icon shape="rewind"></clr-icon> Pan Left
+    </button>
+    <button class="btn btn-outline" (click)="zoomOut()" [disabled]="!interval || interval.width === getRefChrSize()">
+      <clr-icon shape="zoom-out"></clr-icon> Zoom Out
+    </button>
+    <clr-dropdown *ngIf="featuresAreSelected()">
+      <button type="button" class="btn btn-outline group-dropdown" clrDropdownTrigger [disabled]="!interval">
+        Jump to Feature
+        <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+        <div *ngIf="this.selectedFeatures.reference.length > 0">
+          <label class="dropdown-header">Genes</label>
+          <button *ngFor="let gene of selectedFeatures.reference" type="button" clrDropdownItem>
+            {{ gene.symbol }}
+          </button>
+        </div>
+        <div *ngIf="selectedQTLs.length > 0 && this.selectedFeatures.reference.length > 0" class="dropdown-divider"></div>
+        <div *ngIf="selectedQTLs.length > 0">
+          <label class="dropdown-header">QTLs</label>
+          <button *ngFor="let qtl of selectedQTLs" type="button" clrDropdownItem>
+            {{ qtl.qtl_symbol }}
+          </button>
+        </div>
+
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <button class="btn btn-outline" (click)="zoomIn()" [disabled]="!interval || interval.width === minimumIntervalSize">
+      <clr-icon shape="zoom-in"></clr-icon> Zoom In
+    </button>
+    <button class="btn btn-outline" (click)="panRight()" [disabled]="!interval || interval.end === getRefChrSize()">
+      <clr-icon shape="fast-forward"></clr-icon> Pan Right
+    </button>
+  </div>
+
   <svg class="block-view" [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="xMinYMin meet">
     <!-- Chromosome View -->
     <g id="chromosome-view">
@@ -8,7 +46,7 @@
             [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 8, 5)">
       </path>
 
-      <!-- Chromosome view syntenic blocks (and background)-->
+      <!-- Chromosome view syntenic blocks (and background) -->
       <g id="chr-view-blocks">
         <!-- Syntenic blocks -->
         <rect *ngFor="let block of blocks" [attr.transform]="translate(staticRefBPToPixels(block.ref_start), 15)"
@@ -40,11 +78,7 @@
     <!-- Synteny browser -->
     <g id="browser" [attr.transform]="translate(0, browserOffset)">
       <!-- Backgrounds -->
-      <rect id="ref-bg" class="bg" [attr.transform]="translate(0, -50)" [attr.height]="trackHeight + 70"></rect>
-      <rect id="comp-bg" class="bg" [attr.transform]="translate(0, trackHeight + 20)" [attr.height]="trackHeight + 65"></rect>
-      <path class="hor-rule" [attr.d]="getHLinePath(trackHeight + 20, width)"></path>
-      <text class="all-caps" [attr.transform]="translate(0, trackHeight + 16)">{{ reference.commonName }}</text>
-      <text class="all-caps" [attr.transform]="translate(0, trackHeight + 36)">{{ comparison.commonName }}</text>
+      <text class="all-caps" [attr.transform]="translate(2, trackHeight + 16)">{{ reference.commonName }}</text>
 
       <rect class="trans-bg bg" [attr.height]="(2 * trackHeight) + 40"></rect>
 
@@ -95,6 +129,13 @@
 
             <!-- Gene -->
             <rect class="gene" [attr.width]="gene.getWidth(refBPToPixels)" [ngStyle]="{ 'fill': gene.getColor() }"></rect>
+
+            <!-- Transcript -->
+            <g *ngIf="interval.width <= 5000000">
+              <rect *ngFor="let exon of gene.transcript" class="exon" [ngStyle]="{ 'fill': gene.getColor() }"
+                    [attr.width]="gene.getExonWidth(exon, refBPToPixels)"
+                    [attr.transform]="translate(gene.getRefExonXPos(exon, refBPToPixels), 0)"></rect>
+            </g>
           </g>
         </g>
       </g>
@@ -105,7 +146,7 @@
       </g>
 
       <!-- Comparison chromosome track -->
-      <g id="comparison-genome" [attr.transform]="translate(0, trackHeight + 40)">
+      <g id="comparison-genome" [attr.transform]="translate(0, trackHeight + 30)">
         <!-- Comparison track syntenic blocks -->
         <rect *ngFor="let block of blocks" class="comparison" [attr.x]="refBPToPixels(block.ref_start)"
               [attr.width]="getBlockWidth(block)" [attr.height]="trackHeight"
@@ -114,7 +155,7 @@
 
         <!-- Comparison genes -->
         <g *ngIf="comparisonGenes && compBPToPixels && blocks" id="comparison-genes">
-          <g *ngFor="let gene of comparisonGenes" (mouseenter)="highlightComp(gene)" (mouseleave)="unhighlight()"
+          <g *ngFor="let gene of getCompGenesInView()" (mouseenter)="highlightComp(gene)" (mouseleave)="unhighlight()"
              [attr.transform]="translate(gene.getXPos(getScale(gene), getStart(gene)), gene.getYPos(trackHeight))">
             <!-- Gene label -->
             <text *ngIf="gene.hasVisibleLabel()" [ngStyle]="{ 'fill': gene.getColor() }">
@@ -123,6 +164,13 @@
 
             <!-- Gene -->
             <rect class="gene" [attr.width]="gene.getWidth(getScale(gene))" [ngStyle]="{ 'fill': gene.getColor() }"></rect>
+
+            <!-- Transcript -->
+            <g *ngIf="interval.width <= 5000000">
+              <rect *ngFor="let exon of gene.transcript" class="exon" [ngStyle]="{ 'fill': gene.getColor() }"
+                    [attr.width]="gene.getExonWidth(exon, getScale(gene))"
+                    [attr.transform]="translate(gene.getCompExonXPos(exon, getScale(gene), getStart(gene)), 0)"></rect>
+            </g>
           </g>
         </g>
 
@@ -169,10 +217,12 @@
         <path [attr.d]="getVLinePath(width, trackHeight + 43, -8)"></path>
       </g>
 
+      <text class="all-caps" [attr.transform]="translate(2, 2*trackHeight + 54)">{{ comparison.commonName }}</text>
+
       <!-- Interval coordinates for current view extents in comparison positions -->
-      <g *ngIf="interval" id="comparison-interval-coordinates" [attr.transform]="translate(0, 2*trackHeight + 60)">
+      <g *ngIf="interval" id="comparison-interval-coordinates" [attr.transform]="translate(0, 2*trackHeight + 65)">
         <!-- Vertical line extending start point of comparison interval -->
-        <path [attr.d]="getVLinePath(0, -(trackHeight + 21), 1)"></path>
+        <path [attr.d]="getVLinePath(0, -(trackHeight + 36), 1)"></path>
 
         <!-- Start position -->
         <text [attr.transform]="translate(2, 0)">
@@ -185,7 +235,7 @@
         </text>
 
         <!-- Vertical line extending end point of comparison interval -->
-        <path [attr.d]="getVLinePath(width, -(trackHeight + 21), 1)"></path>
+        <path [attr.d]="getVLinePath(width, -(trackHeight + 36), 1)"></path>
       </g>
     </g>
 
