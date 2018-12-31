@@ -257,6 +257,15 @@ export class BlockViewBrowserComponent {
   }
 
   /**
+   * Changes the current browser view the location of the specified feature (gene or QTL) with a margin
+   * of 1 Mb on both sides or the chromosome edge, as applicable
+   * @param {any} feature - the feature to jump the location to
+   */
+  jumpTo(feature: any): void {
+    this.brushView(Math.max(0, feature.start - 1000000), Math.min(this.getRefChrSize(), feature.end + 1000000));
+  }
+
+  /**
    * Zoomes the view in by a total of 30%, assuming the interval width would be at least the minimum
    * interval size; if not, zoom down to the minimum interval size
    */

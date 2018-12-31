@@ -16,14 +16,14 @@
       <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
         <div *ngIf="this.selectedFeatures.reference.length > 0">
           <label class="dropdown-header">Genes</label>
-          <button *ngFor="let gene of selectedFeatures.reference" type="button" clrDropdownItem>
+          <button *ngFor="let gene of selectedFeatures.reference" type="button" clrDropdownItem (click)="jumpTo(gene)">
             {{ gene.symbol }}
           </button>
         </div>
         <div *ngIf="selectedQTLs.length > 0 && this.selectedFeatures.reference.length > 0" class="dropdown-divider"></div>
         <div *ngIf="selectedQTLs.length > 0">
           <label class="dropdown-header">QTLs</label>
-          <button *ngFor="let qtl of selectedQTLs" type="button" clrDropdownItem>
+          <button *ngFor="let qtl of selectedQTLs" type="button" clrDropdownItem (click)="jumpTo(qtl)">
             {{ qtl.qtl_symbol }}
           </button>
         </div>
