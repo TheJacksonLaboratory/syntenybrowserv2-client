@@ -122,3 +122,5 @@ export interface Exon {
   start: number;
   end: number;
 }
+
+export interface TooltipContent extends Object {}

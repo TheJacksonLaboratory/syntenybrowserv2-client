@@ -1,5 +1,6 @@
 import {ScaleLinear} from 'd3-scale';
 import {Exon} from './interfaces';
+import * as d3 from 'd3';
 
 export class Gene {
   start: number;
@@ -18,6 +19,8 @@ export class Gene {
   selected: boolean = false;
   filtered: boolean = false;
 
+  format: Function = d3.format(',');
+
   constructor(gene: any, ids: Array<number>, selected: boolean, block: string = null) {
     this.start = (gene.start_pos) ? gene.start_pos : gene.gene_start_pos;
     this.end = (gene.end_pos) ? gene.end_pos : gene.gene_end_pos;
@@ -25,7 +28,7 @@ export class Gene {
     this.symbol = gene.gene_symbol;
     this.id = gene.gene_id;
     this.chr = gene.gene_chr;
-    this.strand = gene.strand;
+    this.strand = (gene.strand) ? gene.strand : gene.gene_strand;
     this.type = gene.type;
 
     this.homologIDs = ids;
@@ -154,4 +157,15 @@ export class Gene {
       return '#000';
     }
   }
+
+  getTooltipGeneData(): object {
+    return {
+      'Gene ID': this.id,
+      'Location': `${this.format(this.start)}bp - ${this.format(this.end)}bp`,
+      '# of Homologs': this.homologIDs.length,
+      'Strand': this.strand
+    }
+  }
+
+
 }

@@ -12,6 +12,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
+import { TooltipComponent } from './tooltip/tooltip.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { BlockViewBrowserComponent } from './block-view-browser/block-view-brows
     SpeciesSelectionComponent,
     FeatureSelectionComponent,
     GenomeViewComponent,
-    BlockViewBrowserComponent
+    BlockViewBrowserComponent,
+    TooltipComponent
   ],
   imports: [
     BrowserModule,

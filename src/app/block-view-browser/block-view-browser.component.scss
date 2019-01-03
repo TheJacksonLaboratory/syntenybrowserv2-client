@@ -132,3 +132,13 @@ text.all-caps {
   border-left: none !important;
   border-right: none !important;
 }
+
+#tt {
+  position: absolute;
+  z-index: 1000;
+  background: #FFF;
+  border: #999;
+  border-radius: 2px;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2), 0 4px 15px 0 rgba(0, 0, 0, 0.19);
+  color: #333;
+}

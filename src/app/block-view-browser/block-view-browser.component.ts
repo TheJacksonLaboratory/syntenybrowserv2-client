@@ -1,10 +1,11 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Species} from '../classes/species';
 import {ApiService} from '../services/api.service';
 import * as d3 from 'd3';
 import {BrowserInterval, ComparisonMapping, ComparisonScaling, Metadata, QTLMetadata, SyntenyBlock} from '../classes/interfaces';
 import {BrushBehavior, ScaleLinear, ZoomBehavior} from 'd3';
 import {Gene} from '../classes/gene';
+import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-block-view-browser',
@@ -34,7 +35,7 @@ export class BlockViewBrowserComponent {
   browserOffset = 175;
   legendOffset = 460;
   trackHeight = 100;
-  minimumIntervalSize = 500;
+  minimumIntervalSize = 3000;
 
   interval: BrowserInterval;
   blocks: Array<SyntenyBlock>;
@@ -53,6 +54,16 @@ export class BlockViewBrowserComponent {
     true_orientation: {}
   };
   blockOrientation: string = 'match_orientation';
+
+  showTooltip: boolean = false;
+  tooltipCoords: Array<string> = ['0px', '0px'];
+  tooltipTypeDimensions = {
+    feature: ['200px', '110px'],
+    block: ['200px', '80px']
+  };
+  tooltipDimensions: Array<string> = ['0px', '0px'];
+  format: Function = d3.format(',');
+  @ViewChild('tooltip') tooltip: TooltipComponent;
 
 
   constructor(private http: ApiService) { }
@@ -211,9 +222,10 @@ export class BlockViewBrowserComponent {
    * Returns the absolute value of the specified QTL based on the specified scale
    * @param {QTLMetadata} qtl - the specified QTL to calcule the width of
    * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width
+   * @param {number} defaultSize - the width to use if the scaled width is less than (i.e. 1 or 2 to make the QTL visible)
    */
-  getQTLWidth(qtl: QTLMetadata, scale: ScaleLinear<number, number>): number {
-    return Math.abs(scale(qtl.end) - scale(qtl.start));
+  getQTLWidth(qtl: QTLMetadata, scale: ScaleLinear<number, number>, defaultSize: number): number {
+    return Math.max(defaultSize, Math.abs(scale(qtl.end) - scale(qtl.start)));
   }
 
   /**
@@ -403,31 +415,108 @@ export class BlockViewBrowserComponent {
   /**
    * Highlights all comparison genes that match any of the specified (comparison) gene's homolog IDs
    * @param {Gene} gene - the comparison gene that needs to have its reference homologs highlighted
+   * @param {MouseEvent} event - the mouseover event for highlighting
+   * @param {boolean} metadataOnly - a default false boolean indicating whether the the highlighting
+   *                                 is coming from the overview or browser
    */
-  highlightRef(gene: Gene): void {
-    gene.highlight();
+  highlightRefGene(gene: Gene, event: MouseEvent, metadataOnly: boolean = false): void {
+    if(!metadataOnly) {
+      gene.highlight();
 
-    // highlight gene's homologs comparison
-    this.comparisonGenes.filter(g => g.homologIDs.indexOf(gene.homologIDs[0]) >= 0).forEach(g => g.highlight());
+      // highlight gene's homologs comparison
+      this.comparisonGenes.filter(g => g.homologIDs.indexOf(gene.homologIDs[0]) >= 0).forEach(g => g.highlight());
+    }
+
+    // generate the tooltip for the gene
+    this.showTooltip = true;
+    this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 10}px`];
+    this.tooltipDimensions = this.tooltipTypeDimensions.feature;
+    this.tooltip.display(gene.getTooltipGeneData(), gene.symbol);
   }
 
   /**
    * Highlights the specified (comparison) gene and all reference homolog genes
    * @param {Gene} gene - the comparison gene that needs to have its reference homologs highlighted
+   * @param {MouseEvent} event - the mouseover event for highlighting
+   * @param {boolean} metadataOnly - a default false boolean indicating whether the the highlighting
+   *                                 is coming from the overview or browser
    */
-  highlightComp(gene: Gene): void {
-    gene.highlight();
+  highlightCompGene(gene: Gene, event: MouseEvent, metadataOnly: boolean = false): void {
+    if(!metadataOnly) {
+      gene.highlight();
 
-    // highlight gene's homologs in the reference
-    this.referenceGenes.filter(g => gene.homologIDs.indexOf(g.homologIDs[0]) >= 0).forEach(g => g.highlight());
+      // highlight gene's homologs in the reference
+      this.referenceGenes.filter(g => gene.homologIDs.indexOf(g.homologIDs[0]) >= 0).forEach(g => g.highlight());
+    }
+
+    // generate the tooltip for the gene
+    this.showTooltip = true;
+    this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 10}px`];
+    this.tooltipDimensions = this.tooltipTypeDimensions.feature;
+    this.tooltip.display(gene.getTooltipGeneData(), gene.symbol);
   }
 
   /**
    * Marks all reference and comparison genes that are currently highlighted as unhighighlighted
+   * @param {boolean} metadataOnly - a default false boolean indicating whether the the highlighting
+   *                                 is coming from the overview or browser
    */
-  unhighlight(): void {
-    this.comparisonGenes.filter(gene => gene.highlighted).forEach(gene => gene.unhighlight());
-    this.referenceGenes.filter(gene => gene.highlighted).forEach(gene => gene.unhighlight());
+  unhighlightGene(metadataOnly: boolean = false): void {
+    if(!metadataOnly) {
+      // remove highlighted status of any genes marked as highlighted
+      this.comparisonGenes.filter(gene => gene.highlighted).forEach(gene => gene.unhighlight());
+      this.referenceGenes.filter(gene => gene.highlighted).forEach(gene => gene.unhighlight());
+    }
+
+    // hide the tooltip for the gene
+    this.hideTooltip();
+  }
+
+  highlightBlock(block: SyntenyBlock, event: MouseEvent, isComp: boolean = false): void {
+    // if the block is small enough to not have its block coordinates showing, generate a tooltip
+    if(this.getBlockWidth(block) <= 125) {
+      this.showTooltip = true;
+      this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 40}px`];
+      this.tooltipDimensions = this.tooltipTypeDimensions.block;
+      this.tooltip.display(this.getTooltipBlockData(block, isComp), isComp ? this.comparison.name : this.reference.name)
+    }
+  }
+
+  hideTooltip(): void {
+    this.showTooltip = false;
+    this.tooltip.clear();
+  }
+
+  highlightQTL(qtl: QTLMetadata, event: MouseEvent): void {
+    this.showTooltip = true;
+    this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 40}px`];
+    this.tooltipDimensions = this.tooltipTypeDimensions.block;
+    this.tooltip.display(this.getTooltipQTLData(qtl), qtl.qtl_symbol)
+  }
+
+  getTooltipBlockData(block: SyntenyBlock, isComp: boolean): object {
+    return {
+      'Chromsome': isComp ? block.comp_chr : block.ref_chr,
+      'Location': isComp ? `${this.format(block.true_orientation.comp_start)}bp - ${this.format(block.true_orientation.comp_end)}bp` :
+                         `${this.format(block.ref_start)}bp - ${this.format(block.ref_end)}bp`,
+    };
+  }
+
+  getTooltipQTLData(qtl: QTLMetadata): object {
+    return {
+      'QTL ID': qtl.qtl_id,
+      'Location': `${this.format(qtl.start)}bp - ${this.format(qtl.end)}bp`
+    }
+  }
+
+  getTooltipStyles(): object {
+    return {
+      left: this.tooltipCoords[0],
+      top: this.tooltipCoords[1],
+      display: this.showTooltip ? 'initial' : 'none',
+      width: this.tooltipDimensions[0],
+      height: this.tooltipDimensions[1]
+    }
   }
 
   /**
@@ -577,9 +666,13 @@ export class BlockViewBrowserComponent {
                      });
                      return new Gene(gene, [i], true);
                    }
-                 }
 
-                 return new Gene(gene, [i], false);
+                   return new Gene(gene, [i], false);
+                 } else {
+                   let featureSymbols = features.map(feature => feature.gene_symbol);
+
+                   return new Gene(gene, [], featureSymbols.indexOf(gene.gene_symbol) >= 0);
+                 }
                });
 
       this.progress += 0.25;

@@ -16,7 +16,6 @@ export class AppComponent implements OnInit {
   @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
   @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
   @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
-  @ViewChild('blockViewContainer') bvContainer: ElementRef;
   @ViewChild(BlockViewBrowserComponent) blockViewBrowser: BlockViewBrowserComponent;
 
   refSpecies: Species;
