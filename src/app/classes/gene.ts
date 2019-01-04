@@ -161,6 +161,7 @@ export class Gene {
   getTooltipGeneData(): object {
     return {
       'Gene ID': this.id,
+      'Chromosome': this.chr,
       'Location': `${this.format(this.start)}bp - ${this.format(this.end)}bp`,
       '# of Homologs': this.homologIDs.length,
       'Strand': this.strand

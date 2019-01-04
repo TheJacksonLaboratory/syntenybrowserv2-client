@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../services/api.service';
 import {Species} from '../classes/species';
 import {GenomeMap} from '../classes/genome-map';
 import {CartesianCoordinate, Metadata, SelectedFeatures, SyntenyBlock} from '../classes/interfaces';
+import * as d3 from 'd3';
+import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-genome-view',
@@ -31,6 +33,10 @@ export class GenomeViewComponent implements OnInit {
 
   features: Array<Metadata>;
   featureBlocks: Array<SyntenyBlock>;
+
+  showTooltip: boolean = false;
+  tooltipCoords: Array<string> = ['0px', '0px'];
+  @ViewChild('tooltip') tooltip: TooltipComponent;
 
   constructor(private http: ApiService) { }
 
@@ -61,6 +67,9 @@ export class GenomeViewComponent implements OnInit {
 
   }
 
+  /**
+   * Returns the chromosome the user chose as well as a list of any features to render in the block view
+   */
   getChromosomeFeaturesToView(): SelectedFeatures {
     let features = (this.features) ? this.features.filter(feature => feature.chr === this.referenceChromosome.chr.replace('ref', '')) : [];
 
@@ -184,21 +193,6 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Returns a path command for the given four specified coordinates (x, y pairs) and the desired radii
-   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally) this is the bottom left corner of band
-   * @param {CartesianCoordinate} inEnd - ("") this is the bottom right corner of band
-   * @param {CartesianCoordinate} outStrt - ("") this is the top left corner of band
-   * @param {CartesianCoordinate} outEnd - ("") this is the top right corner of band
-   * @param {number} inRad - the radius of the inner edge of the band
-   * @param {number} outRad - the radius of the outer edge of the band
-   */
-  private getBandPathCommand(inStrt: CartesianCoordinate, inEnd: CartesianCoordinate, outStrt: CartesianCoordinate,
-                             outEnd: CartesianCoordinate, inRad: number, outRad: number): string {
-    return `M${inStrt.x},${inStrt.y}A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}L${outEnd.x},${outEnd.y}
-            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
-  }
-
-  /**
    * Returns the translation string value for the label of a specified chromosome
    * @param {string} chr - the chromsome the label is for
    * @param {GenomeMap} genomeMap - the genome map for the specified genome (reference or comparison)
@@ -222,6 +216,59 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
+   * Returns a config that will generate ngStyles for the tooltip for when and where it should appear
+   */
+  getTooltipStyles(): object {
+    return {
+      left: this.tooltipCoords[0],
+      top: this.tooltipCoords[1],
+      display: this.showTooltip ? 'initial' : 'none',
+    }
+  }
+
+  /**
+   * Shows the tooltip for the specified chromsome and species by getting the location of the cursor
+   * @param {string} chr - the chromosome that needs the tooltip
+   * @param {Species} species - the species the specified chromsome belongs to
+   * @param {MouseEvent} event - the hover event we use to get cursor location
+   */
+  revealTooltip(chr: string, species: Species, event: MouseEvent): void {
+    this.showTooltip = true;
+    this.tooltipCoords = [`${event.offsetX + 10}px`, `${event.offsetY - 60}px`];
+    this.tooltip.display(this.getTooltipContent(chr, species), species.name);
+  }
+
+  /**
+   * Hides the tooltip from view and clears the content
+   */
+  hideTooltip(): void {
+    this.showTooltip = false;
+    this.tooltip.clear();
+  }
+
+  /**
+   * Returns the content to be displayed in the tooltip based on the specified chromosome and species
+   * @param {string} chr - the chromosome that needs the tooltip
+   * @param {Species} species - the species that the specified chromosome belongs to
+   */
+  private getTooltipContent(chr: string, species: Species): object {
+    let data = {
+      'Chromosome': chr
+    };
+
+    // if the species is reference and there are features, display the symbols in the tooltip
+    if(species.taxonID === this.reference.taxonID && (this.features && this.features.length > 0)) {
+      let genes = this.features.filter(feature => feature.gene_id && feature.chr === chr);
+      let qtls = this.features.filter(feature => feature.qtl_id && feature.chr === chr);
+
+      if(genes.length > 0) data['Selected Genes'] = genes.map(gene => gene.gene_symbol).join(', ');
+      if(qtls.length > 0) data['Selected QTLs'] = qtls.map(qtl => qtl.qtl_symbol).join(', ');
+    }
+
+    return data;
+  }
+
+  /**
    * Returns true/false if the specified gene occurs in the specified block (takes into consideration orientation)
    * @param {Metadata} feature - the feature to check for it's location in the specified block
    * @param {SyntenyBlock} block - the block to check that the specified gene is in
@@ -229,5 +276,20 @@ export class GenomeViewComponent implements OnInit {
   private isInBlock(feature: Metadata, block: SyntenyBlock): boolean {
     return (feature.start >= block.ref_start && feature.start <= block.ref_end) ||
            (feature.end <= block.ref_end && feature.end >= block.ref_start)
+  }
+
+  /**
+   * Returns a path command for the given four specified coordinates (x, y pairs) and the desired radii
+   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally) this is the bottom left corner of band
+   * @param {CartesianCoordinate} inEnd - ("") this is the bottom right corner of band
+   * @param {CartesianCoordinate} outStrt - ("") this is the top left corner of band
+   * @param {CartesianCoordinate} outEnd - ("") this is the top right corner of band
+   * @param {number} inRad - the radius of the inner edge of the band
+   * @param {number} outRad - the radius of the outer edge of the band
+   */
+  private getBandPathCommand(inStrt: CartesianCoordinate, inEnd: CartesianCoordinate, outStrt: CartesianCoordinate,
+                             outEnd: CartesianCoordinate, inRad: number, outRad: number): string {
+    return `M${inStrt.x},${inStrt.y}A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}L${outEnd.x},${outEnd.y}
+            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
   }
 }

@@ -57,11 +57,6 @@ export class BlockViewBrowserComponent {
 
   showTooltip: boolean = false;
   tooltipCoords: Array<string> = ['0px', '0px'];
-  tooltipTypeDimensions = {
-    feature: ['200px', '110px'],
-    block: ['200px', '80px']
-  };
-  tooltipDimensions: Array<string> = ['0px', '0px'];
   format: Function = d3.format(',');
   @ViewChild('tooltip') tooltip: TooltipComponent;
 
@@ -413,9 +408,9 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Highlights all comparison genes that match any of the specified (comparison) gene's homolog IDs
+   * Highlights the specified (reference) gene and all of the gene's homologs in the comparison
    * @param {Gene} gene - the comparison gene that needs to have its reference homologs highlighted
-   * @param {MouseEvent} event - the mouseover event for highlighting
+   * @param {MouseEvent} event - the mouseover event to get cursor coordinates
    * @param {boolean} metadataOnly - a default false boolean indicating whether the the highlighting
    *                                 is coming from the overview or browser
    */
@@ -428,16 +423,14 @@ export class BlockViewBrowserComponent {
     }
 
     // generate the tooltip for the gene
-    this.showTooltip = true;
-    this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 10}px`];
-    this.tooltipDimensions = this.tooltipTypeDimensions.feature;
+    this.revealTooltip(event, 0, 10);
     this.tooltip.display(gene.getTooltipGeneData(), gene.symbol);
   }
 
   /**
    * Highlights the specified (comparison) gene and all reference homolog genes
    * @param {Gene} gene - the comparison gene that needs to have its reference homologs highlighted
-   * @param {MouseEvent} event - the mouseover event for highlighting
+   * @param {MouseEvent} event - the mouseover event to get cursor coordinates
    * @param {boolean} metadataOnly - a default false boolean indicating whether the the highlighting
    *                                 is coming from the overview or browser
    */
@@ -450,9 +443,7 @@ export class BlockViewBrowserComponent {
     }
 
     // generate the tooltip for the gene
-    this.showTooltip = true;
-    this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 10}px`];
-    this.tooltipDimensions = this.tooltipTypeDimensions.feature;
+    this.revealTooltip(event, 0, 10);
     this.tooltip.display(gene.getTooltipGeneData(), gene.symbol);
   }
 
@@ -472,50 +463,84 @@ export class BlockViewBrowserComponent {
     this.hideTooltip();
   }
 
+  /**
+   * Shows a tooltip for the specified syntenic block if the block is too small to have block coordinates showing
+   * @param {SyntenyBlock} block - the syntenic block to potentially highlight
+   * @param {MouseEvent} event - the mouseover event to get cursor coordinates
+   * @param {boolean} isComp - the default false boolean flag indicating species for tooltip title
+   */
   highlightBlock(block: SyntenyBlock, event: MouseEvent, isComp: boolean = false): void {
     // if the block is small enough to not have its block coordinates showing, generate a tooltip
     if(this.getBlockWidth(block) <= 125) {
-      this.showTooltip = true;
-      this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 40}px`];
-      this.tooltipDimensions = this.tooltipTypeDimensions.block;
+      this.revealTooltip(event, 0, 40);
       this.tooltip.display(this.getTooltipBlockData(block, isComp), isComp ? this.comparison.name : this.reference.name)
     }
   }
 
+  /**
+   * Shows the tooltip based on the current mouseover location with consideration of manual extra space (dx, dy)
+   * @param {MouseEvent} event - the mouseover event to get cursor coordinates
+   * @param {number} dx - the manual extra horizontal space to add to the x position of the cursor
+   * @param {number} dy - the manual extra vertical space to add to the y position of the cursor
+   */
+  private revealTooltip(event: MouseEvent, dx: number, dy: number): void {
+    this.showTooltip = true;
+    this.tooltipCoords = [`${event.offsetX + dx}px`, `${event.offsetY + dy}px`];
+  }
+
+  /**
+   * Hides the tooltip and clears the content
+   */
   hideTooltip(): void {
     this.showTooltip = false;
     this.tooltip.clear();
   }
 
+  /**
+   * Shows a tooltip for the specified QTL
+   * @param {QTLMetadata} qtl - the qtl to generate the tooltip for
+   * @param {MouseEvent} event - the mouseover event to get cursor coordinates
+   */
   highlightQTL(qtl: QTLMetadata, event: MouseEvent): void {
-    this.showTooltip = true;
-    this.tooltipCoords = [`${event.offsetX}px`, `${event.offsetY + 40}px`];
-    this.tooltipDimensions = this.tooltipTypeDimensions.block;
+    this.revealTooltip(event, 0, 40);
     this.tooltip.display(this.getTooltipQTLData(qtl), qtl.qtl_symbol)
   }
 
-  getTooltipBlockData(block: SyntenyBlock, isComp: boolean): object {
+  /**
+   * Returns the content for a tooltip for the specified syntenic block which includes the chromsome and
+   * basepair start and end points
+   * @param {SyntenyBlock} block - the block to generate the tooltip for
+   * @param {boolean} isComp - boolean flag indicating whether the block is of the reference or comparison species
+   */
+  private getTooltipBlockData(block: SyntenyBlock, isComp: boolean): object {
     return {
-      'Chromsome': isComp ? block.comp_chr : block.ref_chr,
+      'Chromosome': isComp ? block.comp_chr : block.ref_chr,
       'Location': isComp ? `${this.format(block.true_orientation.comp_start)}bp - ${this.format(block.true_orientation.comp_end)}bp` :
                          `${this.format(block.ref_start)}bp - ${this.format(block.ref_end)}bp`,
     };
   }
 
-  getTooltipQTLData(qtl: QTLMetadata): object {
+  /**
+   * Returns the content for a tooltip for the specified QTL which includes the QTL id, the chromsome it is located
+   * in as well as the basepair start and end points
+   * @param {QTLMetadata} qtl - the qtl to generate a tooltip for
+   */
+  private getTooltipQTLData(qtl: QTLMetadata): object {
     return {
       'QTL ID': qtl.qtl_id,
+      'Chromsome': qtl.chr,
       'Location': `${this.format(qtl.start)}bp - ${this.format(qtl.end)}bp`
     }
   }
 
+  /**
+   * Returns a config that will generate ngStyles for the tooltip for when and where it should appear
+   */
   getTooltipStyles(): object {
     return {
       left: this.tooltipCoords[0],
       top: this.tooltipCoords[1],
       display: this.showTooltip ? 'initial' : 'none',
-      width: this.tooltipDimensions[0],
-      height: this.tooltipDimensions[1]
     }
   }
 

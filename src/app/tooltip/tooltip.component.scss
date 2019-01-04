@@ -4,8 +4,9 @@
   line-height: 16px;
 }
 
-#container {
+#tooltip-container {
   padding: 8px;
+  overflow: auto;
 }
 
 .title {

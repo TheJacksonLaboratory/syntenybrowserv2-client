@@ -10,13 +10,14 @@
 
       <g id="ref-bands">
         <path *ngFor="let chr of getChromosomes(reference.genome)" class="outer-chr-band" (click)="renderSelectionMapForChr(chr)"
-              [attr.d]="getChrBandPath(referenceRadii, refGenomeMap, chr, reference.genome)">
+              [attr.d]="getChrBandPath(referenceRadii, refGenomeMap, chr, reference.genome)" (mouseenter)="revealTooltip(chr, reference, $event)"
+              (mouseleave)="hideTooltip()">
         </path>
       </g>
 
       <g id="ref-labels">
-        <text *ngFor="let chr of getChromosomes(reference.genome)" class="outer outer-label"
-              text-anchor="middle" (click)="renderSelectionMapForChr(chr)"
+        <text *ngFor="let chr of getChromosomes(reference.genome)" class="outer outer-label" text-anchor="middle"
+              (click)="renderSelectionMapForChr(chr)"
               [attr.transform]="getLabelTransformation(chr, refGenomeMap, reference.genome, referenceRadii.labels)">
           {{ chr }}
         </text>
@@ -32,7 +33,8 @@
     <g *ngIf="!referenceChromosome" id="comparison-plot" [attr.transform]="'translate(' + radius + ', ' + radius + ')'">
       <g id="comp-bands">
         <path *ngFor="let chr of getChromosomes(comparison.genome)" class="inner" [attr.fill]="genomeColors[chr]"
-              [attr.d]="getChrBandPath(comparisonRadii, compGenomeMap, chr, comparison.genome)">
+              [attr.d]="getChrBandPath(comparisonRadii, compGenomeMap, chr, comparison.genome)" (mouseenter)="revealTooltip(chr, comparison, $event)"
+              (mouseleave)="hideTooltip()">
         </path>
       </g>
 
@@ -78,4 +80,6 @@
       </g>
     </g>
   </svg>
+
+  <app-tooltip #tooltip id="tt" [ngStyle]="getTooltipStyles()"></app-tooltip>
 </div>
