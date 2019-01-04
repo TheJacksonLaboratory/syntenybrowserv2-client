@@ -60,17 +60,13 @@ export class GenomeMap {
    * Returns the radian conversion of a degree value
    * @param {number} degrees - the degree value to be converted to radians
    */
-  private degreesToRadians(degrees: number): number {
-    return Math.PI * degrees / 180;
-  }
+  private degreesToRadians(degrees: number): number { return Math.PI * degrees / 180; }
 
   /**
    * Returns a clamped value (between 0 and 2PI)
    * @param {number} radians - the radian value to ensure is between 0 and 2PI
    */
-  private clamp(radians: number): number {
-    return radians % (2 * Math.PI);
-  }
+  private clamp(radians: number): number { return radians % (2 * Math.PI); }
 
   /**
    * Returns a cartesian coordinate (a dictionary with an x and y value) calculated from a radian value

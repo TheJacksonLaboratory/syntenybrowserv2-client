@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import {environment} from '../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {map} from 'rxjs/operators';
-import {GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response, SyntenyBlock} from '../classes/interfaces';
+import {GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response} from '../classes/interfaces';
+import {SyntenyBlock} from '../classes/synteny-block';
 import {Observable} from 'rxjs';
 
 @Injectable({
@@ -30,7 +31,7 @@ export class ApiService {
    */
   getQTLMatches(taxonID: string, search: string): Observable<Array<QTLMetadata>> {
     return this.http.get<Response>(this.root + 'qtls/' + taxonID + '/' + search)
-      .pipe(map(resp => resp.qtls));
+                    .pipe(map(resp => resp.qtls));
   }
 
   /**
@@ -63,7 +64,7 @@ export class ApiService {
    */
   getGenomeSynteny(refTaxonID: string, compTaxonID: string): Observable<Array<SyntenyBlock>> {
     return this.http.get<Response>(this.root + 'syntenic-blocks/' + refTaxonID + '/' + compTaxonID)
-                    .pipe(map(resp => resp.blocks));
+                    .pipe(map(resp => resp.blocks.map(block => new SyntenyBlock(block, 'genome'))));
   }
 
   getChromosomeSynteny(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<SyntenyBlock>> {

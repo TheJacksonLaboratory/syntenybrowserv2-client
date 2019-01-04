@@ -62,18 +62,18 @@ export interface QTLMetadata extends Metadata {
   end: number;
 }
 
-export interface SyntenyBlock {
-  comp_chr: string;
-  comp_start?: number;
-  comp_end?: number;
-  ref_chr: string;
-  ref_start: number;
-  ref_end: number;
-  id?: string;
-  orientation_matches?: boolean;
-  true_orientation?: ComparisonBlockCoordinates;
-  match_orientation?: ComparisonBlockCoordinates;
-}
+// export interface SyntenyBlock {
+//   comp_chr: string;
+//   comp_start?: number;
+//   comp_end?: number;
+//   ref_chr: string;
+//   ref_start: number;
+//   ref_end: number;
+//   id?: string;
+//   orientation_matches?: boolean;
+//   true_orientation?: ComparisonBlockCoordinates;
+//   match_orientation?: ComparisonBlockCoordinates;
+// }
 
 export interface CartesianCoordinate {
   x: number;
