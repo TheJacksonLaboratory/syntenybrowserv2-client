@@ -1,6 +1,7 @@
 import {ScaleLinear} from 'd3-scale';
 import {Exon} from './interfaces';
 import * as d3 from 'd3';
+import {SyntenyBlock} from './synteny-block';
 
 export class Gene {
   start: number;
@@ -13,6 +14,9 @@ export class Gene {
   strand: string;
   type: string;
   blockID: string;
+  species: string;
+  orientationMatches: boolean;
+  yPos: number;
   transcript: Array<Exon>;
 
   highlighted: boolean = false;
@@ -21,7 +25,8 @@ export class Gene {
 
   format: Function = d3.format(',');
 
-  constructor(gene: any, ids: Array<number>, selected: boolean, block: string = null) {
+  constructor(gene: any, ids: Array<number>, selected: boolean, trackHeight: number, blocks: Array<SyntenyBlock> = null) {
+    this.species = (gene.start_pos) ? 'ref' : 'comp';
     this.start = (gene.start_pos) ? gene.start_pos : gene.gene_start_pos;
     this.end = (gene.end_pos) ? gene.end_pos : gene.gene_end_pos;
     this.size = this.end - this.start;
@@ -30,10 +35,12 @@ export class Gene {
     this.chr = gene.gene_chr;
     this.strand = (gene.strand) ? gene.strand : gene.gene_strand;
     this.type = gene.type;
+    this.yPos = this.getYPos(trackHeight);
 
     this.homologIDs = ids;
-    this.blockID = (block) ? block : null;
-    this.selected = selected;
+    this.selected = selected ? selected : false;
+
+    if(blocks) this.setBlockID(blocks);
 
     let t = gene.canonical_transcript.map(t => `${t.start_pos}-${t.end_pos}`);
     let newT: Array<string> = Array.from(new Set(t));
@@ -41,7 +48,21 @@ export class Gene {
       let coords = t.split('-');
       return { start: Number(coords[0]), end: Number(coords[1])};
     })
+  }
 
+  /**
+   * Sets the block ID to that of the block the gene is contained in; if the block doesn't fully
+   * contain the gene, it won't be considered syntenic
+   * @param blocks
+   */
+  setBlockID(blocks: Array<SyntenyBlock>): void {
+    let b = blocks.filter(block => {
+      //console.log(block.matchesCompChr(this.chr));
+      return block.matchesCompChr(this.chr) && block.contains(this)
+    });
+    this.blockID = (b.length > 0) ? b[0].id : null;
+
+    if(this.blockID) this.orientationMatches = b[0].orientationMatches;
   }
 
   /**
@@ -84,12 +105,17 @@ export class Gene {
    */
   hasVisibleLabel(): boolean { return this.highlighted || this.selected || this.filtered; }
 
-  /**
-   * Returns an X position (in px) for the gene, using the specified scale and start (if provided, indicating a comparison gene)
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
-   * @param {number} start - if specified, use instead of the real start (used for comparison genes)
-   */
-  getXPos(scale: ScaleLinear<number, number>, start: number = null): number { return scale((start) ? start : this.start); }
+  isInRefView(scale: ScaleLinear<number, number>, width: number): boolean {
+    return !(this.getRefXPos(scale) + this.getWidth(scale) < 0 || this.getRefXPos(scale) > width);
+  }
+
+  isInCompView(scale: ScaleLinear<number, number>, width: number, trueCoords: boolean): boolean {
+    return !(this.getCompXPos(scale, trueCoords) + this.getWidth(scale) < 0 || this.getCompXPos(scale, trueCoords) > width);
+  }
+
+  getRefXPos(scale: ScaleLinear<number, number>): number { return scale(this.start); }
+
+  getCompXPos(scale: ScaleLinear<number, number>, trueCoords: boolean): number { return scale(this.getStart(trueCoords)) }
 
   /**
    * Returns a central X position (in px) for the gene using the specified scale
@@ -109,6 +135,10 @@ export class Gene {
 
     return ((trackHeight - 10) / 1.12 + offset) + 6;
   }
+
+  getRefPxCoords(scale: ScaleLinear<number, number>): Array<number> { return [this.getRefXPos(scale), this.yPos]; }
+
+  getCompPxCoords(scale: ScaleLinear<number, number>, trueCoords: boolean): Array<number> { return [this.getCompXPos(scale, trueCoords), this.yPos] }
 
   /**
    * Returns a width (in px) for the gene using the specified scale
@@ -158,7 +188,7 @@ export class Gene {
     }
   }
 
-  getTooltipGeneData(): object {
+  getTooltipData(): object {
     return {
       'Gene ID': this.id,
       'Chromosome': this.chr,
@@ -168,5 +198,7 @@ export class Gene {
     }
   }
 
-
+  getStart(trueCoords: boolean): number {
+    return trueCoords ? this.start : (this.orientationMatches ? this.start : this.end);
+  }
 }

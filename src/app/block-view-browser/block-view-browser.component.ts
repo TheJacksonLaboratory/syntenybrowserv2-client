@@ -1,11 +1,12 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {Species} from '../classes/species';
 import {ApiService} from '../services/api.service';
 import * as d3 from 'd3';
-import {BrowserInterval, ComparisonMapping, ComparisonScaling, Metadata, QTLMetadata, SyntenyBlock} from '../classes/interfaces';
+import {BrowserInterval, ComparisonMapping, ComparisonScaling, Metadata, QTLMetadata} from '../classes/interfaces';
 import {BrushBehavior, ScaleLinear, ZoomBehavior} from 'd3';
 import {Gene} from '../classes/gene';
 import {TooltipComponent} from '../tooltip/tooltip.component';
+import {SyntenyBlock} from '../classes/synteny-block';
 
 @Component({
   selector: 'app-block-view-browser',
@@ -17,10 +18,10 @@ export class BlockViewBrowserComponent {
   comparison: Species;
   genomeColors: object;
   activeChromosomes: Array<string> = [];
-  currentChromosome: string = null;
+  hoverChr: string = null;
 
   chromosome: string;
-  selectedFeatures = {
+  selectedGenes = {
     reference: [],
     comparison: []
   };
@@ -39,21 +40,18 @@ export class BlockViewBrowserComponent {
 
   interval: BrowserInterval;
   blocks: Array<SyntenyBlock>;
+  blockLookup: object = {};
   blockStartPts: object = {};
   blockEndPts: object = {};
   referenceGenes: Array<Gene>;
   comparisonGenes: Array<Gene>;
   staticRefBPToPixels: ScaleLinear<number, number>;
   staticCompBPToPixels: ComparisonScaling = {
-    match_orientation: {},
-    true_orientation: {}
+    matchOrientation: {},
+    trueOrientation: {}
   };
   refBPToPixels: ScaleLinear<number, number>;
-  compBPToPixels: ComparisonScaling = {
-    match_orientation: {},
-    true_orientation: {}
-  };
-  blockOrientation: string = 'match_orientation';
+  trueOrientation: boolean = false;
 
   showTooltip: boolean = false;
   tooltipCoords: Array<string> = ['0px', '0px'];
@@ -65,11 +63,11 @@ export class BlockViewBrowserComponent {
 
   /**
    * Renders the block view with the specified reference and comparison species, using the specified color dictionary for the
-   * genomes, a list of features to highlight on the specified chromsome
+   * genomes, a list of features to highlight on the specified chromosome
    * @param {Species} reference - the reference species
    * @param {Species} comparison - the comparison species
    * @param {object} genomeColors - the genome color dictionary
-   * @param {string} chr - the chromsome to get syntenic blocks and features for
+   * @param {string} chr - the chromosome to get syntenic blocks and features for
    * @param {Array<Metadata>} features - list of selected features to display in red
    */
   render(reference: Species, comparison: Species, genomeColors: object, chr: string, features: Array<Metadata>): void {
@@ -103,14 +101,12 @@ export class BlockViewBrowserComponent {
     this.blockEndPts = {};
     this.refBPToPixels = null;
     this.staticRefBPToPixels = null;
-    this.currentChromosome = null;
-    this.selectedFeatures.reference = [];
-    this.selectedFeatures.comparison = [];
+    this.hoverChr = null;
+    this.selectedGenes.reference = [];
+    this.selectedGenes.comparison = [];
     this.selectedQTLs = [];
-    this.staticCompBPToPixels.match_orientation = {};
-    this.staticCompBPToPixels.true_orientation = {};
-    this.compBPToPixels.match_orientation = {};
-    this.compBPToPixels.true_orientation = {};
+    this.staticCompBPToPixels.matchOrientation = {};
+    this.staticCompBPToPixels.trueOrientation = {};
     this.activeChromosomes = [];
   }
 
@@ -118,14 +114,14 @@ export class BlockViewBrowserComponent {
    * Returns a list of the reference genes that are in the current browser's view
    */
   getRefGenesInView(): Array<Gene> {
-    return this.referenceGenes.filter(gene => this.isRefInView(gene));
+    return this.referenceGenes.filter(gene => gene.isInRefView(this.refBPToPixels, this.width));
   }
 
   /**
    * Returns a list of the comparison genes that are in the current browser's view
    */
   getCompGenesInView(): Array<Gene> {
-    return this.comparisonGenes.filter(gene => this.isCompInView(gene));
+    return this.comparisonGenes.filter(gene => gene.isInCompView(this.getScale(gene), this.width, this.trueOrientation));
   }
 
   /**
@@ -134,7 +130,7 @@ export class BlockViewBrowserComponent {
    * location is outside of a region, the location is the start of the left-most block in view
    */
   getCompStartForInterval(): ComparisonMapping {
-    // get the list of end positions of all the blocks and reverse so we start checking from the end of the chromsome
+    // get the list of end positions of all the blocks and reverse so we start checking from the end of the chromosome
     let endPts = Object.keys(this.blockEndPts).reverse();
 
     let startBlock: SyntenyBlock;
@@ -153,16 +149,16 @@ export class BlockViewBrowserComponent {
 
     // TODO: handle cases where the current interval start and end are in between regions
     // if the start position is inside the region, convert the ref position, else, get the start of the block
-    if(this.interval.start <= startBlock.ref_end && this.interval.start >= startBlock.ref_start) {
+    if(this.interval.start <= startBlock.refEnd && this.interval.start >= startBlock.refStart) {
       return {
-        chr: startBlock.comp_chr,
-        loc: Math.round(this.compBPToPixels[this.blockOrientation][startBlock.id]
+        chr: startBlock.compChr,
+        loc: Math.round(startBlock.getScale(this.trueOrientation)
                  .invert(this.refBPToPixels(this.interval.start)))
       };
     } else {
       return {
-        chr: startBlock.comp_chr,
-        loc: startBlock[this.blockOrientation].comp_start
+        chr: startBlock.compChr,
+        loc: startBlock.getStart(this.trueOrientation)
       };
     }
   }
@@ -191,26 +187,18 @@ export class BlockViewBrowserComponent {
 
     // TODO: handle cases where the current interval start and end are in between regions
     // if the end position is inside the region, convert the ref position, else, get the end of the block
-    if(this.interval.start <= endBlock.ref_end && this.interval.start >= endBlock.ref_start) {
+    if(this.interval.start <= endBlock.refEnd && this.interval.start >= endBlock.refStart) {
       return {
-        chr: endBlock.comp_chr,
-        loc: Math.round(this.compBPToPixels[this.blockOrientation][endBlock.id]
+        chr: endBlock.compChr,
+        loc: Math.round(endBlock.getScale(this.trueOrientation)
                  .invert(this.refBPToPixels(this.interval.start)))
       };
     } else {
       return {
-        chr: endBlock.comp_chr,
-        loc: endBlock[this.blockOrientation].comp_end
+        chr: endBlock.compChr,
+        loc: endBlock.getEnd(this.trueOrientation)
       };
     }
-  }
-
-  /**
-   * Returns the absolute value of the scaled width of a syntenic block in pixels
-   * @param {SyntenyBlock} block - the syntenic block to get the width for
-   */
-  getBlockWidth(block: SyntenyBlock): number {
-    return Math.abs(this.refBPToPixels(block.ref_end) - this.refBPToPixels(block.ref_start));
   }
 
   /**
@@ -228,15 +216,7 @@ export class BlockViewBrowserComponent {
    * @param {Gene} gene - the gene to get the comparison scale for by the block ID of the block it's located in
    */
   getScale(gene: Gene): ScaleLinear<number, number> {
-    return this.compBPToPixels[this.blockOrientation][gene.blockID];
-  }
-
-  /**
-   * Returns the start position to be used of a comparison gene (based on orientation)
-   * @param {Gene} gene - the gene to get the proper start point based on orientation
-   */
-  getStart(gene: Gene): number {
-    return (this.blocks.filter(block => block.id === gene.blockID)[0].orientation_matches) ? gene.start : gene.end;
+    return this.blockLookup[gene.blockID].getScale(this.trueOrientation);
   }
 
   /**
@@ -244,23 +224,22 @@ export class BlockViewBrowserComponent {
    * @param {Gene} gene - the gene to use to get the associated block ID for
    */
   getStaticCompScale(gene: Gene): ScaleLinear<number, number> {
-    return this.staticCompBPToPixels[this.blockOrientation][gene.blockID];
+    return this.staticCompBPToPixels[this.trueOrientation ? 'trueOrientation' : 'matchOrientation'][gene.blockID];
   }
 
   /**
    * Returns true/false if at least 1 QTL or gene is selected
    */
   featuresAreSelected(): boolean {
-    return this.selectedQTLs.length > 0 || this.selectedFeatures.reference.length > 0;
+    return this.selectedQTLs.length > 0 || this.selectedGenes.reference.length > 0;
   }
 
   /**
    * Returns a translate command in the form of a string to be used in the template for custom translations
-   * @param {number} dx - the number of pixels horizontally away from (0, 0), the top left of parent container
-   * @param {number} dy - the number of pixels vertically away from (0, 0), the top left of parent container
+   * @param {Array<number>} coords - a two value array where [0] = dx and [1] = dy translations
    */
-  translate(dx: number, dy: number): string {
-    return `translate(${dx}, ${dy})`;
+  translate(coords: Array<number>): string {
+    return `translate(${coords[0]}, ${coords[1]})`;
   }
 
   /**
@@ -310,10 +289,10 @@ export class BlockViewBrowserComponent {
       // get the difference of widths; divide by 2 to get the number for each edge
       let diff = (this.getRefChrSize() - this.interval.width) / 2;
 
-      // if both edges are within the boundaries of the chromsome, zoom out by diff on each edge
+      // if both edges are within the boundaries of the chromosome, zoom out by diff on each edge
       if(this.interval.start - diff >= 0 && this.interval.end + diff <= this.getRefChrSize()) {
         this.brushView(this.interval.start - diff, this.interval.end + diff);
-      // if only new start edge of view is a problem, start = chromsome start, increment end by 2 * diff
+      // if only new start edge of view is a problem, start = chromosome start, increment end by 2 * diff
       } else if(this.interval.start - diff < 0) {
         this.brushView(0, this.interval.end + (2 * diff));
       // if only new end edge of view is a problem, end = chromosome end,decrement start by 2 * diff
@@ -371,25 +350,19 @@ export class BlockViewBrowserComponent {
    * Returns true/false if the specified chromosome is in the list of active chromosomes (is represented in block view)
    * @param {string} chr - the chromosome value to be searched for in active chromosomes
    */
-  isChrActive(chr: string): boolean {
-    return this.activeChromosomes.indexOf(chr) >= 0;
-  }
+  isChrActive(chr: string): boolean { return this.activeChromosomes.indexOf(chr) >= 0; }
 
   /**
    * Returns the horizontal translation for a specified chromosome label
    * @param {string} chr - the value of the chromosome to get the translation for
    */
-  getLegendItemXTrans(chr: string): number {
-    return this.getCompChromosomes().indexOf(chr) * 35;
-  }
+  getLegendItemXTrans(chr: string): number { return this.getCompChromosomes().indexOf(chr) * 35; }
 
   /**
-   * Returns the opacity for a chromsome label based on whether it is "active" (represented in the current chromosome)
+   * Returns the opacity for a chromosome label based on whether it is "active" (represented in the current chromosome)
    * @param {string} chr - the value of the chromosome to get the opacity for
    */
-  getLegendItemOpacity(chr: string): number {
-    return (this.isChrActive(chr)) ? 1 : 0.1;
-  }
+  getLegendItemOpacity(chr: string): number { return (this.isChrActive(chr)) ? 1 : 0.1; }
 
   /**
    * Returns the vertical translation for a QTL based on its index in the array of QTLs
@@ -397,14 +370,6 @@ export class BlockViewBrowserComponent {
    */
   getQTLMarkY(qtl: QTLMetadata): number {
     return (this.selectedQTLs.map(qtl => qtl.qtl_symbol).indexOf(qtl.qtl_symbol) * 10) + 20;
-  }
-
-  /**
-   * Returns the color of the specified syntenic block; returns the color if the block should remain colored or grey if not
-   * @param {SyntenyBlock} block - the block to get the color for
-   */
-  getBlockColor(block: SyntenyBlock): number {
-    return (!this.currentChromosome || block.comp_chr === this.currentChromosome) ? this.genomeColors[block.comp_chr] : '#AAA';
   }
 
   /**
@@ -424,7 +389,7 @@ export class BlockViewBrowserComponent {
 
     // generate the tooltip for the gene
     this.revealTooltip(event, 0, 10);
-    this.tooltip.display(gene.getTooltipGeneData(), gene.symbol);
+    this.tooltip.display(gene.getTooltipData(), gene.symbol);
   }
 
   /**
@@ -444,7 +409,7 @@ export class BlockViewBrowserComponent {
 
     // generate the tooltip for the gene
     this.revealTooltip(event, 0, 10);
-    this.tooltip.display(gene.getTooltipGeneData(), gene.symbol);
+    this.tooltip.display(gene.getTooltipData(), gene.symbol);
   }
 
   /**
@@ -471,9 +436,9 @@ export class BlockViewBrowserComponent {
    */
   highlightBlock(block: SyntenyBlock, event: MouseEvent, isComp: boolean = false): void {
     // if the block is small enough to not have its block coordinates showing, generate a tooltip
-    if(this.getBlockWidth(block) <= 125) {
+    if(block.getPxWidth() <= 125) {
       this.revealTooltip(event, 0, 40);
-      this.tooltip.display(this.getTooltipBlockData(block, isComp), isComp ? this.comparison.name : this.reference.name)
+      this.tooltip.display(block.getTooltipData(isComp), isComp ? this.comparison.name : this.reference.name)
     }
   }
 
@@ -507,28 +472,14 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns the content for a tooltip for the specified syntenic block which includes the chromsome and
-   * basepair start and end points
-   * @param {SyntenyBlock} block - the block to generate the tooltip for
-   * @param {boolean} isComp - boolean flag indicating whether the block is of the reference or comparison species
-   */
-  private getTooltipBlockData(block: SyntenyBlock, isComp: boolean): object {
-    return {
-      'Chromosome': isComp ? block.comp_chr : block.ref_chr,
-      'Location': isComp ? `${this.format(block.true_orientation.comp_start)}bp - ${this.format(block.true_orientation.comp_end)}bp` :
-                         `${this.format(block.ref_start)}bp - ${this.format(block.ref_end)}bp`,
-    };
-  }
-
-  /**
-   * Returns the content for a tooltip for the specified QTL which includes the QTL id, the chromsome it is located
+   * Returns the content for a tooltip for the specified QTL which includes the QTL id, the chromosome it is located
    * in as well as the basepair start and end points
    * @param {QTLMetadata} qtl - the qtl to generate a tooltip for
    */
   private getTooltipQTLData(qtl: QTLMetadata): object {
     return {
       'QTL ID': qtl.qtl_id,
-      'Chromsome': qtl.chr,
+      'chromosome': qtl.chr,
       'Location': `${this.format(qtl.start)}bp - ${this.format(qtl.end)}bp`
     }
   }
@@ -547,16 +498,12 @@ export class BlockViewBrowserComponent {
   /**
    * Helper method used in this file as well as the template to quickly access the size of the current reference chromosome
    */
-  getRefChrSize(): number {
-    return this.reference.genome[this.chromosome];
-  }
+  getRefChrSize(): number { return this.reference.genome[this.chromosome]; }
 
   /**
    * Returns the list of syntenic blocks where orientation between reference and comparison regions do not align
    */
-  getNonMatchedBlocks(): Array<SyntenyBlock> {
-    return this.blocks.filter(block => !block.orientation_matches)
-  }
+  getNonMatchedBlocks(): Array<SyntenyBlock> { return this.blocks.filter(block => !block.orientationMatches); }
 
   /**
    * Returns a path command for a vertical line, starting at specified x, with specified length and optional specified y
@@ -583,14 +530,14 @@ export class BlockViewBrowserComponent {
    * @param {SyntenyBlock} block - the syntenic block to draw orientation indicators for
    */
   getOrientationIndPathCommand(block: SyntenyBlock): string {
-    return `M${this.refBPToPixels(block.ref_start)},${this.trackHeight}` +
-           `L${this.refBPToPixels(block.ref_end)},${this.trackHeight + 30}` +
-           `M${this.refBPToPixels(block.ref_end)},${this.trackHeight}` +
-           `L${this.refBPToPixels(block.ref_start)},${this.trackHeight + 30}Z`;
+    return `M${this.refBPToPixels(block.refStart)},${this.trackHeight}` +
+           `L${this.refBPToPixels(block.refEnd)},${this.trackHeight + 30}` +
+           `M${this.refBPToPixels(block.refEnd)},${this.trackHeight}` +
+           `L${this.refBPToPixels(block.refStart)},${this.trackHeight + 30}Z`;
   }
 
   /**
-   * Returns the list of all chromsome values for the comparison genome
+   * Returns the list of all chromosome values for the comparison genome
    */
   getCompChromosomes(): Array<string> {
     return Object.keys(this.comparison.genome);
@@ -604,52 +551,37 @@ export class BlockViewBrowserComponent {
     this.http.getChromosomeSynteny(this.reference.getID(), this.comparison.getID(), this.chromosome)
              .subscribe(blocks => {
                // create list of necessary block data dictionaries
-               this.blocks = blocks.map(block => {
-                 let blockContent = {
-                   ref_chr: block.ref_chr,
-                   ref_start: block.ref_start,
-                   ref_end: block.ref_end,
-                   comp_chr: block.comp_chr,
-                   orientation_matches: block.orientation_matches,
-                   match_orientation: {
-                     comp_start: (block.orientation_matches) ? block.comp_start : block.comp_end,
-                     comp_end: (block.orientation_matches) ? block.comp_end : block.comp_start
-                   },
-                   true_orientation: {
-                     comp_start: block.comp_start,
-                     comp_end: block.comp_end
-                   },
-                   id: block.id
-                 };
+               blocks.forEach(block => {
 
                  // don't worry about repeats
-                 this.activeChromosomes.push(block.comp_chr);
+                 this.activeChromosomes.push(block.compChr);
 
-                 this.blockStartPts[block.ref_start] = blockContent;
-                 this.blockEndPts[block.ref_end] = blockContent;
+                 this.blockStartPts[block.refStart] = block;
+                 this.blockEndPts[block.refEnd] = block;
 
-                 // create the comparison scaling function for the current block using new dictionary object
-                 let matchScale = this.createCompScaleForBlock(blockContent, 'match_orientation');
-                 let trueScale = this.createCompScaleForBlock(blockContent, 'true_orientation');
+                 block.setScales(this.refBPToPixels);
+                 block.setColor(this.genomeColors[block.compChr]);
+                 this.blockLookup[block.id] = block;
 
-                 this.compBPToPixels.match_orientation[block.id] = matchScale;
-                 this.compBPToPixels.true_orientation[block.id] = trueScale;
-
-                 this.staticCompBPToPixels.match_orientation[block.id] = matchScale;
-                 this.staticCompBPToPixels.true_orientation[block.id] = trueScale;
-
-                 return blockContent;
+                 this.staticCompBPToPixels.matchOrientation[block.id] = block.compMatchScale;
+                 this.staticCompBPToPixels.trueOrientation[block.id] = block.compTrueScale;
                });
 
-      this.progress += 0.10;
+               this.blocks = blocks;
 
-      // create the chromosome view (static) axis
-      this.renderChromosomeViewAxis();
+               // only update this once because it won't
+               this.progress += 0.70;
 
-      this.progress += 0.05;
+               // create the chromosome view (static) axis
+               d3.select('#chr-view-axis')
+                 .call(d3.axisBottom(this.staticRefBPToPixels)
+                   .tickValues(this.getAxisTickValues(0, this.reference.genome[this.chromosome]))
+                   .tickFormat((d: number) => Math.round(d / 1000000).toString() + " Mb"))
+                 .selectAll('text')
+                   .attr('text-anchor', (d, i, x) => this.getAxisTickLabelPosition(i, x.length));
 
-      this.getGenes(features);
-    });
+               this.getGenes(features);
+             });
   }
 
   /**
@@ -687,47 +619,39 @@ export class BlockViewBrowserComponent {
                    if(featureSymbols.indexOf(gene.gene_symbol) >= 0) {
                      gene.homologs.forEach(hom => {
                        hom.sel = true; // temporary flag
-                       hom.block_id = this.getBlockForGene(hom);
                      });
-                     return new Gene(gene, [i], true);
+                     return new Gene(gene, [i], true, this.trackHeight);
                    }
 
-                   return new Gene(gene, [i], false);
+                   return new Gene(gene, [i], false, this.trackHeight);
                  } else {
                    let featureSymbols = features.map(feature => feature.gene_symbol);
 
-                   return new Gene(gene, [], featureSymbols.indexOf(gene.gene_symbol) >= 0);
+                   return new Gene(gene, [], featureSymbols.indexOf(gene.gene_symbol) >= 0, this.trackHeight);
                  }
                });
 
-      this.progress += 0.25;
+               // create a list of comparison genes from the temp compGenes array, add the list of homolog IDs for each, as found from
+               // homLookup, and add block ID for genes in a syntenic region, then filter that list to only genes that have a block ID
+               this.comparisonGenes = compGenes.map(gene => {
+                 return new Gene(gene, homIDs[gene.gene_symbol], gene.sel, this.trackHeight, this.blocks);
+               }).filter(gene => gene.isSyntenic());
 
-      // create a list of comparison genes from the temp compGenes array, add the list of homolog IDs for each, as found from
-      // homLookup, and add block ID for genes in a syntenic region, then filter that list to only genes that have a block ID
-      this.comparisonGenes = compGenes.map(gene => new Gene(gene, homIDs[gene.gene_symbol], gene.sel, this.getBlockForGene(gene)))
-                                      .filter(gene => gene.isSyntenic());
+               // get selected features
+               this.selectedGenes.reference = this.referenceGenes.filter(gene => gene.selected);
+               this.selectedGenes.comparison = this.comparisonGenes.filter(gene => gene.selected);
+               this.selectedQTLs = features.filter(feature => feature.qtl_id);
 
-      this.progress += 0.4;
+               // set interval to roughly 5Mb with the first reference feature centered if features are selected,
+               // otherwise set interval to entire chr
+               (this.selectedGenes.reference.length > 0) ?
+                 this.setInterval(Math.max(0, this.selectedGenes.reference[0].start - 2500000),
+                                  Math.min(this.getRefChrSize(), this.selectedGenes.reference[0].end + 2500000)) :
+                 this.setInterval(0, this.getRefChrSize());
 
-      // get selected features
-      this.selectedFeatures.reference = this.referenceGenes.filter(gene => gene.selected);
-      this.selectedFeatures.comparison = this.comparisonGenes.filter(gene => gene.selected);
-      this.selectedQTLs = features.filter(feature => feature.qtl_id);
-
-      this.progress += 0.1;
-
-      // set interval to roughly 5Mb with the first reference feature centered if features are selected,
-      // otherwise set interval to entire chr
-      (this.selectedFeatures.reference.length > 0) ?
-        this.setInterval(Math.max(0, this.selectedFeatures.reference[0].start - 2500000),
-                         Math.min(this.getRefChrSize(), this.selectedFeatures.reference[0].end + 2500000)) :
-        this.setInterval(0, this.getRefChrSize());
-
-      this.progress += 0.1;
-
-      // set the zoom, brush and dynamic axis behaviors/interactions
-      this.bindBrowserBehaviors();
-    });
+               // set the zoom, brush and dynamic axis behaviors/interactions
+               this.bindBrowserBehaviors();
+             });
   }
 
   /**
@@ -766,10 +690,7 @@ export class BlockViewBrowserComponent {
                     this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
 
                     // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-                    this.blocks.forEach(block => {
-                      this.compBPToPixels.match_orientation[block.id] = this.createCompScaleForBlock(block, 'match_orientation');
-                      this.compBPToPixels.true_orientation[block.id] = this.createCompScaleForBlock(block, 'true_orientation');
-                    });
+                    this.blocks.forEach(block => block.setScales(this.refBPToPixels));
 
                     // zoom the browser to same section
                     d3.select('#browser')
@@ -777,8 +698,8 @@ export class BlockViewBrowserComponent {
 
                     this.setInterval(this.staticRefBPToPixels.invert(s[0]), this.staticRefBPToPixels.invert(s[1]));
 
-                    // update the axis above the reference track (if interval starts at 0, format the first tick label)
-                    this.renderBrowserAxis(s[0], browserAxis);
+                    // update the axis above the reference track
+                    d3.select('#browser-axis').call(browserAxis).select('text').attr('text-anchor', 'start');
                   });
 
     this.zoom = d3.zoom()
@@ -795,10 +716,7 @@ export class BlockViewBrowserComponent {
                    this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
 
                    // update the comparison scale dictionaries that use refBPToPixels to use new ref scale
-                   this.blocks.forEach(block => {
-                     this.compBPToPixels.match_orientation[block.id] = this.createCompScaleForBlock(block, 'match_orientation');
-                     this.compBPToPixels.true_orientation[block.id] = this.createCompScaleForBlock(block, 'true_orientation');
-                   });
+                   this.blocks.forEach(block => block.setScales(this.refBPToPixels));
 
                    // get the start and end pixel and bp points of the current interval
                    let pxExtents: Array<number> = this.refBPToPixels.range().map(t.invertX, t);
@@ -810,8 +728,8 @@ export class BlockViewBrowserComponent {
                    // update the interval values
                    this.setInterval(bpExtents[0], bpExtents[1]);
 
-                   // update the axis above the reference track (if interval starts at 0, format the first tick label)
-                   this.renderBrowserAxis(pxExtents[0], browserAxis);
+                   // update the axis above the reference track
+                   d3.select('#browser-axis').call(browserAxis).select('text').attr('text-anchor', 'start');
                  });
 
     // bind the zoom behavior
@@ -822,79 +740,6 @@ export class BlockViewBrowserComponent {
     d3.select('#chr-view-inv-cover')
       .call(this.brush)
       .call(this.brush.move, [this.staticRefBPToPixels(this.interval.start), this.staticRefBPToPixels(this.interval.end)]);
-  }
-
-  /**
-   * Renders the static axis for the chromosome view (must be done here and not in template as HTML doesn't recognize
-   * D3's custom element. Plus we don't actually ever interact with it, so it's completely safe to generate here)
-   */
-  private renderChromosomeViewAxis(): void {
-    // create the axis
-    d3.select('#chr-view-axis')
-      .call(d3.axisBottom(this.staticRefBPToPixels) // the scale to use
-        .tickValues(this.getAxisTickValues(0, this.reference.genome[this.chromosome])) // tick values to use
-        .tickFormat((d: number) => Math.round(d / 1000000).toString() + " Mb")) // format for tick labels
-      .selectAll('text')
-        .attr('text-anchor', (d, i, x) => this.getAxisTickLabelPosition(i, x.length)); // set positional attr for tick labels
-
-  }
-
-  /**
-   * Renders the dynamic axis for the browser (must be done here and not in template as HTML doesn't recognize D3's custom
-   * element. Plus we don't actually ever interact with it, so it's completely safe to generate here)
-   * @param {number} intervalStart - the bp location of the start of interval in view
-   * @param {any} axis - the axis object for the browser
-   */
-  private renderBrowserAxis(intervalStart: number, axis: any): void {
-    (intervalStart === 0) ? d3.select('#browser-axis').call(axis).select('text').attr('text-anchor', 'start') :
-                            d3.select('#browser-axis').call(axis);
-  }
-
-  /**
-   * Returns the id of the block that the specified gene occurs in or null if it doesn't occur in a block
-   * @param {Gene} gene - the gene to get the block id for
-   */
-  private getBlockForGene(gene: any): string {
-    let block = this.blocks.filter(block => block.comp_chr === gene.gene_chr && this.isInBlock(gene, block));
-    return (block.length > 0) ? block[0].id : null;
-  }
-
-  /**
-   * Returns true/false if the specified gene occurs in the specified block (takes into consideration orientation)
-   * @param {Gene} gene - the gene to check for it's location in the specified block
-   * @param {SyntenyBlock} block - the block to check that the specified gene is in
-   */
-  private isInBlock(gene: any, block: SyntenyBlock): boolean {
-    return (gene.gene_start_pos >= block.true_orientation.comp_start && gene.gene_start_pos <= block.true_orientation.comp_end) &&
-           (gene.gene_end_pos <= block.true_orientation.comp_end && gene.gene_end_pos >= block.true_orientation.comp_start)
-  }
-
-  /**
-   * Returns true/false if the specified reference gene is located within the current view
-   * @param {Gene} gene - the specified gene to check if it's in view
-   */
-  private isRefInView(gene: Gene): boolean {
-    let xPos = gene.getXPos(this.refBPToPixels);
-    return !(xPos + gene.getWidth(this.refBPToPixels) < 0 || xPos > this.width);
-  }
-
-  /**
-   * Returns true/false if the specified comparison gene is located within the current view
-   * @param {Gene} gene - the specified gene to check if it's in view
-   */
-  private isCompInView(gene: Gene): boolean {
-    let scale = this.getScale(gene);
-    let xPos = gene.getXPos(scale, this.getStart(gene));
-    return !(xPos + gene.getWidth(scale) < 0 || xPos > this.width);
-  }
-
-  /**
-   * Returns a scaling function for the specified block and orientation mode
-   * @param {SyntenyBlock} block - the block to create the scale for
-   * @param {string} orientationKey - the orientation mode currently in use ('match_orientation' or 'true_orientation')
-   */
-  private createCompScaleForBlock(block: SyntenyBlock, orientationKey: string): ScaleLinear<number, number> {
-    return d3.scaleLinear().domain(this.getCompScaleDomain(block, orientationKey)).range(this.getCompScaleRange(block))
   }
 
   /**
@@ -924,7 +769,7 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Takes a chromsome value/name and generates a list of 11 values including 0 and the last BP of the chromosome where
+   * Takes a chromosome value/name and generates a list of 11 values including 0 and the last BP of the chromosome where
    * the other 9 values are equally spaced locations for tick values on the chromosome view axis
    * @param {number} start - the starting point to start generating tick values for
    * @param {number} end - the ending point to start generating tick values for
@@ -958,23 +803,5 @@ export class BlockViewBrowserComponent {
     } else { // otherwise, use default value
       return 'middle';
     }
-  }
-
-  /**
-   * Returns the domain array necessary to create a D3 linear scale for the specified block and orientation
-   * @param {SyntenyBlock} block - the block to create the scale's domain for
-   * @param {string} orientationKey - 'true_orientation' or 'match_orientation', depending on what the user has selected
-   */
-  private getCompScaleDomain(block: SyntenyBlock, orientationKey: string): Array<number> {
-    return [block[orientationKey].comp_start, block[orientationKey].comp_end];
-  }
-
-  /**
-   * Returns a readonly (because Webstorm's d3 inspections are weird) array of the pixel values for the start and end of a
-   * syntenic block to create a scale range
-   * @param {SyntenyBlock} block - the syntenic block to convert to pixel positions
-   */
-  private getCompScaleRange(block: SyntenyBlock): ReadonlyArray<number> {
-    return [this.refBPToPixels(block.ref_start), this.refBPToPixels(block.ref_end)];
   }
 }

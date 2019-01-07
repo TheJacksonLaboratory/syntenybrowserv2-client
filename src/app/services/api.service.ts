@@ -64,12 +64,12 @@ export class ApiService {
    */
   getGenomeSynteny(refTaxonID: string, compTaxonID: string): Observable<Array<SyntenyBlock>> {
     return this.http.get<Response>(this.root + 'syntenic-blocks/' + refTaxonID + '/' + compTaxonID)
-                    .pipe(map(resp => resp.blocks.map(block => new SyntenyBlock(block, 'genome'))));
+                    .pipe(map(resp => resp.blocks.map(block => new SyntenyBlock(block))));
   }
 
   getChromosomeSynteny(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<SyntenyBlock>> {
     return this.http.get<Response>(this.root + 'syntenic-blocks/' + refTaxonID + '/' + compTaxonID + '/' + chr)
-                    .pipe(map(resp => resp.blocks));
+                    .pipe(map(resp => resp.blocks.map(block => new SyntenyBlock(block, true))));
   }
 
   getGenes(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<any>> {

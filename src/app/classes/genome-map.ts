@@ -7,7 +7,7 @@ export class GenomeMap {
   /**
    * Creates a genome map object that stores scaling functions for each chromosome in the genome and
    * can convert genomic positions (bp) to radians or cartesian coordinates (x,y)
-   * @param {any} chromosomes - a dictionary with keys being chromosome values, and values being chromsome sizes
+   * @param {any} chromosomes - a dictionary with keys being chromosome values, and values being chromosome sizes
    */
   constructor(chromosomes: any) {
     // spaces between the chromosome segments in the plot
@@ -32,7 +32,7 @@ export class GenomeMap {
                            .domain([0, chromosomes[chr]])
                            .range([start, end]);
 
-      // increment bp so that we know where to start calculating radians for the next chromsome
+      // increment bp so that we know where to start calculating radians for the next chromosome
       bp += chromosomes[chr];
     });
   }

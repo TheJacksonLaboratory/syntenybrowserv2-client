@@ -93,8 +93,8 @@ export class GenomeViewComponent implements OnInit {
    * @param {string} chr - the selected chromosome
    */
   renderChordMapForChr(chr: string): void {
-    let featureBlocks = (this.featureBlocks) ? this.featureBlocks.filter(block => block.isInRefChr(chr)) : [];
-    let blocks = (featureBlocks.length > 0) ? featureBlocks : this.genomeData.filter(block => block.isInRefChr(chr));
+    let featureBlocks = (this.featureBlocks) ? this.featureBlocks.filter(block => block.matchesRefChr(chr)) : [];
+    let blocks = (featureBlocks.length > 0) ? featureBlocks : this.genomeData.filter(block => block.matchesRefChr(chr));
 
     let newCompGenome = Object.assign({}, this.comparison.genome);
     newCompGenome['ref'+ chr] = this.reference.genome[chr];
@@ -125,9 +125,9 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Shows the tooltip for the specified chromsome and species by getting the location of the cursor
+   * Shows the tooltip for the specified chromosome and species by getting the location of the cursor
    * @param {string} chr - the chromosome that needs the tooltip
-   * @param {Species} species - the species the specified chromsome belongs to
+   * @param {Species} species - the species the specified chromosome belongs to
    * @param {MouseEvent} event - the hover event we use to get cursor location
    */
   revealTooltip(chr: string, species: Species, event: MouseEvent): void {
@@ -193,7 +193,7 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Returns the path command specifically for the selected reference chromsome for the inner plot
+   * Returns the path command specifically for the selected reference chromosome for the inner plot
    */
   getInnerRefBlockBandPath(): string {
     return this.getChrBandPath(this.comparisonRadii, this.compGenomeMap, this.referenceChromosome.chr, this.tempCompGenome);
@@ -217,7 +217,7 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Returns the translation string value for the label of a specified chromosome
-   * @param {string} chr - the chromsome the label is for
+   * @param {string} chr - the chromosome the label is for
    * @param {GenomeMap} genomeMap - the genome map for the specified genome (reference or comparison)
    * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
    * @param {number} radius - the radius to which the labels need to be rendered
