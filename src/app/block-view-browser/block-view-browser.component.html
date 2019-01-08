@@ -67,7 +67,7 @@
         <!-- Syntenic blocks -->
         <rect *ngFor="let block of blocks" [attr.transform]="translate([staticRefBPToPixels(block.refStart), 15])"
               [attr.width]="staticRefBPToPixels(block.refEnd - block.refStart)" [attr.height]="chromosomeViewHeight - 25"
-              [ngStyle]="{ 'fill': block.getColor(hoverChr), 'stroke': block.getColor(hoverChr) }">
+              [ngStyle]="{ 'fill': block.getColor(legend.hoverChr), 'stroke': block.getColor(legend.hoverChr) }">
         </rect>
 
         <!-- Transparent cover for brush (and when rendered, brush elements) -->
@@ -88,7 +88,7 @@
 
       <!-- Indicators for selected QTLs -->
       <path *ngFor="let qtl of selectedQTLs" class="qtl qtl-mark"
-            [attr.d]="getHLinePath(getQTLMarkY(qtl), getQTLWidth(qtl, staticRefBPToPixels, 2), staticRefBPToPixels(qtl.start))"
+            [attr.d]="getHLinePath(qtl.indicatorY, qtl.getIndWidth(2), qtl.getIndStart())"
             (mouseenter)="highlightQTL(qtl, $event)" (mouseleave)="hideTooltip()">
       </path>
 
@@ -134,20 +134,19 @@
 
         <!-- Reference track syntenic blocks -->
         <rect *ngFor="let block of blocks" class="reference" [attr.x]="block.getPxStart()"
-              [attr.width]="block.getPxWidth()" [attr.height]="trackHeight" (mouseenter)="highlightBlock(block, $event)"
-              (mouseleave)="hideTooltip()">
+              [attr.width]="block.getPxWidth()" [attr.height]="trackHeight"
+              (mouseenter)="highlightBlock(block, $event)" (mouseleave)="hideTooltip()">
         </rect>
 
         <!-- Selected QTLs -->
-        <rect *ngFor="let qtl of selectedQTLs" class="qtl" [attr.transform]="translate([refBPToPixels(qtl.start), 0])"
-              [attr.width]="getQTLWidth(qtl, refBPToPixels, 0.5)" [attr.height]="trackHeight"
+        <rect *ngFor="let qtl of selectedQTLs" class="qtl" [attr.x]="qtl.getStart(refBPToPixels)"
+              [attr.width]="qtl.getWidth(refBPToPixels, 0.5)" [attr.height]="trackHeight"
               (mouseenter)="highlightQTL(qtl, $event)" (mouseleave)="hideTooltip()">
         </rect>
 
         <!-- Reference genes -->
         <g *ngIf="referenceGenes">
-          <g *ngFor="let gene of getRefGenesInView()"
-             [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
+          <g *ngFor="let gene of getRefGenesInView()" [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
             <!-- Gene label -->
             <text *ngIf="gene.hasVisibleLabel()" [ngStyle]="{ 'fill': gene.getColor() }">
               {{ gene.symbol }}
@@ -157,7 +156,7 @@
             <g *ngIf="interval.width <= 5000000">
               <rect *ngFor="let exon of gene.transcript" class="exon" [ngStyle]="{ 'fill': gene.getColor() }"
                     [attr.width]="gene.getExonWidth(exon, refBPToPixels)"
-                    [attr.transform]="translate([gene.getRefExonXPos(exon, refBPToPixels), 0])"></rect>
+                    [attr.x]="gene.getRefExonXPos(exon, refBPToPixels)"></rect>
             </g>
 
             <!-- Gene -->
@@ -178,7 +177,7 @@
         <rect *ngFor="let block of blocks" class="comparison" [attr.x]="block.getPxStart()"
               [attr.width]="block.getPxWidth()" [attr.height]="trackHeight" (mouseenter)="highlightBlock(block, $event, true)"
               (mouseleave)="hideTooltip()"
-              [ngStyle]="{ 'fill': block.getColor(hoverChr), 'stroke': block.getColor(hoverChr) }">
+              [ngStyle]="{ 'fill': block.getColor(legend.hoverChr), 'stroke': block.getColor(legend.hoverChr) }">
       </rect>
 
         <!-- Comparison genes -->
@@ -194,7 +193,7 @@
             <g *ngIf="interval.width <= 5000000">
               <rect *ngFor="let exon of gene.transcript" class="exon" [ngStyle]="{ 'fill': gene.getColor() }"
                     [attr.width]="gene.getExonWidth(exon, getScale(gene))"
-                    [attr.transform]="translate([gene.getCompExonXPos(exon, getScale(gene), gene.getStart(trueOrientation)), 0])"></rect>
+                    [attr.x]="gene.getCompExonXPos(exon, getScale(gene), gene.getStart(trueOrientation))"></rect>
             </g>
 
             <!-- Gene -->
@@ -208,7 +207,7 @@
           <g *ngFor="let block of blocks" [attr.transform]="translate([refBPToPixels(block.refStart), trackHeight + 9])">
             <g *ngIf="block.getPxWidth() > 125">
               <!-- Vertical line extending start point of block -->
-              <path [attr.d]="getVLinePath(0, -10)" [attr.stroke]="block.getColor(hoverChr)"></path>
+              <path [attr.d]="getVLinePath(0, -10)" [attr.stroke]="block.getColor(legend.hoverChr)"></path>
 
               <!-- Starting block coordinate -->
               <text [attr.transform]="translate([2, -1])"> {{ block.getBlockCompStartLabel() }} </text>
@@ -219,7 +218,7 @@
               </text>
 
               <!-- Vertical line extending end point of block -->
-              <path [attr.d]="getVLinePath(block.getPxWidth(), -10)" [attr.stroke]="block.getColor(hoverChr)"></path>
+              <path [attr.d]="getVLinePath(block.getPxWidth(), -10)" [attr.stroke]="block.getColor(legend.hoverChr)"></path>
             </g>
           </g>
         </g>
@@ -267,19 +266,19 @@
     </g>
 
     <!-- Comparison genome legend -->
-    <g id="comparison-genome-legend" [attr.transform]="translate([0, legendOffset])">
+    <g *ngIf="legend" id="comparison-genome-legend" [attr.transform]="translate([0, legend.offsetY])">
       <!-- Title -->
       <text [attr.transform]="translate([width / 2, 0])"> {{ comparison.commonName }} Genome Key </text>
 
       <!-- Legend -->
-      <g id="legend" [attr.transform]="translate([getLegendXTrans(), 20])">
-        <g *ngFor="let chr of getCompChromosomes()" [attr.transform]="translate([getLegendItemXTrans(chr), 0])"
-           (mouseenter)="isChrActive(chr) ? hoverChr = chr : null" (mouseleave)="hoverChr = null">
+      <g id="legend" [attr.transform]="translate([legend.offsetX, 20])">
+        <g *ngFor="let chr of legend.allChrs" [attr.transform]="translate([legend.getXPos(chr), 0])"
+           (mouseenter)="legend.isActive(chr) ? legend.hover(chr) : null" (mouseleave)="legend.hover()">
           <!-- Colored circles -->
-          <circle r="10" [attr.fill]="genomeColors[chr]" [attr.fill-opacity]="getLegendItemOpacity(chr)"></circle>
+          <circle r="10" [attr.fill]="legend.getColor(chr)" [attr.fill-opacity]="legend.getOpacity(chr)"></circle>
 
           <!-- Chromosome label -->
-          <text [attr.transform]="translate([0, 25])" [attr.fill-opacity]="getLegendItemOpacity(chr)"> {{ chr }} </text>
+          <text [attr.transform]="translate([0, 25])" [attr.fill-opacity]="legend.getOpacity(chr)"> {{ chr }} </text>
         </g>
       </g>
     </g>

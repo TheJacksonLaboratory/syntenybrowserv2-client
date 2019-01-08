@@ -7,6 +7,8 @@ import {BrushBehavior, ScaleLinear, ZoomBehavior} from 'd3';
 import {Gene} from '../classes/gene';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 import {SyntenyBlock} from '../classes/synteny-block';
+import {QTL} from '../classes/qtl';
+import {Legend} from '../classes/legend';
 
 @Component({
   selector: 'app-block-view-browser',
@@ -17,7 +19,7 @@ export class BlockViewBrowserComponent {
   reference: Species;
   comparison: Species;
   genomeColors: object;
-  activeChromosomes: Array<string> = [];
+  legend: Legend;
   hoverChr: string = null;
 
   chromosome: string;
@@ -25,7 +27,7 @@ export class BlockViewBrowserComponent {
     reference: [],
     comparison: []
   };
-  selectedQTLs: Array<QTLMetadata> = [];
+  selectedQTLs: Array<QTL> = [];
   progress: number = 0;
   zoom: ZoomBehavior<any, any>;
   brush: BrushBehavior<any>;
@@ -34,7 +36,6 @@ export class BlockViewBrowserComponent {
   height: number = 520;
   chromosomeViewHeight = 80;
   browserOffset = 175;
-  legendOffset = 460;
   trackHeight = 100;
   minimumIntervalSize = 3000;
 
@@ -55,7 +56,6 @@ export class BlockViewBrowserComponent {
 
   showTooltip: boolean = false;
   tooltipCoords: Array<string> = ['0px', '0px'];
-  format: Function = d3.format(',');
   @ViewChild('tooltip') tooltip: TooltipComponent;
 
 
@@ -107,7 +107,7 @@ export class BlockViewBrowserComponent {
     this.selectedQTLs = [];
     this.staticCompBPToPixels.matchOrientation = {};
     this.staticCompBPToPixels.trueOrientation = {};
-    this.activeChromosomes = [];
+    this.legend = null;
   }
 
   /**
@@ -199,16 +199,6 @@ export class BlockViewBrowserComponent {
         loc: endBlock.getEnd(this.trueOrientation)
       };
     }
-  }
-
-  /**
-   * Returns the absolute value of the specified QTL based on the specified scale
-   * @param {QTLMetadata} qtl - the specified QTL to calcule the width of
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width
-   * @param {number} defaultSize - the width to use if the scaled width is less than (i.e. 1 or 2 to make the QTL visible)
-   */
-  getQTLWidth(qtl: QTLMetadata, scale: ScaleLinear<number, number>, defaultSize: number): number {
-    return Math.max(defaultSize, Math.abs(scale(qtl.end) - scale(qtl.start)));
   }
 
   /**
@@ -340,39 +330,6 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns the horizontal translation for the legend that is calculated by the number of chromosomes need to be represented
-   */
-  getLegendXTrans(): number {
-    return (this.width - (((this.getCompChromosomes().length - 1) * 35) + 20)) / 2;
-  }
-
-  /**
-   * Returns true/false if the specified chromosome is in the list of active chromosomes (is represented in block view)
-   * @param {string} chr - the chromosome value to be searched for in active chromosomes
-   */
-  isChrActive(chr: string): boolean { return this.activeChromosomes.indexOf(chr) >= 0; }
-
-  /**
-   * Returns the horizontal translation for a specified chromosome label
-   * @param {string} chr - the value of the chromosome to get the translation for
-   */
-  getLegendItemXTrans(chr: string): number { return this.getCompChromosomes().indexOf(chr) * 35; }
-
-  /**
-   * Returns the opacity for a chromosome label based on whether it is "active" (represented in the current chromosome)
-   * @param {string} chr - the value of the chromosome to get the opacity for
-   */
-  getLegendItemOpacity(chr: string): number { return (this.isChrActive(chr)) ? 1 : 0.1; }
-
-  /**
-   * Returns the vertical translation for a QTL based on its index in the array of QTLs
-   * @param {QTLMetadata} qtl - the qtl to calculate the translation for
-   */
-  getQTLMarkY(qtl: QTLMetadata): number {
-    return (this.selectedQTLs.map(qtl => qtl.qtl_symbol).indexOf(qtl.qtl_symbol) * 10) + 20;
-  }
-
-  /**
    * Highlights the specified (reference) gene and all of the gene's homologs in the comparison
    * @param {Gene} gene - the comparison gene that needs to have its reference homologs highlighted
    * @param {MouseEvent} event - the mouseover event to get cursor coordinates
@@ -466,22 +423,9 @@ export class BlockViewBrowserComponent {
    * @param {QTLMetadata} qtl - the qtl to generate the tooltip for
    * @param {MouseEvent} event - the mouseover event to get cursor coordinates
    */
-  highlightQTL(qtl: QTLMetadata, event: MouseEvent): void {
+  highlightQTL(qtl: QTL, event: MouseEvent): void {
     this.revealTooltip(event, 0, 40);
-    this.tooltip.display(this.getTooltipQTLData(qtl), qtl.qtl_symbol)
-  }
-
-  /**
-   * Returns the content for a tooltip for the specified QTL which includes the QTL id, the chromosome it is located
-   * in as well as the basepair start and end points
-   * @param {QTLMetadata} qtl - the qtl to generate a tooltip for
-   */
-  private getTooltipQTLData(qtl: QTLMetadata): object {
-    return {
-      'QTL ID': qtl.qtl_id,
-      'chromosome': qtl.chr,
-      'Location': `${this.format(qtl.start)}bp - ${this.format(qtl.end)}bp`
-    }
+    this.tooltip.display(qtl.getTooltipData(), qtl.symbol)
   }
 
   /**
@@ -550,11 +494,12 @@ export class BlockViewBrowserComponent {
   private getSyntenicBlocks(features: Array<Metadata>): void {
     this.http.getChromosomeSynteny(this.reference.getID(), this.comparison.getID(), this.chromosome)
              .subscribe(blocks => {
+               let activeChrs = [];
                // create list of necessary block data dictionaries
                blocks.forEach(block => {
 
                  // don't worry about repeats
-                 this.activeChromosomes.push(block.compChr);
+                 activeChrs.push(block.compChr);
 
                  this.blockStartPts[block.refStart] = block;
                  this.blockEndPts[block.refEnd] = block;
@@ -568,6 +513,7 @@ export class BlockViewBrowserComponent {
                });
 
                this.blocks = blocks;
+               this.legend = new Legend(this.comparison.genome, this.genomeColors, activeChrs, this.width);
 
                // only update this once because it won't
                this.progress += 0.70;
@@ -640,7 +586,7 @@ export class BlockViewBrowserComponent {
                // get selected features
                this.selectedGenes.reference = this.referenceGenes.filter(gene => gene.selected);
                this.selectedGenes.comparison = this.comparisonGenes.filter(gene => gene.selected);
-               this.selectedQTLs = features.filter(feature => feature.qtl_id);
+               this.selectedQTLs = features.filter(feature => feature.qtl_id).map((qtl, i) => new QTL(qtl, i, this.staticRefBPToPixels));
 
                // set interval to roughly 5Mb with the first reference feature centered if features are selected,
                // otherwise set interval to entire chr

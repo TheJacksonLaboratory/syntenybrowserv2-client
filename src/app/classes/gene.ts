@@ -142,7 +142,7 @@ export class Gene {
 
   /**
    * Returns a width (in px) for the gene using the specified scale
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
+   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width
    */
   getWidth(scale: ScaleLinear<number, number>): number { return Math.abs(scale(this.end) - scale(this.start)); }
 

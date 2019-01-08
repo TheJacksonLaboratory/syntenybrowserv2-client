@@ -68,6 +68,7 @@ export class GenomeViewComponent implements OnInit {
   }
 
   // Operational Methods
+
   /**
    * Renders a genome view from a specified reference species and comparison species
    * @param {Species} reference - the current reference species
@@ -144,7 +145,9 @@ export class GenomeViewComponent implements OnInit {
     this.tooltip.clear();
   }
 
+
   // Getter Methods
+
   /**
    * Returns the chromosome the user chose as well as a list of any features to render in the block view
    */
@@ -258,7 +261,9 @@ export class GenomeViewComponent implements OnInit {
     }
   }
 
+
   // Private Methods
+
   /**
    * Returns the content to be displayed in the tooltip based on the specified chromosome and species
    * @param {string} chr - the chromosome that needs the tooltip
