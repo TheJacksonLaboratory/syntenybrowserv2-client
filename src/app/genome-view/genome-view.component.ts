@@ -145,8 +145,11 @@ export class GenomeViewComponent implements OnInit {
    * @param {MouseEvent} event - the hover event we use to get cursor location
    */
   revealTooltip(chr: string, species: Species, event: MouseEvent): void {
+    let offsetY = (this.features && this.chrFeatures(chr).length > 0) ?
+                  event.offsetY - 75 : event.offsetY - 60;
+
     this.tooltip.display(this.getTooltipContent(chr, species),
-                         event.offsetX + 10, event.offsetY - 60, species.name);
+                         event.offsetX - 65, offsetY, species.name);
   }
 
 
@@ -158,12 +161,10 @@ export class GenomeViewComponent implements OnInit {
    */
   getChromosomeFeaturesToView(): SelectedFeatures {
     let trueChr = this.refChr.chr.replace('ref', '');
-    let features = this.features ?
-                   this.features.filter(f => f.chr === trueChr) : [];
 
     return {
       chr: trueChr,
-      features: features
+      features: this.features ? this.chrFeatures(trueChr) : []
     }
   }
 
@@ -307,7 +308,7 @@ export class GenomeViewComponent implements OnInit {
    * @param {Species} species - the species of the specified chromosome
    */
   private getTooltipContent(chr: string, species: Species): object {
-    let data = { 'Chromosome': chr };
+    let data = { 'Chr': chr };
     let hasFeatures = this.features && this.features.length > 0;
 
     // if tooltip is for reference species and there are features, display
@@ -317,10 +318,10 @@ export class GenomeViewComponent implements OnInit {
       let qtls = this.features.filter(f => f.qtl_id && f.chr === chr);
 
       if(genes.length > 0)
-        data['Selected Genes'] = genes.map(g => g.gene_symbol).join(', ');
+        data['Genes'] = genes.map(g => g.gene_symbol).join(', ');
 
       if(qtls.length > 0)
-        data['Selected QTLs'] = qtls.map(qtl => qtl.qtl_symbol).join(', ');
+        data['QTLs'] = qtls.map(qtl => qtl.qtl_symbol).join(', ');
     }
 
     return data;
@@ -358,5 +359,13 @@ export class GenomeViewComponent implements OnInit {
    */
   private translate(dx: number, dy: number): string {
     return `translate(${dx}, ${dy})`
+  }
+
+  /**
+   * Returns the features that are in the specified chromosome
+   * @param {string} chr - the chromosome to check
+   */
+  private chrFeatures(chr: string): Array<Metadata> {
+    return this.features.filter(f => f.chr === chr);
   }
 }
