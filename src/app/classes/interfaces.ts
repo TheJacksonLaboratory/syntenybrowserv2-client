@@ -1,3 +1,5 @@
+import {SyntenyBlock} from './synteny-block';
+
 export interface Response {
   species?: Array<RawSpecies>;
   genes?: Array<any>;
@@ -62,19 +64,6 @@ export interface QTLMetadata extends Metadata {
   end: number;
 }
 
-export interface SyntenyBlock {
-  comp_chr: string;
-  comp_start?: number;
-  comp_end?: number;
-  ref_chr: string;
-  ref_start: number;
-  ref_end: number;
-  id?: string;
-  orientation_matches?: boolean;
-  true_orientation?: ComparisonBlockCoordinates;
-  match_orientation?: ComparisonBlockCoordinates;
-}
-
 export interface CartesianCoordinate {
   x: number;
   y: number;
@@ -85,22 +74,9 @@ export interface SelectedFeatures {
   features: Array<Metadata>;
 }
 
-export interface BrowserInterval {
-  start: number;
-  end: number;
-  width: number;
-  compEnd?: ComparisonMapping;
-  compStart?: ComparisonMapping;
-}
-
-export interface ComparisonMapping {
-  chr: string;
-  loc: number;
-}
-
 export interface ComparisonBlockCoordinates {
-  comp_start: number;
-  comp_end: number;
+  compStart: number;
+  compEnd: number;
 }
 
 export interface GeneMetadata extends Metadata {
@@ -114,6 +90,13 @@ export interface GeneMetadata extends Metadata {
 }
 
 export interface ComparisonScaling {
-  match_orientation: any;
-  true_orientation: any;
+  match: object;
+  true: object;
 }
+
+export interface Exon {
+  start: number;
+  end: number;
+}
+
+export interface TooltipContent extends Object {}

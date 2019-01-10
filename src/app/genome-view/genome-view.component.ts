@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../services/api.service';
 import {Species} from '../classes/species';
 import {GenomeMap} from '../classes/genome-map';
-import {CartesianCoordinate, Metadata, SelectedFeatures, SyntenyBlock} from '../classes/interfaces';
+import {CartesianCoordinate, Metadata, SelectedFeatures} from '../classes/interfaces';
+import {TooltipComponent} from '../tooltip/tooltip.component';
+import {SyntenyBlock} from '../classes/synteny-block';
 
 @Component({
   selector: 'app-genome-view',
@@ -10,26 +12,27 @@ import {CartesianCoordinate, Metadata, SelectedFeatures, SyntenyBlock} from '../
   styleUrls: ['./genome-view.component.scss']
 })
 export class GenomeViewComponent implements OnInit {
-  reference: Species;
-  comparison: Species;
-  genomeColors: any;
+  @ViewChild('tooltip') tooltip: TooltipComponent;
 
+  ref: Species;
+  comp: Species;
+  colors: object;
   genomeData: Array<SyntenyBlock>;
-  refGenomeMap: GenomeMap;
-  compGenomeMap: GenomeMap;
+  refGMap: GenomeMap;
+  compGMap: GenomeMap;
+  tempCompGenome: object;
 
   // rendering constants
   width: number = 500;
   radius: number = this.width * 0.5;
   bandThickness: number = 20;
-  referenceRadii: any;
-  comparisonRadii: any;
+  refRadii: any;
+  compRadii: any;
   featureRadii: any;
 
-  referenceChromosome: any;
-  tempCompGenome: any;
+  refChr: any;
 
-  features: Array<Metadata>;
+  features: Array<any>;
   featureBlocks: Array<SyntenyBlock>;
 
   constructor(private http: ApiService) { }
@@ -38,84 +41,79 @@ export class GenomeViewComponent implements OnInit {
     // generate a radii dictionary to help with rendering the reference plot
     let refRadius = Math.round(this.radius * (2/3) + 30);
 
-    this.referenceRadii = {
+    this.refRadii = {
       ringInner: refRadius,
       ringOuter: refRadius + this.bandThickness,
       labels: refRadius + 35,
-      featureIndicators: refRadius - 15
     };
 
     // generate a radii dictionary for feature blocks
     this.featureRadii = {
-      ringInner: this.referenceRadii.ringInner - this.bandThickness,
-      ringOuter: this.referenceRadii.ringInner
+      ringInner: this.refRadii.ringInner - this.bandThickness,
+      ringOuter: this.refRadii.ringInner
     };
 
     // generate a radii dictionary to help with rendering the comparison plot
     let compRadius = (this.radius * 0.4) + 30;
-    this.comparisonRadii = {
+    this.compRadii = {
       ringInner: compRadius,
       ringOuter: compRadius + this.bandThickness,
       labels: compRadius + 30
     };
-
   }
 
-  getChromosomeFeaturesToView(): SelectedFeatures {
-    let features = (this.features) ? this.features.filter(feature => feature.chr === this.referenceChromosome.chr.replace('ref', '')) : [];
 
-    return {
-      chr: this.referenceChromosome.chr.replace('ref', ''),
-      features: features
-    }
-  }
+  // Operational Methods
 
   /**
-   * Renders a genome view from a specified reference species and comparison species
+   * Renders a genome view from a specified reference and comparison species
    * @param {Species} reference - the current reference species
    * @param {Species} comparison - the current comparison species
-   * @param {any} genomeColors - the dictionary to map colors to chromosomes
+   * @param {object} colors - the dictionary to map colors to chromosomes
    */
-  render(reference: Species, comparison: Species, genomeColors: any): void {
-    this.reference = reference;
-    this.comparison = comparison;
-    this.genomeColors = genomeColors;
+  render(reference: Species, comparison: Species, colors: object): void {
+    this.ref = reference;
+    this.comp = comparison;
+    this.colors = colors;
 
-    this.http.getGenomeSynteny(this.reference.getID(), this.comparison.getID()).subscribe(blocks => {
-      this.refGenomeMap = new GenomeMap(this.reference.genome);
-      this.compGenomeMap = new GenomeMap(this.comparison.genome);
+    let refID = this.ref.getID();
+    let compID = this.comp.getID();
 
-      this.genomeData = blocks;
-    });
+    // get genome-wide syntenic blocks from API
+    this.http.getGenomeSynteny(refID, compID)
+             .subscribe(blocks => {
+               this.refGMap = new GenomeMap(this.ref.genome);
+               this.compGMap = new GenomeMap(this.comp.genome);
+
+               // set the color for each block
+               blocks.forEach(b => b.setColor(colors[b.compChr]));
+               this.genomeData = blocks;
+             });
   }
 
   /**
    * Renders chord mapping of syntenic blocks for an entire selected chromosome
    * @param {string} chr - the selected chromosome
    */
-  renderSelectionMapForChr(chr: string): void {
-    let featureBlocks = (this.featureBlocks) ? this.featureBlocks.filter(block => block.ref_chr === chr) : [];
-    let blocks = (featureBlocks.length > 0) ? featureBlocks : this.genomeData.filter(block => block.ref_chr === chr);
+  renderChordMapForChr(chr: string): void {
+    // get the blocks that should be shown in the comparison plot's ref chromosome
+    let featureBlocks = (this.featureBlocks) ?
+                        this.featureBlocks.filter(b => b.matchesRefChr(chr)) : [];
+    let blocks = (featureBlocks.length > 0) ?
+                 featureBlocks : this.genomeData.filter(b => b.matchesRefChr(chr));
 
-    let newCompGenome = Object.assign({}, this.comparison.genome);
-    newCompGenome['ref'+ chr] = this.reference.genome[chr];
+    // make a new comparison genome dictionary with the temp reference chromosome
+    let newCompGenome = Object.assign({}, this.comp.genome);
+    newCompGenome['ref'+ chr] = this.ref.genome[chr];
 
     this.tempCompGenome = newCompGenome;
-    this.compGenomeMap = new GenomeMap(newCompGenome);
+    this.compGMap = new GenomeMap(newCompGenome);
 
-    this.referenceChromosome = {
+    // set the reference chromosome
+    this.refChr = {
       chr: 'ref'+ chr,
-      size: this.reference.genome[chr],
-      blocks: blocks.map(block => {
-        return {
-          ref_chr: 'ref' + block.ref_chr,
-          ref_start: block.ref_start,
-          ref_end: block.ref_end,
-          comp_chr: block.comp_chr,
-          comp_start: block.comp_start,
-          comp_end: block.comp_end
-        }
-      })
+      size: this.ref.genome[chr],
+      blocks: blocks.map(b => b.markAsSelected())
     };
   }
 
@@ -126,108 +124,239 @@ export class GenomeViewComponent implements OnInit {
   updateFeatures(features: Array<Metadata>): void {
     this.features = features;
 
-    // generate a list of syntenic blocks to highlight; the features.map() is going to produce an array of arrays
-    // (some features may span more than one block) which needs to be flattened which is done with the [].concat.apply()
-    let blocks = [].concat.apply([], features.map(feature => {
-      return this.genomeData.filter(block => block.ref_chr === feature.chr && this.isInBlock(feature, block));
-    }));
+    // generate a list of syntenic blocks to highlight; the features.map() is
+    // going to produce an array of arrays (some features may span more than one
+    // block) which needs to be flattened which is done with the [].concat.apply()
+    let blocks = [].concat
+                   .apply([],
+                          features.map(f => {
+                            return this.genomeData.filter(b => b.isAFeatureBlock(f))
+                          }));
 
-    // create a list of distinct blocks (we don't want to render the same block more than once)
+    // create a list of distinct blocks (we don't want to render 
+    // the same block more than once)
     this.featureBlocks = Array.from(new Set(blocks));
+  }
+
+  /**
+   * Shows the tooltip for the specified chromosome and species
+   * @param {string} chr - the chromosome that needs the tooltip
+   * @param {Species} species - the species the specified chromosome belongs to
+   * @param {MouseEvent} event - the hover event we use to get cursor location
+   */
+  revealTooltip(chr: string, species: Species, event: MouseEvent): void {
+    this.tooltip.display(this.getTooltipContent(chr, species),
+                         event.offsetX + 10, event.offsetY - 60, species.name);
+  }
+
+
+  // Getter Methods
+
+  /**
+   * Returns the chromosome the user chose as well as a list of any features to 
+   * render in the block view
+   */
+  getChromosomeFeaturesToView(): SelectedFeatures {
+    let trueChr = this.refChr.chr.replace('ref', '');
+    let features = this.features ?
+                   this.features.filter(f => f.chr === trueChr) : [];
+
+    return {
+      chr: trueChr,
+      features: features
+    }
   }
 
   /**
    * Returns a path command for a chromosome band
    * @param {any} radiiDict - the radius dictionary of the specified genome
-   * @param {GenomeMap} genomeMap - the genome map for the specified genome (reference or comparison)
+   * @param {GenomeMap} gMap - the genome map for the specified genome
+ *                             (reference or comparison)
    * @param {string} chr - the chromosome the band is for
    * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
    */
-  getChrBandPath(radiiDict: any, genomeMap: GenomeMap, chr: string, genome: any): string {
-    return this.getBandPathCommand(genomeMap.convertBPToCartesian(chr, 0, radiiDict.ringInner),
-                                   genomeMap.convertBPToCartesian(chr, genome[chr], radiiDict.ringInner),
-                                   genomeMap.convertBPToCartesian(chr, 0, radiiDict.ringOuter),
-                                   genomeMap.convertBPToCartesian(chr, genome[chr], radiiDict.ringOuter),
-                                   radiiDict.ringInner,
-                                   radiiDict.ringOuter);
+  getChrBandPath(radiiDict: any, gMap: GenomeMap, chr: string, genome: any): string {
+    let end = genome[chr];
+    let inner = radiiDict.ringInner;
+    let outer = radiiDict.ringOuter;
+    return this.getBandPathCommand(gMap.bpToCartesian(chr, 0, inner),
+                                   gMap.bpToCartesian(chr, end, inner),
+                                   gMap.bpToCartesian(chr, 0, outer),
+                                   gMap.bpToCartesian(chr, end, outer),
+                                   inner,
+                                   outer);
   }
 
   /**
    * Returns a path command for a syntenic block
    * @param {any} radiiDict - the radius dictionary of the specified genome
-   * @param {GenomeMap} genomeMap - the genome map for the specified genome (reference or comparison)
+   * @param {GenomeMap} gMap - the genome map for the specified genome
+   *                           (reference or comparison)
    * @param {SyntenyBlock} block - the synteny block to render the band for
+   * @param {boolean} comp - the default false flag that indicates if the block
+   *                         band is for the inner plot
    */
-  getBlockBandPath(radiiDict: any, genomeMap: GenomeMap, block: SyntenyBlock): string {
-    return this.getBandPathCommand(genomeMap.convertBPToCartesian(block.ref_chr, block.ref_start, radiiDict.ringInner),
-                                   genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radiiDict.ringInner),
-                                   genomeMap.convertBPToCartesian(block.ref_chr, block.ref_start, radiiDict.ringOuter),
-                                   genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radiiDict.ringOuter),
-                                   radiiDict.ringInner,
-                                   radiiDict.ringOuter);
+  getBlockBandPath(radiiDict: any, gMap: GenomeMap,
+                   block: SyntenyBlock, comp: boolean = false): string {
+    // if the block is located in the inner plot and it has a temporary chr
+    // (only the reference chr), use the temp chr
+    let chr = (comp && block.tempChr) ? block.tempChr : block.refChr;
+    let start = block.refStart;
+    let end = block.refEnd;
+    let inner = radiiDict.ringInner;
+    let outer = radiiDict.ringOuter;
+
+    return this.getBandPathCommand(gMap.bpToCartesian(chr, start, inner),
+                                   gMap.bpToCartesian(chr, end, inner),
+                                   gMap.bpToCartesian(chr, start, outer),
+                                   gMap.bpToCartesian(chr, end, outer),
+                                   inner,
+                                   outer);
+  }
+
+  /**
+   * Returns the path command of the reference chromosome for the inner plot
+   */
+  getInnerRefBlockBandPath(): string {
+    return this.getChrBandPath(this.compRadii,
+                               this.compGMap,
+                               this.refChr.chr,
+                               this.tempCompGenome);
   }
 
   /**
    * Returns a path command for the given syntenic mapping region and radius
    * @param {number} radius - the inner radius of the comparison (inner) ring
-   * @param {GenomeMap} genomeMap - the genome map (NOTE: must be updated with the ref chr accessed by 'ref<chr value>'
-   * @param {SyntenyBlock} block - the syntenic region to render a chord for (NOTE: ref_chr must be in the form 'ref<chr value>'
+   * @param {GenomeMap} gMap - the genome map (NOTE: must be updated with
+   *                                the ref chr accessed by 'ref<chr>')
+   * @param {SyntenyBlock} block - the syntenic region to render a chord for
+   *                               (NOTE: refChr must be in the form 'ref<chr>')
    */
-  getChordPath(radius: number, genomeMap: GenomeMap, block: SyntenyBlock) {
-    let refStart = genomeMap.convertBPToCartesian(block.ref_chr, block.ref_start, radius);
-    let refEnd = genomeMap.convertBPToCartesian(block.ref_chr, block.ref_end, radius);
-    let compStart = genomeMap.convertBPToCartesian(block.comp_chr, block.comp_start, radius);
-    let compEnd = genomeMap.convertBPToCartesian(block.comp_chr, block.comp_end, radius);
+  getChordPath(radius: number, gMap: GenomeMap, block: SyntenyBlock) {
+    // get all 4 points of the chord
+    let refStart = gMap.bpToCartesian(block.tempChr, block.refStart, radius);
+    let refEnd = gMap.bpToCartesian(block.tempChr, block.refEnd, radius);
+    let compStart = gMap.bpToCartesian(block.compChr, block.compStart, radius);
+    let compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, radius);
 
-    return `M${refStart.x},${refStart.y}A205,205 0 0,1 ${refEnd.x},${refEnd.y}Q0,0 ${compEnd.x},${compEnd.y}
-            A 205,205 0 0,1${compStart.x},${compStart.y}Q0,0 ${refStart.x},${refStart.y}Z`;
-  }
-
-  /**
-   * Returns a path command for the given four specified coordinates (x, y pairs) and the desired radii
-   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally) this is the bottom left corner of band
-   * @param {CartesianCoordinate} inEnd - ("") this is the bottom right corner of band
-   * @param {CartesianCoordinate} outStrt - ("") this is the top left corner of band
-   * @param {CartesianCoordinate} outEnd - ("") this is the top right corner of band
-   * @param {number} inRad - the radius of the inner edge of the band
-   * @param {number} outRad - the radius of the outer edge of the band
-   */
-  private getBandPathCommand(inStrt: CartesianCoordinate, inEnd: CartesianCoordinate, outStrt: CartesianCoordinate,
-                             outEnd: CartesianCoordinate, inRad: number, outRad: number): string {
-    return `M${inStrt.x},${inStrt.y}A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}L${outEnd.x},${outEnd.y}
-            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
+    return `M${refStart.x},${refStart.y}
+            A205,205 0 0,1 ${refEnd.x},${refEnd.y}
+            Q0,0 ${compEnd.x},${compEnd.y}
+            A 205,205 0 0,1${compStart.x},${compStart.y}
+            Q0,0 ${refStart.x},${refStart.y}Z`;
   }
 
   /**
    * Returns the translation string value for the label of a specified chromosome
-   * @param {string} chr - the chromsome the label is for
-   * @param {GenomeMap} genomeMap - the genome map for the specified genome (reference or comparison)
-   * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
-   * @param {number} radius - the radius to which the labels need to be rendered
+   * @param {string} chr - the chromosome the label is for
+   * @param {GenomeMap} gMap - the genome map for the specified genome
    */
-  getLabelTransformation(chr: string, genomeMap: GenomeMap, genome: any, radius: number): string {
-    let pos = genomeMap.convertBPToCartesian(chr, genome[chr] * 0.5, radius);
+  getRefLabelPos(chr: string, gMap: GenomeMap): string {
+    let pos = gMap.bpToCartesian(chr,
+                                 this.ref.genome[chr] * 0.5,
+                                 this.refRadii.labels);
 
-    // a few small manual adjustments for the x and y values as I notice they don't center with the
-    // rings as well when not rotated; this is probably due to not rotating them with the bands
-    return `translate(${pos.x - 2}, ${pos.y + 4})`;
+    // a few small manual adjustments for the x and y values as I notice they
+    // don't center with the rings as well when not rotated; this is probably
+    // due to not rotating them with the bands
+    return this.translate(pos.x - 2, pos.y + 4);
   }
+
+  /**
+   * Returns the translation string value for the label of a specified chromosome
+   * @param {string} chr - the chromosome the label is for
+   * @param {GenomeMap} gMap - the genome map for the specified genome
+   * @param {boolean} temp - the default false flag indicating whether to use
+ *                           the temp genome or the true comp genome dictionary
+   */
+  getCompLabelPos(chr: string, gMap: GenomeMap, temp: boolean = false): string {
+    let genome = temp ? this.tempCompGenome : this.comp.genome;
+    let pos = gMap.bpToCartesian(chr,
+                                 genome[chr] * 0.5,
+                                 this.compRadii.labels);
+
+    // a few small manual adjustments for the x and y values as I notice they
+    // don't center with the rings as well when not rotated; this is probably
+    // due to not rotating them with the bands
+    return this.translate(pos.x - 2, pos.y + 4);
+  }
+
+  /**
+   * Returns the translation to the center of the plot
+   */
+  getCenter(): string { return this.translate(this.radius, this.radius) }
 
   /**
    * Returns array of chromosome for the specified genome
-   * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
+   * @param {any} genome - the genome dictionary of the specified species
    */
-  getChromosomes(genome: any): Array<string> {
-    return Object.keys(genome);
+  getChromosomes(genome: any): Array<string> { return Object.keys(genome); }
+
+  /**
+   * Returns the color for the specified chromosome
+   * @param {string} chr - the chromosome to get the color of
+   */
+  getChrColor(chr: string): string { return this.colors[chr]; }
+
+
+  // Private Methods
+
+  /**
+   * Returns the content for a tooltip for the specified chromosome and species
+   * @param {string} chr - the chromosome that needs the tooltip
+   * @param {Species} species - the species of the specified chromosome
+   */
+  private getTooltipContent(chr: string, species: Species): object {
+    let data = { 'Chromosome': chr };
+    let hasFeatures = this.features && this.features.length > 0;
+
+    // if tooltip is for reference species and there are features, display
+    // the feature symbols in the tooltip
+    if(species.taxonID === this.ref.taxonID && hasFeatures) {
+      let genes = this.features.filter(f => f.gene_id && f.chr === chr);
+      let qtls = this.features.filter(f => f.qtl_id && f.chr === chr);
+
+      if(genes.length > 0)
+        data['Selected Genes'] = genes.map(g => g.gene_symbol).join(', ');
+
+      if(qtls.length > 0)
+        data['Selected QTLs'] = qtls.map(qtl => qtl.qtl_symbol).join(', ');
+    }
+
+    return data;
   }
 
   /**
-   * Returns true/false if the specified gene occurs in the specified block (takes into consideration orientation)
-   * @param {Metadata} feature - the feature to check for it's location in the specified block
-   * @param {SyntenyBlock} block - the block to check that the specified gene is in
+   * Returns a path command for the given four specified coordinates (x, y pairs)
+   * and the desired radii
+   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally)
+ *                                         the bottom left corner of band
+   * @param {CartesianCoordinate} inEnd - ("") the bottom right corner of band
+   * @param {CartesianCoordinate} outStrt - ("") the top left corner of band
+   * @param {CartesianCoordinate} outEnd - ("") the top right corner of band
+   * @param {number} inRad - the radius of the inner edge of the band
+   * @param {number} outRad - the radius of the outer edge of the band
    */
-  private isInBlock(feature: Metadata, block: SyntenyBlock): boolean {
-    return (feature.start >= block.ref_start && feature.start <= block.ref_end) ||
-           (feature.end <= block.ref_end && feature.end >= block.ref_start)
+  private getBandPathCommand(inStrt: CartesianCoordinate,
+                             inEnd: CartesianCoordinate,
+                             outStrt: CartesianCoordinate,
+                             outEnd: CartesianCoordinate,
+                             inRad: number, outRad: number): string {
+    return `M${inStrt.x},${inStrt.y}
+            A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}
+            L${outEnd.x},${outEnd.y}
+            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
+  }
+
+  /**
+   * Returns a translate command in the form of a string to be used in the
+   * template for custom translations
+   * @param {number} dx - the number of pixels horizontally away from (0, 0),
+   *                      the top left of parent container
+   * @param {number} dy - the number of pixels vertically away from (0, 0),
+   *                      the top left of parent container
+   */
+  private translate(dx: number, dy: number): string {
+    return `translate(${dx}, ${dy})`
   }
 }

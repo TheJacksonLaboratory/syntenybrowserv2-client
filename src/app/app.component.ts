@@ -16,7 +16,6 @@ export class AppComponent implements OnInit {
   @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
   @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
   @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
-  @ViewChild('blockViewContainer') bvContainer: ElementRef;
   @ViewChild(BlockViewBrowserComponent) blockViewBrowser: BlockViewBrowserComponent;
 
   refSpecies: Species;
@@ -34,7 +33,7 @@ export class AppComponent implements OnInit {
 
       // get available species from the API
       this.http.getSpecies().subscribe(species => {
-        // create species objects for every species and send them to the selection component
+        // create species for species and pass them to the selection component
         this.species.setSpecies(species.map(id => new Species(id)));
 
         this.updateSpecies();
@@ -43,17 +42,17 @@ export class AppComponent implements OnInit {
   }
 
   /**
-   * Updates the reference and comparison variables with the most recent selections
+   * Updates reference and comparison species with the most recent selections
    */
   updateSpecies(): void {
-    // update the species variables with the most recent selections made by the user
+    // update the species
     this.refSpecies = this.species.getReferenceSelection();
     this.compSpecies = this.species.getComparisonSelection();
 
     // allow the species selects to stabilize
     this.cdr.detectChanges();
 
-    // init the feature selection using the most recent reference species
+    // load the feature selection using the most recent reference species
     this.features.load(this.refSpecies);
 
     // render the genome view for the new selections
@@ -69,11 +68,16 @@ export class AppComponent implements OnInit {
 
     // allow the block view browser to initialize
     this.cdr.detectChanges();
-    this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, features.chr, features.features);
+    this.blockViewBrowser.render(this.refSpecies,
+                                 this.compSpecies,
+                                 this.genomeColors,
+                                 features.chr,
+                                 features.features);
 
     setTimeout(() => {
       // TODO: this currently only will work in Firefox and Chrome
-      document.getElementById('block-view').scrollIntoView({behavior: 'smooth', block: 'end'});
+      document.getElementById('block-view')
+              .scrollIntoView({behavior: 'smooth', block: 'end'});
     }, 50);
 
   }
