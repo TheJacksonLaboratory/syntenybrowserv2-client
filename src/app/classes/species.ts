@@ -1,4 +1,4 @@
-import {Chromosome, ExternalResource, SearchType} from './interfaces';
+import {ExternalResource, SearchType} from './interfaces';
 
 export class Species {
   taxonID: number;

@@ -49,6 +49,7 @@ export class SyntenyBlock {
     }
   }
 
+
   // Operational Methods
 
   /**
@@ -65,11 +66,16 @@ export class SyntenyBlock {
    */
   setColor(hex: string): void { this.color = hex; }
 
+  /**
+   * Sets the reference scale as well as creating a new true comparison and matching comparison scale
+   * @param {ScaleLinear<number, number>} refScale - the new reference scale
+   */
   setScales(refScale: ScaleLinear<number, number>): void {
     this.refScale = refScale;
     this.compTrueScale = this.createCompScale(this.trueCoords);
     this.compMatchScale = this.createCompScale(this.matchCoords);
   }
+
 
   // Getter Methods
 
@@ -78,7 +84,7 @@ export class SyntenyBlock {
    * comparison chromosome or if the specified chromosome is null (indicating no current hover);
    * if neither of these conditions are true, then return grey
    */
-  getColor(currChr: string): string { return (!currChr || currChr === this.compChr) ? this.color : '#AAA'; }
+  getColor(currChr: string = null): string { return (!currChr || currChr === this.compChr) ? this.color : '#AAA'; }
 
   /**
    * Returns the content for a tooltip for the specified syntenic block which includes the chromosome and
@@ -94,31 +100,55 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns the absolute value of the scaled width of the syntenic block in pixels
+   * Returns the absolute value of the scaled width of the syntenic block (in px))
    */
   getPxWidth(): number { return Math.abs(this.refScale(this.refEnd) - this.refScale(this.refStart)); }
 
+  /**
+   * Returns the scaled start position of the syntenic block (in px)
+   */
   getPxStart(): number { return this.refScale(this.refStart); }
 
+  /**
+   * Returns the label for the reference block starting position in the form of '<chr>:<start>bp'
+   */
   getBlockRefStartLabel(): string { return this.getLabel(this.refStart, this.refChr); }
 
+  /**
+   * Returns the label for the reference block ending position in the form of '<chr>:<end>bp'
+   */
   getBlockRefEndLabel(): string { return this.getLabel(this.refEnd, this.refChr); }
 
+  /**
+   * Returns the label for the comparison block starting position in the form of '<chr>:<start>bp'
+   */
   getBlockCompStartLabel(): string { return this.getLabel(this.getTrueCompStart(), this.compChr); }
 
+  /**
+   * Returns the label for the comparison block ending position in the form of '<chr>:<end>bp'
+   */
   getBlockCompEndLabel(): string { return this.getLabel(this.getTrueCompEnd(), this.compChr); }
 
+  /**
+   * Returns either the true comparison or matching comparison scale depending on the trueScale boolean flag
+   * @param {boolean} trueScale - whether the true or matching scale is needed
+   */
   getScale(trueScale: boolean): ScaleLinear<number, number> {
     return trueScale ? this.compTrueScale : this.compMatchScale;
   }
 
-  getStart(trueScale: boolean): number {
-    return trueScale ? this.trueCoords.compStart : this.matchCoords.compStart;
-  }
+  /**
+   * Returns either the true start point or matching start point depending on the trueCoords boolean flag
+   * @param {boolean} trueCoords - whether the true or matching start point is needed
+   */
+  getStart(trueCoords: boolean): number { return trueCoords ? this.getTrueCompStart() : this.matchCoords.compStart; }
 
-  getEnd(trueScale: boolean): number {
-    return trueScale ? this.trueCoords.compEnd : this.matchCoords.compEnd;
-  }
+  /**
+   * Returns either the true end point or matching end point depending on the trueCoords boolean flag
+   * @param {boolean} trueCoords - whether the true or matching start point is needed
+   */
+  getEnd(trueCoords: boolean): number { return trueCoords ? this.getTrueCompEnd() : this.matchCoords.compEnd; }
+
 
   // Condition Checks
 
@@ -151,6 +181,7 @@ export class SyntenyBlock {
    */
   isAFeatureBlock(feature: any): boolean { return this.matchesRefChr(feature.chr) && this.includes(feature); }
 
+
   // Private Methods
 
   /**
@@ -173,10 +204,21 @@ export class SyntenyBlock {
              .range([this.refScale(this.refStart), this.refScale(this.refEnd)]);
   }
 
+  /**
+   * Returns the true comparison start point
+   */
   private getTrueCompStart(): number { return this.trueCoords.compStart; }
 
+  /**
+   * Returns the true comparison end point
+   */
   private getTrueCompEnd(): number { return this.trueCoords.compEnd; }
 
+  /**
+   * Returns the string value containing a formatted coordinate and the specified chromosome, if any
+   * @param {number} coord - the location to format
+   * @param {string} chr - the default null value that if specified will be prepended to the label
+   */
   private getLabel(coord: number, chr: string = null): string {
     return chr ? `${chr}:${this.format(coord)}bp` : `${this.format(coord)}bp`;
   }

@@ -74,19 +74,6 @@ export interface SelectedFeatures {
   features: Array<Metadata>;
 }
 
-export interface BrowserInterval {
-  start: number;
-  end: number;
-  width: number;
-  compEnd?: ComparisonMapping;
-  compStart?: ComparisonMapping;
-}
-
-export interface ComparisonMapping {
-  chr: string;
-  loc: number;
-}
-
 export interface ComparisonBlockCoordinates {
   compStart: number;
   compEnd: number;
@@ -103,8 +90,8 @@ export interface GeneMetadata extends Metadata {
 }
 
 export interface ComparisonScaling {
-  matchOrientation: any;
-  trueOrientation: any;
+  match: object;
+  true: object;
 }
 
 export interface Exon {

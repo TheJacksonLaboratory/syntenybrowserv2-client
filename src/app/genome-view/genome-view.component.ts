@@ -12,31 +12,28 @@ import {SyntenyBlock} from '../classes/synteny-block';
   styleUrls: ['./genome-view.component.scss']
 })
 export class GenomeViewComponent implements OnInit {
+  @ViewChild('tooltip') tooltip: TooltipComponent;
+
   reference: Species;
   comparison: Species;
   genomeColors: any;
-
   genomeData: Array<SyntenyBlock>;
   refGenomeMap: GenomeMap;
   compGenomeMap: GenomeMap;
+  tempCompGenome: any;
 
   // rendering constants
   width: number = 500;
   radius: number = this.width * 0.5;
   bandThickness: number = 20;
-  referenceRadii: any;
-  comparisonRadii: any;
+  refRadii: any;
+  compRadii: any;
   featureRadii: any;
 
-  referenceChromosome: any;
-  tempCompGenome: any;
+  refChromosome: any;
 
   features: Array<Metadata>;
   featureBlocks: Array<SyntenyBlock>;
-
-  showTooltip: boolean = false;
-  tooltipCoords: Array<string> = ['0px', '0px'];
-  @ViewChild('tooltip') tooltip: TooltipComponent;
 
   constructor(private http: ApiService) { }
 
@@ -44,7 +41,7 @@ export class GenomeViewComponent implements OnInit {
     // generate a radii dictionary to help with rendering the reference plot
     let refRadius = Math.round(this.radius * (2/3) + 30);
 
-    this.referenceRadii = {
+    this.refRadii = {
       ringInner: refRadius,
       ringOuter: refRadius + this.bandThickness,
       labels: refRadius + 35,
@@ -53,19 +50,19 @@ export class GenomeViewComponent implements OnInit {
 
     // generate a radii dictionary for feature blocks
     this.featureRadii = {
-      ringInner: this.referenceRadii.ringInner - this.bandThickness,
-      ringOuter: this.referenceRadii.ringInner
+      ringInner: this.refRadii.ringInner - this.bandThickness,
+      ringOuter: this.refRadii.ringInner
     };
 
     // generate a radii dictionary to help with rendering the comparison plot
     let compRadius = (this.radius * 0.4) + 30;
-    this.comparisonRadii = {
+    this.compRadii = {
       ringInner: compRadius,
       ringOuter: compRadius + this.bandThickness,
       labels: compRadius + 30
     };
-
   }
+
 
   // Operational Methods
 
@@ -73,17 +70,19 @@ export class GenomeViewComponent implements OnInit {
    * Renders a genome view from a specified reference species and comparison species
    * @param {Species} reference - the current reference species
    * @param {Species} comparison - the current comparison species
-   * @param {any} genomeColors - the dictionary to map colors to chromosomes
+   * @param {object} genomeColors - the dictionary to map colors to chromosomes
    */
-  render(reference: Species, comparison: Species, genomeColors: any): void {
+  render(reference: Species, comparison: Species, genomeColors: object): void {
     this.reference = reference;
     this.comparison = comparison;
     this.genomeColors = genomeColors;
 
+    // get genome-wide syntenic blocks from API
     this.http.getGenomeSynteny(this.reference.getID(), this.comparison.getID()).subscribe(blocks => {
       this.refGenomeMap = new GenomeMap(this.reference.genome);
       this.compGenomeMap = new GenomeMap(this.comparison.genome);
 
+      // set the color for each block
       blocks.forEach(block => block.setColor(genomeColors[block.compChr]));
       this.genomeData = blocks;
     });
@@ -94,16 +93,19 @@ export class GenomeViewComponent implements OnInit {
    * @param {string} chr - the selected chromosome
    */
   renderChordMapForChr(chr: string): void {
+    // get the blocks that should be shown in the comparison plot's reference chromosome
     let featureBlocks = (this.featureBlocks) ? this.featureBlocks.filter(block => block.matchesRefChr(chr)) : [];
     let blocks = (featureBlocks.length > 0) ? featureBlocks : this.genomeData.filter(block => block.matchesRefChr(chr));
 
+    // make a new comparison genome dictionary with the temporary reference chromosome
     let newCompGenome = Object.assign({}, this.comparison.genome);
     newCompGenome['ref'+ chr] = this.reference.genome[chr];
 
     this.tempCompGenome = newCompGenome;
     this.compGenomeMap = new GenomeMap(newCompGenome);
 
-    this.referenceChromosome = {
+    // set the reference chromosome
+    this.refChromosome = {
       chr: 'ref'+ chr,
       size: this.reference.genome[chr],
       blocks: blocks.map(block => block.markAsSelected())
@@ -132,17 +134,7 @@ export class GenomeViewComponent implements OnInit {
    * @param {MouseEvent} event - the hover event we use to get cursor location
    */
   revealTooltip(chr: string, species: Species, event: MouseEvent): void {
-    this.showTooltip = true;
-    this.tooltipCoords = [`${event.offsetX + 10}px`, `${event.offsetY - 60}px`];
-    this.tooltip.display(this.getTooltipContent(chr, species), species.name);
-  }
-
-  /**
-   * Hides the tooltip from view and clears the content
-   */
-  hideTooltip(): void {
-    this.showTooltip = false;
-    this.tooltip.clear();
+    this.tooltip.display(this.getTooltipContent(chr, species), event.offsetX + 10, event.offsetY - 60, species.name);
   }
 
 
@@ -152,10 +144,10 @@ export class GenomeViewComponent implements OnInit {
    * Returns the chromosome the user chose as well as a list of any features to render in the block view
    */
   getChromosomeFeaturesToView(): SelectedFeatures {
-    let features = (this.features) ? this.features.filter(feature => feature.chr === this.referenceChromosome.chr.replace('ref', '')) : [];
+    let features = (this.features) ? this.features.filter(feature => feature.chr === this.refChromosome.chr.replace('ref', '')) : [];
 
     return {
-      chr: this.referenceChromosome.chr.replace('ref', ''),
+      chr: this.refChromosome.chr.replace('ref', ''),
       features: features
     }
   }
@@ -199,7 +191,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the path command specifically for the selected reference chromosome for the inner plot
    */
   getInnerRefBlockBandPath(): string {
-    return this.getChrBandPath(this.comparisonRadii, this.compGenomeMap, this.referenceChromosome.chr, this.tempCompGenome);
+    return this.getChrBandPath(this.compRadii, this.compGenomeMap, this.refChromosome.chr, this.tempCompGenome);
   }
 
   /**
@@ -209,6 +201,7 @@ export class GenomeViewComponent implements OnInit {
    * @param {SyntenyBlock} block - the syntenic region to render a chord for (NOTE: ref_chr must be in the form 'ref<chr value>'
    */
   getChordPath(radius: number, genomeMap: GenomeMap, block: SyntenyBlock) {
+    // get all 4 points of the chord
     let refStart = genomeMap.convertBPToCartesian(block.tempChr, block.refStart, radius);
     let refEnd = genomeMap.convertBPToCartesian(block.tempChr, block.refEnd, radius);
     let compStart = genomeMap.convertBPToCartesian(block.compChr, block.compStart, radius);
@@ -249,17 +242,6 @@ export class GenomeViewComponent implements OnInit {
    * @param {string} chr - the chromosome to get the color of
    */
   getChrColor(chr: string): string { return this.genomeColors[chr]; }
-
-  /**
-   * Returns a config that will generate ngStyles for the tooltip for when and where it should appear
-   */
-  getTooltipStyles(): object {
-    return {
-      left: this.tooltipCoords[0],
-      top: this.tooltipCoords[1],
-      display: this.showTooltip ? 'initial' : 'none',
-    }
-  }
 
 
   // Private Methods
