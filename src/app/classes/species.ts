@@ -16,7 +16,7 @@ export class Species {
     this.taxonID = taxonID;
 
     if(taxonID !== 0) {
-      // TODO: this is a form of hardcoding until we get the necessary data into the DB
+      // TODO: hardcoding until we get the necessary data into the API
       (this.taxonID === 10090) ? this.createMouse() : this.createHuman();
     } else {
       this.createDummySpecies();

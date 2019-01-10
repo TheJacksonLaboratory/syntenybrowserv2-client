@@ -1,6 +1,6 @@
-<div *ngIf="reference && comparison" id="browser-container">
+<div *ngIf="ref && comp" id="browser-container">
   <!-- Title -->
-  <h2>{{ reference.commonName }}, Chr{{ chromosome }}</h2>
+  <h2>{{ ref.commonName }}, Chr{{ refChr }}</h2>
 
   <!-- Navigation buttons -->
   <div class="btn-group bottom-1">
@@ -135,7 +135,7 @@
     <g id="browser" [attr.transform]="translate([0, browserOffset])">
       <!-- Backgrounds -->
       <text class="all-caps" [attr.transform]="translate([2, trackHeight + 16])">
-        {{ reference.commonName }}
+        {{ ref.commonName }}
       </text>
 
       <rect class="trans-bg bg" [attr.height]="(2 * trackHeight) + 30"></rect>
@@ -307,12 +307,12 @@
 
         <!-- Start position -->
         <text [attr.transform]="translate([2, 0])">
-          {{ reference.commonName }}, Chr{{ chromosome }}:{{ interval.refStart }}bp
+          {{ ref.commonName }}, Chr{{ refChr }}:{{ interval.refStart }}bp
         </text>
 
         <!-- End position -->
         <text class="end" [attr.transform]="translate([width - 2, 0])">
-          {{ reference.commonName }}, Chr{{ chromosome }}:{{ interval.refEnd }}bp
+          {{ ref.commonName }}, Chr{{ refChr }}:{{ interval.refEnd }}bp
         </text>
 
         <!-- Vertical line extending end point of reference interval -->
@@ -321,7 +321,7 @@
 
       <!-- Comparison species title -->
       <text class="all-caps" [attr.transform]="translate([2, 2*trackHeight + 54])">
-        {{ comparison.commonName }}
+        {{ comp.commonName }}
       </text>
 
       <!-- Interval coordinates for current view extents in comparison positions -->
@@ -332,12 +332,12 @@
 
         <!-- Start position -->
         <text [attr.transform]="translate([2, 0])">
-          {{ comparison.commonName }}, Chr{{ interval.compStartChr }}:{{ interval.compStart }}bp
+          {{ comp.commonName }}, Chr{{ interval.compStartChr }}:{{ interval.compStart }}bp
         </text>
 
         <!-- End Position -->
         <text class="end" [attr.transform]="translate([width - 2, 0])">
-          {{ comparison.commonName }}, Chr{{ interval.compEndChr }}:{{ interval.compEnd }}bp
+          {{ comp.commonName }}, Chr{{ interval.compEndChr }}:{{ interval.compEnd }}bp
         </text>
 
         <!-- Vertical line extending end point of comparison interval -->
@@ -350,7 +350,7 @@
        [attr.transform]="translate([0, legend.offsetY])">
       <!-- Title -->
       <text [attr.transform]="translate([width / 2, 0])">
-        {{ comparison.commonName }} Genome Key
+        {{ comp.commonName }} Genome Key
       </text>
 
       <!-- Legend -->

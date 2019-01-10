@@ -7,19 +7,20 @@ export class Legend {
   offsetX;
   colors: object;
 
-  constructor(genome: object, genomeColors: object, activeChrs: Array<string>, plotWidth: number) {
+  constructor(genome: object, colors: object, chrs: Array<string>, width: number) {
     this.allChrs = Object.keys(genome);
-    this.activeChrs = activeChrs;
-    this.colors = genomeColors;
+    this.activeChrs = chrs;
+    this.colors = colors;
 
-    this.offsetX = (plotWidth - (((this.allChrs.length - 1) * 35) + 20)) / 2;
+    // use the width to calculate the x translation for the legend
+    this.offsetX = (width - (((this.allChrs.length - 1) * 35) + 20)) / 2;
   }
 
 
   // Operational Methods
 
   /**
-   * Sets hoverChr to the specified chromosome; if no chromosome is passed, set hoverChr to null
+   * Sets hoverChr to the specified chromosome; if no chromosome, hoverChr = null
    * @param {string} chr - the specified chromosome, if any
    */
   hover(chr: string = null): void { this.hoverChr = chr; }
@@ -34,7 +35,8 @@ export class Legend {
   getXPos(chr: string): number { return this.allChrs.indexOf(chr) * 35; }
 
   /**
-   * Returns the opacity for a chromosome label based on whether it is "active" (represented in the current chromosome)
+   * Returns the opacity for a chromosome label based on whether it is "active"
+   * (represented in the current chromosome)
    * @param {string} chr - the value of the chromosome to get the opacity for
    */
   getOpacity(chr: string): number { return this.isActive(chr) ? 1 : 0.1; }
@@ -49,8 +51,9 @@ export class Legend {
   // Condition Checks
 
   /**
-   * Returns true/false if the specified chromosome is in the list of active chromosomes (is represented in block view)
-   * @param {string} chr - the chromosome value to be searched for in active chromosomes
+   * Returns true/false if the specified chromosome is in the list of active
+   * chromosomes (is represented in block view)
+   * @param {string} chr - the chromosome to search for
    */
   isActive(chr: string): boolean { return this.activeChrs.indexOf(chr) >= 0; }
 }

@@ -30,12 +30,15 @@ export class BrowserInterval {
     this.moveTo(0, refChrWidth, refScale);
   }
 
+
+  // Operational Methods
+
   /**
    * Moves the interval to the specified start and end points, and generates new
    * comparison interval points using the specified (reference) scale,
    * @param {number} start - the new (bp) start point for the interval
    * @param {number} end - the new (bp) start point for the interval
-   * @param {ScaleLinear<number, number>} scale - the new ref scale to use to create
+   * @param {ScaleLinear<number, number>} scale - the new ref scale to create
    *                                              the new comparison points
    */
   moveTo(start: number, end: number, scale: ScaleLinear<number, number>): void {
@@ -48,6 +51,9 @@ export class BrowserInterval {
     this.setCompStartForInterval();
     this.setCompEndForInterval();
   }
+
+
+  // Private Methods
 
   /**
    * Sets the comparison start coordinate and chromosome in the browser view;

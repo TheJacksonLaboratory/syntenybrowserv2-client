@@ -91,14 +91,17 @@ export class Gene {
   //Getter Methods
 
   /**
-   * Returns a central X position (in px) for the gene using the specified scale
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
+   * Returns a central X position (px) for the gene using the specified scale
+   * @param {ScaleLinear<number, number>} scale - scale to use to get the position
    */
-  getCenterXPos(scale: ScaleLinear<number, number>): number { return scale(this.start + (this.size / 2 )); }
+  getCenterXPos(scale: ScaleLinear<number, number>): number {
+    return scale(this.start + (this.size / 2 ));
+  }
 
   /**
-   * Returns a Y position (in px) based on genomic location (used to reduce overlap of genes in the tracks)
-   * @param {number} trackHeight - the height of the genomic track (the amount of vertical space)
+   * Returns a Y position (px) based on genomic location (used to reduce
+   * overlap of genes in the tracks)
+   * @param {number} trackHeight - height of the genomic track
    */
   getYPos(trackHeight: number): number {
     // 1.11 gets us close enough to edges without any elements overflowing
@@ -110,22 +113,29 @@ export class Gene {
   }
 
   /**
-   * Returns a width (in px) for the gene using the specified scale
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width
+   * Returns a width (px) for the gene using the specified scale
+   * @param {ScaleLinear<number, number>} scale - scale to use to get width
    */
-  getWidth(scale: ScaleLinear<number, number>): number { return Math.abs(scale(this.end) - scale(this.start)); }
+  getWidth(scale: ScaleLinear<number, number>): number {
+    return Math.abs(scale(this.end) - scale(this.start));
+  }
 
   /**
-   * Returns the width (in px) of the specified exon using the specified scale
+   * Returns the width (px) of the specified exon using the specified scale
    * @param {Exon} exon - the exon to calculate the width for
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width of the specified exon
+   * @param {ScaleLinear<number, number>} scale - scale to use to get width of exon
    */
-  getExonWidth(exon: Exon, scale: ScaleLinear<number, number>): number { return Math.abs(scale(exon.end) - scale(exon.start)); }
+  getExonWidth(exon: Exon, scale: ScaleLinear<number, number>): number {
+    return Math.abs(scale(exon.end) - scale(exon.start));
+  }
 
   /**
-   * Returns the appropriate color of the gene, depending on the status flag states; order is important:
-   * 1. We must check if the gene is being hovered over (highlighted) which should override selection/filtration status
-   * 2. Selection is typically done before any filtering so we don't want to overwrite selection status
+   * Returns the appropriate color of the gene, depending on the status flag
+   * states; order is important:
+   * 1. We must check if the gene is being hovered over (highlighted) which
+   *    should override selection/filtration status
+   * 2. Selection is typically done before any filtering so we don't want to
+   *    overwrite selection status
    * 3. Last resort to keep from it being colored black
    */
   getColor(): string {
@@ -157,57 +167,80 @@ export class Gene {
 
   /**
    * Returns the scaled x position for the reference gene's start position (px)
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the start point
+   * @param {ScaleLinear<number, number>} scale - scale to use to get start point
    */
   getRefXPos(scale: ScaleLinear<number, number>): number { return scale(this.start); }
 
   /**
-   * Returns the x and y positions (in px) of a reference gene based on the specified scale
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the x position
+   * Returns the x, y positions (px) of a ref gene based on the specified scale
+   * @param {ScaleLinear<number, number>} scale - scale to use to get the position
    */
-  getRefPxCoords(scale: ScaleLinear<number, number>): Array<number> { return [this.getRefXPos(scale), this.yPos]; }
+  getRefPxCoords(scale: ScaleLinear<number, number>): Array<number> {
+    return [this.getRefXPos(scale), this.yPos];
+  }
 
   /**
-   * Returns the X position (in px) of the specified exon using the specified scale
+   * Returns the x position (px) of the specified exon using the specified scale
    * @param {Exon} exon - the exon to calculate the width for
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the width of the specified exon
+   * @param {ScaleLinear<number, number>} scale - scale to use to get the width
+   *                                              of the exon
    */
-  getRefExonXPos(exon: Exon, scale: ScaleLinear<number, number>): number { return Math.abs(scale(exon.start) - scale(this.start)); }
+  getRefExonXPos(exon: Exon, scale: ScaleLinear<number, number>): number {
+    return Math.abs(scale(exon.start) - scale(this.start));
+  }
 
   // Comparison Getter Methods
 
   /**
    * Returns the scaled x position for the comparison gene's start position (px)
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the start point
-   * @param {boolean} trueCoords - the boolean flag for getting either the true starting point or matching starting point
+   * @param {ScaleLinear<number, number>} scale - scale to use to get start point
+   * @param {boolean} trueCoords - the flag for getting either the true starting
+ *                                 point or matching starting point
    */
-  getCompXPos(scale: ScaleLinear<number, number>, trueCoords: boolean): number { return scale(this.getStart(trueCoords)) }
-
-  /**
-   * Returns the x and y positions (in px) of a copmarison gene based on the specified scale, using
-   * either true coordinates or matching coordinates based on the trueCoords flag
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the x position
-   * @param {boolean} trueCoords - the boolean flag for getting either the true starting point or matching starting point
-   */
-  getCompPxCoords(scale: ScaleLinear<number, number>, trueCoords: boolean): Array<number> { return [this.getCompXPos(scale, trueCoords), this.yPos] }
-
-  /**
-   * Returns an X position (in px) for the specified exon, using the specified scale and gene start position
-   * @param {Exon} exon - the exon to calculate the X position for
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the position
-   * @param {boolean} trueCoords - the boolean flag for getting either the true starting point or matching starting point
-   */
-  getCompExonXPos(exon: Exon, scale: ScaleLinear<number, number>, trueCoords: boolean): number {
-    let start = this.getStart(trueCoords);
-    return (start === this.start) ? Math.abs(scale(exon.start) - scale(start)) : Math.abs(scale(start) - scale(exon.end));
+  getCompXPos(scale: ScaleLinear<number, number>, trueCoords: boolean): number {
+    return scale(this.getStart(trueCoords));
   }
 
   /**
-   * Returns either a comparison gene's start or end point based on whether true coordinates or matching
-   * coordinates are needed and if the gene's orientation matches
-   * @param {boolean} trueCoords - the boolean flag for getting either the true starting point or matching starting point
+   * Returns the x and y positions (in px) of a copmarison gene based on the
+   * specified scale, using either true coordinates or matching coordinates based
+   * on the trueCoords flag
+   * @param {ScaleLinear<number, number>} scale - scale to use to get start point
+   * @param {boolean} trueCoords - the flag for getting either the true starting
+   *                               point or matching starting point
    */
-  getStart(trueCoords: boolean): number { return trueCoords ? this.start : (this.orientationMatches ? this.start : this.end); }
+  getCompPxCoords(scale: ScaleLinear<number, number>,
+                  trueCoords: boolean): Array<number> {
+    return [this.getCompXPos(scale, trueCoords), this.yPos] ;
+  }
+
+  /**
+   * Returns an X position (in px) for the specified exon, using the specified
+   * scale and gene start position
+   * @param {Exon} exon - the exon to calculate the X position for
+   * @param {ScaleLinear<number, number>} scale - scale to use to get start point
+   * @param {boolean} trueCoords - the flag for getting either the true starting
+   *                               point or matching starting point
+   */
+  getCompExonXPos(exon: Exon, scale: ScaleLinear<number, number>,
+                  trueCoords: boolean): number {
+    let start = this.getStart(trueCoords);
+    return start === this.start ?
+           Math.abs(scale(exon.start) - scale(start)) :
+           Math.abs(scale(start) - scale(exon.end));
+  }
+
+  /**
+   * Returns either a comparison gene's start or end point based on whether true
+   * coords or matching coords are needed and if the gene's orientation matches
+   * @param {boolean} trueCoords - the flag for getting either the true starting
+   *                               point or matching starting point
+   */
+  getStart(trueCoords: boolean): number {
+    return trueCoords ?
+           this.start :
+           (this.orientationMatches ? this.start : this.end);
+  }
 
 
   // Condition Checks
@@ -218,36 +251,45 @@ export class Gene {
   isSyntenic(): boolean { return !(!this.blockID); }
 
   /**
-   * Returns true/false if any of the status flags are true; essentially, if the gene has a color, it should have a label
+   * Returns true/false if any of the status flags are true; essentially, if the
+   * gene has a color, it should have a label
    */
-  hasVisibleLabel(): boolean { return this.highlighted || this.selected || this.filtered; }
-
-  /**
-   * Returns true/false if the gene (reference chromosome) is in the current browser view (px)
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the gene's edge position
-   * @param {number} width - the width of the browser
-   */
-  isInRefView(scale: ScaleLinear<number, number>, width: number): boolean {
-    return !(this.getRefXPos(scale) + this.getWidth(scale) < 0 || this.getRefXPos(scale) > width);
+  hasVisibleLabel(): boolean {
+    return this.highlighted || this.selected || this.filtered;
   }
 
   /**
-   * Returns true/false if the gene (comparison genome) is in the current browser view (px)
-   * @param {ScaleLinear<number, number>} scale - the scale to use to calculate the gene's edge position
+   * Returns true/false if the gene (ref) is in the current browser view (px)
+   * @param {ScaleLinear<number, number>} scale - scale to use to get gene's
+   *                                              edge positions
    * @param {number} width - the width of the browser
-   * @param {boolean} trueCoords - the boolean flag for getting either the true starting point or matching starting point
    */
-  isInCompView(scale: ScaleLinear<number, number>, width: number, trueCoords: boolean): boolean {
-    return !(this.getCompXPos(scale, trueCoords) + this.getWidth(scale) < 0 || this.getCompXPos(scale, trueCoords) > width);
+  isInRefView(scale: ScaleLinear<number, number>, width: number): boolean {
+    return !(this.getRefXPos(scale) + this.getWidth(scale) < 0 ||
+             this.getRefXPos(scale) > width);
+  }
+
+  /**
+   * Returns true/false if the gene (comp) is in the current browser view (px)
+   * @param {ScaleLinear<number, number>} scale - scale to use to get gene's
+   *                                              edge positions
+   * @param {number} width - the width of the browser
+   * @param {boolean} trueCoords - the flag for getting either the true starting
+   *                               point or matching starting point
+   */
+  isInCompView(scale: ScaleLinear<number, number>,
+               width: number, trueCoords: boolean): boolean {
+    return !(this.getCompXPos(scale, trueCoords) + this.getWidth(scale) < 0 ||
+             this.getCompXPos(scale, trueCoords) > width);
   }
 
 
   // Private Methods
 
   /**
-   * Sets the block ID to that of the block the gene is contained in; if the block doesn't fully
-   * contain the gene, it won't be considered syntenic
-   * @param blocks
+   * Sets the block ID to that of the block the gene is contained in; if the
+   * block doesn't fully contain the gene, it won't be considered syntenic
+   * @param {Array<SyntenyBlock>} blocks - blocks to use identify the gene's blockID
    */
   setBlockID(blocks: Array<SyntenyBlock>): void {
     // get the block that contains the gene
@@ -255,8 +297,9 @@ export class Gene {
       return block.matchesCompChr(this.chr) && block.contains(this)
     });
 
-    // if the gene is contained in a block, assign the block's id to this.blockID, otherwise keep it null
-    this.blockID = (b.length > 0) ? b[0].id : null;
+    // if the gene is contained in a block, assign the block's id to
+    // this.blockID, otherwise keep it null
+    this.blockID = b.length > 0 ? b[0].id : null;
 
     // if an ID was just assigned, it's important to note the orientation
     if(this.blockID) this.orientationMatches = b[0].orientationMatches;

@@ -6,7 +6,7 @@ import {Species} from '../classes/species';
   templateUrl: './species-selection.component.html',
   styleUrls: ['./species-selection.component.scss']
 })
-export class SpeciesSelectionComponent implements OnInit {
+export class SpeciesSelectionComponent {
   species: Array<Species>;
   refSpecies: string;
   compSpecies: string;
@@ -15,28 +15,48 @@ export class SpeciesSelectionComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {}
 
-  setSpecies(species): void {
+  // Operational Methods
+
+  /**
+   * Sets the reference and comparison species to the the first and
+   * second species available, respectively
+   * @param {Array<Species>} species - list of available species to compare
+   */
+  setSpecies(species: Array<Species>): void {
     this.species = species;
     this.refSpecies = this.species[0].getID();
     this.compSpecies = this.species[1].getID();
   }
 
+  /**
+   * Changes the comparison species to the first non-reference species available
+   */
   changeComparison(): void {
     if(this.refSpecies === this.compSpecies) {
-      this.compSpecies = this.species.filter(species => species.getID() !== this.refSpecies)[0].getID();
+      this.compSpecies = this.species.filter(s => {
+                                       return s.getID() !== this.refSpecies
+                                     })[0].getID();
     }
 
     this.update.emit()
   }
 
+
+  // Getter Methods
+
+  /**
+   * Returns the current reference species
+   */
   getReferenceSelection(): Species {
-    return this.species.filter(species => species.getID() === this.refSpecies)[0];
+    return this.species.filter(s => s.getID() === this.refSpecies)[0];
   }
 
+  /**
+   * Returns the current comparison species
+   */
   getComparisonSelection(): Species {
-    return this.species.filter(species => species.getID() === this.compSpecies)[0];
+    return this.species.filter(s => s.getID() === this.compSpecies)[0];
   }
 
 }

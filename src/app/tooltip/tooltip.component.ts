@@ -18,7 +18,8 @@ export class TooltipComponent {
   // Operational Methods
 
   /**
-   * Displays the tooltip with the specified data and title at the specified x and y positions
+   * Displays the tooltip with the specified data and title at the
+   * specified x, y position
    * @param {TooltipContent} data - the content to be displayed in the tooltip
    * @param {number} x - the offset from the left side of the browser window
    * @param {number} y - the offset from the top of the browser window
@@ -35,7 +36,8 @@ export class TooltipComponent {
   }
 
   /**
-   * Clears the content and coordinates for the tooltip as well as marking the tooltip as hidden
+   * Clears the content and coordinates for the tooltip as well as marking
+   * the tooltip as hidden
    */
   clear(): void {
     this.data = null;
