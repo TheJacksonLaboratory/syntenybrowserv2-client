@@ -1,10 +1,11 @@
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from './services/api.service';
 import {Species} from './classes/species';
 import {SpeciesSelectionComponent} from './species-selection/species-selection.component';
 import {GenomeViewComponent} from './genome-view/genome-view.component';
 import {FeatureSelectionComponent} from './feature-selection/feature-selection.component';
 import {BlockViewBrowserComponent} from './block-view-browser/block-view-browser.component';
+import {Metadata} from './classes/interfaces';
 
 @Component({
   selector: 'app-root',
@@ -26,15 +27,13 @@ export class AppComponent implements OnInit {
   constructor(private http: ApiService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
-    console.log('init');
     // get the color map for genomes
     this.http.getGenomeColorMap().subscribe(colors => {
       this.genomeColors = colors;
 
-      console.log('getting species');
       // get available species from the API
       this.http.getSpecies().subscribe(species => {
-        // create species objects for every species and send them to the selection component
+        // create species for species and pass them to the selection component
         this.species.setSpecies(species.map(id => new Species(id)));
 
         this.updateSpecies();
@@ -43,28 +42,21 @@ export class AppComponent implements OnInit {
   }
 
   /**
-   * Updates the reference and comparison variables with the most recent selections
+   * Updates reference and comparison species with the most recent selections
    */
   updateSpecies(): void {
-    console.log('species updated');
-    // update the species variables with the most recent selections made by the user
+    // update the species
     this.refSpecies = this.species.getReferenceSelection();
     this.compSpecies = this.species.getComparisonSelection();
 
     // allow the species selects to stabilize
     this.cdr.detectChanges();
 
-    // init the feature selection using the most recent reference species
+    // load the feature selection using the most recent reference species
     this.features.load(this.refSpecies);
 
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
-
-    // TODO: this is a shortcut call to streamline the process down to the block view browser
-    // TODO: REMOVE WHEN FINISHED
-    this.viewInBrowser = true;
-    this.cdr.detectChanges();
-    this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, "1", []);
   }
 
   getChromosomeFeatures() {
@@ -76,8 +68,18 @@ export class AppComponent implements OnInit {
 
     // allow the block view browser to initialize
     this.cdr.detectChanges();
+    this.blockViewBrowser.render(this.refSpecies,
+                                 this.compSpecies,
+                                 this.genomeColors,
+                                 features.chr,
+                                 features.features);
 
-    this.blockViewBrowser.render(this.refSpecies, this.compSpecies, this.genomeColors, features.chr, features.features);
+    setTimeout(() => {
+      // TODO: this currently only will work in Firefox and Chrome
+      document.getElementById('block-view')
+              .scrollIntoView({behavior: 'smooth', block: 'end'});
+    }, 50);
+
   }
 
 }

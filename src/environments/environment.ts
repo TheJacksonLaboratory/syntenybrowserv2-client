@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  root: 'http://0.0.0.0:5001/'
+  root: 'http://localhost:5001/'
 };
 
 /*

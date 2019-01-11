@@ -33,7 +33,9 @@
         <div class="card-block">
           <app-species-selection (update)="updateSpecies()"></app-species-selection>
           <hr/>
-          <app-feature-selection *ngIf="refSpecies" (update)="genomeView.updateFeatures(features.selections)"></app-feature-selection>
+          <app-feature-selection *ngIf="refSpecies"
+                                 (update)="genomeView.updateFeatures(features.selections)">
+          </app-feature-selection>
         </div>
       </div>
     </div>
@@ -49,7 +51,8 @@
           <app-genome-view *ngIf="refSpecies && compSpecies"></app-genome-view>
         </div>
         <div class="card-footer">
-          <button class="btn btn-primary" [disabled]="genomeView && !genomeView.referenceChromosome"
+          <button class="btn btn-primary"
+                  [disabled]="genomeView && !genomeView.refChr"
                   (click)="getChromosomeFeatures()">
             <clr-icon shape="check"></clr-icon> See Selection in Block View
           </button>
@@ -60,15 +63,13 @@
 </div>
 
 <div *ngIf="viewInBrowser" class="clr-row">
-  <div class="col-lg-12">
+  <div class="col-lg-12 bottom-1" id="block-view">
     <div class="card">
       <div class="card-header">
         BLOCK VIEW BROWSER
       </div>
       <div class="card-block">
-        <app-block-view-browser>
-
-        </app-block-view-browser>
+        <app-block-view-browser></app-block-view-browser>
       </div>
     </div>
   </div>

@@ -1,0 +1,8 @@
+<div *ngIf="data" id="tooltip-container">
+  <div *ngIf="title" class="text-center">
+    <b class="title">{{ title }}</b>
+  </div>
+  <div *ngFor="let row of getDataRowKeys()">
+    <b>{{ row }}:</b> {{ data[row] }}
+  </div>
+</div>

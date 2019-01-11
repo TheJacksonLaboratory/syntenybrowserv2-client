@@ -10,43 +10,40 @@
 .margin-1 { margin: 1rem !important; }
 .margin-2 { margin: 2rem !important; }
 .row-center { justify-content: center; }
+.text-center { text-align: center; }
 .clr-control-label { text-transform: uppercase; }
-
-.outer-chr-band {
-  stroke: black;
-  stroke-width: 0.25;
-  fill: transparent;
-}
-
-.block-band {
-  stroke: black;
-  stroke-width: 0.1;
-}
-
-.inner {
-  stroke: black;
-  stroke-width: 0.25;
-}
-
-.ref-block-band { stroke: none; }
-
-#genome-view-container text { font-size: 12px; }
-
-.chord { stroke-width: 0.3; }
 
 .clr-row {
   margin-left: 0;
   margin-right: 0;
 }
 
-#view-selection-overlay {
-  stroke-width: 0.3;
+// The following styles need to be here; any further up in the chain and they won't override D3's
+// default stylings
+rect.selection {
+  fill: #DDD;
+  fill-opacity: 0.3;
+  stroke-width: 0.3px;
+  stroke: black;
 }
 
-#orientation-indicators path {
-  stroke-width: 0.5;
+#browser {
+  text { font-size: 8px; }
+
+  #browser-axis {
+    line, path { stroke-width: 0.5; }
+  }
 }
 
-#reference-genes text, #comparison-genes text {
-  font-size: 8px;
+#tt {
+  position: absolute;
+  z-index: 1000;
+  background: #FFF;
+  border: #999;
+  border-radius: 2px;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2), 0 4px 15px 0 rgba(0, 0, 0, 0.19);
+  color: #333;
 }
+
+.black-text { color: #000; }
+.black-rect { color: #000; }
