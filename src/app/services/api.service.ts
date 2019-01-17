@@ -20,8 +20,8 @@ export class ApiService {
    * @param {string} search - string to search for genes by
    */
   getGeneMatches(taxonID: string, search: string): Observable<Array<GeneMetadata>> {
-    return this.http.get<Response>(this.root + 'genes/' + taxonID + '/' + search)
-                    .pipe(map(resp => resp.genes));
+    let url = `${this.root}/genes/${taxonID}/${search}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.genes));
   }
 
   /**
@@ -41,8 +41,8 @@ export class ApiService {
    * @param {string} search - string to search for genes by matching ontologies
    */
   getOntGeneMatches(taxonID: string, ontType: string, search: string): Observable<Array<OntologyGeneMetadata>> {
-    return this.http.get<Response>(this.root + 'ont/' + ontType + '/genes/' + taxonID + '/' + search)
-                    .pipe(map(resp => resp.ont_genes));
+    let url = `${this.root}/ont/${ontType}/genes/${taxonID}/${search}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.ont_genes));
   }
 
   /**
@@ -53,8 +53,10 @@ export class ApiService {
    * TODO: a row in a relational table
    */
   getSpecies(): Observable<Array<number>> {
-    return this.http.get<Response>(this.root + 'species')
-                    .pipe(map(resp => resp.species.map(species => species.ref_taxonid).sort()))
+    return this.http.get<Response>(`${this.root}/species`)
+                    .pipe(
+                      map(resp => resp.species.map(s => s.ref_taxonid).sort())
+                    );
   }
 
   /**
@@ -63,20 +65,34 @@ export class ApiService {
    * @param {string} compTaxonID - the stringified taxon ID for the comparison species
    */
   getGenomeSynteny(refTaxonID: string, compTaxonID: string): Observable<Array<SyntenyBlock>> {
-    return this.http.get<Response>(this.root + 'syntenic-blocks/' + refTaxonID + '/' + compTaxonID)
-                    .pipe(map(resp => resp.blocks.map(block => new SyntenyBlock(block))));
+    let url = `${this.root}/syntenic-blocks/${refTaxonID}/${compTaxonID}`;
+    return this.http.get<Response>(url)
+                    .pipe(
+                      map(resp => resp.blocks.map(b => new SyntenyBlock(b)))
+                    );
   }
 
   getChromosomeSynteny(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<SyntenyBlock>> {
-    return this.http.get<Response>(this.root + 'syntenic-blocks/' + refTaxonID + '/' + compTaxonID + '/' + chr)
-                    .pipe(map(resp => resp.blocks.map(block => new SyntenyBlock(block, true))));
+    let url = `${this.root}/syntenic-blocks/${refTaxonID}/${compTaxonID}/${chr}`;
+    return this.http.get<Response>(url)
+                    .pipe(
+                      map(resp => {
+                        return resp.blocks.map(b => new SyntenyBlock(b, true));
+                      })
+                    );
   }
 
   getGenes(refTaxonID: string, compTaxonID: string, chr: string): Observable<Array<any>> {
-    return this.http.get<Response>(this.root + 'chr-genes/' + refTaxonID + '/' + compTaxonID + '/' +chr).pipe(map(resp => resp.genes));
+    let url = `${this.root}/chr-genes/${refTaxonID}/${compTaxonID}/${chr}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.genes));
   }
 
   getGenomeColorMap(): Observable<any> {
-    return this.http.get<Response>(this.root + 'genome-colors');
+    return this.http.get<Response>(`${this.root}/genome-colors`);
+  }
+
+  getQTLsByChr(taxonID: string, chr: string): Observable<Array<any>> {
+    let url = `${this.root}/chr-qtls/${taxonID}/${chr}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.qtls));
   }
 }
