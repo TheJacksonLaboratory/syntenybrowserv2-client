@@ -30,8 +30,8 @@ export class ApiService {
    * @param {string} search - string to search for QTLs by
    */
   getQTLMatches(taxonID: string, search: string): Observable<Array<QTLMetadata>> {
-    return this.http.get<Response>(this.root + 'qtls/' + taxonID + '/' + search)
-                    .pipe(map(resp => resp.qtls));
+    let url = `${this.root}/qtls/${taxonID}/${search}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.qtls));
   }
 
   /**

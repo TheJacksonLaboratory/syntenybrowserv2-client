@@ -115,7 +115,7 @@
 
       <!-- Indicators for selected QTLs -->
       <path *ngFor="let qtl of selectedQTLs" class="qtl qtl-mark"
-            [attr.d]="getHLinePath(qtl.indicatorY, qtl.getIndWidth(2), qtl.getIndStart())"
+            [attr.d]="getHLinePath(qtl.indOffset, qtl.getIndWidth(2), qtl.getIndStart())"
             (mouseenter)="hoverQTL(qtl, $event)"
             (mouseleave)="tooltip.clear()">
       </path>
@@ -181,9 +181,9 @@
 
         <!-- Selected QTLs -->
         <rect *ngFor="let qtl of selectedQTLs" class="qtl"
-              [attr.x]="qtl.getStart(refBPToPixels)"
+              [attr.transform]="translate([qtl.getStart(refBPToPixels), qtl.offset])"
               [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
-              [attr.height]="trackHeight"
+              [attr.height]="qtl.height"
               (mouseenter)="hoverQTL(qtl, $event)"
               (mouseleave)="tooltip.clear()">
         </rect>

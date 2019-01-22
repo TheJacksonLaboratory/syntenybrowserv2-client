@@ -8,8 +8,11 @@ export class QTL {
   chr: string;
   start: number;
   end: number;
+  size: number;
+  height: number;
+  offset: number;
 
-  indicatorY: number;
+  indOffset: number;
   indScale: ScaleLinear<number, number>;
 
   format: Function = d3.format(',');
@@ -20,8 +23,11 @@ export class QTL {
     this.chr = qtl.chr;
     this.start = qtl.start;
     this.end = qtl.end;
+    this.size = qtl.end - qtl.start;
+    this.height = qtl.height;
+    this.offset = qtl.offset;
 
-    this.indicatorY = (index * 10) + 20;
+    this.indOffset = qtl.indOffset + 18;
     this.indScale = staticScale;
   }
 
