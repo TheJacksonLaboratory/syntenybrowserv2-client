@@ -1,2 +1,6 @@
-clr-dg-column, clr-dg-placeholder, .datagrid-column-title { text-transform: uppercase; }
+clr-dg-column,
+clr-dg-placeholder { text-transform: uppercase !important; }
+
+
+
 .datagrid .datagrid-cell { font-size: .4rem !important; }
