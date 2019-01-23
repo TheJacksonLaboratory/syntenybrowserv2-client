@@ -535,30 +535,23 @@ export class BlockViewBrowserComponent {
                // get selected features
                this.selectedRefGenes = this.refGenes.filter(g => g.selected);
                this.selectedCompGenes = this.compGenes.filter(g => g.selected);
-               // this.http.getQTLsByChr(this.ref.getID(), this.refChr)
-               //          .subscribe(qtls => {
-               //            let heightQTLS = this.arrangeQTLs(qtls);
-               //            this.selectedQTLs = heightQTLS
-               //              .map((q, i) => {
-               //                return new QTL(q,
-               //                  i,
-               //                  this.staticRefBPToPixels);
-               //              });
-               //            console.log(this.selectedQTLs);
-               //          });
+
+               // Keeping here until QTL arrangement is completely finished
+               /* this.http.getQTLsByChr(this.ref.getID(), this.refChr)
+                           .subscribe(qtls => {
+                             let heightQTLS = this.arrangeQTLs(qtls);
+                             this.selectedQTLs = heightQTLS.map((q, i) => {
+                                 return new QTL(q, i, this.staticRefBPToPixels);
+                               });
+                           });
+               */
+
                let formattedQTLs = this.arrangeQTLs(features.filter(f => f.qtl_id));
                this.selectedQTLs = formattedQTLs.map((q, i) => {
                                                    return new QTL(q,
                                                                   i,
                                                                   this.staticRefBPToPixels);
                                                  });
-               // this.selectedQTLs = features.filter(f => f.qtl_id)
-               //                             .map((q, i) => {
-               //                               return new QTL(q,
-               //                                              i,
-               //                                              this.staticRefBPToPixels);
-               //                             });
-               // this.selectedQTLs.sort((a, b) => b.size - a.size !== 0 ? b.size - a.size : a.start - b.start);
 
                // set interval to center around the first reference feature, if
                // features are selected, otherwise set interval to entire chr

@@ -53,6 +53,37 @@ export class BrowserInterval {
   }
 
 
+  // Getter Methods
+
+  /**
+   * Returns the label for the reference start point for the current interval
+   */
+  getRefStartLabel(): string {
+    return `Chr${this.refChr}:${this.refStart}bp`;
+  }
+
+  /**
+   * Returns the label for the reference end point for the current interval
+   */
+  getRefEndLabel(): string {
+    return `Chr${this.refChr}:${this.refEnd}bp`;
+  }
+
+  /**
+   * Returns the label for the comparison start point for the current interval
+   */
+  getCompStartLabel(): string {
+    return `Chr${this.compStartChr}:${this.compStart}bp`;
+  }
+
+  /**
+   * Returns the label for the comparison end point for the current interval
+   */
+  getCompEndLabel(): string {
+    return `Chr${this.compEndChr}:${this.compEnd}bp`;
+  }
+
+
   // Private Methods
 
   /**
@@ -74,7 +105,7 @@ export class BrowserInterval {
       if(Number(ends[i]) < this.refStart) {
         // we want the previous block (which is the block to the right,
         // visually, since we reversed the array) and break from the loop
-        block = i > 0 ? this.blockEnds[ends[i-1]] : this.blockEnds[ends[0]];
+        block = i > 0 ? this.blockEnds[ends[i - 1]] : this.blockEnds[ends[0]];
         break;
       }
     }
@@ -111,7 +142,8 @@ export class BrowserInterval {
       if(Number(strts[i]) > this.refEnd) {
         // we want the previous block (which is the block to the left, visually)
         // and break from the loop
-        block = i > 0 ? this.blockStarts[strts[i-1]] : this.blockStarts[strts[0]];
+        block = i > 0 ?
+                this.blockStarts[strts[i - 1]] : this.blockStarts[strts[0]];
         break;
       }
     }

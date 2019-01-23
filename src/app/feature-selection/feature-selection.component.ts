@@ -102,6 +102,10 @@ export class FeatureSelectionComponent {
        of ${pagination.totalItems}` : this.getSinglePagePaginatorLabel();
   }
 
+  /**
+   * Returns the proper comparator based on the specified column name
+   * @param {string} colName - name of the column
+   */
   getComparator(colName: string): ClrDatagridComparatorInterface<any> {
     if(colName.includes('id')) {
       return this.idComp;
@@ -156,6 +160,12 @@ export class FeatureSelectionComponent {
 
 }
 
+
+// Comparator Classes
+
+/**
+ * Comparator for sorting features in the feature search table by ID
+ */
 export class IDComparator implements ClrDatagridComparatorInterface<any> {
   compare(a: any, b: any) {
     if(a.gene_id && b.gene_id) {
@@ -168,6 +178,9 @@ export class IDComparator implements ClrDatagridComparatorInterface<any> {
   }
 }
 
+/**
+ * Comparator for sorting features in the feature search table by symbol
+ */
 export class SymbolComparator implements ClrDatagridComparatorInterface<any> {
   compare(a: any, b: any) {
     if(a.gene_id && b.gene_id) {
@@ -178,11 +191,17 @@ export class SymbolComparator implements ClrDatagridComparatorInterface<any> {
   }
 }
 
+/**
+ * Comparator for sorting genes in the feature search table by type
+ */
 export class TypeComparator implements ClrDatagridComparatorInterface<any> {
   compare(a: any, b: any) {
     return a.gene_type.localeCompare(b.gene_type); }
 }
 
+/**
+ * Comparator for sorting features in the feature search table by chromosome
+ */
 export class ChrComparator implements ClrDatagridComparatorInterface<any> {
   compare(a: any, b: any) {
     // if a.chr is y, b comes first
