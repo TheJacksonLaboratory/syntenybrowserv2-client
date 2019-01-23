@@ -528,9 +528,12 @@ export class BlockViewBrowserComponent {
                // and add block ID for genes in a syntenic region, then filter
                // that list to only genes that have a block ID
                this.compGenes = compGenes.map(g => {
-                 let homs = homIDs[g.gene_symbol];
-                 return new Gene(g, homs, this.trackHeight, this.blocks);
-               }).filter(g => g.isSyntenic());
+                                           let homs = homIDs[g.gene_symbol];
+                                           return new Gene(g,
+                                                           homs,
+                                                           this.trackHeight,
+                                                           this.blocks);
+                                         }).filter(g => g.isSyntenic());
 
                // get selected features
                this.selectedRefGenes = this.refGenes.filter(g => g.selected);
@@ -576,6 +579,7 @@ export class BlockViewBrowserComponent {
 
     let pointData = {};
 
+    // log start (and end) point(s) of each QTL
     tempQs.forEach(q => {
       if(q.start === q.end) {
         q['points'] = [q.start];
@@ -605,7 +609,7 @@ export class BlockViewBrowserComponent {
       }
     });
 
-    // do one more pass of the points list that adds information for a QTL
+    // do one more pass of the QTLs to add information to pointData for a QTL
     // that neither starts or ends and the "point of interests"
     tempQs.forEach(q => {
       Object.keys(pointData).forEach(pt => {
@@ -618,23 +622,22 @@ export class BlockViewBrowserComponent {
       q.points.sort(); // sort the points so we do them in order
     });
 
-    //console.log(pointData);
-
     // an 1D array representing vertically stacked spaces (lanes) that can be
     // allotted to a single QTL at a time
     let lanes = [];
+    // keeps track of smallest height for each QTL
     let qtlHeights = {};
+    // keeps track of QTLs that need to be referenced to get their height to
+    // affect offsets of other QTLs
     let qtlOffsets = {};
-    let points = Object.keys(pointData).map(pt => Number(pt)).sort((a, b) => a - b);
+
+    let points = Object.keys(pointData).map(pt => Number(pt))
+                                       .sort((a, b) => a - b);
 
     points.forEach(pt => {
-      // console.log('Lanes before: [', lanes.map(lane => lane ? lane.id : 'free').join(', '), ']');
       let qs = pointData[pt];
       let starts = qs.filter(q => q.isStart);
       let ends = qs.filter(q => q.isEnd && !q.isStart);
-      // console.log('Starts: ', starts.map(q => q.id).join(', '));
-      // console.log('Ends: ', ends.map(q => q.id).join(', '));
-      // console.log('');
 
       // assign each starting QTL to a lane
       if(starts.length > 0) {
@@ -657,12 +660,15 @@ export class BlockViewBrowserComponent {
         });
       }
 
+      // load heights and offsets for each QTL
       lanes.forEach((q, i, all) => {
         if(q) {
+          // update height
           qtlHeights[q.id] = qtlHeights[q.id] ?
                              Math.min(1 / all.length, qtlHeights[q.id]) :
                              1 / all.length;
 
+          // get QTLs that affect the current QTL's offset
           let qtlsToRef = [];
           for(let j = 0; j < i; j++) {
             if(all[j]) {
@@ -699,13 +705,8 @@ export class BlockViewBrowserComponent {
           lastLane = i + 1;
         }
       });
-      // console.log('Last used lane: ', lastLane);
       // get the index of the last used lane and slice lanes to only contain indices 0 through the last used lane;
       lanes = lastLane > 0 ? (lastLane === lanes.length ? lanes : lanes.slice(0, lastLane)) : [];
-
-      // console.log('Lanes after: [', lanes.map(lane => lane ? lane.id : 'free').join(', '), ']');
-      // console.log('');
-      // console.log('');
     });
 
     tempQs.forEach(q => {
@@ -729,8 +730,6 @@ export class BlockViewBrowserComponent {
       q['height'] = this.trackHeight * qtlHeights[id];
 
     });
-
-    console.log(qtlOffsets);
 
     tempQs.forEach(q => {
       q['offset'] = this.trackHeight * qtlOffsets[q.qtl_id];
