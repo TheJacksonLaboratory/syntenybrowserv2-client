@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  root: 'http://syntenybrowserpublic.jax.org/'
+  root: 'http://syntenybrowser.jax.org/'
 };
