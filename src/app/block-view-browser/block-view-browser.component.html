@@ -108,14 +108,18 @@
       <!-- Indicators for selected/filtered features in the comparison chromosome -->
       <path *ngFor="let gene of selectedCompGenes"
             class="gene-mark"
-            [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)), 8, chromosomeViewHeight - 8)"
+            [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)),
+                                   8,
+                                   chromosomeViewHeight - 8)"
             (mouseenter)="highlightCompGene(gene, $event, true)"
             (mouseleave)="unhighlightGene(true)">
       </path>
 
       <!-- Indicators for selected QTLs -->
       <path *ngFor="let qtl of selectedQTLs" class="qtl qtl-mark"
-            [attr.d]="getHLinePath(qtl.indicatorY, qtl.getIndWidth(2), qtl.getIndStart())"
+            [attr.d]="getHLinePath(qtl.indOffset,
+                                   qtl.getIndWidth(2),
+                                   qtl.getIndStart())"
             (mouseenter)="hoverQTL(qtl, $event)"
             (mouseleave)="tooltip.clear()">
       </path>
@@ -181,9 +185,9 @@
 
         <!-- Selected QTLs -->
         <rect *ngFor="let qtl of selectedQTLs" class="qtl"
-              [attr.x]="qtl.getStart(refBPToPixels)"
+              [attr.transform]="translate([qtl.getStart(refBPToPixels), qtl.offset])"
               [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
-              [attr.height]="trackHeight"
+              [attr.height]="qtl.height"
               (mouseenter)="hoverQTL(qtl, $event)"
               (mouseleave)="tooltip.clear()">
         </rect>
@@ -243,7 +247,8 @@
         <!-- Comparison genes -->
         <g *ngIf="compGenes && blocks" id="comparison-genes">
           <g *ngFor="let gene of getCompGenesInView()"
-             [attr.transform]="translate(gene.getCompPxCoords(getScale(gene), trueOrientation))">
+             [attr.transform]="translate(gene.getCompPxCoords(getScale(gene),
+                                         trueOrientation))">
             <!-- Gene label -->
             <text *ngIf="gene.hasVisibleLabel()"
                   [ngStyle]="{ 'fill': gene.getColor() }">
@@ -253,7 +258,8 @@
             <!-- Transcript -->
             <g *ngIf="interval.width <= 5000000">
               <rect *ngFor="let exon of gene.transcript" class="exon"
-                    [attr.x]="gene.getCompExonXPos(exon, getScale(gene), trueOrientation)"
+                    [attr.x]="gene.getCompExonXPos(exon, getScale(gene),
+                                                   trueOrientation)"
                     [attr.width]="gene.getExonWidth(exon, getScale(gene))"
                     [ngStyle]="{ 'fill': gene.getColor() }">
               </rect>
@@ -272,7 +278,8 @@
         <!-- Comparison block coordinates -->
         <g *ngIf="blocks" id="comparison-block-coordinates">
           <g *ngFor="let block of blocks"
-             [attr.transform]="translate([refBPToPixels(block.refStart), trackHeight + 9])">
+             [attr.transform]="translate([refBPToPixels(block.refStart),
+                                          trackHeight + 9])">
             <g *ngIf="block.getPxWidth() > 125">
               <!-- Vertical line extending start point of block -->
               <path [attr.d]="getVLinePath(0, -10)"
@@ -307,12 +314,12 @@
 
         <!-- Start position -->
         <text [attr.transform]="translate([2, 0])">
-          {{ ref.commonName }}, Chr{{ refChr }}:{{ interval.refStart }}bp
+          {{ ref.commonName }}, {{ interval.getRefStartLabel() }}
         </text>
 
         <!-- End position -->
         <text class="end" [attr.transform]="translate([width - 2, 0])">
-          {{ ref.commonName }}, Chr{{ refChr }}:{{ interval.refEnd }}bp
+          {{ ref.commonName }}, {{ interval.getRefEndLabel() }}
         </text>
 
         <!-- Vertical line extending end point of reference interval -->
@@ -332,12 +339,12 @@
 
         <!-- Start position -->
         <text [attr.transform]="translate([2, 0])">
-          {{ comp.commonName }}, Chr{{ interval.compStartChr }}:{{ interval.compStart }}bp
+          {{ comp.commonName }}, {{ interval.getCompStartLabel() }}
         </text>
 
         <!-- End Position -->
         <text class="end" [attr.transform]="translate([width - 2, 0])">
-          {{ comp.commonName }}, Chr{{ interval.compEndChr }}:{{ interval.compEnd }}bp
+          {{ comp.commonName }}, {{ interval.getCompEndLabel() }}
         </text>
 
         <!-- Vertical line extending end point of comparison interval -->

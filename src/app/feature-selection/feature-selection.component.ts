@@ -2,6 +2,7 @@ import {ChangeDetectorRef, Component, EventEmitter, Output} from '@angular/core'
 import {Species} from '../classes/species';
 import {Metadata, SearchType} from '../classes/interfaces';
 import {ApiService} from '../services/api.service';
+import {ClrDatagridComparatorInterface} from '@clr/angular';
 
 @Component({
   selector: 'app-feature-selection',
@@ -17,6 +18,11 @@ export class FeatureSelectionComponent {
   masterSelections: Array<Metadata> = [];
   selections: Array<Metadata> = [];
   displayColumns: Array<string>;
+
+  idComp = new IDComparator();
+  symbolComp = new SymbolComparator();
+  typeComp = new TypeComparator();
+  chrComp = new ChrComparator();
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 
@@ -96,6 +102,24 @@ export class FeatureSelectionComponent {
        of ${pagination.totalItems}` : this.getSinglePagePaginatorLabel();
   }
 
+  /**
+   * Returns the proper comparator based on the specified column name
+   * @param {string} colName - name of the column
+   */
+  getComparator(colName: string): ClrDatagridComparatorInterface<any> {
+    if(colName.includes('id')) {
+      return this.idComp;
+    } else if(colName.includes('symbol')) {
+      return this.symbolComp;
+    } else if(colName.includes('type')) {
+      return this.typeComp;
+    } else if(colName.includes('chr')) {
+      return this.chrComp;
+    } else {
+      return null;
+    }
+  }
+
 
   // Private Methods
 
@@ -135,3 +159,63 @@ export class FeatureSelectionComponent {
   }
 
 }
+
+
+// Comparator Classes
+
+/**
+ * Comparator for sorting features in the feature search table by ID
+ */
+export class IDComparator implements ClrDatagridComparatorInterface<any> {
+  compare(a: any, b: any) {
+    if(a.gene_id && b.gene_id) {
+      let aID = Number(a.gene_id.replace('MGI:', ''));
+      let bID = Number(b.gene_id.replace('MGI:', ''));
+      return aID - bID;
+    } else {
+      return Number(a.qtl_id) - Number(b.qtl_id);
+    }
+  }
+}
+
+/**
+ * Comparator for sorting features in the feature search table by symbol
+ */
+export class SymbolComparator implements ClrDatagridComparatorInterface<any> {
+  compare(a: any, b: any) {
+    if(a.gene_id && b.gene_id) {
+      return a.gene_symbol.localeCompare(b.gene_symbol);
+    } else {
+      return a.qtl_symbol.localeCompare(b.qtl_symbol);
+    }
+  }
+}
+
+/**
+ * Comparator for sorting genes in the feature search table by type
+ */
+export class TypeComparator implements ClrDatagridComparatorInterface<any> {
+  compare(a: any, b: any) {
+    return a.gene_type.localeCompare(b.gene_type); }
+}
+
+/**
+ * Comparator for sorting features in the feature search table by chromosome
+ */
+export class ChrComparator implements ClrDatagridComparatorInterface<any> {
+  compare(a: any, b: any) {
+    // if a.chr is y, b comes first
+    if(a.chr.toLowerCase() === 'y') return 1;
+    // if b.chr is y, a comes first
+    else if(b.chr.toLowerCase() === 'y') return -1;
+    // if neither a.chr or b.chr are y and a.chr is x, then b.chr must
+    // be a number and comes first
+    else if(a.chr.toLowerCase() === 'x') return 1;
+    // if neither a.chr or b.chr are y and b.chr is x, then a.chr must
+    // be a number and comes first
+    else if(b.chr.toLowerCase() === 'x') return -1;
+    // if neither a.chr or b.chr are x or y, then compare numerical chr values
+    else return Number(a.chr) - Number(b.chr);
+  }
+}
+

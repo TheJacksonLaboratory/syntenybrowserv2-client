@@ -528,19 +528,33 @@ export class BlockViewBrowserComponent {
                // and add block ID for genes in a syntenic region, then filter
                // that list to only genes that have a block ID
                this.compGenes = compGenes.map(g => {
-                 let homs = homIDs[g.gene_symbol];
-                 return new Gene(g, homs, this.trackHeight, this.blocks);
-               }).filter(g => g.isSyntenic());
+                                           let homs = homIDs[g.gene_symbol];
+                                           return new Gene(g,
+                                                           homs,
+                                                           this.trackHeight,
+                                                           this.blocks);
+                                         }).filter(g => g.isSyntenic());
 
                // get selected features
                this.selectedRefGenes = this.refGenes.filter(g => g.selected);
                this.selectedCompGenes = this.compGenes.filter(g => g.selected);
-               this.selectedQTLs = features.filter(f => f.qtl_id)
-                                           .map((qtl, i) => {
-                                             return new QTL(qtl,
-                                                            i,
-                                                            this.staticRefBPToPixels);
-                                           });
+
+               // Keeping here until QTL arrangement is completely finished
+               /* this.http.getQTLsByChr(this.ref.getID(), this.refChr)
+                           .subscribe(qtls => {
+                             let heightQTLS = this.arrangeQTLs(qtls);
+                             this.selectedQTLs = heightQTLS.map((q, i) => {
+                                 return new QTL(q, i, this.staticRefBPToPixels);
+                               });
+                           });
+               */
+
+               let formattedQTLs = this.arrangeQTLs(features.filter(f => f.qtl_id));
+               this.selectedQTLs = formattedQTLs.map((q, i) => {
+                                                   return new QTL(q,
+                                                                  i,
+                                                                  this.staticRefBPToPixels);
+                                                 });
 
                // set interval to center around the first reference feature, if
                // features are selected, otherwise set interval to entire chr
@@ -558,6 +572,171 @@ export class BlockViewBrowserComponent {
                // set the zoom, brush and dynamic axis behaviors/interactions
                this.bindBrowserBehaviors();
              });
+  }
+
+  private arrangeQTLs(qtls: Array<any>): Array<any> {
+    let tempQs = JSON.parse(JSON.stringify(qtls));
+
+    let pointData = {};
+
+    // log start (and end) point(s) of each QTL
+    tempQs.forEach(q => {
+      if(q.start === q.end) {
+        q['points'] = [q.start];
+
+        // log point data
+        if(!pointData[q.start]) {
+          pointData[q.start] = [{ id: q.qtl_id, isStart: true, isEnd: true }];
+        } else {
+          pointData[q.start].push({ id: q.qtl_id, isStart: true, isEnd: true });
+        }
+      } else {
+        q['points'] = [q.start, q.end];
+
+        // log start point data
+        if(!pointData[q.start]) {
+          pointData[q.start] = [{ id: q.qtl_id, isStart: true, isEnd: false }];
+        } else {
+          pointData[q.start].push({ id: q.qtl_id, isStart: true, isEnd: false });
+        }
+
+        // log end point data
+        if(!pointData[q.end]) {
+          pointData[q.end] = [{ id: q.qtl_id, isStart: false, isEnd: true }];
+        } else {
+          pointData[q.end].push({ id: q.qtl_id, isStart: false, isEnd: true });
+        }
+      }
+    });
+
+    // do one more pass of the QTLs to add information to pointData for a QTL
+    // that neither starts or ends and the "point of interests"
+    tempQs.forEach(q => {
+      Object.keys(pointData).forEach(pt => {
+        if(q.start < pt && q.end > pt) {
+          q.points.push(Number(pt));
+          pointData[pt].push({ id: q.qtl_id, isStart: false, isEnd: false });
+        }
+      });
+
+      q.points.sort(); // sort the points so we do them in order
+    });
+
+    // an 1D array representing vertically stacked spaces (lanes) that can be
+    // allotted to a single QTL at a time
+    let lanes = [];
+    // keeps track of smallest height for each QTL
+    let qtlHeights = {};
+    // keeps track of QTLs that need to be referenced to get their height to
+    // affect offsets of other QTLs
+    let qtlOffsets = {};
+
+    let points = Object.keys(pointData).map(pt => Number(pt))
+                                       .sort((a, b) => a - b);
+
+    points.forEach(pt => {
+      let qs = pointData[pt];
+      let starts = qs.filter(q => q.isStart);
+      let ends = qs.filter(q => q.isEnd && !q.isStart);
+
+      // assign each starting QTL to a lane
+      if(starts.length > 0) {
+        starts.forEach(s => {
+          // if there are open lanes, use them for starting QTLs
+          if(lanes.filter(lane => !lane).length > 0) {
+            // iterate through the lanes to find the first available one
+            for(let i = 0; i < lanes.length; i++) {
+              if(!lanes[i]) {
+                // store the index of the lane
+                s['lane'] = i;
+                lanes[i] = s;
+                break;
+              }
+            }
+          } else { // if there aren't any open lanes, let's add a new one
+            s['lane'] = lanes.length;
+            lanes.push(s);
+          }
+        });
+      }
+
+      // load heights and offsets for each QTL
+      lanes.forEach((q, i, all) => {
+        if(q) {
+          // update height
+          qtlHeights[q.id] = qtlHeights[q.id] ?
+                             Math.min(1 / all.length, qtlHeights[q.id]) :
+                             1 / all.length;
+
+          // get QTLs that affect the current QTL's offset
+          let qtlsToRef = [];
+          for(let j = 0; j < i; j++) {
+            if(all[j]) {
+              qtlsToRef.push(all[j].id);
+            }
+          }
+          if(!qtlOffsets[q.id] || i - 1 > qtlOffsets[q.id].length) {
+            qtlOffsets[q.id] = qtlsToRef;
+          }
+        }
+      });
+
+      // if there are QTLs that are ending, let's process them first to open up
+      // any lanes that might need to be reassigned
+      if(ends.length > 0) {
+        // free up lanes
+        ends.forEach(e => {
+          // check that the QTL isn't one that starts and ends at the same bp
+          if(!e.isStart) {
+            for(let i = 0; i < lanes.length; i++) {
+              if(lanes[i] && lanes[i].id === e.id) {
+                lanes[i] = null;
+                break;
+              }
+            }
+          }
+        });
+      }
+
+      // remove unused excess appended lanes
+      let lastLane = -1;
+      lanes.forEach((lane, i) => {
+        if(lane) {
+          lastLane = i + 1;
+        }
+      });
+      // get the index of the last used lane and slice lanes to only contain indices 0 through the last used lane;
+      lanes = lastLane > 0 ? (lastLane === lanes.length ? lanes : lanes.slice(0, lastLane)) : [];
+    });
+
+    tempQs.forEach(q => {
+      let id = q.qtl_id;
+      let numsOfOverlaps = [];
+      // get the lengths of all the points that the current QTL covers
+      q['lane'] = pointData[q.start].filter(e => e.isStart && e.id === q.qtl_id)
+                                    .map(e => e.lane)[0];
+
+      q.points.forEach(pt => {
+          numsOfOverlaps.push(pointData[pt].length);
+      });
+
+      qtlOffsets[id] = qtlOffsets[id].length > 0 ?
+                   qtlOffsets[id].map(i => qtlHeights[i])
+                                 .reduce((tot, val) => tot + val) :
+                   0;
+
+      // calculate the final height of the QTL by dividing the total vertical
+      // space by the maximum value of overlaps
+      q['height'] = this.trackHeight * qtlHeights[id];
+
+    });
+
+    tempQs.forEach(q => {
+      q['offset'] = this.trackHeight * qtlOffsets[q.qtl_id];
+      q['indOffset'] = (this.chromosomeViewHeight - 25) * qtlOffsets[q.qtl_id];
+    });
+
+    return tempQs;
   }
 
   /**

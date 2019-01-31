@@ -25,7 +25,8 @@
                 (clrDgSelectedChange)="updateSelections()"
                 [clDgRowSelection]="true" class="col-lg-12">
     <clr-dg-placeholder> Start searching for features! </clr-dg-placeholder>
-    <clr-dg-column *ngFor="let col of displayColumns">
+    <clr-dg-column *ngFor="let col of displayColumns"
+                   [clrDgSortBy]="getComparator(col)">
       {{ col.replace('_', ' ') }}
     </clr-dg-column>
 
