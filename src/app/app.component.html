@@ -1,79 +1,30 @@
-<header class="header-4">
-  <div class="branding">
-    <a href="#" class="nav-link">
-      <img style="height:50px;" src="../assets/jax-logo.png">
-      <span class="title">SYNTENY BROWSER</span>
-    </a>
-  </div>
-</header>
-<nav class="subnav">
-  <ul class="nav">
-    <li class="nav-item">
-      <a class="nav-link active" href="#">Browser</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">About</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Contact</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">License</a>
-    </li>
-  </ul>
-</nav>
-
-<div class="clr-row">
-  <div class="col-lg-6 col-md-12">
-    <div class="col-lg-12">
-      <div class="card">
-        <div class="card-header">
-          FEATURE SEARCH
-        </div>
-        <div class="card-block">
-          <app-species-selection (update)="updateSpecies()"></app-species-selection>
-          <hr/>
-          <app-feature-selection *ngIf="refSpecies"
-                                 (update)="genomeView.updateFeatures(features.selections)">
-          </app-feature-selection>
-        </div>
-      </div>
+<div class="main-container">
+  <header class="header-4">
+    <div class="branding">
+      <a href="#" class="nav-link">
+        <img style="height:50px;" src="../assets/jax-logo.png">
+        <span class="title">SYNTENY BROWSER</span>
+      </a>
     </div>
-  </div>
-
-  <div class="col-lg-6 col-md-12">
-    <div class="col-lg-12">
-      <div class="card">
-        <div class="card-header">
-          GENOME VIEW
-        </div>
-        <div class="card-block">
-          <app-genome-view *ngIf="refSpecies && compSpecies"></app-genome-view>
-        </div>
-        <div class="card-footer">
-          <button class="btn btn-primary"
-                  [disabled]="genomeView && !genomeView.refChr"
-                  (click)="getChromosomeFeatures()">
-            <clr-icon shape="check"></clr-icon> See Selection in Block View
-          </button>
-        </div>
-      </div>
-    </div>
+  </header>
+  
+  <nav class="subnav">
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link active" [routerLink]="['']">Browser</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/about']">About</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/examples']">Examples</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/docs']">Docs</a>
+      </li>
+    </ul>
+  </nav>
+  <div class="content-container">
+    <router-outlet></router-outlet>
   </div>
 </div>
-
-<div *ngIf="viewInBrowser" class="clr-row">
-  <div class="col-lg-12 bottom-1" id="block-view">
-    <div class="card">
-      <div class="card-header">
-        BLOCK VIEW BROWSER
-      </div>
-      <div class="card-block">
-        <app-block-view-browser></app-block-view-browser>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<router-outlet></router-outlet>
