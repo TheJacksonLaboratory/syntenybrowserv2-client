@@ -49,9 +49,14 @@
   <h4>Current selections</h4>
   <br/>
   <div id="label-container" class="col-lg-12">
-    <span *ngFor="let sel of currentSelections" class="label label-light-blue">
-    {{ sel }}
-      <clr-icon shape="close" (click)="removeSelection(sel)"></clr-icon>
-  </span>
+    <div *ngIf="currentSelections.length === 0" class="no-selections">
+      No selections have been made yet
+    </div>
+    <div *ngIf="currentSelections.length > 0">
+      <span *ngFor="let sel of currentSelections" class="label label-light-blue">
+        {{ sel }}
+        <clr-icon shape="close" (click)="removeSelection(sel)"></clr-icon>
+      </span>
+    </div>
   </div>
 </div>
