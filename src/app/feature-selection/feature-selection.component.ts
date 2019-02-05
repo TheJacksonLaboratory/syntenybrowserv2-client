@@ -18,6 +18,7 @@ export class FeatureSelectionComponent {
   masterSelections: Array<Metadata> = [];
   selections: Array<Metadata> = [];
   displayColumns: Array<string>;
+  currentSelections: Array<any> = [];
 
   idComp = new IDComparator();
   symbolComp = new SymbolComparator();
@@ -79,13 +80,26 @@ export class FeatureSelectionComponent {
   setTypeDependentElements(): void {
     this.searchPlaceholder = this.getSearchType().search_example;
     this.displayColumns = this.getColumns();
+
+    this.rows = [];
+    this.search = '';
   }
 
   /**
    * Emits to indicate that there has been an update in the selections to display
    */
-  updateSelections(): void {
+  updateSelections(selections: any): void {
+    console.log(selections);
     this.update.emit();
+
+    let newSels = selections.map(sel => sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol)
+                            .filter(sel => this.currentSelections.indexOf(sel) < 0);
+    this.currentSelections.push(...newSels)
+  }
+
+  removeSelection(feature: string): void {
+    this.currentSelections = this.currentSelections.filter(sel => sel !== feature);
+    this.selections = this.selections.filter(sel => sel.gene_symbol !== feature);
   }
 
 
@@ -132,12 +146,12 @@ export class FeatureSelectionComponent {
   private getColumns(): Array<string> {
     if(this.getSearchType().search_type === 'GeneName') {
       return ['gene_id', 'gene_symbol', 'gene_type', 'chr',
-              'start', 'end', 'strand'];
+              'start', 'end'];
     } else if(this.getSearchType().search_type === 'QTLName') {
       return ['qtl_id', 'qtl_symbol', 'chr', 'start', 'end'];
     } else {
       return ['term_id', 'term_name', 'gene_id', 'gene_symbol',
-              'gene_type', 'chr', 'start', 'end', 'strand'];
+              'gene_type', 'chr', 'start', 'end'];
     }
   }
 

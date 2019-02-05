@@ -22,7 +22,7 @@
 </div>
 <div class="clr-row">
   <clr-datagrid [clrDgSelected]="selections"
-                (clrDgSelectedChange)="updateSelections()"
+                (clrDgSelectedChange)="updateSelections($event)"
                 [clDgRowSelection]="true" class="col-lg-12">
     <clr-dg-placeholder> Start searching for features! </clr-dg-placeholder>
     <clr-dg-column *ngFor="let col of displayColumns"
@@ -44,4 +44,14 @@
       </clr-dg-pagination>
     </clr-dg-footer>
   </clr-datagrid>
+</div>
+<div class="clr-row">
+  <h4>Current selections</h4>
+  <br/>
+  <div id="label-container" class="col-lg-12">
+    <span *ngFor="let sel of currentSelections" class="label label-light-blue">
+    {{ sel }}
+      <clr-icon shape="close" (click)="removeSelection(sel)"></clr-icon>
+  </span>
+  </div>
 </div>
