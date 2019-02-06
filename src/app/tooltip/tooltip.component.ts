@@ -30,7 +30,7 @@ export class TooltipComponent {
     this.title = title;
 
     this.offsetX = `${x}px`;
-    this.offsetY = `${y}px`;
+    this.offsetY = `${y - 10}px`;
 
     this.hidden = false;
   }

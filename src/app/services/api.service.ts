@@ -15,6 +15,24 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
   /**
+   * Returns a list of all genes belonging to the specified species (by taxon ID)
+   * @param {string} taxonID - stringified taxon ID for the reference species
+   */
+  getAllGenes(taxonID: string): Observable<Array<GeneMetadata>> {
+    let url = `${this.root}/genes/${taxonID}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.genes));
+  }
+
+  /**
+   * Returns a list of all QTLs belonging to the specified species (by taxon ID)
+   * @param {string} taxonID - stringified taxon ID for the reference species
+   */
+  getAllQTLs(taxonID: string): Observable<Array<QTLMetadata>> {
+    let url = `${this.root}/qtls/${taxonID}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.qtls));
+  }
+
+  /**
    * Returns a list of genes belonging to the specified species (by taxon ID)
    * which also matches the search string
    * @param {string} taxonID - stringified taxon ID for the reference species

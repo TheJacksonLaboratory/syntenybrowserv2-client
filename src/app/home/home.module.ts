@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
-import { ClarityModule, ClrFormsNextModule, ClrSelectModule} from '@clr/angular';
+import { ClarityModule, ClrSelectModule} from '@clr/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // components
@@ -22,7 +22,6 @@ import { ApiService } from '../services/api.service';
 @NgModule({
   imports: [
     ClarityModule,
-    ClrFormsNextModule,
     ClrSelectModule,
     CommonModule,
     FormsModule,

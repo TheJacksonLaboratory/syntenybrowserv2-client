@@ -15,10 +15,9 @@ export class FeatureSelectionComponent {
   searchType: string;
   searchPlaceholder: string;
   rows: Array<Metadata> = [];
-  masterSelections: Array<Metadata> = [];
+  filteredRows: Array<Metadata> = [];
   selections: Array<Metadata> = [];
   displayColumns: Array<string>;
-  currentSelections: Array<any> = [];
 
   idComp = new IDComparator();
   symbolComp = new SymbolComparator();
@@ -52,24 +51,16 @@ export class FeatureSelectionComponent {
   searchForFeatures(): void {
     // if there's a search term, get features based on the current search type
     if(this.search !== '') {
-      if(this.getSearchType().search_type === 'GeneName') {
-        this.http.getGeneMatches(this.refSpecies.getID(), this.search)
-                 .subscribe(features => {
-                   this.rows = features;
-                 });
-      } else if(this.getSearchType().search_type === 'QTLName') {
-        this.http.getQTLMatches(this.refSpecies.getID(), this.search)
-                 .subscribe(features => {
-                   this.rows = features
-                 });
-      } else {
-        // TODO: SEARCH FOR GENES BY ONTOLOGY => DESIGN A NEW QUERY SYSTEM
-        // this.http.getOntGeneMatches(this.refSpecies.getID(), this.getSearchType().name, this.search)
-        //          .subscribe(features => this.rows = features);
-      }
-    // if the search term has been cleared, empty the table
+      let sym = this.getSearchType().search_type === 'GeneName' ?
+                'gene_symbol' : 'qtl_symbol';
+
+      this.filteredRows = this.rows.filter(row => {
+                                      return row[sym].toLowerCase()
+                                              .includes(this.search.toLowerCase());
+                                    })
+    // if the search term has been cleared, show all features
     } else {
-      this.rows = [];
+      this.filteredRows = this.rows;
     }
   }
 
@@ -81,25 +72,46 @@ export class FeatureSelectionComponent {
     this.searchPlaceholder = this.getSearchType().search_example;
     this.displayColumns = this.getColumns();
 
-    this.rows = [];
+    if(this.getSearchType().search_type === 'GeneName') {
+      this.http.getAllGenes(this.refSpecies.getID())
+        .subscribe(genes => {
+          this.rows = genes;
+          this.filteredRows = genes;
+        });
+    } else if(this.getSearchType().search_type === 'QTLName') {
+      this.http.getAllQTLs(this.refSpecies.getID())
+        .subscribe(qtls => {
+          this.rows = qtls;
+          this.filteredRows = qtls;
+        });
+    } else {
+      // TODO: SEARCH FOR GENES BY ONTOLOGY => DESIGN A NEW QUERY SYSTEM
+      // this.http.getOntGeneMatches(this.refSpecies.getID(), this.getSearchType().name, this.search)
+      //          .subscribe(features => this.rows = features);
+    }
     this.search = '';
   }
 
   /**
    * Emits to indicate that there has been an update in the selections to display
    */
-  updateSelections(selections: any): void {
-    console.log(selections);
-    this.update.emit();
+  updateSelections(newRow: any): void {
+    if(this.selections.map(sel => sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol)
+                      .indexOf(newRow.gene_symbol ? newRow.gene_symbol : newRow.qtl_symbol) < 0) {
+      this.selections.push(newRow);
+    }
 
-    let newSels = selections.map(sel => sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol)
-                            .filter(sel => this.currentSelections.indexOf(sel) < 0);
-    this.currentSelections.push(...newSels)
+    this.update.emit();
   }
 
-  removeSelection(feature: string): void {
-    this.currentSelections = this.currentSelections.filter(sel => sel !== feature);
-    this.selections = this.selections.filter(sel => sel.gene_symbol !== feature);
+  removeSelection(feature: Metadata): void {
+    let fSymbol = feature.gene_symbol ? feature.gene_symbol : feature.qtl_symbol;
+    this.selections = this.selections.filter(sel => {
+      let selSymbol  = sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol;
+      return selSymbol !== fSymbol
+    });
+
+    this.update.emit();
   }
 
 
