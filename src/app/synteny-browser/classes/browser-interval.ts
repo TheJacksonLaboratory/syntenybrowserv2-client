@@ -1,5 +1,5 @@
-import {SyntenyBlock} from './synteny-block';
-import {ScaleLinear} from 'd3-scale';
+import { ScaleLinear } from 'd3';
+import { SyntenyBlock } from './synteny-block';
 
 export class BrowserInterval {
   refStart: number;

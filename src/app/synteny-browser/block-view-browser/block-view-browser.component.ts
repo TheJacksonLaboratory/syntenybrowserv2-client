@@ -1,15 +1,15 @@
-import {Component, ViewChild} from '@angular/core';
-import {Species} from '../classes/species';
-import {ApiService} from '../services/api.service';
+import { ApiService } from '../services/api.service';
+import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
-import {ComparisonScaling, Metadata, QTLMetadata} from '../classes/interfaces';
-import {BrushBehavior, ScaleLinear, ZoomBehavior} from 'd3';
-import {Gene} from '../classes/gene';
-import {TooltipComponent} from '../tooltip/tooltip.component';
-import {SyntenyBlock} from '../classes/synteny-block';
-import {QTL} from '../classes/qtl';
-import {Legend} from '../classes/legend';
-import {BrowserInterval} from '../classes/browser-interval';
+import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
+import { ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
+import { Component, ViewChild } from '@angular/core';
+import { Gene } from '../classes/gene';
+import { Legend } from '../classes/legend';
+import { QTL } from '../classes/qtl';
+import { Species } from '../classes/species';
+import { SyntenyBlock } from '../classes/synteny-block';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-block-view-browser',

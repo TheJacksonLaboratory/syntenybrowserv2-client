@@ -1,7 +1,6 @@
-import {ComparisonBlockCoordinates} from './interfaces';
-import {Gene} from './gene';
-import {ScaleLinear} from 'd3-scale';
-import * as d3 from 'd3';
+import { ComparisonBlockCoordinates } from './interfaces';
+import { format, scaleLinear, ScaleLinear } from 'd3';
+import { Gene } from './gene';
 
 export class SyntenyBlock {
   id: string;
@@ -23,7 +22,7 @@ export class SyntenyBlock {
   refScale: ScaleLinear<number, number>;
   compMatchScale: ScaleLinear<number, number>;
   compTrueScale: ScaleLinear<number, number>;
-  format: Function = d3.format(',');
+  format: Function = format(',');
 
   constructor(block: any, moreInfo: boolean = false) {
     this.id = block.id;
@@ -232,9 +231,10 @@ export class SyntenyBlock {
    * @param {ComparisonBlockCoordinates} coords - the coordinates for current orientation
    */
   private createCompScale(coords: ComparisonBlockCoordinates): ScaleLinear<number, number> {
-    return d3.scaleLinear()
-             .domain([coords.compStart, coords.compEnd])
-             .range([this.refScale(this.refStart), this.refScale(this.refEnd)]);
+    return scaleLinear().domain([coords.compStart, coords.compEnd])
+                        .range(
+                          [this.refScale(this.refStart),
+                           this.refScale(this.refEnd)]);
   }
 
   /**

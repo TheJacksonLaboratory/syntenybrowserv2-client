@@ -1,4 +1,4 @@
-import {SyntenyBlock} from './synteny-block';
+import { SyntenyBlock } from './synteny-block';
 
 export interface Response {
   species?: Array<RawSpecies>;

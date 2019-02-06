@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import {TooltipContent} from '../classes/interfaces';
+import { Component}  from '@angular/core';
+import { TooltipContent } from '../classes/interfaces';
 
 @Component({
   selector: 'app-tooltip',

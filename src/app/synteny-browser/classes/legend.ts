@@ -3,8 +3,8 @@ export class Legend {
   activeChrs: Array<string>;
   hoverChr: string = null;
 
-  offsetY = 460;
-  offsetX;
+  offsetY: number = 460;
+  offsetX: number;
   colors: object;
 
   constructor(genome: object, colors: object, chrs: Array<string>, width: number) {

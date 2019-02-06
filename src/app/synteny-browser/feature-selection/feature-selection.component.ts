@@ -1,8 +1,8 @@
-import {ChangeDetectorRef, Component, EventEmitter, Output} from '@angular/core';
-import {Species} from '../classes/species';
-import {Metadata, SearchType} from '../classes/interfaces';
-import {ApiService} from '../services/api.service';
-import {ClrDatagridComparatorInterface} from '@clr/angular';
+import { ApiService } from '../services/api.service';
+import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ClrDatagridComparatorInterface } from '@clr/angular';
+import { Metadata, SearchType } from '../classes/interfaces';
+import { Species } from '../classes/species';
 
 @Component({
   selector: 'app-feature-selection',

@@ -1,6 +1,5 @@
-import {QTLMetadata} from './interfaces';
-import * as d3 from 'd3';
-import {ScaleLinear} from 'd3';
+import { format, ScaleLinear } from 'd3';
+import { QTLMetadata } from './interfaces';
 
 export class QTL {
   id: string;
@@ -15,7 +14,7 @@ export class QTL {
   indOffset: number;
   indScale: ScaleLinear<number, number>;
 
-  format: Function = d3.format(',');
+  format: Function = format(',');
 
   constructor(qtl: any, index: number, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.qtl_id;

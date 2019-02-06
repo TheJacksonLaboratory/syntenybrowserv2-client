@@ -1,14 +1,12 @@
+import { environment } from '../../../environments/environment';
+import { GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response } from '../classes/interfaces';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {environment} from '../../../environments/environment';
-import {HttpClient} from '@angular/common/http';
-import {map} from 'rxjs/operators';
-import {GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response} from '../classes/interfaces';
-import {SyntenyBlock} from '../classes/synteny-block';
-import {Observable} from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { SyntenyBlock } from '../classes/synteny-block';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ApiService {
   private root: string = environment.root;
 

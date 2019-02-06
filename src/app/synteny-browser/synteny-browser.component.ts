@@ -1,11 +1,11 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ApiService } from './services/api.service';
+import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
+import { GenomeViewComponent } from './genome-view/genome-view.component';
+import { Metadata } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
-import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
-import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
-import { Metadata } from './classes/interfaces';
 
 @Component({
   selector: 'home',

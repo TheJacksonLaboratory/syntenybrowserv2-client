@@ -1,7 +1,6 @@
-import {ScaleLinear} from 'd3-scale';
-import {Exon} from './interfaces';
-import * as d3 from 'd3';
-import {SyntenyBlock} from './synteny-block';
+import { Exon } from './interfaces';
+import { format, ScaleLinear } from 'd3';
+import { SyntenyBlock } from './synteny-block';
 
 export class Gene {
   start: number;
@@ -23,7 +22,7 @@ export class Gene {
   selected: boolean = false;
   filtered: boolean = false;
 
-  format: Function = d3.format(',');
+  format: Function = format(',');
 
   constructor(gene: any, ids: Array<number>, trackHeight: number,
               blocks: Array<SyntenyBlock> = null) {

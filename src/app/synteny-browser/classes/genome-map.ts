@@ -1,5 +1,5 @@
-import * as d3 from 'd3';
-import {CartesianCoordinate} from './interfaces';
+import { CartesianCoordinate } from './interfaces';
+import { scaleLinear } from 'd3';
 
 export class GenomeMap {
   private scales = {};
@@ -31,9 +31,8 @@ export class GenomeMap {
       let end = start + (radiansPerUnit * chromosomes[chr]);
 
       // assign the scale of the result (domain: genomic bp, range: radians)
-      this.scales[chr] = d3.scaleLinear()
-                           .domain([0, chromosomes[chr]])
-                           .range([start, end]);
+      this.scales[chr] = scaleLinear().domain([0, chromosomes[chr]])
+                                      .range([start, end]);
 
       // increment bp so that we know where to start calculating radians
       // for the next chromosome

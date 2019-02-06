@@ -1,5 +1,5 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {Species} from '../classes/species';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Species } from '../classes/species';
 
 @Component({
   selector: 'app-species-selection',

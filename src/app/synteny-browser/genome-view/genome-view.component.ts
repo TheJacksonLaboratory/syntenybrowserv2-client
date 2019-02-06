@@ -1,10 +1,10 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../services/api.service';
-import {Species} from '../classes/species';
-import {GenomeMap} from '../classes/genome-map';
 import {CartesianCoordinate, Metadata, SelectedFeatures} from '../classes/interfaces';
-import {TooltipComponent} from '../tooltip/tooltip.component';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {GenomeMap} from '../classes/genome-map';
+import {Species} from '../classes/species';
 import {SyntenyBlock} from '../classes/synteny-block';
+import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-genome-view',
