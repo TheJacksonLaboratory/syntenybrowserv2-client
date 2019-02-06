@@ -14,7 +14,7 @@ import { Component } from '@angular/core';
       <a class="nav-link" [routerLink]="['/docs-contributors']">Contributor Guidelines</a>
     </section>
   `,
-  styleUrls: ['./docs.component.scss']  
+  styleUrls: ['../docs.component.scss']
 })
 
 export class DocsMenuComponent {

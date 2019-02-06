@@ -3,17 +3,13 @@ h2 {
   font-weight: 600;
 }
 
-p {
-  margin-top: 0;
-}
+p { margin-top: 0; }
 
-pre {
-  background-color:#EEEEEE;
-}
+pre { background-color:#EEEEEE; }
 
 code {
   color: #688DB2;
-  font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New;
+  font-family: Consolas, Menlo, Monaco, monospace;
   line-height: 0.9;
   font-size: 0.9em;
 }

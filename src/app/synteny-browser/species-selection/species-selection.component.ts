@@ -3,8 +3,7 @@ import {Species} from '../classes/species';
 
 @Component({
   selector: 'app-species-selection',
-  templateUrl: './species-selection.component.html',
-  styleUrls: ['./species-selection.component.scss']
+  templateUrl: './species-selection.component.html'
 })
 export class SpeciesSelectionComponent {
   species: Array<Species>;

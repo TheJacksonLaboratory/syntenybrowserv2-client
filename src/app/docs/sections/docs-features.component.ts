@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sb-docs-service-api',
+  selector: 'sb-docs-features',
   template: `
     <div class="content-container">
       <div class="content-area">
-        <h2>Python Service API</h2>
+        <h2>Browser Features</h2>
       </div>
       <!-- nav element should be kept in 
       the parent component to preserve layout -->
@@ -14,9 +14,9 @@ import { Component } from '@angular/core';
       </nav>
     </div>
   `,
-  styleUrls: ['./docs.component.scss']  
+  styleUrls: ['../docs.component.scss']
 })
 
-export class DocsServiceAPIComponent {
+export class DocsFeaturesComponent {
 	
 }

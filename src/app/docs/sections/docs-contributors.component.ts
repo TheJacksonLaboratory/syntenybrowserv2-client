@@ -27,7 +27,7 @@ import { Component } from '@angular/core';
       </nav>
     </div>
   `,
-  styleUrls: ['./docs.component.scss']  
+  styleUrls: ['../docs.component.scss']
 })
 
 export class DocsContributorsComponent {

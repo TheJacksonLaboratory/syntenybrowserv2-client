@@ -1,19 +1,18 @@
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ApiService } from '../services/api.service';
-import { Species } from '../classes/species';
-import { SpeciesSelectionComponent } from '../species-selection/species-selection.component';
-import { GenomeViewComponent } from '../genome-view/genome-view.component';
-import { FeatureSelectionComponent } from '../feature-selection/feature-selection.component';
-import { BlockViewBrowserComponent } from '../block-view-browser/block-view-browser.component';
-import { Metadata } from '../classes/interfaces';
+import { ApiService } from './services/api.service';
+import { Species } from './classes/species';
+import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
+import { GenomeViewComponent } from './genome-view/genome-view.component';
+import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
+import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
+import { Metadata } from './classes/interfaces';
 
 @Component({
   selector: 'home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  templateUrl: './synteny-browser.component.html'
 })
 
-export class HomeComponent implements OnInit {
+export class SyntenyBrowserComponent implements OnInit {
   @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
   @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
   @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
@@ -61,13 +60,13 @@ export class HomeComponent implements OnInit {
   }
 
   getChromosomeFeatures() {
-    // show block view browser
+    // show block view synteny-browser
     this.viewInBrowser = true;
 
     // get the list of features (if any) for the selected chromosome
     let features = this.genomeView.getChromosomeFeaturesToView();
 
-    // allow the block view browser to initialize
+    // allow the block view synteny-browser to initialize
     this.cdr.detectChanges();
     this.blockViewBrowser.render(this.refSpecies,
                                  this.compSpecies,

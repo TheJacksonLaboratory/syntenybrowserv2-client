@@ -26,34 +26,22 @@
 
 #browser-bg { fill: transparent; }
 
-rect.comparison, #comparison-block-coordinates path {
-  stroke-width: 1;
-}
+rect.comparison, #comparison-block-coordinates path { stroke-width: 1; }
 
 rect.reference, #reference-block-coordinates path {
   stroke: #AAA;
   stroke-width: 1;
 }
 
-rect.reference {
-  fill: #CCC;
-}
+rect.reference { fill: #CCC; }
 
-rect.reference, rect.comparison, #chr-view-blocks rect {
-  fill-opacity: 0.5;
-}
+rect.reference, rect.comparison, #chr-view-blocks rect { fill-opacity: 0.5; }
 
-.trans-bg {
-  fill: transparent;
-}
+.trans-bg { fill: transparent; }
 
-.bg {
-  width: 1200px;
-}
+.bg { width: 1200px; }
 
-.gene-mark {
-  stroke: #F00;
-}
+.gene-mark { stroke: #F00; }
 
 .qtl {
   stroke: #409;
@@ -65,44 +53,30 @@ rect.reference, rect.comparison, #chr-view-blocks rect {
   stroke-linecap: round;
 }
 
-.end {
-  text-anchor: end;
-}
+.end { text-anchor: end; }
 
-#legend text {
-  font-size: 12px;
-}
+#legend text { font-size: 12px; }
 
 #ref-bg {
   fill: #EEE;
   fill-opacity: 0.7;
 }
 
-#comp-bg {
-  fill: #FFF;
-}
+#comp-bg { fill: #FFF; }
 
 rect.gene {
   height: 5px;
   fill-opacity: 0.5;
 }
 
-rect.exon {
-  height: 5px;
-}
+rect.exon { height: 5px; }
 
-rect, line {
-  shape-rendering: crispEdges;
-}
+rect, line { shape-rendering: crispEdges; }
 
-#comparison-genome-legend text {
-  text-anchor: middle;
-}
+#comparison-genome-legend text { text-anchor: middle; }
 
 #reference-interval-coordinates text,
-#comparison-interval-coordinates text {
-  font-size: 10px;
-}
+#comparison-interval-coordinates text { font-size: 10px; }
 
 #reference-interval-coordinates path,
 #comparison-interval-coordinates path {
@@ -117,9 +91,7 @@ text.all-caps {
   text-transform: uppercase;
 }
 
-#progress-bar {
-  fill: #006A91;
-}
+#progress-bar { fill: #006A91; }
 
 #loading-overlay {
   fill: #FFF;

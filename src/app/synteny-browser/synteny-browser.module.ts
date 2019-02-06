@@ -8,16 +8,16 @@ import { ClarityModule, ClrSelectModule} from '@clr/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // components
-import { HomeComponent } from './home.component';
+import { SyntenyBrowserComponent } from './synteny-browser.component';
 
-import { BlockViewBrowserComponent } from '../block-view-browser/block-view-browser.component';
-import { FeatureSelectionComponent } from '../feature-selection/feature-selection.component';
-import { GenomeViewComponent } from '../genome-view/genome-view.component';
-import { SpeciesSelectionComponent } from '../species-selection/species-selection.component';
-import { TooltipComponent } from '../tooltip/tooltip.component';
+import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
+import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
+import { GenomeViewComponent } from './genome-view/genome-view.component';
+import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
+import { TooltipComponent } from './tooltip/tooltip.component';
 
 // services
-import { ApiService } from '../services/api.service';
+import { ApiService } from './services/api.service';
 
 @NgModule({
   imports: [
@@ -29,7 +29,7 @@ import { ApiService } from '../services/api.service';
     ReactiveFormsModule
   ],
   declarations: [
-    HomeComponent,
+    SyntenyBrowserComponent,
     BlockViewBrowserComponent,
     FeatureSelectionComponent,
     GenomeViewComponent,
@@ -39,4 +39,4 @@ import { ApiService } from '../services/api.service';
   providers: [ApiService, HttpClient]
 })
 
-export class HomeModule { }
+export class SyntenyBrowserModule { }
