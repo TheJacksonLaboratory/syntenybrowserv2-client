@@ -574,6 +574,10 @@ export class BlockViewBrowserComponent {
              });
   }
 
+  /**
+   * Returns the array of QTLs with added data about offset and height
+   * @param {Array<any>} qtls - an array of QTLs
+   */
   private arrangeQTLs(qtls: Array<any>): Array<any> {
     let tempQs = JSON.parse(JSON.stringify(qtls));
 
