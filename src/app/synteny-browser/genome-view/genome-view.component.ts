@@ -1,11 +1,11 @@
-import {ApiService} from '../services/api.service';
-import {CartesianCoordinate, Metadata, SelectedFeatures} from '../classes/interfaces';
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {GenomeMap} from '../classes/genome-map';
-import {Species} from '../classes/species';
-import {SyntenyBlock} from '../classes/synteny-block';
-import {TooltipComponent} from '../tooltip/tooltip.component';
-import {Feature} from '../classes/feature';
+import { ApiService } from '../services/api.service';
+import { CartesianCoordinate, Metadata, SelectedFeatures } from '../classes/interfaces';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Feature } from '../classes/feature';
+import { GenomeMap } from '../classes/genome-map';
+import { Species } from '../classes/species';
+import { SyntenyBlock } from '../classes/synteny-block';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-genome-view',
@@ -122,7 +122,7 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Updates the list of features to display in the circos plot
-   * @param {Array<Metadata>} features - the current list of features to display
+   * @param {Array<Feature>} features - the current list of features to display
    */
   updateFeatures(features: Array<Feature>): void {
     this.features = features;

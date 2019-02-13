@@ -80,7 +80,7 @@ export class FeatureSelectionComponent {
                             });
                  } else {
                    this.rows.sort((a, b) => this.compare(a, b));
-                   
+
                    this.filteredRows = this.rows;
                    this.loading = false;
                  }

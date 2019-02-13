@@ -8,7 +8,7 @@ import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 
 @Component({
-  selector: 'home',
+  selector: 'app-synteny-browser',
   templateUrl: './synteny-browser.component.html'
 })
 
@@ -61,10 +61,18 @@ export class SyntenyBrowserComponent implements OnInit {
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
   }
 
+  /**
+   * Updates the genome view with the current selections from the feature search
+   */
   updateFeatures(): void {
     this.genomeView.updateFeatures(this.features.selections);
   }
 
+  /**
+   * Show the block view browser and pass the reference and comparison species,
+   * color dictionary, selected chromosome, and the features in the selected
+   * chromosome (if any) to the block view browser
+   */
   getChromosomeFeatures() {
     // show block view synteny-browser
     this.viewInBrowser = true;

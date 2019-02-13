@@ -1,4 +1,4 @@
-import { Component}  from '@angular/core';
+import { Component } from '@angular/core';
 import { TooltipContent } from '../classes/interfaces';
 
 @Component({
@@ -30,7 +30,7 @@ export class TooltipComponent {
     this.title = title;
 
     this.offsetX = `${x}px`;
-    this.offsetY = `${y - 10}px`;
+    this.offsetY = `${y}px`;
 
     this.hidden = false;
   }
