@@ -5,6 +5,7 @@ import {GenomeMap} from '../classes/genome-map';
 import {Species} from '../classes/species';
 import {SyntenyBlock} from '../classes/synteny-block';
 import {TooltipComponent} from '../tooltip/tooltip.component';
+import {Feature} from '../classes/feature';
 
 @Component({
   selector: 'app-genome-view',
@@ -32,7 +33,7 @@ export class GenomeViewComponent implements OnInit {
 
   refChr: any;
 
-  features: Array<any>;
+  features: Array<Feature>;
   featureBlocks: Array<SyntenyBlock>;
 
   constructor(private http: ApiService) { }
@@ -72,6 +73,8 @@ export class GenomeViewComponent implements OnInit {
    * @param {object} colors - the dictionary to map colors to chromosomes
    */
   render(reference: Species, comparison: Species, colors: object): void {
+    this.reset();
+
     this.ref = reference;
     this.comp = comparison;
     this.colors = colors;
@@ -121,7 +124,7 @@ export class GenomeViewComponent implements OnInit {
    * Updates the list of features to display in the circos plot
    * @param {Array<Metadata>} features - the current list of features to display
    */
-  updateFeatures(features: Array<Metadata>): void {
+  updateFeatures(features: Array<Feature>): void {
     this.features = features;
 
     // generate a list of syntenic blocks to highlight; the features.map() is
@@ -314,14 +317,12 @@ export class GenomeViewComponent implements OnInit {
     // if tooltip is for reference species and there are features, display
     // the feature symbols in the tooltip
     if(species.taxonID === this.ref.taxonID && hasFeatures) {
-      let genes = this.features.filter(f => f.gene_id && f.chr === chr);
-      let qtls = this.features.filter(f => f.qtl_id && f.chr === chr);
+      let genes = this.features.filter(f => f.gene && f.chr === chr);
+      let qtls = this.features.filter(f => !f.gene && f.chr === chr);
 
-      if(genes.length > 0)
-        data['Genes'] = genes.map(g => g.gene_symbol).join(', ');
+      if(genes.length > 0) data['Genes'] = genes.map(g => g.symbol).join(', ');
 
-      if(qtls.length > 0)
-        data['QTLs'] = qtls.map(qtl => qtl.qtl_symbol).join(', ');
+      if(qtls.length > 0) data['QTLs'] = qtls.map(qtl => qtl.symbol).join(', ');
     }
 
     return data;
@@ -367,5 +368,18 @@ export class GenomeViewComponent implements OnInit {
    */
   private chrFeatures(chr: string): Array<Metadata> {
     return this.features.filter(f => f.chr === chr);
+  }
+
+  /**
+   * Resets variables associated with rendering the genome view
+   */
+  private reset(): void {
+    this.ref = null;
+    this.comp = null;
+    this.refGMap = null;
+    this.compGMap = null;
+    this.genomeData = null;
+    this.refChr = null;
+    this.tempCompGenome = null;
   }
 }

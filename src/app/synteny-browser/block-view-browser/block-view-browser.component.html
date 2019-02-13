@@ -212,11 +212,16 @@
             </g>
 
             <!-- Gene -->
+            <line class="gene" [attr.y1]="2" [attr.y2]="2"
+                  [attr.x2]="gene.getWidth(refBPToPixels)"
+                  [ngStyle]="{ 'stroke': gene.getColor() }">
+            </line>
+
+            <!-- Gene Overlay -->
             <rect class="gene"
                   [attr.width]="gene.getWidth(refBPToPixels)"
                   (mouseenter)="highlightRefGene(gene, $event)"
-                  (mouseleave)="unhighlightGene()"
-                  [ngStyle]="{ 'fill': gene.getColor() }">
+                  (mouseleave)="unhighlightGene()">
             </rect>
           </g>
         </g>
@@ -266,11 +271,16 @@
             </g>
 
             <!-- Gene -->
+            <line class="gene" [attr.y1]="2" [attr.y2]="2"
+                  [attr.x2]="gene.getWidth(getScale(gene))"
+                  [ngStyle]="{ 'stroke': gene.getColor() }">
+            </line>
+
+            <!-- Gene Overlay -->
             <rect class="gene"
                   [attr.width]="gene.getWidth(getScale(gene))"
-                  (mouseenter)="highlightCompGene(gene, $event)"
-                  (mouseleave)="unhighlightGene()"
-                  [ngStyle]="{ 'fill': gene.getColor() }">
+                  (mouseenter)="highlightRefGene(gene, $event)"
+                  (mouseleave)="unhighlightGene()">
             </rect>
           </g>
         </g>

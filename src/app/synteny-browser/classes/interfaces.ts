@@ -19,8 +19,8 @@ export interface Chromosome {
 }
 
 export interface SearchType {
-  name: string;
-  value: string;
+  name?: string;
+  value?: string;
   search_example: string;
   search_type: string;
 }

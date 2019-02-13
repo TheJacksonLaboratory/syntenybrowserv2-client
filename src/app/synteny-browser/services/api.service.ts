@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { SyntenyBlock } from '../classes/synteny-block';
+import {Feature} from '../classes/feature';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -16,40 +17,24 @@ export class ApiService {
    * Returns a list of all genes belonging to the specified species (by taxon ID)
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
-  getAllGenes(taxonID: string): Observable<Array<GeneMetadata>> {
+  getAllGenes(taxonID: string): Observable<Array<Feature>> {
     let url = `${this.root}/genes/${taxonID}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.genes));
+    return this.http.get<Response>(url)
+                    .pipe(
+                      map(resp => resp.genes.map(g => new Feature(g)))
+                    );
   }
 
   /**
    * Returns a list of all QTLs belonging to the specified species (by taxon ID)
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
-  getAllQTLs(taxonID: string): Observable<Array<QTLMetadata>> {
+  getAllQTLs(taxonID: string): Observable<Array<Feature>> {
     let url = `${this.root}/qtls/${taxonID}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.qtls));
-  }
-
-  /**
-   * Returns a list of genes belonging to the specified species (by taxon ID)
-   * which also matches the search string
-   * @param {string} taxonID - stringified taxon ID for the reference species
-   * @param {string} search - string to search for genes by
-   */
-  getGeneMatches(taxonID: string, search: string): Observable<Array<GeneMetadata>> {
-    let url = `${this.root}/genes/${taxonID}/${search}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.genes));
-  }
-
-  /**
-   * Returns a list of QTLs belonging to the specified species (by taxon ID)
-   * which also matches the search string
-   * @param {string} taxonID - stringified taxon ID for the reference species
-   * @param {string} search - string to search for QTLs by
-   */
-  getQTLMatches(taxonID: string, search: string): Observable<Array<QTLMetadata>> {
-    let url = `${this.root}/qtls/${taxonID}/${search}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.qtls));
+    return this.http.get<Response>(url)
+                    .pipe(
+                      map(resp => resp.qtls.map(q => new Feature(q)))
+                    );
   }
 
   /**

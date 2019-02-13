@@ -1,13 +1,13 @@
 <div *ngIf="refSpecies" class="clr-row">
   <clr-select-container class="clr-col-6">
-    <label for="search-type"> search type </label>
+    <label for="search-type"> Search features by </label>
     <select clrSelect id="search-type"
             [(ngModel)]="searchType"
             (ngModelChange)="setTypeDependentElements()">
       <option *ngFor="let type of refSpecies.searchTypes"
-              [value]="type.name"
-              [disabled]="type.search_type === 'OntAnnotation'">
-        {{ refSpecies.commonName + ': ' + type.value }}
+              [value]="type.value"
+              [disabled]="type.value === 'ontology'">
+        {{ refSpecies.commonName + ': ' + type.name }}
       </option>
     </select>
   </clr-select-container>
@@ -21,17 +21,20 @@
   </clr-input-container>
 </div>
 <div class="clr-row">
-  <clr-datagrid *ngIf="displayColumns" class="clr-col-12">
-    <clr-dg-column *ngFor="let col of displayColumns"
-                   [clrDgSortBy]="getComparator(col)">
-      {{ col.replace('_', ' ') }}
+  <clr-datagrid class="clr-col-12" [clrDgLoading]="loading">
+    <clr-dg-column *ngFor="let col of columns" [clrDgSortBy]="getSorter(col)">
+      {{ (col === 'start' || col === 'end') ? col + ' (bases)' : col }}
     </clr-dg-column>
 
     <clr-dg-placeholder> Start searching for features! </clr-dg-placeholder>
 
-    <clr-dg-row *clrDgItems="let row of filteredRows" (click)="updateSelections(row)">
-      <clr-dg-cell *ngFor="let col of displayColumns">
-        {{ row[col] }}
+    <clr-dg-row *clrDgItems="let row of filteredRows"
+                (mousedown)="dragStart(row)"
+                (mouseenter)="dragOver(row)"
+                (mouseup)="dragEnd()"
+                [ngClass]="{ 'selected': row.selected }">
+      <clr-dg-cell *ngFor="let col of columns">
+        {{ getCell(row, col) }}
       </clr-dg-cell>
     </clr-dg-row>
 
@@ -39,7 +42,9 @@
       <!-- Clarity doesn't really handle non-paginated results very well so if
       proper pagination is required, show that, otherwise, use custom label -->
       <clr-dg-pagination #pagination>
-        <clr-dg-page-size [clrPageSizeOptions]="[10,20,50,100]">Features per page</clr-dg-page-size>
+        <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
+          Features per page
+        </clr-dg-page-size>
         {{ getPaginatorLabel(pagination) }}
       </clr-dg-pagination>
     </clr-dg-footer>
@@ -54,8 +59,8 @@
     </div>
     <div *ngIf="selections.length > 0">
       <span *ngFor="let sel of selections" class="label label-light-blue">
-        {{ sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol }}
-        <clr-icon shape="close" (click)="removeSelection(sel)"></clr-icon>
+        {{ sel.symbol }}
+        <clr-icon shape="close" (click)="removeSelection(sel.symbol)"></clr-icon>
       </span>
     </div>
   </div>

@@ -66,10 +66,10 @@ rect.reference, rect.comparison, #chr-view-blocks rect { fill-opacity: 0.5; }
 
 rect.gene {
   height: 5px;
-  fill-opacity: 0.5;
+  fill: transparent;
 }
 
-rect.exon { height: 5px; }
+rect.exon { height: 4px; }
 
 rect, line { shape-rendering: crispEdges; }
 

@@ -42,7 +42,9 @@ export class SyntenyBrowserComponent implements OnInit {
   }
 
   /**
-   * Updates reference and comparison species with the most recent selections
+   * Updates reference and comparison species with the most recent selections,
+   * loads the feature search with features for the reference species and
+   * renders the genome view with the updated reference and comparison species
    */
   updateSpecies(): void {
     // update the species
@@ -57,6 +59,10 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
+  }
+
+  updateFeatures(): void {
+    this.genomeView.updateFeatures(this.features.selections);
   }
 
   getChromosomeFeatures() {

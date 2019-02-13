@@ -5,7 +5,9 @@ export class Species {
   name: string;
   commonName: string;
   genome: any;
-  searchTypes: Array<SearchType>;
+  ontologies: Array<SearchType>;
+  searchTypes: Array<any>;
+  hasQTLs: boolean;
   resources: Array<ExternalResource>;
 
   /**
@@ -46,9 +48,12 @@ export class Species {
       '17': 94987271, '18': 90702639, '19': 61431566, 'X': 171031299,
       'Y': 91744698
     };
+    this.hasQTLs = true;
     this.searchTypes = [
-      {name: 'gene', value: 'Gene Symbol', search_example: 'Symbol (e.g. Trp53)', search_type: 'GeneName'},
-      {name: 'qtl', value: 'QTL', search_example: 'Symbol (e.g. Tmev)', search_type: 'QTLName'},
+      {name: 'Feature Symbol', value: 'symbol'},
+      {name: 'Ontology', value: 'ontology'}
+    ];
+    this.ontologies = [
       {name: 'go', value: 'Gene Ontology (GO)', search_example: 'GO term (e.g. BMP signaling pathway)', search_type: 'OntAnnotation'},
       {name: 'mp', value: 'Mammalian Phenotype Ontology (MP)', search_example: 'MP term (e.g. abnormal cell)', search_type: 'OntAnnotation'}
     ];
@@ -70,8 +75,12 @@ export class Species {
       '17': 81195210, '18': 78077248, '19': 59128983, '20': 63025520,
       '21': 48129895, '22': 51304566, 'X': 155270560, 'Y': 59373566
     };
+    this.hasQTLs = false;
     this.searchTypes = [
-      {name: 'gene', value: 'Gene Symbol', search_example: 'Symbol (e.g. BRCA)', search_type: 'GeneName'},
+      {name: 'Feature Symbol', value: 'symbol'},
+      {name: 'Ontology', value: 'ontology'}
+    ];
+    this.ontologies = [
       {name: 'go', value: 'Gene Ontology (GO)', search_example: 'GO term (e.g. osmosensory signaling pathway)', search_type: 'OntAnnotation'},
       {name: 'do', value: 'Disease Ontology (DO)', search_example: 'DO term (e.g. dynein)', search_type: 'OntAnnotation'}
     ];
@@ -92,8 +101,8 @@ export class Species {
       '10': 10, '11': 11, '12': 12, '13': 13, '14': 14, '15': 15, '16': 16,
       '17': 17, '18': 18, '19': 19, '20': 20, '21': 21, '22': 22, 'X': 23, 'Y': 24
     };
-    this.searchTypes = [ // Same as human
-      {name: 'gene', value: 'Gene Symbol', search_example: 'Symbol (e.g. BRCA)', search_type: 'GeneName'},
+    this.hasQTLs = false;
+    this.ontologies = [ // Same as human
       {name: 'go', value: 'Gene Ontology (GO)', search_example: 'GO term (e.g. osmosensory signaling pathway)', search_type: 'OntAnnotation'},
       {name: 'do', value: 'Disease Ontology (DO)', search_example: 'DO term (e.g. dynein)', search_type: 'OntAnnotation'}
     ];

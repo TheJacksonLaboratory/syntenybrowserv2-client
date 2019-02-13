@@ -3,6 +3,8 @@ import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/cor
 import { ClrDatagridComparatorInterface } from '@clr/angular';
 import { Metadata, SearchType } from '../classes/interfaces';
 import { Species } from '../classes/species';
+import { Feature } from '../classes/feature';
+import { format } from 'd3';
 
 @Component({
   selector: 'app-feature-selection',
@@ -12,13 +14,17 @@ import { Species } from '../classes/species';
 export class FeatureSelectionComponent {
   refSpecies: Species;
   search: string = '';
-  searchType: string;
-  searchPlaceholder: string;
-  rows: Array<Metadata> = [];
-  filteredRows: Array<Metadata> = [];
-  selections: Array<Metadata> = [];
-  displayColumns: Array<string>;
+  searchType: string = 'symbol';
+  searchPlaceholder: string = 'Search features by symbol...';
+  loading: boolean = false;
+  rows: Array<Feature> = [];
+  filteredRows: Array<Feature> = [];
+  selections: Array<Feature> = [];
+  columns: Array<string> = ['id', 'symbol', 'chr', 'start', 'end', 'type'];
+  dragging: boolean = false;
+  dragMode: string = null;
 
+  // sorting classes
   idComp = new IDComparator();
   symbolComp = new SymbolComparator();
   typeComp = new TypeComparator();
@@ -38,9 +44,6 @@ export class FeatureSelectionComponent {
   load(referenceSpecies: Species): void {
     this.refSpecies = referenceSpecies;
 
-    // set the search type to the first search type for the species by default
-    this.searchType = this.refSpecies.searchTypes[0].name;
-
     // set the search term placeholder and table columns based on the search type
     this.setTypeDependentElements();
   }
@@ -49,19 +52,9 @@ export class FeatureSelectionComponent {
    * Calls the API for features and updates the table with the results
    */
   searchForFeatures(): void {
-    // if there's a search term, get features based on the current search type
-    if(this.search !== '') {
-      let sym = this.getSearchType().search_type === 'GeneName' ?
-                'gene_symbol' : 'qtl_symbol';
-
-      this.filteredRows = this.rows.filter(row => {
-                                      return row[sym].toLowerCase()
-                                              .includes(this.search.toLowerCase());
-                                    })
-    // if the search term has been cleared, show all features
-    } else {
-      this.filteredRows = this.rows;
-    }
+    this.filteredRows = this.search !== '' ?
+                        this.rows.filter(f => f.matchesSearch(this.search)) :
+                        this.rows;
   }
 
   /**
@@ -69,47 +62,83 @@ export class FeatureSelectionComponent {
    * recent search type selected
    */
   setTypeDependentElements(): void {
-    this.searchPlaceholder = this.getSearchType().search_example;
-    this.displayColumns = this.getColumns();
+    this.loading = true;
 
-    if(this.getSearchType().search_type === 'GeneName') {
+    if(this.searchType === 'symbol') {
       this.http.getAllGenes(this.refSpecies.getID())
-        .subscribe(genes => {
-          this.rows = genes;
-          this.filteredRows = genes;
-        });
-    } else if(this.getSearchType().search_type === 'QTLName') {
-      this.http.getAllQTLs(this.refSpecies.getID())
-        .subscribe(qtls => {
-          this.rows = qtls;
-          this.filteredRows = qtls;
-        });
+               .subscribe(genes => {
+                 this.rows = genes;
+
+                 if(this.refSpecies.hasQTLs) {
+                   this.http.getAllQTLs(this.refSpecies.getID())
+                            .subscribe(qtls => {
+                              this.rows.push(...qtls);
+                              this.rows.sort((a, b) => this.compare(a, b));
+
+                              this.filteredRows = this.rows;
+                              this.loading = false;
+                            });
+                 } else {
+                   this.rows.sort((a, b) => this.compare(a, b));
+                   
+                   this.filteredRows = this.rows;
+                   this.loading = false;
+                 }
+               });
     } else {
       // TODO: SEARCH FOR GENES BY ONTOLOGY => DESIGN A NEW QUERY SYSTEM
-      // this.http.getOntGeneMatches(this.refSpecies.getID(), this.getSearchType().name, this.search)
-      //          .subscribe(features => this.rows = features);
     }
     this.search = '';
   }
 
   /**
-   * Emits to indicate that there has been an update in the selections to display
+   * Sets the dragging indicator to true, sets the dragging mode (whether the
+   * drag action will be selecting or deselecting all included features in drag)
+   * and (de)select the starting row
+   * @param {Feature} row - the feature row where the drag event starts
    */
-  updateSelections(newRow: any): void {
-    if(this.selections.map(sel => sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol)
-                      .indexOf(newRow.gene_symbol ? newRow.gene_symbol : newRow.qtl_symbol) < 0) {
-      this.selections.push(newRow);
-    }
+  dragStart(row: Feature): void {
+    this.dragging = true;
+    // set drag mode to the OPPOSITE of the state the starting row is in
+    this.dragMode = row.selected ? 'deselect' : 'select';
+    this.dragOver(row);
+  }
 
+  /**
+   * If the mouse event occurs during a drag event, select or deselect the
+   * row depending on what the drag mode is
+   * @param {Feature} row - the feature row that is being hovered over
+   */
+  dragOver(row: Feature): void {
+    if(this.dragging) {
+      if(this.dragMode === 'select') {
+        row.select();
+        if(this.selections.filter(s => s.is(row.symbol)).length === 0) {
+          this.selections.push(row);
+        }
+      } else {
+        row.deselect();
+        this.removeSelection(row.symbol);
+      }
+    }
+  }
+
+  /**
+   * End the drag and emit an update to parent
+   */
+  dragEnd(): void {
+    this.dragging = false;
+    this.dragMode = null;
     this.update.emit();
   }
 
-  removeSelection(feature: Metadata): void {
-    let fSymbol = feature.gene_symbol ? feature.gene_symbol : feature.qtl_symbol;
-    this.selections = this.selections.filter(sel => {
-      let selSymbol  = sel.gene_symbol ? sel.gene_symbol : sel.qtl_symbol;
-      return selSymbol !== fSymbol
-    });
+  /**
+   * Removes the feature matching specified symbol and emit an update to parent
+   * @param {string} symbol - the symbol of the feature to remove
+   */
+  removeSelection(symbol: string): void {
+    this.selections = this.selections.filter(s => !s.is(symbol));
+    this.rows.filter(r => r.symbol === symbol)[0].deselect();
 
     this.update.emit();
   }
@@ -132,58 +161,50 @@ export class FeatureSelectionComponent {
    * Returns the proper comparator based on the specified column name
    * @param {string} colName - name of the column
    */
-  getComparator(colName: string): ClrDatagridComparatorInterface<any> {
-    if(colName.includes('id')) {
+  getSorter(colName: string): ClrDatagridComparatorInterface<any> {
+    if(colName === 'id') {
       return this.idComp;
-    } else if(colName.includes('symbol')) {
+    } else if(colName === 'symbol') {
       return this.symbolComp;
-    } else if(colName.includes('type')) {
+    } else if(colName === 'type') {
       return this.typeComp;
-    } else if(colName.includes('chr')) {
+    } else if(colName === 'chr') {
       return this.chrComp;
     } else {
       return null;
     }
   }
 
+  /**
+   * Returns the specified value of the specified feature if the column isn't a
+   * chromosomal position and a formatted value if it IS a chromosomal position
+   * @param {Feature} row - the feature to get the value for
+   * @param {string} col - the key to use to look up the value in the feature
+   */
+  getCell(row: Feature, col: any): string {
+    return (col === 'start' || col === 'end') ? format(',')(row[col]) : row[col];
+  }
+
 
   // Private Methods
 
   /**
-   * Returns a set list of column names based on the search type
-   * TODO: I MIGHT HAVE TO FIDGET WITH THE LIFECYCLE HOOKS BUT IF WE USE ALL
-   * TODO: KEYS AS COLUMNS, WE SHOULD BE ABLE TO SET THE COLUMNS AS THE LIST OF
-   * TODO: KEYS RATHER THAN HARD CODING THEM HERE
-   */
-  private getColumns(): Array<string> {
-    if(this.getSearchType().search_type === 'GeneName') {
-      return ['gene_id', 'gene_symbol', 'gene_type', 'chr',
-              'start', 'end'];
-    } else if(this.getSearchType().search_type === 'QTLName') {
-      return ['qtl_id', 'qtl_symbol', 'chr', 'start', 'end'];
-    } else {
-      return ['term_id', 'term_name', 'gene_id', 'gene_symbol',
-              'gene_type', 'chr', 'start', 'end'];
-    }
-  }
-
-  /**
-   * Returns the current search type object based on the current selected
-   * search type value (string)
-   */
-  private getSearchType(): SearchType {
-    return this.refSpecies.searchTypes.filter(t => t.name === this.searchType)[0];
-  }
-
-  /**
-   * Customizes the results description for a set of results that don't need a
-   * proper paginator (10 or fewer)
+   * Returns a customized results description for a set of results that don't
+   * need a proper paginator (10 or fewer)
    */
   private getSinglePagePaginatorLabel(): string {
-    return this.rows.length > 0 ?
-      `1 - ${this.rows.length} of ${this.rows.length}` : '0 of 0';
+    let numRows = this.filteredRows.length;
+    return numRows > 0 ? `1 - ${numRows} of ${numRows}` : '0 of 0';
   }
 
+  /**
+   * Returns a compare value (-1, 0, 1) when comparing two features for sorting
+   * @param {Feature} a - the base (reference) feature
+   * @param {Feature} b - the comparison feature
+   */
+  private compare(a: Feature, b: Feature): number {
+    return a.symbol.localeCompare(b.symbol);
+  }
 }
 
 
@@ -193,14 +214,8 @@ export class FeatureSelectionComponent {
  * Comparator for sorting features in the feature search table by ID
  */
 export class IDComparator implements ClrDatagridComparatorInterface<any> {
-  compare(a: any, b: any) {
-    if(a.gene_id && b.gene_id) {
-      let aID = Number(a.gene_id.replace('MGI:', ''));
-      let bID = Number(b.gene_id.replace('MGI:', ''));
-      return aID - bID;
-    } else {
-      return Number(a.qtl_id) - Number(b.qtl_id);
-    }
+  compare(a: Feature, b: Feature) {
+    return Number(a.id.replace('MGI:', '')) - Number(b.id.replace('MGI:', ''));
   }
 }
 
@@ -208,28 +223,21 @@ export class IDComparator implements ClrDatagridComparatorInterface<any> {
  * Comparator for sorting features in the feature search table by symbol
  */
 export class SymbolComparator implements ClrDatagridComparatorInterface<any> {
-  compare(a: any, b: any) {
-    if(a.gene_id && b.gene_id) {
-      return a.gene_symbol.localeCompare(b.gene_symbol);
-    } else {
-      return a.qtl_symbol.localeCompare(b.qtl_symbol);
-    }
-  }
+  compare(a: Feature, b: Feature) { return a.symbol.localeCompare(b.symbol); }
 }
 
 /**
  * Comparator for sorting genes in the feature search table by type
  */
 export class TypeComparator implements ClrDatagridComparatorInterface<any> {
-  compare(a: any, b: any) {
-    return a.gene_type.localeCompare(b.gene_type); }
+  compare(a: Feature, b: Feature) { return a.type.localeCompare(b.type); }
 }
 
 /**
  * Comparator for sorting features in the feature search table by chromosome
  */
 export class ChrComparator implements ClrDatagridComparatorInterface<any> {
-  compare(a: any, b: any) {
+  compare(a: Feature, b: Feature) {
     // if a.chr is y, b comes first
     if(a.chr.toLowerCase() === 'y') return 1;
     // if b.chr is y, a comes first

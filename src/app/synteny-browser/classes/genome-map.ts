@@ -48,9 +48,7 @@ export class GenomeMap {
    * @param {string} chr - chromosome the specified position (bp) is in
    * @param {number} bp - the position (in bp) to be converted
    */
-  bpToRadians(chr: string, bp: number): number {
-    return this.scales[chr](bp);
-  }
+  bpToRadians(chr: string, bp: number): number { return this.scales[chr](bp); }
 
   /**
    * Returns a cartesian coordinate (x, y) of a genomic position (in bp)
