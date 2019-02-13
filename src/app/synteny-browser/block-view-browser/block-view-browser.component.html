@@ -279,7 +279,7 @@
             <!-- Gene Overlay -->
             <rect class="gene"
                   [attr.width]="gene.getWidth(getScale(gene))"
-                  (mouseenter)="highlightRefGene(gene, $event)"
+                  (mouseenter)="highlightCompGene(gene, $event)"
                   (mouseleave)="unhighlightGene()">
             </rect>
           </g>
