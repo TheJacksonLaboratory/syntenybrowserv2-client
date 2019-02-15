@@ -1,26 +1,21 @@
 <div class="main-container">
   <header class="header-4">
     <div class="branding">
-      <a href="#" class="nav-link">
-        <img style="height:50px;" src="../assets/jax-logo.png">
-        <span class="title">SYNTENY BROWSER</span>
+      <a [routerLink]="['']" class="nav-link">
+        <img id="logo" src="../assets/jax-logo.png" alt="The Jackson Laboratory">
+        <span class="title"> SYNTENY BROWSER </span>
       </a>
     </div>
   </header>
   
   <nav class="subnav">
     <ul class="nav">
-      <li class="nav-item">
-        <a class="nav-link active" [routerLink]="['']">Browser</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="['/about']">About</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="['/examples']">Examples</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="['/docs']">Docs</a>
+      <li *ngFor="let page of getPages()" class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': isActive(page) }"
+           (click)="setActive(page)"
+           [routerLink]="pages[page]">
+          {{ page }}
+        </a>
       </li>
     </ul>
   </nav>

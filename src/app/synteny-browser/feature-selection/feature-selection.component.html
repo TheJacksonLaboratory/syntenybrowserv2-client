@@ -1,0 +1,67 @@
+<div *ngIf="refSpecies" class="clr-row">
+  <clr-select-container class="clr-col-6">
+    <label for="search-type"> Search features by </label>
+    <select clrSelect id="search-type"
+            [(ngModel)]="searchType"
+            (ngModelChange)="setTypeDependentElements()">
+      <option *ngFor="let type of refSpecies.searchTypes"
+              [value]="type.value"
+              [disabled]="type.value === 'ontology'">
+        {{ refSpecies.commonName + ': ' + type.name }}
+      </option>
+    </select>
+  </clr-select-container>
+
+  <clr-input-container>
+    <label for="search-term"> search term </label>
+    <input id="search-term" clrInput
+           [(ngModel)]="search"
+           [placeholder]="searchPlaceholder"
+           (keyup)="searchForFeatures()">
+  </clr-input-container>
+</div>
+<div class="clr-row">
+  <clr-datagrid class="clr-col-12" [clrDgLoading]="loading">
+    <clr-dg-column *ngFor="let col of columns" [clrDgSortBy]="getSorter(col)">
+      {{ (col === 'start' || col === 'end') ? col + ' (bases)' : col }}
+    </clr-dg-column>
+
+    <clr-dg-placeholder> Start searching for features! </clr-dg-placeholder>
+
+    <clr-dg-row *clrDgItems="let row of filteredRows"
+                (mousedown)="dragStart(row)"
+                (mouseenter)="dragOver(row)"
+                (mouseup)="dragEnd()"
+                [ngClass]="{ 'selected': row.selected }">
+      <clr-dg-cell *ngFor="let col of columns">
+        {{ getCell(row, col) }}
+      </clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>
+      <!-- Clarity doesn't really handle non-paginated results very well so if
+      proper pagination is required, show that, otherwise, use custom label -->
+      <clr-dg-pagination #pagination>
+        <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
+          Features per page
+        </clr-dg-page-size>
+        {{ getPaginatorLabel(pagination) }}
+      </clr-dg-pagination>
+    </clr-dg-footer>
+  </clr-datagrid>
+</div>
+<div class="clr-row">
+  <h4>Current selections</h4>
+  <br/>
+  <div id="label-container" class="clr-col-lg-12">
+    <div *ngIf="selections.length === 0" class="no-selections">
+      No selections have been made yet
+    </div>
+    <div *ngIf="selections.length > 0">
+      <span *ngFor="let sel of selections" class="label label-light-blue">
+        {{ sel.symbol }}
+        <clr-icon shape="close" (click)="removeSelection(sel.symbol)"></clr-icon>
+      </span>
+    </div>
+  </div>
+</div>

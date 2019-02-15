@@ -1,0 +1,35 @@
+<div class="clr-row clr-col-lg-12">
+  <div class="card">
+    <div class="card-header"> FIND FEATURES </div>
+    <div class="card-block">
+      <div class="clr-row clr-col-lg-12">
+        <div class="clr-col-lg-7 clr-col-md-12">
+          <app-species-selection (update)="updateSpecies()"></app-species-selection>
+          <hr/>
+          <app-feature-selection *ngIf="refSpecies"
+                                 (update)="updateFeatures()">
+          </app-feature-selection>
+        </div>
+        <div class="clr-col-lg-5 clr-col-md-12">
+          <app-genome-view *ngIf="refSpecies && compSpecies"></app-genome-view>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="genomeView && genomeView.refChr" class="card-footer text-right">
+      <button class="btn btn-primary" (click)="getChromosomeFeatures()">
+        <clr-icon shape="check"></clr-icon> See Selection in Block View
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="viewInBrowser" class="clr-row">
+  <div class="clr-col-lg-12 bottom-1" id="block-view">
+    <div class="card">
+      <div class="card-header"> BLOCK VIEW BROWSER </div>
+      <div class="card-block">
+        <app-block-view-browser></app-block-view-browser>
+      </div>
+    </div>
+  </div>
+</div>
