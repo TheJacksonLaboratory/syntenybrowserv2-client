@@ -1,3 +1,4 @@
+import { Feature } from './feature';
 import { SyntenyBlock } from './synteny-block';
 
 export interface Response {
@@ -19,10 +20,8 @@ export interface Chromosome {
 }
 
 export interface SearchType {
-  name?: string;
-  value?: string;
-  search_example: string;
-  search_type: string;
+  name: string;
+  value: string;
 }
 
 export interface ExternalResource {
@@ -71,7 +70,7 @@ export interface CartesianCoordinate {
 
 export interface SelectedFeatures {
   chr: string;
-  features: Array<Metadata>;
+  features: Array<Feature>;
 }
 
 export interface ComparisonBlockCoordinates {

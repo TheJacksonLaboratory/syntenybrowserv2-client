@@ -1,5 +1,5 @@
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, Metadata, SelectedFeatures } from '../classes/interfaces';
+import { CartesianCoordinate, SelectedFeatures } from '../classes/interfaces';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
@@ -366,7 +366,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the features that are in the specified chromosome
    * @param {string} chr - the chromosome to check
    */
-  private chrFeatures(chr: string): Array<Metadata> {
+  private chrFeatures(chr: string): Array<Feature> {
     return this.features.filter(f => f.chr === chr);
   }
 

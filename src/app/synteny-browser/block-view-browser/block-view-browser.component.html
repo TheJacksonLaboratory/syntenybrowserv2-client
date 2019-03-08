@@ -2,76 +2,100 @@
   <!-- Title -->
   <h2>{{ ref.commonName }}, Chr{{ refChr }}</h2>
 
-  <!-- Navigation buttons -->
-  <div class="btn-group bottom-1">
-    <!-- Pan left button -->
-    <button class="btn btn-outline"
-            [disabled]="!interval || interval.refStart === 0"
-            (click)="panLeft()">
-      <clr-icon shape="rewind"></clr-icon> Pan Left
-    </button>
+  <div class="clr-row">
+    <div class="clr-col-lg-4 clr-col-md-12 bottom-1">
+        <div id="filters" class="label-container">
+          <div *ngIf="filterConditions.length === 0"
+               class="no-selections filter-labels">
+            No filters have been created yet
+          </div>
 
-    <!-- Zoom out button -->
-    <button class="btn btn-outline"
-            [disabled]="!interval || interval.width === getRefChrSize()"
-            (click)="zoomOut()">
-      <clr-icon shape="zoom-out"></clr-icon> Zoom Out
-    </button>
+          <div *ngIf="filterConditions.length > 0" class="filter-labels">
+            <span *ngFor="let f of filterConditions"
+                  class="label"
+                  [ngClass]="{ 'label-success': f.include,
+                               'label-danger': !f.include }">
+              ({{ f.species.toUpperCase() }}) {{ getConditionLabel(f.title) }}
+            </span>
+          </div>
+        </div>
+        <button class="btn btn-primary filter-edit" (click)="filter.emit()">
+          <clr-icon shape="pencil" class="is-solid"></clr-icon> Edit
+        </button>
+    </div>
+    <div class="clr-col-lg-4 clr-col-md-12 bottom-1">
+      <!-- Navigation buttons -->
+      <div class="btn-group">
+        <!-- Pan left button -->
+        <button class="btn btn-outline"
+                [disabled]="!interval || interval.refStart === 0"
+                (click)="panLeft()">
+          <clr-icon shape="rewind"></clr-icon> Pan Left
+        </button>
 
-    <!-- Jump to feature button -->
-    <clr-dropdown *ngIf="featuresAreSelected()">
-      <!-- Button if features are selected -->
-      <button clrDropdownTrigger type="button"
-              class="btn btn-outline group-dropdown"
-              [disabled]="!interval">
-        Jump to Feature
-        <clr-icon shape="caret down"></clr-icon>
-      </button>
+        <!-- Zoom out button -->
+        <button class="btn btn-outline"
+                [disabled]="!interval || interval.width === getRefChrSize()"
+                (click)="zoomOut()">
+          <clr-icon shape="zoom-out"></clr-icon> Zoom Out
+        </button>
 
-      <!-- Dropdown selection -->
-      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
-        <!-- Gene selections -->
-        <div *ngIf="this.selectedRefGenes.length > 0">
-          <label class="dropdown-header">Genes</label>
-
-          <button *ngFor="let gene of selectedRefGenes"
-                  type="button" clrDropdownItem
-                  (click)="jumpTo(gene)">
-            {{ gene.symbol }}
+        <!-- Jump to feature button -->
+        <clr-dropdown *ngIf="featuresAreSelected()">
+          <!-- Button if features are selected -->
+          <button clrDropdownTrigger type="button"
+                  class="btn btn-outline group-dropdown"
+                  [disabled]="!interval">
+            Jump to
+            <clr-icon shape="caret down"></clr-icon>
           </button>
-        </div>
 
-        <!-- Divider -->
-        <div *ngIf="selectedQTLs.length > 0 && this.selectedRefGenes.length > 0"
-             class="dropdown-divider">
-        </div>
+          <!-- Dropdown selection -->
+          <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+            <!-- Gene selections -->
+            <div *ngIf="this.selectedRefGenes.length > 0">
+              <label class="dropdown-header">Genes</label>
 
-        <!-- QTL selection -->
-        <div *ngIf="selectedQTLs.length > 0">
-          <label class="dropdown-header">QTLs</label>
+              <button *ngFor="let gene of selectedRefGenes"
+                      type="button" clrDropdownItem
+                      (click)="jumpTo(gene)">
+                {{ gene.symbol }}
+              </button>
+            </div>
 
-          <button *ngFor="let qtl of selectedQTLs"
-                  type="button" clrDropdownItem
-                  (click)="jumpTo(qtl)">
-            {{ qtl.symbol }}
-          </button>
-        </div>
-      </clr-dropdown-menu>
-    </clr-dropdown>
+            <!-- Divider -->
+            <div *ngIf="selectedQTLs.length > 0 && this.selectedRefGenes.length > 0"
+                 class="dropdown-divider">
+            </div>
 
-    <!-- Zoom in button -->
-    <button class="btn btn-outline"
-            [disabled]="!interval || interval.width === minimumIntervalSize"
-            (click)="zoomIn()" >
-      <clr-icon shape="zoom-in"></clr-icon> Zoom In
-    </button>
+            <!-- QTL selection -->
+            <div *ngIf="selectedQTLs.length > 0">
+              <label class="dropdown-header">QTLs</label>
 
-    <!-- Pan right button -->
-    <button class="btn btn-outline"
-            [disabled]="!interval || interval.refEnd === getRefChrSize()"
-            (click)="panRight()" >
-      <clr-icon shape="fast-forward"></clr-icon> Pan Right
-    </button>
+              <button *ngFor="let qtl of selectedQTLs"
+                      type="button" clrDropdownItem
+                      (click)="jumpTo(qtl)">
+                {{ qtl.symbol }}
+              </button>
+            </div>
+          </clr-dropdown-menu>
+        </clr-dropdown>
+
+        <!-- Zoom in button -->
+        <button class="btn btn-outline"
+                [disabled]="!interval || interval.width === minimumIntervalSize"
+                (click)="zoomIn()" >
+          <clr-icon shape="zoom-in"></clr-icon> Zoom In
+        </button>
+
+        <!-- Pan right button -->
+        <button class="btn btn-outline"
+                [disabled]="!interval || interval.refEnd === getRefChrSize()"
+                (click)="panRight()" >
+          <clr-icon shape="fast-forward"></clr-icon> Pan Right
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Block view browser -->
@@ -198,7 +222,10 @@
              [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
             <!-- Gene label -->
             <text *ngIf="gene.hasVisibleLabel()"
-                  [ngStyle]="{ 'fill': gene.getColor() }">
+                  [ngStyle]="{ 'fill': gene.getColor(),
+                               'display': gene.hidden ? 'none' : 'initial' }"
+                  (mouseenter)="highlightRefGene(gene, $event)"
+                  (mouseleave)="unhighlightGene()">
               {{ gene.symbol }}
             </text>
 
@@ -207,14 +234,16 @@
               <rect *ngFor="let exon of gene.transcript" class="exon"
                     [attr.x]="gene.getRefExonXPos(exon, refBPToPixels)"
                     [attr.width]="gene.getExonWidth(exon, refBPToPixels)"
-                    [ngStyle]="{ 'fill': gene.getColor() }">
+                    [ngStyle]="{ 'fill': gene.getColor(),
+                                 'display': gene.hidden ? 'none' : 'initial'}">
               </rect>
             </g>
 
             <!-- Gene -->
             <line class="gene" [attr.y1]="2" [attr.y2]="2"
                   [attr.x2]="gene.getWidth(refBPToPixels)"
-                  [ngStyle]="{ 'stroke': gene.getColor() }">
+                  [ngStyle]="{ 'stroke': gene.getColor(),
+                               'display': gene.hidden ? 'none' : 'initial' }">
             </line>
 
             <!-- Gene Overlay -->
@@ -256,7 +285,10 @@
                                          trueOrientation))">
             <!-- Gene label -->
             <text *ngIf="gene.hasVisibleLabel()"
-                  [ngStyle]="{ 'fill': gene.getColor() }">
+                  [ngStyle]="{ 'fill': gene.getColor(),
+                               'display': gene.hidden ? 'none' : 'initial' }"
+                  (mouseenter)="highlightCompGene(gene, $event)"
+                  (mouseleave)="unhighlightGene()">
               {{ gene.symbol }}
             </text>
 
@@ -266,14 +298,16 @@
                     [attr.x]="gene.getCompExonXPos(exon, getScale(gene),
                                                    trueOrientation)"
                     [attr.width]="gene.getExonWidth(exon, getScale(gene))"
-                    [ngStyle]="{ 'fill': gene.getColor() }">
+                    [ngStyle]="{ 'fill': gene.getColor(),
+                                 'display': gene.hidden ? 'none' : 'initial' }">
               </rect>
             </g>
 
             <!-- Gene -->
             <line class="gene" [attr.y1]="2" [attr.y2]="2"
                   [attr.x2]="gene.getWidth(getScale(gene))"
-                  [ngStyle]="{ 'stroke': gene.getColor() }">
+                  [ngStyle]="{ 'stroke': gene.getColor(),
+                               'display': gene.hidden ? 'none' : 'initial' }">
             </line>
 
             <!-- Gene Overlay -->
@@ -411,10 +445,8 @@
 
   <!-- Tooltip -->
   <app-tooltip #tooltip id="tt"
-               [ngStyle]="{
-                            'left': this.tooltip.offsetX,
+               [ngStyle]="{ 'left': this.tooltip.offsetX,
                             'top': this.tooltip.offsetY,
-                            'display': this.tooltip.getDisplay()
-                          }">
+                            'display': this.tooltip.getDisplay() }">
   </app-tooltip>
 </div>

@@ -1,6 +1,7 @@
 <div *ngIf="refSpecies" class="clr-row">
   <clr-select-container class="clr-col-6">
     <label for="search-type"> Search features by </label>
+
     <select clrSelect id="search-type"
             [(ngModel)]="searchType"
             (ngModelChange)="setTypeDependentElements()">
@@ -14,6 +15,7 @@
 
   <clr-input-container>
     <label for="search-term"> search term </label>
+
     <input id="search-term" clrInput
            [(ngModel)]="search"
            [placeholder]="searchPlaceholder"
@@ -53,10 +55,11 @@
 <div class="clr-row">
   <h4>Current selections</h4>
   <br/>
-  <div id="label-container" class="clr-col-lg-12">
+  <div class="clr-col-lg-12 label-container">
     <div *ngIf="selections.length === 0" class="no-selections">
       No selections have been made yet
     </div>
+
     <div *ngIf="selections.length > 0">
       <span *ngFor="let sel of selections" class="label label-light-blue">
         {{ sel.symbol }}

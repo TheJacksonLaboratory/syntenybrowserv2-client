@@ -1,0 +1,97 @@
+<div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12">
+  <div class="clr-row clr-col-12 bottom-1">
+    <div class="clr-col-2"> <h5> Current filters </h5> </div>
+
+    <div class="clr-col label-container">
+      <div *ngIf="filters.length === 0" class="no-filters">
+        No filters have been created yet
+      </div>
+
+      <div *ngIf="filters.length > 0">
+        <span *ngFor="let f of filters"
+              class="label"
+              [ngClass]="{ 'label-success': f.include,
+                           'label-danger': !f.include }">
+          ({{ f.species.toUpperCase() }}) {{ getConditionLabel(f.title) }}
+          <clr-icon shape="close" (click)="removeFilter(f.title)"></clr-icon>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="clr-row clr-col-12 new-filter top-1">
+    <div class="clr-row top-1">
+      <h6><b>EXAMPLES</b></h6>
+
+      <clr-signpost>
+        <clr-signpost-content *clrIfOpen>
+          <p class="smaller">
+            <i>Please enter single conditions one at a time.</i> Supported
+            attributes right now include 'id', 'symbol', 'chr', 'type'.
+            Conditions can be further specified by selecting a particular
+            species (or both) to run the filter on. Each individual condition in
+            the current filter list are combined using are combined using a
+            traditional OR operation (AND operations will be supported soon).
+          </p>
+        </clr-signpost-content>
+      </clr-signpost>
+    </div>
+    <div class="clr-row clr-justify-content-center">
+      <p>
+        <b>symbol=trp53</b> (include genes with gene symbol containing the
+        string 'trp53')
+      </p>
+
+      <p>
+        <b>type=gene+segment</b> (multi-word values should be use '+' in place
+        of spaces)
+      </p>
+
+      <p>
+        <b>!type=mRNA+gene</b> (exclude all mRNA genes, also search strings are
+        case-INsensitive)
+      </p>
+    </div>
+
+    <div class="clr-row clr-col-12 bottom-1 top-1">
+      <clr-select-container class="clr-col-3 padding-0 top-0">
+        <label for="species">Filter species</label>
+
+        <select clrSelect id="species" [(ngModel)]="conditionSpecies">
+          <option value="both"> Both </option>
+          <option value="ref"> Reference ({{ refSpecies.commonName }}) </option>
+          <option value="comp"> Comparison ({{ compSpecies.commonName }})</option>
+        </select>
+      </clr-select-container>
+
+      <clr-input-container class="clr-col-5 padding-0 top-0">
+        <label for="condition"> Filter condition </label>
+
+        <input id="condition" clrInput
+               [(ngModel)]="currentFilter"
+               placeholder="Start typing conditions"
+               (keyup.enter)="addFilter()">
+      </clr-input-container>
+      <p *ngIf="filterErrorState" class="error-msg"> {{ filterErrorState }}</p>
+
+      <div class="clr-col padding-0">
+        <button type="button"
+                class="btn input-btn"
+                disabled
+                (click)="testFilter()"
+                title="Test the condition to see how many/which features fit
+                       (not yet available)">
+          <clr-icon shape="refresh"></clr-icon>
+        </button>
+
+        <button type="button"
+                class="btn input-btn"
+                (click)="addFilter()"
+                title="Add this filter condition">
+          <clr-icon shape="check"></clr-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
