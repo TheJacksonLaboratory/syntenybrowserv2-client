@@ -53,7 +53,7 @@
       </p>
     </div>
 
-    <div class="clr-row clr-col-12 bottom-1 top-1">
+    <div class="clr-row clr-col-12 top-1">
       <clr-select-container class="clr-col-3 padding-0 top-0">
         <label for="species">Filter species</label>
 
@@ -72,7 +72,6 @@
                placeholder="Start typing conditions"
                (keyup.enter)="addFilter()">
       </clr-input-container>
-      <p *ngIf="filterErrorState" class="error-msg"> {{ filterErrorState }}</p>
 
       <div class="clr-col padding-0">
         <button type="button"
@@ -92,6 +91,7 @@
         </button>
       </div>
     </div>
+    <p *ngIf="filterErrorState" class="error-msg"> {{ filterErrorState }}</p>
   </div>
 </div>
 

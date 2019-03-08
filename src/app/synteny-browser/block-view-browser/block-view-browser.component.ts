@@ -448,7 +448,9 @@ export class BlockViewBrowserComponent {
    * @param {string} conditionTitle - the title of the condition
    */
   getConditionLabel(conditionTitle: string): string {
-    return conditionTitle.replace('+', ' ').replace('=', ' = ').replace('!', '');
+    return conditionTitle.replace(/=/g, ' = ')
+                         .replace(/!/g, '')
+                         .replace(/\+/g, ' ');
   }
 
 

@@ -13,7 +13,7 @@ export class FilterComponent {
 
   currentFilter: string = '';
   conditionSpecies: string = 'both';
-  filterErrorState: string = '';
+  filterErrorState: string = null;
   validAttrs = ['id', 'symbol', 'type', 'chr'];
 
   constructor() { }
@@ -25,39 +25,34 @@ export class FilterComponent {
    * Add a filter object to the list by parsing the user input
    */
   addFilter(): void {
-    let newConditions = [];
-    let filterConditions = this.currentFilter.split(' ');
+    let condition = this.currentFilter;
+    this.filterErrorState = null;
 
-    filterConditions.forEach(c => {
-      let attr;
-      let value;
-      if(c.includes('!=')) {
-        attr = c.split('!=')[0].toLowerCase();
-        value = c.split('!=')[1].toLowerCase();
-      } else if(c.includes('=')) {
-        attr = c.split('=')[0].toLowerCase();
-        value = c.split('=')[1].toLowerCase();
-      }
-
-      if(attr && value) {
-        if(this.validAttrs.indexOf(attr.replace('!', '')) < 0) {
-          this.filterErrorState = 'Invalid attribute name present';
-        } else {
-          newConditions.push({
-            title: c,
-            species: this.conditionSpecies,
-            attr: attr.replace('!', ''),
-            value: value.replace('+', ' '),
-            include: !(attr.includes('!', ''))
-          });
-        }
-      }
-    });
-
-    if(!this.filterErrorState) {
-      this.filters.push(...newConditions);
-      this.currentFilter = '';
+    let newCondition;
+    let attr;
+    let value;
+    
+    if(condition.includes(' ')) {
+      this.filterErrorState = "Replace any spaces with '+'";
+      return
+    } else {
+      attr = condition.split('=')[0].toLowerCase();
+      value = condition.split('=')[1].toLowerCase();
     }
+
+    if(this.validAttrs.indexOf(attr.replace(/!/g, '')) < 0) {
+      this.filterErrorState = 'Invalid attribute name';
+      return
+    } else {
+        newCondition = { title: condition,
+                         species: this.conditionSpecies,
+                         attr: attr.replace(/!/g, ''),
+                         value: value.replace(/\+/g, ' '),
+                         include: !(attr.includes('!', '')) }
+    }
+
+    this.filters.push(newCondition);
+    this.currentFilter = '';
   }
 
   /**
@@ -83,7 +78,9 @@ export class FilterComponent {
    * @param {string} conditionTitle - the title of the condition
    */
   getConditionLabel(conditionTitle: string): string {
-    return conditionTitle.replace('+', ' ').replace('=', ' = ').replace('!', '');
+    return conditionTitle.replace(/=/g, ' = ')
+                         .replace(/!/g, '')
+                         .replace(/\+/g, ' ');
   }
 
 
