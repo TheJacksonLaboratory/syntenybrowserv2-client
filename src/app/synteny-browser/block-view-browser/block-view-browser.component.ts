@@ -24,6 +24,9 @@ export class BlockViewBrowserComponent {
   comp: Species;
   legend: Legend;
   refChr: string;
+  refInterval: string = '';
+
+  options: any;
 
   selectedRefGenes: Array<Gene> = [];
   selectedCompGenes: Array<Gene> = [];
@@ -48,16 +51,15 @@ export class BlockViewBrowserComponent {
   refGenes: Array<Gene>;
   compGenes: Array<Gene>;
   staticRefBPToPixels: ScaleLinear<number, number>;
-  staticCompBPToPixels: ComparisonScaling = {
-    match: {},
-    true: {}
-  };
+  staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
-  trueOrientation: boolean = false;
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService) { }
+  constructor(private http: ApiService) {
+    this.options = { symbols: false, anchors: false, trueOrientation: false };
+    this.staticCompBPToPixels = { match: {}, true: {} };
+  }
 
 
   // Operational Methods
@@ -151,9 +153,34 @@ export class BlockViewBrowserComponent {
    * (gene or QTL) with a margin of 1 Mb on both sides, if possible
    * @param {any} feature - the feature to jump the location to
    */
-  jumpTo(feature: any): void {
+  jumpToFeature(feature: any): void {
     this.brushView(Math.max(0, feature.start - 1000000),
                    Math.min(this.getRefChrSize(), feature.end + 1000000));
+  }
+
+  /**
+   * Changes the current browser view to the interval entered into the reference
+   * interval field in the interface; if the interval only contains one value
+   * followed by a hyphen then interpret the interval as starting from the
+   * specified value to the end of the reference chromsome; if the single value
+   * is preceded by a hyphen, interpret as starting from the start of the
+   * reference chromsome to the specified value
+   */
+  jumpToInterval(): void {
+    if(this.refInterval.length > 0) {
+      let pts = this.refInterval.replace(/\s+/g, '')
+                                .replace(/,/g, '')
+                                .split('-');
+
+      if(pts.length === 2) {
+        let start = pts[0].length > 0 ? pts[0]: 0;
+        let end = pts[1].length > 0 ? pts[1]: this.getRefChrSize();
+
+        if(Number(start) && Number(end)) {
+          this.brushView(Number(start), Number(end));
+        }
+      }
+    }
   }
 
   /**
@@ -258,8 +285,7 @@ export class BlockViewBrowserComponent {
       gene.highlight();
 
       // highlight gene's homologs comparison
-      this.compGenes.filter(g => g.homologIDs.indexOf(gene.homologIDs[0]) >= 0)
-                    .forEach(g => g.highlight());
+      this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
     }
 
     // generate the tooltip for the gene
@@ -279,8 +305,7 @@ export class BlockViewBrowserComponent {
       gene.highlight();
 
       // highlight gene's homologs in the reference
-      this.refGenes.filter(g => gene.homologIDs.indexOf(g.homologIDs[0]) >= 0)
-                   .forEach(g => g.highlight());
+      this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
     }
 
     // generate the tooltip for the gene
@@ -341,8 +366,16 @@ export class BlockViewBrowserComponent {
    */
   getRefGenesInView(): Array<Gene> {
     return this.refGenes.filter(g => {
-      return g.isInRefView(this.refBPToPixels, this.width);
-    });
+                           return g.isInRefView(this.refBPToPixels, this.width);
+                         });
+  }
+
+  /**
+   * Returns a list of reference genes that are homologous (have at least one
+   * syntenic homolog)
+   */
+  getHomologousRefGenes(): Array<Gene> {
+    return this.refGenes.filter(g => g.isHomologous());
   }
 
   /**
@@ -350,7 +383,9 @@ export class BlockViewBrowserComponent {
    */
   getCompGenesInView(): Array<Gene> {
     return this.compGenes.filter(g => {
-      return g.isInCompView(this.getScale(g), this.width, this.trueOrientation);
+      return g.isInCompView(this.getScale(g),
+                            this.width,
+                            this.options.trueOrientation);
     });
   }
 
@@ -359,7 +394,7 @@ export class BlockViewBrowserComponent {
    * @param {Gene} gene - the gene to get the comp scale for by its blockID
    */
   getScale(gene: Gene): ScaleLinear<number, number> {
-    return this.blockLookup[gene.blockID].getScale(this.trueOrientation);
+    return this.blockLookup[gene.blockID].getScale(this.options.trueOrientation);
   }
 
   /**
@@ -367,7 +402,7 @@ export class BlockViewBrowserComponent {
    * @param {Gene} gene - the gene to use to a block ID from
    */
   getStaticCompScale(gene: Gene): ScaleLinear<number, number> {
-    let type = this.trueOrientation ? 'true' : 'match';
+    let type = this.options.trueOrientation ? 'true' : 'match';
     return this.staticCompBPToPixels[type][gene.blockID];
   }
 
@@ -418,10 +453,39 @@ export class BlockViewBrowserComponent {
    * @param {SyntenyBlock} block - the block to draw orientation indicators for
    */
   getOrientationIndPathCommand(block: SyntenyBlock): string {
-    return `M${this.refBPToPixels(block.refStart)},${this.trackHeight}
-            L${this.refBPToPixels(block.refEnd)},${this.trackHeight + 30}
-            M${this.refBPToPixels(block.refEnd)},${this.trackHeight}
-            L${this.refBPToPixels(block.refStart)},${this.trackHeight + 30}Z`;
+    return `M${block.getPxStart()},${this.trackHeight}
+            L${block.getPxEnd()},${this.trackHeight + 30}
+            M${block.getPxEnd()},${this.trackHeight}
+            L${block.getPxStart()},${this.trackHeight + 30}Z`;
+  }
+
+  /**
+   * Returns the path command for all of the anchors of the specified gene and
+   * homologs (2 lines per homolog)
+   * @param {Gene} gene - the gene to determine path commands for
+   */
+  getAnchorPathCommand(gene: Gene): string {
+    let command = '';
+    let refStart = this.refBPToPixels(gene.start);
+    let refEnd = this.refBPToPixels(gene.end);
+    let homologs = this.getComparisonHomologs(gene.homologIDs[0]);
+
+    homologs.forEach(hom => {
+      let scale = this.getScale(hom);
+      let homStart = scale(hom.getStart(this.options.trueOrientation));
+      let homEnd = scale(hom.getEnd(this.options.trueOrientation));
+
+      command += `M${refStart},${gene.yPos + 2}
+                  V${this.trackHeight}
+                  L${homStart},${this.trackHeight + 30}
+                  V${this.trackHeight + 30 + hom.yPos + 2}
+                  M${refEnd},${gene.yPos + 2}
+                  V${this.trackHeight}
+                  L${homEnd},${this.trackHeight + 30}
+                  V${this.trackHeight + 30 + hom.yPos + 2}`;
+    });
+
+    return command;
   }
 
   /**
@@ -533,7 +597,7 @@ export class BlockViewBrowserComponent {
                                                    this.getRefChrSize(),
                                                    blocks,
                                                    this.refBPToPixels,
-                                                   this.trueOrientation);
+                                                   this.options.trueOrientation);
 
                // only update this once because it won't
                this.progress += 0.70;
@@ -614,6 +678,15 @@ export class BlockViewBrowserComponent {
                                                            this.trackHeight,
                                                            this.blocks);
                                          }).filter(g => g.isSyntenic());
+
+               // go through reference genes to remove homolog IDs that are
+               // associated with comparison genes that were just filtered out
+               this.refGenes.filter(g => g.isHomologous())
+                            .forEach(g => {
+                              g.homologIDs = g.homologIDs.filter(h => {
+                                return this.getComparisonHomologs(h).length > 0;
+                              });
+                            });
 
                // get selected features
                this.selectedRefGenes = this.refGenes.filter(g => g.selected);
@@ -982,5 +1055,25 @@ export class BlockViewBrowserComponent {
     } else {
       return 'middle';
     }
+  }
+
+  /**
+   * Returns a list of comparison genes that have a homolog ID that matches
+   * the specified homolog ID of a reference gene
+   * @param {number} homID - the homolog ID to search for comparison matches
+   */
+  private getComparisonHomologs(homID: number): Array<Gene> {
+    return this.compGenes.filter(g => g.homologIDs.indexOf(homID) >= 0);
+  }
+
+  private getReferenceHomologs(homIDs: Array<number>): Array<Gene> {
+    return this.refGenes.filter(g => {
+                           let match = false;
+                           g.homologIDs.forEach(h => {
+                                         homIDs.indexOf(h) >= 0 ?
+                                           match = true : null
+                                        });
+                           return match;
+                         });
   }
 }
