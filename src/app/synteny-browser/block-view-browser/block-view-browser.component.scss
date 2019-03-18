@@ -19,6 +19,10 @@
   stroke-width: 0.5;
 }
 
+h2 {
+  margin-top: 0;
+}
+
 .hor-rule {
   stroke: #999;
   stroke-width: 0.5;
@@ -54,7 +58,7 @@ rect.reference, rect.comparison, #chr-view-blocks rect { fill-opacity: 0.5; }
 }
 
 .anchor {
-  stroke: #006A91;
+  stroke: #777;
   stroke-width: 0.5;
   stroke-dasharray: 2;
   fill: none;
@@ -135,6 +139,7 @@ clr-checkbox-wrapper .clr-control-label {
   line-height: 12px;
   margin-bottom: 0.75em;
   padding-top: 6px;
+  text-align: left;
 }
 
 #reference-interval-info {
