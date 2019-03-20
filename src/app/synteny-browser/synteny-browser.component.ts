@@ -69,12 +69,12 @@ export class SyntenyBrowserComponent implements OnInit {
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
 
     // TODO: Remove after filter implementation is finished
-    this.cdr.detectChanges();
-
-    setTimeout(() => {
-      this.genomeView.renderChordMapForChr('16');
-      this.getChromosomeFeatures();
-    }, 1500);
+    // this.cdr.detectChanges();
+    //
+    // setTimeout(() => {
+    //   this.genomeView.renderChordMapForChr('16');
+    //   this.getChromosomeFeatures();
+    // }, 1500);
     // setTimeout(() => {
     //   this.filterOpen = true;
     // }, 3000);

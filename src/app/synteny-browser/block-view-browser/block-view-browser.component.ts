@@ -28,7 +28,6 @@ export class BlockViewBrowserComponent {
   refInterval: string = '';
 
   options: any;
-  downloading: boolean = false;
 
   selectedRefGenes: Array<Gene> = [];
   selectedCompGenes: Array<Gene> = [];
@@ -100,7 +99,6 @@ export class BlockViewBrowserComponent {
    * TODO: let users choose the name they want to use for the download
    */
   download(): void {
-    this.downloading = true;
     this.setObjectAttributes();
 
     let svg = document.querySelector('#browser-svg');
@@ -122,8 +120,6 @@ export class BlockViewBrowserComponent {
                    this.interval.refStart+ '-' + this.interval.refEnd;
         saveAs(blob, name);
       });
-
-      this.downloading = false;
     };
 
     let serialized = new XMLSerializer().serializeToString(svg);

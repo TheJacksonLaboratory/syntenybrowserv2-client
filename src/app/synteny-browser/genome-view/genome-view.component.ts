@@ -3,6 +3,7 @@ import { CartesianCoordinate, SelectedFeatures } from '../classes/interfaces';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
+import { saveAs } from 'file-saver';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { TooltipComponent } from '../tooltip/tooltip.component';
@@ -92,6 +93,35 @@ export class GenomeViewComponent implements OnInit {
                blocks.forEach(b => b.setColor(colors[b.compChr]));
                this.genomeData = blocks;
              });
+  }
+
+  /**
+   * Triggers a download of the current view in the block view browser
+   * TODO: let users choose the name they want to use for the download
+   */
+  download(): void {
+    let svg = document.querySelector('#genome-view-svg');
+    svg.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+
+    let canvas = document.createElement('canvas');
+    canvas.width = Number(svg.clientWidth);
+    canvas.height = Number(svg.clientHeight);
+
+    let ctx = canvas.getContext('2d');
+    let image = new Image();
+
+    image.onload = () => {
+      ctx.clearRect(0, 0, svg.clientWidth, svg.clientHeight);
+      ctx.drawImage(image, 0, 0, svg.clientWidth, svg.clientHeight);
+
+      canvas.toBlob((blob) => {
+        let name = this.ref.commonName + '_' + (this.refChr ? this.refChr.chr : '');
+        saveAs(blob, name);
+      });
+    };
+
+    let serialized = new XMLSerializer().serializeToString(svg);
+    image.src = `data:image/svg+xml;base64,${btoa(serialized)}`;
   }
 
   /**
