@@ -2,6 +2,7 @@ import { ApiService } from './services/api.service';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
+import { FilterComponent } from './filter/filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { Metadata } from './classes/interfaces';
 import { Species } from './classes/species';
@@ -16,13 +17,17 @@ export class SyntenyBrowserComponent implements OnInit {
   @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
   @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
   @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
-  @ViewChild(BlockViewBrowserComponent) blockViewBrowser: BlockViewBrowserComponent;
+  @ViewChild(BlockViewBrowserComponent) blockView: BlockViewBrowserComponent;
+  @ViewChild(FilterComponent) filters: FilterComponent;
 
   refSpecies: Species;
   compSpecies: Species;
   genomeColors: any;
 
   viewInBrowser: boolean = false;
+
+  filterOpen: boolean = false;
+  filterConditions: Array<any> = [];
 
   constructor(private http: ApiService, private cdr: ChangeDetectorRef) { }
 
@@ -40,6 +45,9 @@ export class SyntenyBrowserComponent implements OnInit {
       });
     });
   }
+
+
+  // Operational Methods
 
   /**
    * Updates reference and comparison species with the most recent selections,
@@ -59,6 +67,7 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
+
   }
 
   /**
@@ -67,6 +76,9 @@ export class SyntenyBrowserComponent implements OnInit {
   updateFeatures(): void {
     this.genomeView.updateFeatures(this.features.selections);
   }
+
+
+  // Getter Methods
 
   /**
    * Show the block view browser and pass the reference and comparison species,
@@ -82,17 +94,25 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // allow the block view synteny-browser to initialize
     this.cdr.detectChanges();
-    this.blockViewBrowser.render(this.refSpecies,
-                                 this.compSpecies,
-                                 this.genomeColors,
-                                 features.chr,
-                                 features.features);
+    this.blockView.render(this.refSpecies,
+                          this.compSpecies,
+                          this.genomeColors,
+                          features.chr,
+                          features.features);
 
     setTimeout(() => {
       // TODO: this currently only will work in Firefox and Chrome
       document.getElementById('block-view')
-              .scrollIntoView({behavior: 'smooth', block: 'end'});
+              .scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 50);
+  }
 
+  /**
+   * Updates the block view with the most recent filter conditions
+   */
+  getFilters(): void {
+    this.filterOpen = false;
+    this.filterConditions = this.filters.filters;
+    this.blockView.applyFilterConditions(this.filterConditions);
   }
 }

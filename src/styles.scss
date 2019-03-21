@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+.top-0 { margin-top: 0 !important; }
 .top-1 { margin-top: 1rem !important; }
 .top-2 { margin-top: 2rem !important; }
 .bottom-1 { margin-bottom: 1rem !important; }
@@ -9,6 +10,7 @@
 .right-2 { margin-right: 2rem !important; }
 .margin-1 { margin: 1rem !important; }
 .margin-2 { margin: 2rem !important; }
+.padding-0 { padding: 0 !important; }
 .row-center { justify-content: center; }
 .text-center { text-align: center; }
 .text-right { text-align: right; }
@@ -20,9 +22,26 @@
 }
 
 .datagrid-table {
-  height: 395px;
+  min-height: 100px;
+  max-height: 395px;
   overflow-y: scroll;
 }
+
+.label-container {
+  min-height: 50px;
+  border: 0.5px #CCC solid;
+  border-radius: 3px;
+  margin: 0;
+  padding: 4px;
+}
+
+// When toggle switch is in the off position, make it red rather than grey
+.toggle-switch input[type=checkbox]:not(:checked)+label::before {
+  background-color: #F00 !important;
+  border-color: #F00 !important;
+}
+
+.modal-body { overflow-y: visible; }
 
 // The following styles need to be here; any further up in the chain and they
 // won't override D3's default stylings
@@ -59,3 +78,18 @@ clr-dg-placeholder,
 button { text-transform: uppercase !important; }
 
 .clr-input, .clr-select { min-width: 250px; }
+
+.footer {
+  height: 30px;
+  background-color: #006A91;
+  padding: 3px 15px;
+  width: 100vw;
+  position: static;
+  margin-top: 2em;
+
+  a {
+    color: #FFF !important;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+}

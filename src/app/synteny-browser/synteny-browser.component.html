@@ -1,20 +1,36 @@
-<div class="clr-row clr-col-lg-12">
+<div class="clr-row clr-col-12">
   <div class="card">
     <div class="card-header"> FIND FEATURES </div>
+
     <div class="card-block">
-      <div class="clr-row clr-col-lg-12">
-        <div class="clr-col-lg-7 clr-col-md-12">
+      <div class="clr-row clr-col-12">
+        <div class="clr-col-xl-7 clr-col-lg-12">
+          <div class="clr-row">
+            Select the species that you wish to use as reference and comparison
+            (or destination).
+          </div>
+
           <app-species-selection (update)="updateSpecies()"></app-species-selection>
+
           <hr/>
-          <app-feature-selection *ngIf="refSpecies"
-                                 (update)="updateFeatures()">
+
+          <app-feature-selection *ngIf="refSpecies" (update)="updateFeatures()">
           </app-feature-selection>
         </div>
-        <div class="clr-col-lg-5 clr-col-md-12">
+
+        <div class="clr-col-xl-5 clr-col-lg-12">
+          <div class="clr-row">
+            The reference genome will be displayed on the outer ring of circos
+            plot. The comparison species genome is the inner ring of the circos
+            plot and acts as a color legend for the syntenic blocks constructing
+            the reference genome.
+          </div>
+
           <app-genome-view *ngIf="refSpecies && compSpecies"></app-genome-view>
         </div>
       </div>
     </div>
+
     <div *ngIf="genomeView && genomeView.refChr" class="card-footer text-right">
       <button class="btn btn-primary" (click)="getChromosomeFeatures()">
         <clr-icon shape="check"></clr-icon> See Selection in Block View
@@ -24,12 +40,37 @@
 </div>
 
 <div *ngIf="viewInBrowser" class="clr-row">
-  <div class="clr-col-lg-12 bottom-1" id="block-view">
+  <div class="clr-col-12 bottom-1" id="block-view">
     <div class="card">
       <div class="card-header"> BLOCK VIEW BROWSER </div>
+
       <div class="card-block">
-        <app-block-view-browser></app-block-view-browser>
+        <app-block-view-browser (filter)="filterOpen = true"></app-block-view-browser>
       </div>
     </div>
   </div>
 </div>
+
+<div *ngIf="features && genomeView" class="footer">
+  <a href="https://www.jax.org/"><span>&copy; 2019 The Jackson Laboratory</span></a>
+</div>
+
+<clr-modal id="block-view-filters"
+           [(clrModalOpen)]="filterOpen"
+           [clrModalClosable]="true"
+           [clrModalSize]="'lg'">
+  <h3 class="modal-title"> Filtering the Block View </h3>
+
+  <div class="modal-body">
+    <app-filter *ngIf="blockView && blockView.compGenes"
+                [refSpecies]="refSpecies" [compSpecies]="compSpecies"
+                [filters]="filterConditions">
+    </app-filter>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="getFilters()">
+      Done
+    </button>
+  </div>
+</clr-modal>

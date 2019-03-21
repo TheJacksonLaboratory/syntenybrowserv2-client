@@ -22,6 +22,7 @@ export class SyntenyBlock {
   refScale: ScaleLinear<number, number>;
   compMatchScale: ScaleLinear<number, number>;
   compTrueScale: ScaleLinear<number, number>;
+
   format: Function = format(',');
 
   constructor(block: any, moreInfo: boolean = false) {
@@ -118,6 +119,11 @@ export class SyntenyBlock {
   getPxStart(): number { return this.refScale(this.refStart); }
 
   /**
+   * Returns the scaled end position of the syntenic block (px)
+   */
+  getPxEnd(): number { return this.getPxStart() + this.getPxWidth(); }
+
+  /**
    * Returns the label for the reference block starting position in the form of
    * '<chr>:<start>bp'
    */
@@ -136,17 +142,23 @@ export class SyntenyBlock {
   /**
    * Returns the label for the comparison block starting position in the form of
    * '<chr>:<start>bp'
+   * @param {boolean} trueOrientation - whether the block is truly oriented
    */
-  getBlockCompStartLabel(): string {
-    return this.getLabel(this.getTrueCompStart(), this.compChr);
+  getBlockCompStartLabel(trueOrientation: boolean): string {
+    return trueOrientation ?
+      this.getLabel(this.trueCoords.compStart, this.compChr) :
+      this.getLabel(this.matchCoords.compStart, this.compChr);
   }
 
   /**
    * Returns the label for the comparison block ending position in the form of
    * '<chr>:<end>bp'
+   * @param {boolean} trueOrientation - whether the block is truly oriented
    */
-  getBlockCompEndLabel(): string {
-    return this.getLabel(this.getTrueCompEnd(), this.compChr);
+  getBlockCompEndLabel(trueOrientation: boolean): string {
+    return trueOrientation ?
+      this.getLabel(this.trueCoords.compEnd, this.compChr) :
+      this.getLabel(this.matchCoords.compEnd, this.compChr);
   }
 
   /**

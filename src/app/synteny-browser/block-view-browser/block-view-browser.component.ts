@@ -3,7 +3,8 @@ import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
-import { Component, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
 import { Legend } from '../classes/legend';
 import { QTL } from '../classes/qtl';
@@ -23,10 +24,15 @@ export class BlockViewBrowserComponent {
   comp: Species;
   legend: Legend;
   refChr: string;
+  refInterval: string = '';
+
+  options: any;
 
   selectedRefGenes: Array<Gene> = [];
   selectedCompGenes: Array<Gene> = [];
   selectedQTLs: Array<QTL> = [];
+
+  filterConditions: Array<any> = [];
 
   progress: number = 0;
   zoom: ZoomBehavior<any, any>;
@@ -45,14 +51,15 @@ export class BlockViewBrowserComponent {
   refGenes: Array<Gene>;
   compGenes: Array<Gene>;
   staticRefBPToPixels: ScaleLinear<number, number>;
-  staticCompBPToPixels: ComparisonScaling = {
-    match: {},
-    true: {}
-  };
+  staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
-  trueOrientation: boolean = false;
 
-  constructor(private http: ApiService) { }
+  @Output() filter: EventEmitter<any> = new EventEmitter();
+
+  constructor(private http: ApiService) {
+    this.options = { symbols: false, anchors: false, trueOrientation: false };
+    this.staticCompBPToPixels = { match: {}, true: {} };
+  }
 
 
   // Operational Methods
@@ -65,10 +72,10 @@ export class BlockViewBrowserComponent {
    * @param {Species} comp - the comparison species
    * @param {object} colors - the genome color dictionary
    * @param {string} chr - the chromosome to get syntenic blocks and features for
-   * @param {Array<any>} features - list of selected features to display
+   * @param {Array<Feature>} features - list of selected features to display
    */
   render(ref: Species, comp: Species, colors: object,
-         chr: string, features: Array<any>): void {
+         chr: string, features: Array<Feature>): void {
     this.reset();
 
     this.ref = ref;
@@ -87,6 +94,51 @@ export class BlockViewBrowserComponent {
   }
 
   /**
+   * Filters and hides genes as they match with the specified conditions
+   * @param {Array<any>} conditions - the conditions to filter/hide genes with
+   */
+  applyFilterConditions(conditions: Array<any>): void {
+    this.refGenes.forEach(g => g.resetFilterStatus());
+    this.compGenes.forEach(g => g.resetFilterStatus());
+
+    this.filterConditions = conditions;
+    // order matters here because if a gene satisfies an 'exclude' criteria AND
+    // an 'include' criteria, the include should take precendence over the
+    // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
+    // should be filtered
+    this.hideGenes(conditions.filter(c => !c.include));
+    this.filterGenes(conditions.filter(c => c.include));
+  }
+
+  /**
+   * Marks all reference and comparison genes that match at least one of the
+   * specified conditions as 'filtered'
+   * @param {Array<any>} conditions - list of conditions to check genes against
+   */
+  hideGenes(conditions: Array<any>): void {
+    let hiddenRefGenes = this.getMatches(this.refGenes, conditions);
+    hiddenRefGenes.forEach(g => g.hide());
+
+    let hiddenCompGenes = this.getMatches(this.compGenes, conditions);
+    hiddenCompGenes.forEach(g => g.hide());
+  }
+
+  /**
+   * Marks all reference and comparison genes that match at least one of the
+   * specified conditions as 'filtered'
+   * @param {Array<any>} conditions - list of conditions to check genes against
+   */
+  filterGenes(conditions: Array<any>): void {
+    let refConds = conditions.filter(c => c.species !== 'comp');
+    let compConds = conditions.filter(c => c.species !== 'ref');
+    let filteredRefGenes = this.getMatches(this.refGenes, refConds);
+    filteredRefGenes.forEach(g => g.filter());
+
+    let filteredCompGenes = this.getMatches(this.compGenes, compConds);
+    filteredCompGenes.forEach(g => g.filter());
+  }
+
+  /**
    * Returns a translate command in the form of a string to be used in the
    * template for custom translations
    * @param {Array<number>} coords - a two value array where [0] = dx and
@@ -101,9 +153,34 @@ export class BlockViewBrowserComponent {
    * (gene or QTL) with a margin of 1 Mb on both sides, if possible
    * @param {any} feature - the feature to jump the location to
    */
-  jumpTo(feature: any): void {
+  jumpToFeature(feature: any): void {
     this.brushView(Math.max(0, feature.start - 1000000),
                    Math.min(this.getRefChrSize(), feature.end + 1000000));
+  }
+
+  /**
+   * Changes the current browser view to the interval entered into the reference
+   * interval field in the interface; if the interval only contains one value
+   * followed by a hyphen then interpret the interval as starting from the
+   * specified value to the end of the reference chromsome; if the single value
+   * is preceded by a hyphen, interpret as starting from the start of the
+   * reference chromsome to the specified value
+   */
+  jumpToInterval(): void {
+    if(this.refInterval.length > 0) {
+      let pts = this.refInterval.replace(/\s+/g, '')
+                                .replace(/,/g, '')
+                                .split('-');
+
+      if(pts.length === 2) {
+        let start = pts[0].length > 0 ? pts[0]: 0;
+        let end = pts[1].length > 0 ? pts[1]: this.getRefChrSize();
+
+        if(Number(start) && Number(end)) {
+          this.brushView(Number(start), Number(end));
+        }
+      }
+    }
   }
 
   /**
@@ -208,8 +285,7 @@ export class BlockViewBrowserComponent {
       gene.highlight();
 
       // highlight gene's homologs comparison
-      this.compGenes.filter(g => g.homologIDs.indexOf(gene.homologIDs[0]) >= 0)
-                    .forEach(g => g.highlight());
+      this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
     }
 
     // generate the tooltip for the gene
@@ -229,8 +305,7 @@ export class BlockViewBrowserComponent {
       gene.highlight();
 
       // highlight gene's homologs in the reference
-      this.refGenes.filter(g => gene.homologIDs.indexOf(g.homologIDs[0]) >= 0)
-                   .forEach(g => g.highlight());
+      this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
     }
 
     // generate the tooltip for the gene
@@ -291,8 +366,16 @@ export class BlockViewBrowserComponent {
    */
   getRefGenesInView(): Array<Gene> {
     return this.refGenes.filter(g => {
-      return g.isInRefView(this.refBPToPixels, this.width);
-    });
+                           return g.isInRefView(this.refBPToPixels, this.width);
+                         });
+  }
+
+  /**
+   * Returns a list of reference genes that are homologous (have at least one
+   * syntenic homolog)
+   */
+  getHomologousRefGenes(): Array<Gene> {
+    return this.refGenes.filter(g => g.isHomologous());
   }
 
   /**
@@ -300,7 +383,9 @@ export class BlockViewBrowserComponent {
    */
   getCompGenesInView(): Array<Gene> {
     return this.compGenes.filter(g => {
-      return g.isInCompView(this.getScale(g), this.width, this.trueOrientation);
+      return g.isInCompView(this.getScale(g),
+                            this.width,
+                            this.options.trueOrientation);
     });
   }
 
@@ -309,7 +394,7 @@ export class BlockViewBrowserComponent {
    * @param {Gene} gene - the gene to get the comp scale for by its blockID
    */
   getScale(gene: Gene): ScaleLinear<number, number> {
-    return this.blockLookup[gene.blockID].getScale(this.trueOrientation);
+    return this.blockLookup[gene.blockID].getScale(this.options.trueOrientation);
   }
 
   /**
@@ -317,7 +402,7 @@ export class BlockViewBrowserComponent {
    * @param {Gene} gene - the gene to use to a block ID from
    */
   getStaticCompScale(gene: Gene): ScaleLinear<number, number> {
-    let type = this.trueOrientation ? 'true' : 'match';
+    let type = this.options.trueOrientation ? 'true' : 'match';
     return this.staticCompBPToPixels[type][gene.blockID];
   }
 
@@ -368,10 +453,68 @@ export class BlockViewBrowserComponent {
    * @param {SyntenyBlock} block - the block to draw orientation indicators for
    */
   getOrientationIndPathCommand(block: SyntenyBlock): string {
-    return `M${this.refBPToPixels(block.refStart)},${this.trackHeight}
-            L${this.refBPToPixels(block.refEnd)},${this.trackHeight + 30}
-            M${this.refBPToPixels(block.refEnd)},${this.trackHeight}
-            L${this.refBPToPixels(block.refStart)},${this.trackHeight + 30}Z`;
+    return `M${block.getPxStart()},${this.trackHeight}
+            L${block.getPxEnd()},${this.trackHeight + 30}
+            M${block.getPxEnd()},${this.trackHeight}
+            L${block.getPxStart()},${this.trackHeight + 30}Z`;
+  }
+
+  /**
+   * Returns the path command for all of the anchors of the specified gene and
+   * homologs (2 lines per homolog)
+   * @param {Gene} gene - the gene to determine path commands for
+   */
+  getAnchorPathCommand(gene: Gene): string {
+    let command = '';
+    let refStart = this.refBPToPixels(gene.start);
+    let refEnd = this.refBPToPixels(gene.end);
+    let homologs = this.getComparisonHomologs(gene.homologIDs[0]);
+
+    homologs.forEach(hom => {
+      let scale = this.getScale(hom);
+      let homStart = scale(hom.getStart(this.options.trueOrientation));
+      let homEnd = scale(hom.getEnd(this.options.trueOrientation));
+
+      command += `M${refStart},${gene.yPos + 2}
+                  V${this.trackHeight}
+                  L${homStart},${this.trackHeight + 30}
+                  V${this.trackHeight + 30 + hom.yPos + 2}
+                  M${refEnd},${gene.yPos + 2}
+                  V${this.trackHeight}
+                  L${homEnd},${this.trackHeight + 30}
+                  V${this.trackHeight + 30 + hom.yPos + 2}`;
+    });
+
+    return command;
+  }
+
+  /**
+   * Returns a subset of genes from the specified list of genes that match at
+   * least one of the specified list of conditions
+   * @param {Array<Gene>} genes - the list of genes to search for matches
+   * @param {Array<any>} conditions - the list of conditions to check for matches
+   */
+  getMatches(genes: Array<Gene>, conditions: Array<any>): Array<Gene> {
+    return genes.filter(g => {
+                   let matchesFilter = false;
+                   conditions.forEach(c => {
+                                let cond = c.attr.toLowerCase();
+                                let val = c.value.toLowerCase();
+                                g[cond].toLowerCase() === val ?
+                                  matchesFilter = true : null
+                              });
+                   return matchesFilter;
+                 })
+  }
+
+  /**
+   * Returns the label text for the specified condition title (adds formatting)
+   * @param {string} conditionTitle - the title of the condition
+   */
+  getConditionLabel(conditionTitle: string): string {
+    return conditionTitle.replace(/=/g, ' = ')
+                         .replace(/!/g, '')
+                         .replace(/\+/g, ' ');
   }
 
 
@@ -420,10 +563,10 @@ export class BlockViewBrowserComponent {
   /**
    * Gets the synteny information and constructs dictionaries with important
    * information for each syntenic region
-   * @param {Array<any>} features - list of features for gene coloring
+   * @param {Array<Feature>} features - list of features for gene coloring
    * @param {object} colors - the genome color dictionary
    */
-  private getSyntenicBlocks(features: Array<any>, colors: object): void {
+  private getSyntenicBlocks(features: Array<Feature>, colors: object): void {
     let refID = this.ref.getID();
     let compID = this.comp.getID();
 
@@ -454,7 +597,7 @@ export class BlockViewBrowserComponent {
                                                    this.getRefChrSize(),
                                                    blocks,
                                                    this.refBPToPixels,
-                                                   this.trueOrientation);
+                                                   this.options.trueOrientation);
 
                // only update this once because it won't
                this.progress += 0.70;
@@ -479,9 +622,9 @@ export class BlockViewBrowserComponent {
    * selected features, and generates homolog IDs
    * @param {string} refID - the taxon ID of the reference species
    * @param {string} compID - the taxon ID of the comparison species
-   * @param {Array<any>} features - the selected features from the genome view
+   * @param {Array<Feature>} features - the selected features from the genome view
    */
-  private getGenes(refID: string, compID: string, features: Array<any>): void {
+  private getGenes(refID: string, compID: string, features: Array<Feature>): void {
     this.http.getGenes(refID, compID, this.refChr)
              .subscribe(genes => {
                // stores homolog id arrays by comparison gene symbol
@@ -490,8 +633,11 @@ export class BlockViewBrowserComponent {
                // comparison genes (reference genes' new/distinct homologs)
                let compGenes = [];
 
+               let featureSymbols = features.map(f => f.symbol);
+
                // add a homolog id to all of the reference genes
                this.refGenes = genes.map((g, i) => {
+                 g.gene_chr = this.refChr;
                  // if there are homologs, figure out homolog information
                  if(g.homologs.length !== 0) {
                    // load the homIDs dictionary and the compGenes array
@@ -505,7 +651,6 @@ export class BlockViewBrowserComponent {
                      }
                    });
 
-                   let featureSymbols = features.map(f => f.gene_symbol);
                    if(featureSymbols.indexOf(g.gene_symbol) >= 0) {
                      // set a temporary flag
                      g.sel = true;
@@ -516,7 +661,6 @@ export class BlockViewBrowserComponent {
 
                    return new Gene(g, [i], this.trackHeight);
                  } else {
-                   let featureSymbols = features.map(f => f.gene_symbol);
                    g.sel = featureSymbols.indexOf(g.gene_symbol) >= 0;
 
                    return new Gene(g, [], this.trackHeight);
@@ -535,6 +679,15 @@ export class BlockViewBrowserComponent {
                                                            this.blocks);
                                          }).filter(g => g.isSyntenic());
 
+               // go through reference genes to remove homolog IDs that are
+               // associated with comparison genes that were just filtered out
+               this.refGenes.filter(g => g.isHomologous())
+                            .forEach(g => {
+                              g.homologIDs = g.homologIDs.filter(h => {
+                                return this.getComparisonHomologs(h).length > 0;
+                              });
+                            });
+
                // get selected features
                this.selectedRefGenes = this.refGenes.filter(g => g.selected);
                this.selectedCompGenes = this.compGenes.filter(g => g.selected);
@@ -549,7 +702,7 @@ export class BlockViewBrowserComponent {
                            });
                */
 
-               let formattedQTLs = this.arrangeQTLs(features.filter(f => f.qtl_id));
+               let formattedQTLs = this.arrangeQTLs(features.filter(f => !f.gene));
                this.selectedQTLs = formattedQTLs.map((q, i) => {
                                                    return new QTL(q,
                                                                   i,
@@ -902,5 +1055,25 @@ export class BlockViewBrowserComponent {
     } else {
       return 'middle';
     }
+  }
+
+  /**
+   * Returns a list of comparison genes that have a homolog ID that matches
+   * the specified homolog ID of a reference gene
+   * @param {number} homID - the homolog ID to search for comparison matches
+   */
+  private getComparisonHomologs(homID: number): Array<Gene> {
+    return this.compGenes.filter(g => g.homologIDs.indexOf(homID) >= 0);
+  }
+
+  private getReferenceHomologs(homIDs: Array<number>): Array<Gene> {
+    return this.refGenes.filter(g => {
+                           let match = false;
+                           g.homologIDs.forEach(h => {
+                                         homIDs.indexOf(h) >= 0 ?
+                                           match = true : null
+                                        });
+                           return match;
+                         });
   }
 }
