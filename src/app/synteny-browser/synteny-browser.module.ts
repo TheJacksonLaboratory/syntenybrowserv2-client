@@ -9,7 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // components
 import { SyntenyBrowserComponent } from './synteny-browser.component';
-
+import { FilterComponent } from './filter/filter.component';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
@@ -34,7 +34,8 @@ import { ApiService } from './services/api.service';
     FeatureSelectionComponent,
     GenomeViewComponent,
     SpeciesSelectionComponent,
-    TooltipComponent
+    TooltipComponent,
+    FilterComponent
   ], 
   providers: [ApiService, HttpClient]
 })

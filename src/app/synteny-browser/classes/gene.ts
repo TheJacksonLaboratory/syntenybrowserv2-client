@@ -21,6 +21,7 @@ export class Gene {
   highlighted: boolean = false;
   selected: boolean = false;
   filtered: boolean = false;
+  hidden: boolean = false;
 
   format: Function = format(',');
 
@@ -86,6 +87,24 @@ export class Gene {
    */
   unfilter(): void { this.filtered = false; }
 
+  /**
+   * Marks the gene as hidden (used with filters)
+   */
+  hide(): void { this.hidden = true; }
+
+  /**
+   * Marks the gene as non-hidden (used with filters)
+   */
+  show(): void { this.hidden = false; }
+
+  /**
+   * Resets the gene's filter-based status to "normal" (unfiltered, and visible)
+   */
+  resetFilterStatus(): void {
+    this.unfilter();
+    this.show();
+  }
+
 
   //Getter Methods
 
@@ -94,7 +113,7 @@ export class Gene {
    * @param {ScaleLinear<number, number>} scale - scale to use to get the position
    */
   getCenterXPos(scale: ScaleLinear<number, number>): number {
-    return scale(this.start + (this.size / 2 ));
+    return scale(this.start + (this.size / 2));
   }
 
   /**
@@ -156,6 +175,7 @@ export class Gene {
     return {
       'Gene ID': this.id,
       'Chromosome': this.chr,
+      'Type': this.type,
       'Location': `${this.format(this.start)}bp - ${this.format(this.end)}bp`,
       '# of Homologs': this.homologIDs.length,
       'Strand': this.strand

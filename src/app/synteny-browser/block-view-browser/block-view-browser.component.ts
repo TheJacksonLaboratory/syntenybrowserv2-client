@@ -3,7 +3,8 @@ import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
-import { Component, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
 import { Legend } from '../classes/legend';
 import { QTL } from '../classes/qtl';
@@ -27,6 +28,8 @@ export class BlockViewBrowserComponent {
   selectedRefGenes: Array<Gene> = [];
   selectedCompGenes: Array<Gene> = [];
   selectedQTLs: Array<QTL> = [];
+
+  filterConditions: Array<any> = [];
 
   progress: number = 0;
   zoom: ZoomBehavior<any, any>;
@@ -52,6 +55,8 @@ export class BlockViewBrowserComponent {
   refBPToPixels: ScaleLinear<number, number>;
   trueOrientation: boolean = false;
 
+  @Output() filter: EventEmitter<any> = new EventEmitter();
+
   constructor(private http: ApiService) { }
 
 
@@ -65,10 +70,10 @@ export class BlockViewBrowserComponent {
    * @param {Species} comp - the comparison species
    * @param {object} colors - the genome color dictionary
    * @param {string} chr - the chromosome to get syntenic blocks and features for
-   * @param {Array<any>} features - list of selected features to display
+   * @param {Array<Feature>} features - list of selected features to display
    */
   render(ref: Species, comp: Species, colors: object,
-         chr: string, features: Array<any>): void {
+         chr: string, features: Array<Feature>): void {
     this.reset();
 
     this.ref = ref;
@@ -84,6 +89,51 @@ export class BlockViewBrowserComponent {
 
     // get syntenic block data
     this.getSyntenicBlocks(features, colors);
+  }
+
+  /**
+   * Filters and hides genes as they match with the specified conditions
+   * @param {Array<any>} conditions - the conditions to filter/hide genes with
+   */
+  applyFilterConditions(conditions: Array<any>): void {
+    this.refGenes.forEach(g => g.resetFilterStatus());
+    this.compGenes.forEach(g => g.resetFilterStatus());
+
+    this.filterConditions = conditions;
+    // order matters here because if a gene satisfies an 'exclude' criteria AND
+    // an 'include' criteria, the include should take precendence over the
+    // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
+    // should be filtered
+    this.hideGenes(conditions.filter(c => !c.include));
+    this.filterGenes(conditions.filter(c => c.include));
+  }
+
+  /**
+   * Marks all reference and comparison genes that match at least one of the
+   * specified conditions as 'filtered'
+   * @param {Array<any>} conditions - list of conditions to check genes against
+   */
+  hideGenes(conditions: Array<any>): void {
+    let hiddenRefGenes = this.getMatches(this.refGenes, conditions);
+    hiddenRefGenes.forEach(g => g.hide());
+
+    let hiddenCompGenes = this.getMatches(this.compGenes, conditions);
+    hiddenCompGenes.forEach(g => g.hide());
+  }
+
+  /**
+   * Marks all reference and comparison genes that match at least one of the
+   * specified conditions as 'filtered'
+   * @param {Array<any>} conditions - list of conditions to check genes against
+   */
+  filterGenes(conditions: Array<any>): void {
+    let refConds = conditions.filter(c => c.species !== 'comp');
+    let compConds = conditions.filter(c => c.species !== 'ref');
+    let filteredRefGenes = this.getMatches(this.refGenes, refConds);
+    filteredRefGenes.forEach(g => g.filter());
+
+    let filteredCompGenes = this.getMatches(this.compGenes, compConds);
+    filteredCompGenes.forEach(g => g.filter());
   }
 
   /**
@@ -374,6 +424,35 @@ export class BlockViewBrowserComponent {
             L${this.refBPToPixels(block.refStart)},${this.trackHeight + 30}Z`;
   }
 
+  /**
+   * Returns a subset of genes from the specified list of genes that match at
+   * least one of the specified list of conditions
+   * @param {Array<Gene>} genes - the list of genes to search for matches
+   * @param {Array<any>} conditions - the list of conditions to check for matches
+   */
+  getMatches(genes: Array<Gene>, conditions: Array<any>): Array<Gene> {
+    return genes.filter(g => {
+                   let matchesFilter = false;
+                   conditions.forEach(c => {
+                                let cond = c.attr.toLowerCase();
+                                let val = c.value.toLowerCase();
+                                g[cond].toLowerCase() === val ?
+                                  matchesFilter = true : null
+                              });
+                   return matchesFilter;
+                 })
+  }
+
+  /**
+   * Returns the label text for the specified condition title (adds formatting)
+   * @param {string} conditionTitle - the title of the condition
+   */
+  getConditionLabel(conditionTitle: string): string {
+    return conditionTitle.replace(/=/g, ' = ')
+                         .replace(/!/g, '')
+                         .replace(/\+/g, ' ');
+  }
+
 
   // Condition Checks
 
@@ -420,10 +499,10 @@ export class BlockViewBrowserComponent {
   /**
    * Gets the synteny information and constructs dictionaries with important
    * information for each syntenic region
-   * @param {Array<any>} features - list of features for gene coloring
+   * @param {Array<Feature>} features - list of features for gene coloring
    * @param {object} colors - the genome color dictionary
    */
-  private getSyntenicBlocks(features: Array<any>, colors: object): void {
+  private getSyntenicBlocks(features: Array<Feature>, colors: object): void {
     let refID = this.ref.getID();
     let compID = this.comp.getID();
 
@@ -479,9 +558,9 @@ export class BlockViewBrowserComponent {
    * selected features, and generates homolog IDs
    * @param {string} refID - the taxon ID of the reference species
    * @param {string} compID - the taxon ID of the comparison species
-   * @param {Array<any>} features - the selected features from the genome view
+   * @param {Array<Feature>} features - the selected features from the genome view
    */
-  private getGenes(refID: string, compID: string, features: Array<any>): void {
+  private getGenes(refID: string, compID: string, features: Array<Feature>): void {
     this.http.getGenes(refID, compID, this.refChr)
              .subscribe(genes => {
                // stores homolog id arrays by comparison gene symbol
@@ -490,8 +569,11 @@ export class BlockViewBrowserComponent {
                // comparison genes (reference genes' new/distinct homologs)
                let compGenes = [];
 
+               let featureSymbols = features.map(f => f.symbol);
+
                // add a homolog id to all of the reference genes
                this.refGenes = genes.map((g, i) => {
+                 g.gene_chr = this.refChr;
                  // if there are homologs, figure out homolog information
                  if(g.homologs.length !== 0) {
                    // load the homIDs dictionary and the compGenes array
@@ -505,7 +587,6 @@ export class BlockViewBrowserComponent {
                      }
                    });
 
-                   let featureSymbols = features.map(f => f.gene_symbol);
                    if(featureSymbols.indexOf(g.gene_symbol) >= 0) {
                      // set a temporary flag
                      g.sel = true;
@@ -516,7 +597,6 @@ export class BlockViewBrowserComponent {
 
                    return new Gene(g, [i], this.trackHeight);
                  } else {
-                   let featureSymbols = features.map(f => f.gene_symbol);
                    g.sel = featureSymbols.indexOf(g.gene_symbol) >= 0;
 
                    return new Gene(g, [], this.trackHeight);
@@ -549,7 +629,7 @@ export class BlockViewBrowserComponent {
                            });
                */
 
-               let formattedQTLs = this.arrangeQTLs(features.filter(f => f.qtl_id));
+               let formattedQTLs = this.arrangeQTLs(features.filter(f => !f.gene));
                this.selectedQTLs = formattedQTLs.map((q, i) => {
                                                    return new QTL(q,
                                                                   i,

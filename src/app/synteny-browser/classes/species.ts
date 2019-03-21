@@ -5,8 +5,8 @@ export class Species {
   name: string;
   commonName: string;
   genome: any;
-  ontologies: Array<SearchType>;
-  searchTypes: Array<any>;
+  onts: Array<SearchType>;
+  searchTypes: Array<SearchType>;
   hasQTLs: boolean;
   resources: Array<ExternalResource>;
 
@@ -39,7 +39,9 @@ export class Species {
   private createMouse() {
     this.name = 'Mus musculus';
     this.commonName = 'Mouse';
-    this.resources = [  {url: 'http://www.informatics.jax.org/marker/', name: 'MGI'} ];
+    this.resources = [
+      {url: 'http://www.informatics.jax.org/marker/', name: 'MGI'}
+    ];
     this.genome = {
       '1': 195471971, '2': 182113224, '3': 160039680, '4': 156508116,
       '5': 151834684, '6': 149736546, '7': 145441459, '8': 129401213,
@@ -53,9 +55,9 @@ export class Species {
       {name: 'Feature Symbol', value: 'symbol'},
       {name: 'Ontology', value: 'ontology'}
     ];
-    this.ontologies = [
-      {name: 'go', value: 'Gene Ontology (GO)', search_example: 'GO term (e.g. BMP signaling pathway)', search_type: 'OntAnnotation'},
-      {name: 'mp', value: 'Mammalian Phenotype Ontology (MP)', search_example: 'MP term (e.g. abnormal cell)', search_type: 'OntAnnotation'}
+    this.onts = [
+      {value: 'go', name: 'Gene Ontology (GO) Term'},
+      {value: 'mp', name: 'Mammalian Pheno Ontology (MP) Term'}
     ];
   }
 
@@ -66,7 +68,9 @@ export class Species {
   private createHuman() {
     this.name = 'Homo sapiens';
     this.commonName = 'Human';
-    this.resources = [ {url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI'} ];
+    this.resources = [
+      {url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI'}
+    ];
     this.genome = {
       '1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
       '5': 180915260, '6': 171115067, '7': 159138663, '8': 146364022,
@@ -80,14 +84,15 @@ export class Species {
       {name: 'Feature Symbol', value: 'symbol'},
       {name: 'Ontology', value: 'ontology'}
     ];
-    this.ontologies = [
-      {name: 'go', value: 'Gene Ontology (GO)', search_example: 'GO term (e.g. osmosensory signaling pathway)', search_type: 'OntAnnotation'},
-      {name: 'do', value: 'Disease Ontology (DO)', search_example: 'DO term (e.g. dynein)', search_type: 'OntAnnotation'}
+    this.onts = [
+      {value: 'go', name: 'Gene Ontology (GO) Term'},
+      {value: 'do', name: 'Disease Ontology (DO) Term'}
     ];
   }
 
   /**
-   * Creates a dummy species (for testing purposes until we aren't hardcoding all the data within the class)
+   * Creates a dummy species (for testing purposes until we aren't hardcoding
+   * all the data within the class)
    * TODO: GET RID OF THIS WHEN DB HAD NECESSARY DATA
    */
   private createDummySpecies() {
@@ -102,9 +107,9 @@ export class Species {
       '17': 17, '18': 18, '19': 19, '20': 20, '21': 21, '22': 22, 'X': 23, 'Y': 24
     };
     this.hasQTLs = false;
-    this.ontologies = [ // Same as human
-      {name: 'go', value: 'Gene Ontology (GO)', search_example: 'GO term (e.g. osmosensory signaling pathway)', search_type: 'OntAnnotation'},
-      {name: 'do', value: 'Disease Ontology (DO)', search_example: 'DO term (e.g. dynein)', search_type: 'OntAnnotation'}
+    this.onts = [ // Same as human
+      {value: 'go', name: 'Gene Ontology (GO) Term'},
+      {value: 'do', name: 'Disease Ontology (DO) Term'}
     ];
   };
 }

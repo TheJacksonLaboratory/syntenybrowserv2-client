@@ -104,3 +104,21 @@ text.all-caps {
   border-left: none !important;
   border-right: none !important;
 }
+
+#filters {
+  min-height: 36px !important;
+  border-radius: 3px 0 0 3px !important;
+  float: left;
+  width: 75%;
+}
+
+.filter-edit {
+  border-radius: 0 3px 3px 0;
+  float: left;
+}
+
+.no-selections { color: #AAA; }
+
+.filter-labels { text-align: left; }
+
+.btn-group { float: left; }

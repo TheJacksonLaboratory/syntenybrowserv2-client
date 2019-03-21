@@ -1,0 +1,32 @@
+.selected { background: rgba(0, 106, 145, 0.1); }
+
+.no-filters { color: #AAA; }
+
+.toggle-switch { margin-top: -0.25em }
+
+h5 {
+  text-transform: uppercase;
+  font-weight: bold;
+  display: inline;
+  margin-top: 1em !important;
+}
+
+h6 { margin-top: 6px; }
+
+p { margin-top: 0.2em; }
+
+.smaller { font-size: 0.5rem; }
+
+.new-filter { border-top: 1px #AAA solid; }
+
+.input-btn {
+  padding: 5px;
+  border: none;
+  min-width: 0;
+}
+
+.clr-input { min-width: 380px !important; }
+
+.clr-select { min-width: 0; }
+
+.error-msg { color: #F00; }
