@@ -1,4 +1,4 @@
-import { ScaleLinear } from 'd3';
+import {format, ScaleLinear} from 'd3';
 import { SyntenyBlock } from './synteny-block';
 
 export class BrowserInterval {
@@ -16,6 +16,7 @@ export class BrowserInterval {
 
   blockStarts: object = {};
   blockEnds: object = {};
+  format: Function = format(',');
   
   constructor(refChr: string, refChrWidth: number, blocks: Array<SyntenyBlock>, 
               refScale: ScaleLinear<number, number>, trueOrientation: boolean) {
@@ -59,28 +60,28 @@ export class BrowserInterval {
    * Returns the label for the reference start point for the current interval
    */
   getRefStartLabel(): string {
-    return `Chr${this.refChr}:${this.refStart}bp`;
+    return `Chr${this.refChr}:${this.format(this.refStart)}bp`;
   }
 
   /**
    * Returns the label for the reference end point for the current interval
    */
   getRefEndLabel(): string {
-    return `Chr${this.refChr}:${this.refEnd}bp`;
+    return `Chr${this.refChr}:${this.format(this.refEnd)}bp`;
   }
 
   /**
    * Returns the label for the comparison start point for the current interval
    */
   getCompStartLabel(): string {
-    return `Chr${this.compStartChr}:${this.compStart}bp`;
+    return `Chr${this.compStartChr}:${this.format(this.compStart)}bp`;
   }
 
   /**
    * Returns the label for the comparison end point for the current interval
    */
   getCompEndLabel(): string {
-    return `Chr${this.compEndChr}:${this.compEnd}bp`;
+    return `Chr${this.compEndChr}:${this.format(this.compEnd)}bp`;
   }
 
 

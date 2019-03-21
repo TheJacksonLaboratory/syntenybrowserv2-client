@@ -19,6 +19,10 @@
   stroke-width: 0.5;
 }
 
+h2 {
+  margin-top: 0;
+}
+
 .hor-rule {
   stroke: #999;
   stroke-width: 0.5;
@@ -51,6 +55,13 @@ rect.reference, rect.comparison, #chr-view-blocks rect { fill-opacity: 0.5; }
 .qtl-mark {
   stroke-width: 3;
   stroke-linecap: round;
+}
+
+.anchor {
+  stroke: #777;
+  stroke-width: 0.5;
+  stroke-dasharray: 2;
+  fill: none;
 }
 
 .end { text-anchor: end; }
@@ -107,18 +118,46 @@ text.all-caps {
 
 #filters {
   min-height: 36px !important;
-  border-radius: 3px 0 0 3px !important;
-  float: left;
-  width: 75%;
+  border-radius: 3px !important;
 }
 
-.filter-edit {
-  border-radius: 0 3px 3px 0;
-  float: left;
+#block-view-tools { text-align: left; }
+
+.block-view-option {
+  padding: 0 1em;
+  color: #0079b8;
+  min-width: 0;
 }
+
+clr-input-container { margin-top: 10px !important; }
 
 .no-selections { color: #AAA; }
 
 .filter-labels { text-align: left; }
 
-.btn-group { float: left; }
+clr-checkbox-wrapper .clr-control-label {
+  line-height: 12px;
+  margin-bottom: 0.75em;
+  padding-top: 6px;
+  text-align: left;
+}
+
+#reference-interval-info {
+  margin-left: 10px;
+  margin-top: 23px;
+  height: 20px;
+}
+
+clr-signpost-content {
+  h4 {
+    margin-top: 0;
+    padding-bottom: 0.5em;
+    border-bottom: 0.5px #AAA solid;
+    margin-bottom: 0.75em;
+  }
+
+  span {
+    color: red;
+    font-size: 10px;
+  }
+}

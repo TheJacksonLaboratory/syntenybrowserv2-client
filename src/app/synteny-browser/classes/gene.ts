@@ -106,7 +106,7 @@ export class Gene {
   }
 
 
-  //Getter Methods
+  // Getter Methods
 
   /**
    * Returns a central X position (px) for the gene using the specified scale
@@ -182,7 +182,7 @@ export class Gene {
     }
   }
 
-  // Reference
+  // Reference Getter Methods
 
   /**
    * Returns the scaled x position for the reference gene's start position (px)
@@ -250,15 +250,27 @@ export class Gene {
   }
 
   /**
-   * Returns either a comparison gene's start or end point based on whether true
-   * coords or matching coords are needed and if the gene's orientation matches
+   * Returns a comparison gene's *visual* start point (either start or end point
+   * based on whether true coords or matching coords are needed and if the
+   * gene's orientation matches)
    * @param {boolean} trueCoords - the flag for getting either the true starting
    *                               point or matching starting point
    */
   getStart(trueCoords: boolean): number {
     return trueCoords ?
-           this.start :
-           (this.orientationMatches ? this.start : this.end);
+           this.start : (this.orientationMatches ? this.start : this.end);
+  }
+
+  /**
+   * Returns a comparison gene's *visual* end point (either start or end point
+   * based on whether true coords or matching coords are needed and if the
+   * gene's orientation matches)
+   * @param {boolean} trueCoords - the flag for getting either the true starting
+   *                               point or matching starting point
+   */
+  getEnd(trueCoords: boolean): number {
+    return trueCoords ?
+      this.end : (this.orientationMatches ? this.end : this.start);
   }
 
 
@@ -268,6 +280,11 @@ export class Gene {
    * Returns true/false if the gene is located in a syntenic region
    */
   isSyntenic(): boolean { return !(!this.blockID); }
+
+  /**
+   * Returns true/false if the gene has at least one homolog
+   */
+  isHomologous(): boolean { return this.homologIDs.length > 0; }
 
   /**
    * Returns true/false if any of the status flags are true; essentially, if the
@@ -310,7 +327,7 @@ export class Gene {
    * block doesn't fully contain the gene, it won't be considered syntenic
    * @param {Array<SyntenyBlock>} blocks - blocks to use identify the gene's blockID
    */
-  setBlockID(blocks: Array<SyntenyBlock>): void {
+  private setBlockID(blocks: Array<SyntenyBlock>): void {
     // get the block that contains the gene
     let b = blocks.filter(block => {
       return block.matchesCompChr(this.chr) && block.contains(this)

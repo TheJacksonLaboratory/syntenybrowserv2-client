@@ -2,9 +2,11 @@
   <!-- Title -->
   <h2>{{ ref.commonName }}, Chr{{ refChr }}</h2>
 
-  <div class="clr-row">
-    <div class="clr-col-lg-4 clr-col-md-12 bottom-1">
-        <div id="filters" class="label-container">
+  <div id="block-view-tools" class="clr-row clr-justify-content-center">
+    <div class="clr-col-xl-5 clr-col-12 bottom-1">
+      <h4> Block View Filters </h4>
+      <div class="clr-row">
+        <div id="filters" class="label-container clr-col-xl-8 clr-col-10">
           <div *ngIf="filterConditions.length === 0"
                class="no-selections filter-labels">
             No filters have been created yet
@@ -19,25 +21,55 @@
             </span>
           </div>
         </div>
-        <button class="btn btn-primary filter-edit" (click)="filter.emit()">
-          <clr-icon shape="pencil" class="is-solid"></clr-icon> Edit
-        </button>
+        <div class="clr-col-2">
+          <button class="btn btn-primary" (click)="filter.emit()">
+            <clr-icon shape="pencil" class="is-solid"></clr-icon> Edit
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="clr-col-lg-4 clr-col-md-12 bottom-1">
+    <div class="clr-col-xl-3 clr-col-5 bottom-1">
+      <div class="clr-row">
+        <h4> Jump to Interval </h4>
+        <clr-signpost id="reference-interval-info">
+          <clr-icon shape="info" clrSignpostTrigger></clr-icon>
+          <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+            Valid intervals include: <br/>
+            • <b>12345678-23456789</b><br/>
+            • <b>12,345,678-23,456,789</b><br/>
+            • <b>12345678-</b> (will jump to 12,345,678 through end of chromosome)<br/>
+            • <b>-12345678</b> (will jump to start of chromosome through 12,345,678)<br/>
+          </clr-signpost-content>
+        </clr-signpost>
+      </div>
+
+      <clr-input-container>
+        <label for="reference-interval"></label>
+
+        <input id="reference-interval" clrInput
+               [(ngModel)]="refInterval"
+               placeholder="Enter a valid interval"
+               (keyup.enter)="jumpToInterval()">
+      </clr-input-container>
+    </div>
+    <div class="clr-col-xl-3 clr-col-5 bottom-1">
+      <h4> Block View Navigation </h4>
       <!-- Navigation buttons -->
-      <div class="btn-group">
+      <div class="btn-group btn-icon">
         <!-- Pan left button -->
         <button class="btn btn-outline"
+                title="Pan left"
                 [disabled]="!interval || interval.refStart === 0"
                 (click)="panLeft()">
-          <clr-icon shape="rewind"></clr-icon> Pan Left
+          <clr-icon shape="rewind"></clr-icon>
         </button>
 
         <!-- Zoom out button -->
         <button class="btn btn-outline"
+                title="Zoom out"
                 [disabled]="!interval || interval.width === getRefChrSize()"
                 (click)="zoomOut()">
-          <clr-icon shape="zoom-out"></clr-icon> Zoom Out
+          <clr-icon shape="zoom-out"></clr-icon>
         </button>
 
         <!-- Jump to feature button -->
@@ -58,7 +90,7 @@
 
               <button *ngFor="let gene of selectedRefGenes"
                       type="button" clrDropdownItem
-                      (click)="jumpTo(gene)">
+                      (click)="jumpToFeature(gene)">
                 {{ gene.symbol }}
               </button>
             </div>
@@ -74,7 +106,7 @@
 
               <button *ngFor="let qtl of selectedQTLs"
                       type="button" clrDropdownItem
-                      (click)="jumpTo(qtl)">
+                      (click)="jumpToFeature(qtl)">
                 {{ qtl.symbol }}
               </button>
             </div>
@@ -83,17 +115,57 @@
 
         <!-- Zoom in button -->
         <button class="btn btn-outline"
+                title="Zoom in"
                 [disabled]="!interval || interval.width === minimumIntervalSize"
                 (click)="zoomIn()" >
-          <clr-icon shape="zoom-in"></clr-icon> Zoom In
+          <clr-icon shape="zoom-in"></clr-icon>
         </button>
 
         <!-- Pan right button -->
         <button class="btn btn-outline"
+                title="Pan right"
                 [disabled]="!interval || interval.refEnd === getRefChrSize()"
                 (click)="panRight()" >
-          <clr-icon shape="fast-forward"></clr-icon> Pan Right
+          <clr-icon shape="fast-forward"></clr-icon>
         </button>
+      </div>
+    </div>
+    <div class="clr-col-xl-1 clr-col-2 bottom-1">
+      <h4> Options </h4>
+      <div class="btn-group btn-icon">
+        <button class="btn block-view-option">
+          <clr-icon shape="download"></clr-icon>
+        </button>
+        <clr-signpost class="btn block-view-option">
+          <clr-icon shape="cog" clrSignpostTrigger></clr-icon>
+          <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
+            <h4> Block View Browser Settings </h4>
+            <clr-checkbox-wrapper>
+              <input type="checkbox" clrCheckbox
+                     id="symbols"
+                     [(ngModel)]="options.symbols"/>
+              <label for="symbols">
+                Show all gene symbols <br/>
+                <span> (may affect performance) </span>
+              </label>
+            </clr-checkbox-wrapper>
+            <clr-checkbox-wrapper>
+              <input type="checkbox" clrCheckbox
+                     id="anchors"
+                     [(ngModel)]="options.anchors"/>
+              <label for="anchors">
+                Show gene anchors <br/>
+                <span> (may affect performance) </span>
+              </label>
+            </clr-checkbox-wrapper>
+            <clr-checkbox-wrapper>
+              <input type="checkbox" clrCheckbox
+                     id="orientation"
+                     [(ngModel)]="options.trueOrientation"/>
+              <label for="orientation"> Show synteny in true orientation </label>
+            </clr-checkbox-wrapper>
+          </clr-signpost-content>
+        </clr-signpost>
       </div>
     </div>
   </div>
@@ -161,11 +233,12 @@
 
     <!-- Synteny browser -->
     <g id="browser" [attr.transform]="translate([0, browserOffset])">
-      <!-- Backgrounds -->
+      <!-- Reference species title -->
       <text class="all-caps" [attr.transform]="translate([2, trackHeight + 16])">
         {{ ref.commonName }}
       </text>
 
+      <!-- Background -->
       <rect class="trans-bg bg" [attr.height]="(2 * trackHeight) + 30"></rect>
 
       <!-- Dynamic axis that scales with browser for more reference context -->
@@ -199,29 +272,33 @@
         </g>
 
         <!-- Reference track syntenic blocks -->
-        <rect *ngFor="let block of blocks" class="reference"
-              [attr.x]="block.getPxStart()"
-              [attr.width]="block.getPxWidth()"
-              [attr.height]="trackHeight"
-              (mouseenter)="hoverBlock(block, $event)"
-              (mouseleave)="tooltip.clear()">
-        </rect>
+        <g id="reference-blocks">
+          <rect *ngFor="let block of blocks" class="reference"
+                [attr.x]="block.getPxStart()"
+                [attr.width]="block.getPxWidth()"
+                [attr.height]="trackHeight"
+                (mouseenter)="hoverBlock(block, $event)"
+                (mouseleave)="tooltip.clear()">
+          </rect>
+        </g>
 
         <!-- Selected QTLs -->
-        <rect *ngFor="let qtl of selectedQTLs" class="qtl"
-              [attr.transform]="translate([qtl.getStart(refBPToPixels), qtl.offset])"
-              [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
-              [attr.height]="qtl.height"
-              (mouseenter)="hoverQTL(qtl, $event)"
-              (mouseleave)="tooltip.clear()">
-        </rect>
+        <g id="qtls">
+          <rect *ngFor="let qtl of selectedQTLs" class="qtl"
+                [attr.transform]="translate([qtl.getStart(refBPToPixels), qtl.offset])"
+                [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
+                [attr.height]="qtl.height"
+                (mouseenter)="hoverQTL(qtl, $event)"
+                (mouseleave)="tooltip.clear()">
+          </rect>
+        </g>
 
         <!-- Reference genes -->
-        <g *ngIf="refGenes">
+        <g *ngIf="refGenes" id="reference-genes">
           <g *ngFor="let gene of getRefGenesInView()"
              [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
             <!-- Gene label -->
-            <text *ngIf="gene.hasVisibleLabel()"
+            <text *ngIf="gene.hasVisibleLabel() || options.symbols"
                   [ngStyle]="{ 'fill': gene.getColor(),
                                'display': gene.hidden ? 'none' : 'initial' }"
                   (mouseenter)="highlightRefGene(gene, $event)"
@@ -257,7 +334,7 @@
       </g>
 
       <!-- Orientation indicators -->
-      <g *ngIf="blocks && !trueOrientation" id="orientation-indicators">
+      <g *ngIf="blocks && !options.trueOrientation" id="orientation-indicators">
         <path *ngFor="let block of getNonMatchedBlocks()"
               [attr.d]="getOrientationIndPathCommand(block)">
         </path>
@@ -266,25 +343,27 @@
       <!-- Comparison chromosome track -->
       <g id="comparison-genome" [attr.transform]="translate([0, trackHeight + 30])">
         <!-- Comparison track syntenic blocks -->
-        <rect *ngFor="let block of blocks" class="comparison"
-              [attr.x]="block.getPxStart()"
-              [attr.width]="block.getPxWidth()"
-              [attr.height]="trackHeight"
-              (mouseenter)="hoverBlock(block, $event, true)"
-              (mouseleave)="tooltip.clear()"
-              [ngStyle]="{
+        <g id="comparison-blocks">
+          <rect *ngFor="let block of blocks" class="comparison"
+                [attr.x]="block.getPxStart()"
+                [attr.width]="block.getPxWidth()"
+                [attr.height]="trackHeight"
+                (mouseenter)="hoverBlock(block, $event, true)"
+                (mouseleave)="tooltip.clear()"
+                [ngStyle]="{
                            'fill': block.getColor(legend.hoverChr),
                            'stroke': block.getColor(legend.hoverChr)
                          }">
-      </rect>
+          </rect>
+        </g>
 
         <!-- Comparison genes -->
         <g *ngIf="compGenes && blocks" id="comparison-genes">
           <g *ngFor="let gene of getCompGenesInView()"
              [attr.transform]="translate(gene.getCompPxCoords(getScale(gene),
-                                         trueOrientation))">
+                                         options.trueOrientation))">
             <!-- Gene label -->
-            <text *ngIf="gene.hasVisibleLabel()"
+            <text *ngIf="gene.hasVisibleLabel() || options.symbols"
                   [ngStyle]="{ 'fill': gene.getColor(),
                                'display': gene.hidden ? 'none' : 'initial' }"
                   (mouseenter)="highlightCompGene(gene, $event)"
@@ -296,7 +375,7 @@
             <g *ngIf="interval.width <= 5000000">
               <rect *ngFor="let exon of gene.transcript" class="exon"
                     [attr.x]="gene.getCompExonXPos(exon, getScale(gene),
-                                                   trueOrientation)"
+                                                   options.trueOrientation)"
                     [attr.width]="gene.getExonWidth(exon, getScale(gene))"
                     [ngStyle]="{ 'fill': gene.getColor(),
                                  'display': gene.hidden ? 'none' : 'initial' }">
@@ -332,13 +411,13 @@
 
               <!-- Starting block coordinate -->
               <text [attr.transform]="translate([2, -1])">
-                {{ block.getBlockCompStartLabel() }}
+                {{ block.getBlockCompStartLabel(options.trueOrientation) }}
               </text>
 
               <!-- Ending block coordinate -->
               <text class="end"
                     [attr.transform]="translate([block.getPxWidth() - 2, -1])">
-                {{ block.getBlockCompEndLabel() }}
+                {{ block.getBlockCompEndLabel(options.trueOrientation) }}
               </text>
 
               <!-- Vertical line extending end point of block -->
@@ -348,6 +427,14 @@
             </g>
           </g>
         </g>
+      </g>
+
+      <!-- Gene anchors -->
+      <g *ngIf="options.anchors && refGenes" id="gene-anchors">
+        <path *ngFor="let gene of getHomologousRefGenes()"
+              class="anchor"
+              [attr.d]="getAnchorPathCommand(gene)">
+        </path>
       </g>
 
       <!-- Interval coordinates for current view extents in reference positions -->
@@ -383,12 +470,14 @@
 
         <!-- Start position -->
         <text [attr.transform]="translate([2, 0])">
-          {{ comp.commonName }}, {{ interval.getCompStartLabel() }}
+          {{ comp.commonName }},
+          {{ interval.getCompStartLabel() }}
         </text>
 
         <!-- End Position -->
         <text class="end" [attr.transform]="translate([width - 2, 0])">
-          {{ comp.commonName }}, {{ interval.getCompEndLabel() }}
+          {{ comp.commonName }},
+          {{ interval.getCompEndLabel() }}
         </text>
 
         <!-- Vertical line extending end point of comparison interval -->

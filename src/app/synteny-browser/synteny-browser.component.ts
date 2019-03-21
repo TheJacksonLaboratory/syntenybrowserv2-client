@@ -67,6 +67,7 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
+
   }
 
   /**
