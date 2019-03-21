@@ -1117,6 +1117,11 @@ export class BlockViewBrowserComponent {
     return this.compGenes.filter(g => g.homologIDs.indexOf(homID) >= 0);
   }
 
+  /**
+   * Returns a list of reference genes that have a homolog ID that matches
+   * the any of specified homolog IDs of a comparison gene
+   * @param {Array<number>} homIDs - the homolog IDs to search for reference matches
+   */
   private getReferenceHomologs(homIDs: Array<number>): Array<Gene> {
     return this.refGenes.filter(g => {
                            let match = false;
