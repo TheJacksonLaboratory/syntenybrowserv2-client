@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
       <a class="nav-link" [routerLink]="['/docs-data-prep']">Data Sources/Formats</a>
       <a class="nav-link" [routerLink]="['/docs-browser-features']">Browser Features</a>
       <a class="nav-link" [routerLink]="['/docs-docker']">Docker</a>
-      <a class="nav-link" [routerLink]="['/docs-configs']">View Configs</a>
+      <a class="nav-link" [routerLink]="['/docs-configs']">Species Config Files</a>
       <a class="nav-link" [routerLink]="['/docs-contributors']">Contributor Guidelines</a>
     </section>
   `,
