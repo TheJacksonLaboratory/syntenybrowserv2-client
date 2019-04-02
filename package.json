@@ -27,6 +27,7 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "core-js": "^2.6.3",
     "d3": "^5.8.2",
+    "file-saver": "^2.0.1",
     "rxjs": "~6.3.3",
     "zone.js": "^0.8.29"
   },

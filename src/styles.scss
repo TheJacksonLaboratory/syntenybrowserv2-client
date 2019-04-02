@@ -47,18 +47,17 @@
 // won't override D3's default stylings
 rect.selection {
   fill: #DDD;
-  fill-opacity: 0.3;
   stroke-width: 0.3px;
-  stroke: black;
+  stroke: #000;
 }
 
-#browser {
+#browser-axis, #chr-view-axis {
+  line, path { stroke-width: 0.5; }
+
   text { font-size: 8px; }
-
-  #browser-axis {
-    line, path { stroke-width: 0.5; }
-  }
 }
+
+line, rect { shape-rendering: crispEdges; }
 
 #tt {
   position: absolute;
@@ -69,9 +68,6 @@ rect.selection {
   box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2), 0 4px 15px 0 rgba(0, 0, 0, 0.19);
   color: #333;
 }
-
-.black-text { color: #000; }
-.black-rect { color: #000; }
 
 clr-dg-column,
 clr-dg-placeholder,

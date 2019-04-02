@@ -1,6 +1,7 @@
 import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
+import { saveAs } from 'file-saver';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
@@ -91,6 +92,60 @@ export class BlockViewBrowserComponent {
 
     // get syntenic block data
     this.getSyntenicBlocks(features, colors);
+  }
+
+  /**
+   * Triggers a download of the current view in the block view browser
+   * TODO: let users choose the name they want to use for the download
+   */
+  download(): void {
+    this.setObjectAttributes();
+
+    let svg = document.querySelector('#browser-svg');
+    svg.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+
+    let canvas = document.createElement('canvas');
+    canvas.width = Number(svg.clientWidth);
+    canvas.height = Number(svg.clientHeight);
+
+    let ctx = canvas.getContext('2d');
+    let image = new Image();
+
+    image.onload = () => {
+      ctx.clearRect(0, 0, svg.clientWidth, svg.clientHeight);
+      ctx.drawImage(image, 0, 0, svg.clientWidth, svg.clientHeight);
+
+      canvas.toBlob((blob) => {
+        let name = this.ref.commonName + '_' + this.refChr + ':' +
+                   this.interval.refStart+ '-' + this.interval.refEnd;
+        saveAs(blob, name);
+      });
+    };
+
+    let serialized = new XMLSerializer().serializeToString(svg);
+    image.src = `data:image/svg+xml;base64,${btoa(serialized)}`;
+  }
+
+  /**
+   * Sets the attributes needed to get styles of items in the SVG to export
+   * into the downloaded image; these items are all D3-generated so they can't
+   * be set in the template beforehand as they don't exist before being created
+   */
+  setObjectAttributes(): void {
+    let chrViewOverlay = document.querySelector('rect.selection');
+    chrViewOverlay.setAttribute('fill', '#DDD');
+    chrViewOverlay.setAttribute('stroke', '#000');
+    chrViewOverlay.setAttribute('stroke-width', '0.3');
+
+    let selectors = '#browser-axis line,#browser-axis path,' +
+                    '#chr-view-axis line,#chr-view-axis path';
+    document.querySelectorAll(selectors)
+            .forEach(obj => obj.setAttribute('stroke-width', '0.5'));
+
+    document.querySelectorAll('#browser-axis text, #chr-view-axis text')
+            .forEach(obj => obj.setAttribute('font-size', '8px'));
+    document.querySelectorAll('line, rect')
+            .forEach(obj => obj.setAttribute('shape-rendering', 'crispEdges'));
   }
 
   /**
@@ -946,9 +1001,7 @@ export class BlockViewBrowserComponent {
 
                     // update the axis above the reference track
                     d3.select('#browser-axis')
-                      .call(browserAxis)
-                      .select('text')
-                        .attr('text-anchor', 'start');
+                      .call(browserAxis);
                   });
 
     this.zoom = d3.zoom()
@@ -986,9 +1039,7 @@ export class BlockViewBrowserComponent {
 
                    // update the axis above the reference track
                    d3.select('#browser-axis')
-                     .call(browserAxis)
-                     .select('text')
-                       .attr('text-anchor', 'start');
+                     .call(browserAxis);
                  });
 
     // bind the zoom behavior
@@ -1066,6 +1117,11 @@ export class BlockViewBrowserComponent {
     return this.compGenes.filter(g => g.homologIDs.indexOf(homID) >= 0);
   }
 
+  /**
+   * Returns a list of reference genes that have a homolog ID that matches
+   * the any of specified homolog IDs of a comparison gene
+   * @param {Array<number>} homIDs - the homolog IDs to search for reference matches
+   */
   private getReferenceHomologs(homIDs: Array<number>): Array<Gene> {
     return this.refGenes.filter(g => {
                            let match = false;

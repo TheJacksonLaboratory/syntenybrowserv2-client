@@ -4,22 +4,8 @@
   width: 100%;
   vertical-align: top;
   overflow: hidden;
-
-  text {
-    font-size: 12px;
-    text-anchor: middle;
-  }
 }
 
-#ref-bands path, #ref-band .band {
-  stroke: black;
-  stroke-width: 0.25;
-  fill: transparent;
-}
+#genome-view-svg { margin-top: -36px; }
 
-.inner {
-  stroke: black;
-  stroke-width: 0.25;
-}
-
-.chord { stroke-width: 0.3; }
+button { z-index: 100; }
