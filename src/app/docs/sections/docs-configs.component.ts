@@ -5,11 +5,38 @@ import { Component } from '@angular/core';
   template: `
     <div class="content-container">
       <div class="content-area">
-        <h2>View Configs</h2>
+        <h2>Species Configs Files</h2>
         <p>
-           
+          Each species, such as <i>M. musculus</i> and <i>H. sapiens</i>, requires its own configuration 
+		  file, which specifies species chromosome sizes, searching options, as well as external resources.
         </p>
+		<br>
+		<table>
+		   <tbody class="table">
+		     <tr>
+			   <td class="left"><i>H. sapines</i></td>
+			   <td class="left">
+			   <a target="_blank" href="https://github.com/TheJacksonLaboratory/syntenybrowser/blob/master/synbrowser/synbrowser/static/js/data/9606_config.json">
+			      9606_config.json
+			   </a></td>
+			 </tr>
+			 <tr>
+			 <td class="left"><i>M. musculus</i></td>
+			 <td class="left"><a target="_blank" href="https://github.com/TheJacksonLaboratory/syntenybrowser/blob/master/synbrowser/synbrowser/static/js/data/10090_config.json">
+			   10090_config.json
+			 </a></td>
+			 </tr>
+		   </tbody>
+		</table>
+		<br>
+		<p>The different properties of the config file are described below. If you install the application locally you 
+		can write your own config files and put them in the /service/src/static/data directory. The files is in <a href="">JSON</a> format and 
+        are named as the NCBI id of the species followed by an underscor and the word 'config": "id_config.json". 
+		</p>
         <h4>Chromosome Sizes</h4>
+		<p>
+		  Chromosome sizes are provided as an array of chromosome id, chromosome size pairs.
+		</p>
         <pre>
           <code>{{"
             chromosome: [
@@ -24,7 +51,11 @@ import { Component } from '@angular/core';
         </pre>
         
         <h4>Search Categories</h4>
-        <pre>
+        <p>Different species can be searched fr different categories. This makes sense for example when some species have an associated 
+		ontology or annotation, and others do not. For example, mouse can be searched for QTL while Humans cannot. Each entry should have 
+		a name, value, search example, and a search_type. The search types are predefined and can be cheked here.
+		</p>
+		<pre>
           <code>{{"
             search_categories: [
               {
@@ -44,6 +75,9 @@ import { Component } from '@angular/core';
         </pre>
         
         <h4>External Resources</h4>
+		<p>
+		External resources information is loaded on Block View tooltips. The string is constructed by appending the gene id to the external resource string. 
+		</p>
         <pre>
           <code>{{"
             external_resources: [
