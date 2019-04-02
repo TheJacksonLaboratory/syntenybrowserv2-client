@@ -1,97 +1,249 @@
-<div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12">
-  <div class="clr-row clr-col-12 bottom-1">
-    <div class="clr-col-2"> <h5> Current filters </h5> </div>
+<div id="filter-modal-container" class="clr-row">
+  <clr-vertical-nav class="clr-col-2">
+    <a *ngFor="let page of navigation" clrVerticalNavLink
+       (click)="activePage = page.value"
+       [ngStyle]="getNavItemStyle(page.value)">
+      {{ page.name | titlecase }}
+    </a>
+  </clr-vertical-nav>
 
-    <div class="clr-col label-container">
-      <div *ngIf="filters.length === 0" class="no-filters">
-        No filters have been created yet
+  <div *ngIf="activePage === 'edit'" id="edit-filters" class="clr-col-10">
+    <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
+        <div class="clr-col-12 label-container">
+        <div *ngIf="filters.length === 0" class="no-filters">
+          No filters yet; when filters are created, they will appear here
+        </div>
+
+        <div *ngIf="filters.length > 0">
+          <span *ngFor="let f of filters" class="label"
+                (click)="editThisFilter(f)"
+                [ngClass]="{ 'label-success': f.include,
+                             'label-danger': !f.include }">
+            ({{ f.species.toUpperCase() }}) {{ getConditionLabel(f.title) }}
+            <clr-icon shape="close" (click)="removeFilter(f.title)"></clr-icon>
+          </span>
+        </div>
       </div>
 
-      <div *ngIf="filters.length > 0">
-        <span *ngFor="let f of filters"
-              class="label"
-              [ngClass]="{ 'label-success': f.include,
-                           'label-danger': !f.include }">
-          ({{ f.species.toUpperCase() }}) {{ getConditionLabel(f.title) }}
-          <clr-icon shape="close" (click)="removeFilter(f.title)"></clr-icon>
-        </span>
+      <div class="clr-row clr-col-6 top-1">
+        <h6><b>Add/Edit Filter</b></h6>
+
+        <div class="clr-row clr-col-12">
+          <clr-select-container class="clr-col-12 padding-0 top-0">
+            <label for="species">
+              Species
+
+              <clr-signpost>
+                <clr-signpost-content *clrIfOpen>
+                  <p class="smaller">
+                    By default, a filter condition will be applied to genes
+                    found in the current chromsome of the reference species or
+                    the comparison species within the syntenic regions. If you
+                    want to narrow the search to a particular species, that can
+                    be specified here.
+                  </p>
+                </clr-signpost-content>
+              </clr-signpost>
+            </label>
+
+            <select clrSelect id="species" [(ngModel)]="conditionSpecies">
+              <option *ngFor="let opt of speciesOptions" [value]="opt">
+                {{ getOptionName(opt) }}
+              </option>
+            </select>
+          </clr-select-container>
+
+          <clr-input-container class="clr-col-9 padding-0 top-0">
+            <label for="condition">
+              Condition
+
+              <clr-signpost>
+                <clr-signpost-content *clrIfOpen>
+                  <p class="smaller">
+                    Enter a filter condition in this field. If the string you're
+                    looking to match is more than one word, separate words with
+                    a '+' symbol. For more in-depth information as to how to
+                    make the most of the filters, go to the 'Filtering Guide'
+                    tab to the left.
+                  </p>
+                </clr-signpost-content>
+              </clr-signpost>
+            </label>
+
+            <input id="condition" clrInput
+                   [(ngModel)]="currentFilter"
+                   placeholder="Compose your condition here"
+                   (keyup)="processFilter($event)">
+          </clr-input-container>
+
+          <div class="clr-col filter-buttons">
+            <button type="button" class="btn input-btn"
+                    (click)="testFilter()"
+                    title="Test the filter to see how many/which features fit">
+              <clr-icon shape="refresh"></clr-icon>
+            </button>
+
+            <button type="button" class="btn input-btn"
+                    (click)="processFilter()"
+                    title="Add this filter condition">
+              <clr-icon shape="check"></clr-icon>
+            </button>
+          </div>
+
+          <div class="clr-row clr-col-9 clr-justify-content-end">
+            <p *ngIf="filterErrorState" class="error-msg"> {{ filterErrorState }}</p>
+            <p *ngIf="filterTestResults" class="test-run-msg"> {{ filterTestResults }}</p>
+          </div>
+        </div>
       </div>
+
+      <div class="clr-row clr-col-6 top-1">
+        <h6><b>Examples</b></h6>
+
+        <div class="clr-row clr-col-12">
+          <p>
+            <b>symbol=trp53</b>
+            (include genes with gene symbol containing the string 'trp53')
+          </p>
+
+          <p>
+            <b>type=gene+segment</b>
+            (multi-word values should be use '+' in place of spaces)
+          </p>
+
+          <p>
+            <b>!chr=3</b>
+            (exclude genes in chr 3, search strings are not case-sensitive)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="clr-row clr-justify-content-end top-1 bottom-1">
+      <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+        Done
+      </button>
     </div>
   </div>
 
-  <div class="clr-row clr-col-12 new-filter top-1">
-    <div class="clr-row top-1">
-      <h6><b>EXAMPLES</b></h6>
-
-      <clr-signpost>
-        <clr-signpost-content *clrIfOpen>
-          <p class="smaller">
-            <i>Please enter single conditions one at a time.</i> Supported
-            attributes right now include 'id', 'symbol', 'chr', 'type'.
-            Conditions can be further specified by selecting a particular
-            species (or both) to run the filter on. Each individual condition in
-            the current filter list are combined using are combined using a
-            traditional OR operation (AND operations will be supported soon).
+  <div *ngIf="activePage === 'preview'" id="preview-filters" class="clr-col-10">
+    <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
+      <div id="filter-checklist" class="clr-col-5">
+        <div class="clr-row clr-justify-content-center">
+          <h5> Current Filters </h5>
+        </div>
+        <div class="clr-row">
+          <p>
+            Select/Deselect filters to see how combinations of filters affect
+            how many/which features will be affected.
           </p>
-        </clr-signpost-content>
-      </clr-signpost>
-    </div>
-    <div class="clr-row clr-justify-content-center">
-      <p>
-        <b>symbol=trp53</b> (include genes with gene symbol containing the
-        string 'trp53')
-      </p>
+        </div>
+        <div *ngIf="filters.length > 0" class="clr-row top-1">
+          <clr-tree class="bottom-1">
+            <clr-tree-node *ngFor="let s of getFilterSpecies()"
+                           [clrExpanded]="true">
+              {{ getOptionName(s) }}
+              <clr-tree-node *ngFor="let f of getFiltersBySpecies(s)"
+                             (clrSelectedChange)="runFilters(f, $event)"
+                             [clrSelected]="f.selected"
+                             [ngStyle]="{ 'color': f.include ? '#2A9FE0' : 'red' }">
+                {{ (f.include ? 'highlight ' : 'hide ') + getConditionLabel(f.title) }}
+              </clr-tree-node>
+            </clr-tree-node>
+          </clr-tree>
 
-      <p>
-        <b>type=gene+segment</b> (multi-word values should be use '+' in place
-        of spaces)
-      </p>
+          <div *ngIf="!allFiltersSelected()" class="clr-row">
+            <button class="btn btn-sm"
+                    (click)="applyFilterSelections()"
+                    title="Update the filter list with only selected filters">
+              Apply changes to filter list
+            </button>
+            <clr-signpost>
+              <clr-signpost-content *clrIfOpen>
+                <p>
+                  If you want to apply your current selections from this list to
+                  the actual list of filters (using the checklist is only an
+                  exploration tool).
+                </p>
+              </clr-signpost-content>
+            </clr-signpost>
+          </div>
 
-      <p>
-        <b>!type=mRNA+gene</b> (exclude all mRNA genes, also search strings are
-        case-INsensitive)
-      </p>
-    </div>
+        </div>
+        <div *ngIf="filters.length === 0"
+             class="clr-row clr-justify-content-center top-1 bottom-1">
+          <h4> No Filters Yet! </h4>
+        </div>
 
-    <div class="clr-row clr-col-12 top-1">
-      <clr-select-container class="clr-col-3 padding-0 top-0">
-        <label for="species">Filter species</label>
+      </div>
+      <div id="filter-results" class="clr-col-7">
+        <div class="clr-row clr-col-12 clr-justify-content-center">
+          <h5>Results of Filters</h5>
+        </div>
+        <div class="clr-row clr-justify-content-center">
+          <p>
+            Blue rows are features that will be highlighted while red rows are
+            features that will be hidden.
+          </p>
+        </div>
+        <clr-datagrid class="datagrid-compact"
+                      [clrDgLoading]="!refGenes || !compGenes">
+          <clr-dg-column *ngFor="let attr of validAttrs">
+            {{ attr }}
+          </clr-dg-column>
+          <clr-dg-column> species </clr-dg-column>
 
-        <select clrSelect id="species" [(ngModel)]="conditionSpecies">
-          <option value="both"> Both </option>
-          <option value="ref"> Reference ({{ refSpecies.commonName }}) </option>
-          <option value="comp"> Comparison ({{ compSpecies.commonName }})</option>
-        </select>
-      </clr-select-container>
+          <clr-dg-placeholder> No filters yet! </clr-dg-placeholder>
 
-      <clr-input-container class="clr-col-5 padding-0 top-0">
-        <label for="condition"> Filter condition </label>
+          <clr-dg-row *clrDgItems="let row of filteredGenes"
+                      [ngStyle]="{ 'background': row.filtered ?
+                                                 'rgba(42, 159, 224, 0.2)' :
+                                                 'rgba(255, 0, 0, 0.2)' }">
+            <clr-dg-cell *ngFor="let attr of validAttrs">
+              {{ row[attr] }}
+            </clr-dg-cell>
+            <clr-dg-cell> {{ row.species }} </clr-dg-cell>
+          </clr-dg-row>
 
-        <input id="condition" clrInput
-               [(ngModel)]="currentFilter"
-               placeholder="Start typing conditions"
-               (keyup.enter)="addFilter()">
-      </clr-input-container>
-
-      <div class="clr-col padding-0">
-        <button type="button"
-                class="btn input-btn"
-                disabled
-                (click)="testFilter()"
-                title="Test the condition to see how many/which features fit
-                       (not yet available)">
-          <clr-icon shape="refresh"></clr-icon>
-        </button>
-
-        <button type="button"
-                class="btn input-btn"
-                (click)="addFilter()"
-                title="Add this filter condition">
-          <clr-icon shape="check"></clr-icon>
-        </button>
+          <clr-dg-footer>
+            <!-- Clarity doesn't really handle non-paginated results very well so if
+            proper pagination is required, show that, otherwise, use custom label -->
+            <clr-dg-pagination #pagination [clrDgPageSize]="15">
+              <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
+                Features per page
+              </clr-dg-page-size>
+              {{ getPaginatorLabel(pagination) }}
+            </clr-dg-pagination>
+          </clr-dg-footer>
+        </clr-datagrid>
       </div>
     </div>
-    <p *ngIf="filterErrorState" class="error-msg"> {{ filterErrorState }}</p>
+
+    <div class="clr-row clr-justify-content-end top-1 bottom-1">
+      <button type="button" class="btn btn-outline" (click)="downloadTable()">
+        <clr-icon shape="download"></clr-icon> Download Table
+      </button>
+      <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="activePage === 'guide'" id="guide" class="clr-col-10">
+    <div class="clr-row">
+      <p>
+        This is where the guide will be when I make one
+      </p>
+    </div>
+
+    <div class="clr-row clr-justify-content-end top-1 bottom-1">
+      <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+        Done
+      </button>
+    </div>
   </div>
 </div>
+
+
+
 

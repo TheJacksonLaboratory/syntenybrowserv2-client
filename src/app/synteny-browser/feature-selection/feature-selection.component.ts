@@ -1,6 +1,6 @@
 import { ApiService } from '../services/api.service';
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
-import { ClrDatagridComparatorInterface } from '@clr/angular';
+import {ClrDatagridComparatorInterface, ClrDatagridPagination} from '@clr/angular';
 import { Metadata, SearchType } from '../classes/interfaces';
 import { Species } from '../classes/species';
 import { Feature } from '../classes/feature';
@@ -149,10 +149,10 @@ export class FeatureSelectionComponent {
   /**
    * Returns the label for the paginator for the table based on how many
    * results are being displayed
-   * @param {any} pagination - the paginator data structure
+   * @param {ClrDatagridPagination} pagination - the paginator data structure
    */
-  getPaginatorLabel(pagination: any): string {
-    return (this.rows && this.rows.length > 10) ?
+  getPaginatorLabel(pagination: ClrDatagridPagination): string {
+    return (this.filteredRows && this.filteredRows.length > 10) ?
       `${pagination.firstItem + 1} - ${pagination.lastItem + 1} 
        of ${pagination.totalItems}` : this.getSinglePagePaginatorLabel();
   }

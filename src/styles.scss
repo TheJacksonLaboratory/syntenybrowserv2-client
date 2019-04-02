@@ -28,17 +28,11 @@
 }
 
 .label-container {
-  min-height: 50px;
+  min-height: 35px;
   border: 0.5px #CCC solid;
   border-radius: 3px;
   margin: 0;
   padding: 4px;
-}
-
-// When toggle switch is in the off position, make it red rather than grey
-.toggle-switch input[type=checkbox]:not(:checked)+label::before {
-  background-color: #F00 !important;
-  border-color: #F00 !important;
 }
 
 .modal-body { overflow-y: visible; }
@@ -79,7 +73,7 @@ button { text-transform: uppercase !important; }
   height: 30px;
   background-color: #006A91;
   padding: 3px 15px;
-  width: 100vw;
+  width: 100%;
   position: static;
   margin-top: 2em;
 
@@ -89,3 +83,31 @@ button { text-transform: uppercase !important; }
     text-transform: uppercase;
   }
 }
+
+#block-view-filters {
+  .modal-content { padding: 0; }
+
+  .modal-header {
+    padding: 1rem;
+    border-bottom: 0.5px #CCC solid;
+  }
+
+  .modal-footer { padding: 1rem; }
+
+  #edit-filters .signpost .signpost-action clr-icon {
+    height: 0.75rem !important;
+  }
+
+  button.signpost-action {
+    height: 1.1rem !important;
+    vertical-align: initial;
+  }
+
+  .datagrid {
+    min-height: 100px;
+    max-height: 395px;
+    overflow-y: scroll;
+  }
+}
+
+

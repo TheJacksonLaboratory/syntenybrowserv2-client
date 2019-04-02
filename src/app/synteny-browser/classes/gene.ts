@@ -1,4 +1,4 @@
-import { Exon } from './interfaces';
+import {Exon, TooltipContent} from './interfaces';
 import { format, ScaleLinear } from 'd3';
 import { SyntenyBlock } from './synteny-block';
 
@@ -9,7 +9,7 @@ export class Gene {
   symbol: string;
   id: string;
   chr: string;
-  homologIDs: Array<number>;
+  homologIDs: Array<string>;
   strand: string;
   type: string;
   blockID: string;
@@ -25,7 +25,7 @@ export class Gene {
 
   format: Function = format(',');
 
-  constructor(gene: any, ids: Array<number>, trackHeight: number,
+  constructor(gene: any, ids: Array<string>, trackHeight: number,
               blocks: Array<SyntenyBlock> = null) {
     this.species = (gene.start_pos) ? 'ref' : 'comp';
     this.start = (gene.start_pos) ? gene.start_pos : gene.gene_start_pos;
@@ -179,6 +179,25 @@ export class Gene {
       'Location': `${this.format(this.start)}bp - ${this.format(this.end)}bp`,
       '# of Homologs': this.homologIDs.length,
       'Strand': this.strand
+    }
+  }
+
+  /**
+   * Returns the data necesarry to include for the gene in a download CSV of
+   * filter results
+   * @param {string} refSpeciesName - common name of the current ref species
+   * @param {string} compSpeciesName - common name of the current comp species
+   */
+  getFilterMetadata(refSpeciesName: string, compSpeciesName: string): object {
+    return {
+      id: this.id,
+      symbol: this.symbol,
+      species: this.species === 'ref' ? refSpeciesName : compSpeciesName,
+      type: this.type,
+      chr: this.chr,
+      start: this.start,
+      end: this.end,
+      status: this.hidden ? 'hidden' : 'highlighted'
     }
   }
 

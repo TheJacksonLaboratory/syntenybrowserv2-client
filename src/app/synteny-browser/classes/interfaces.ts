@@ -18,10 +18,22 @@ export interface Chromosome {
   chr: string;
   size: number;
 }
-
-export interface SearchType {
+export interface Option {
   name: string;
   value: string;
+}
+
+export interface SearchType extends Option { }
+
+export interface NavigationObject extends Option { }
+
+export interface FilterCondition {
+  title: string;
+  species: string;
+  attr: string;
+  value: string;
+  include: boolean;
+  selected: boolean;
 }
 
 export interface ExternalResource {
