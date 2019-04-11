@@ -2,8 +2,6 @@
 
 .no-filters { color: #AAA; }
 
-.toggle-switch { margin-top: -0.25em }
-
 h5 {
   text-transform: uppercase;
   font-weight: bold;
@@ -29,15 +27,23 @@ p { margin-top: 0.2em; }
   min-width: 0;
 }
 
-.clr-input { min-width: 300px !important; }
-
-.clr-select { min-width: 0; }
+.clr-input, .clr-select { min-width: 0 !important; }
 
 .error-msg { color: #F00; }
 
 .test-run-msg { color: #0079b8; }
 
-.filter-buttons {
+.filter-controls {
   padding: 0;
   margin-top: 0.5rem;
 }
+
+.hidden-row { background: rgba(255, 0, 0, 0.2); }
+
+clr-dg-row { background: rgba(42, 159, 224, 0.2); }
+
+app-condition-constructor { border-top: 1px solid #CCC; }
+
+clr-icon { margin-left: 5px; }
+
+.datagrid .datagrid-cell { font-size: 0.45rem; }

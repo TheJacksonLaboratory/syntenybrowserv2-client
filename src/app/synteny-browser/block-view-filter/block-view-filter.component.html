@@ -1,0 +1,208 @@
+<div id="filter-modal-container" class="clr-row">
+  <clr-vertical-nav class="clr-col-2">
+    <a *ngFor="let page of navigation" clrVerticalNavLink
+       (click)="activePage = page.value"
+       [ngStyle]="getNavItemStyle(page.value)">
+      {{ page.name | titlecase }}
+    </a>
+  </clr-vertical-nav>
+
+  <div class="clr-col-10">
+    <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
+        <div class="clr-col-12 label-container">
+        <div *ngIf="getCreatedFilters().length === 0" class="no-filters">
+          No filters yet; when filters are created, they will appear here
+        </div>
+
+        <div *ngIf="getCreatedFilters().length > 0">
+          <span *ngFor="let f of getCreatedFilters()" class="label"
+                (click)="editFilter(f)"
+                [ngClass]="{ 'label-info': !f.hides(), 'label-danger': f.hides() }">
+            {{ f.getLabel() }}
+            <clr-icon shape="close" (click)="removeFilter(f)"></clr-icon>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activePage === 'edit'" id="edit-filters" class="clr-col-12">
+      <div class="clr-row clr-col-12 top-1">
+        <h6><b>Add/Edit Filter</b></h6>
+
+        <div class="clr-row clr-col-12">
+          <clr-select-container class="right-1">
+            <label for="species"> Species </label>
+
+            <select clrSelect id="species"
+                    [(ngModel)]="currentFilter.speciesKey"
+                    (ngModelChange)="showCurrentFilterResults()">
+              <option *ngFor="let opt of species" [value]="opt">
+                {{ opt | titlecase }}
+              </option>
+            </select>
+          </clr-select-container>
+
+          <clr-select-container>
+            <label for="mode"> Mode </label>
+
+            <select clrSelect id="mode"
+                    [(ngModel)]="currentFilter.mode"
+                    (ngModelChange)="showCurrentFilterResults()">
+              <option value="Highlight"> Highlight </option>
+              <option value="Hide"> Hide </option>
+            </select>
+          </clr-select-container>
+        </div>
+        <div *ngIf="allGenes" class="clr-row clr-col-12 top-1">
+          <app-condition-constructor *ngFor="let c of currentFilter.conditions"
+                                     class="clr-col-12"
+                                     [attributes]="currentFilter.getValidAttrs()"
+                                     [types]="getFeatureTypes()"
+                                     [values]="c"
+                                     (remove)="removeCondition(c)"
+                                     (stateChange)="showCurrentFilterResults()">
+          </app-condition-constructor>
+        </div>
+
+        <div class="clr-row clr-col-12">
+          <div class="clr-col-6 filter-controls">
+            <button type="button" class="btn btn-sm btn-info-outline"
+                    title="Add another condition to this filter"
+                    (click)="currentFilter.addNewCondition()">
+              <clr-icon shape="add"></clr-icon> Add to condition
+            </button>
+
+            <button type="button" class="btn btn-sm btn-success-outline"
+                    title="Add this filter to the list"
+                    (click)="finishFilter()">
+              <clr-icon shape="check"></clr-icon> Finish editing filter
+            </button>
+          </div>
+          <div class="clr-col-6 filter-controls">
+            <p *ngIf="filterErrorState" class="error-msg"> {{ filterErrorState }} </p>
+            <p *ngIf="filterTestResults" class="test-run-msg"> {{ filterTestResults }} </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="clr-row clr-justify-content-end top-1 bottom-1">
+        <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+          Done
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="activePage === 'preview'" id="preview-filters" class="clr-col-12">
+      <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
+        <div id="filter-checklist" class="clr-col-5">
+          <div class="clr-row clr-justify-content-center">
+            <h5> Current Filters </h5>
+          </div>
+          <div class="clr-row">
+            <p>
+              Select/Deselect filters to see how combinations of filters affect
+              how many/which features will be affected.
+            </p>
+          </div>
+          <div *ngIf="getCreatedFilters().length > 0" class="clr-row top-1">
+            <clr-tree class="bottom-1">
+              <clr-tree-node *ngFor="let s of getFilterSpecies()"
+                             [clrExpanded]="true">
+                {{ getOptionName(s) }}
+                <clr-tree-node *ngFor="let f of getFiltersBySpecies(s)"
+                               (clrSelectedChange)="runFilters(f, $event)"
+                               [clrSelected]="f.selected"
+                               [ngStyle]="{ 'color': f.getColor() }">
+                  {{ f.mode + ' ' + f.getStringifiedConditions() }}
+                </clr-tree-node>
+              </clr-tree-node>
+            </clr-tree>
+
+            <div *ngIf="!allFiltersSelected()" class="clr-row">
+              <button class="btn btn-sm"
+                      (click)="applyFilterSelections()"
+                      title="Update the filter list with only selected filters">
+                Apply changes to filter list
+              </button>
+              <clr-signpost>
+                <clr-signpost-content *clrIfOpen>
+                  <p>
+                    If you want to apply your current selections from this list to
+                    the actual list of filters (using the checklist is only an
+                    exploration tool).
+                  </p>
+                </clr-signpost-content>
+              </clr-signpost>
+            </div>
+
+          </div>
+          <div *ngIf="getCreatedFilters().length === 0"
+               class="clr-row clr-justify-content-center top-1 bottom-1">
+            <h4> No Filters Yet! </h4>
+          </div>
+
+        </div>
+        <div id="filter-results" class="clr-col-7">
+          <div class="clr-row clr-col-12 clr-justify-content-center">
+            <h5>Results of Filters</h5>
+          </div>
+          <div class="clr-row clr-justify-content-center">
+            <p>
+              Blue rows are features that will be highlighted while red rows are
+              features that will be hidden.
+            </p>
+          </div>
+          <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact"
+                        [clrDgLoading]="!refGenes || !compGenes">
+            <clr-dg-column *ngFor="let attr of filters[0].attributes">
+              {{ attr }}
+            </clr-dg-column>
+            <clr-dg-column> species </clr-dg-column>
+
+            <clr-dg-placeholder> No filters to show! </clr-dg-placeholder>
+
+            <clr-dg-row *clrDgItems="let row of filteredGenes"
+                        [ngClass]="{ 'hidden-row': row.hidden }">
+              <clr-dg-cell *ngFor="let attr of filters[0].attributes">
+                {{ row[attr] }}
+              </clr-dg-cell>
+              <clr-dg-cell> {{ row.species }} </clr-dg-cell>
+            </clr-dg-row>
+
+            <clr-dg-footer>
+              <!-- Clarity doesn't really handle non-paginated results very well so if
+              proper pagination is required, show that, otherwise, use custom label -->
+              <clr-dg-pagination #pag [clrDgPageSize]="15">
+                <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
+                  Features per page
+                </clr-dg-page-size>
+                {{ filteredGenes.length > 0 ? getPaginatorLabel(pag) : '0 of 0' }}
+              </clr-dg-pagination>
+            </clr-dg-footer>
+          </clr-datagrid>
+        </div>
+      </div>
+
+      <div class="clr-row clr-justify-content-end top-1 bottom-1">
+        <button type="button" class="btn btn-outline" (click)="downloadTable()">
+          <clr-icon shape="download"></clr-icon> Download Table
+        </button>
+        <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+          Done
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="activePage === 'guide'" id="guide" class="clr-col-12">
+      <div class="clr-row">
+        <p> This is where the guide will be when I make one. </p>
+      </div>
+
+      <div class="clr-row clr-justify-content-end top-1 bottom-1">
+        <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

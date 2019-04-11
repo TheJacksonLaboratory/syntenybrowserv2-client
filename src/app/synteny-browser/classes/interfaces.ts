@@ -28,12 +28,13 @@ export interface SearchType extends Option { }
 export interface NavigationObject extends Option { }
 
 export interface FilterCondition {
-  title: string;
-  species: string;
-  attr: string;
+  filterBy: string;
+  attribute: string;
+  type: string;
+  qualifier: string;
   value: string;
-  include: boolean;
-  selected: boolean;
+  removable: boolean;
+  id: number;
 }
 
 export interface ExternalResource {

@@ -7,17 +7,16 @@
       <h4> Block View Filters </h4>
       <div class="clr-row">
         <div id="filters" class="label-container clr-col-xl-8 clr-col-10">
-          <div *ngIf="filterConditions.length === 0"
+          <div *ngIf="filters.length === 0"
                class="no-selections filter-labels">
             No filters have been created yet
           </div>
 
-          <div *ngIf="filterConditions.length > 0" class="filter-labels">
-            <span *ngFor="let f of filterConditions"
-                  class="label"
-                  [ngClass]="{ 'label-success': f.include,
-                               'label-danger': !f.include }">
-              ({{ f.species.toUpperCase() }}) {{ getConditionLabel(f.title) }}
+          <div *ngIf="filters.length > 0" class="filter-labels">
+            <span *ngFor="let f of filters" class="label"
+                  [ngClass]="{ 'label-info': !f.hides(),
+                               'label-danger': f.hides() }">
+              {{ f.getLabel() }}
             </span>
           </div>
         </div>
@@ -143,8 +142,7 @@
           <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
             <h4> Block View Browser Settings </h4>
             <clr-checkbox-wrapper>
-              <input type="checkbox" clrCheckbox
-                     id="symbols"
+              <input type="checkbox" clrCheckbox id="symbols"
                      [(ngModel)]="options.symbols"/>
               <label for="symbols">
                 Show all gene symbols <br/>
