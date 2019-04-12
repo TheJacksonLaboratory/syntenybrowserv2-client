@@ -12,7 +12,7 @@ import { QTL } from '../classes/qtl';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { TooltipComponent } from '../tooltip/tooltip.component';
-import {Filter} from '../classes/filter';
+import { Filter } from '../classes/filter';
 
 @Component({
   selector: 'app-block-view-browser',

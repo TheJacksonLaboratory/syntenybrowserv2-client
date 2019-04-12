@@ -1,5 +1,8 @@
 <div class="clr-row">
+  <!-- Prepended 'AND' if it's not the first condition of a filter -->
   <h5 *ngIf="isConditionRemovable()"> AND </h5>
+
+  <!-- Filter by select -->
   <clr-select-container class="right-2">
     <label for="filter-by"> Filter By </label>
 
@@ -9,7 +12,9 @@
     </select>
   </clr-select-container>
 
+  <!-- Filter by attribute inputs and selects -->
   <div class="clr-row">
+    <!-- Attribute select -->
     <clr-select-container *ngIf="isAttributeCondition()">
       <label for="attribute"> Attribute </label>
 
@@ -18,6 +23,7 @@
       </select>
     </clr-select-container>
 
+    <!-- Type select -->
     <clr-select-container *ngIf="conditionNeedsTypeSelection()">
       <label for="type"> Type </label>
 
@@ -29,6 +35,7 @@
       </select>
     </clr-select-container>
 
+    <!-- Qualifier select -->
     <clr-select-container *ngIf="conditionNeedsQualifier()">
       <label for="qualifier"> Qualifier </label>
 
@@ -42,6 +49,7 @@
       </select>
     </clr-select-container>
 
+    <!-- Value input (chr, symbol, id) -->
     <clr-input-container *ngIf="conditionNeedsUserInput()">
       <label for="value"> Value </label>
 
@@ -50,6 +58,7 @@
              (input)="valueChanged.next($event.target.value)">
     </clr-input-container>
 
+    <!-- Remove this condition button -->
     <button *ngIf="isConditionRemovable()" type="button"
             class="btn btn-sm btn-danger-outline left-1"
             (click)="remove.emit()">

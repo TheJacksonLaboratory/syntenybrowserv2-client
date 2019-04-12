@@ -2,16 +2,21 @@
   <!-- Title -->
   <h2>{{ ref.commonName }}, Chr{{ refChr }}</h2>
 
+  <!-- Block view browser tools -->
   <div id="block-view-tools" class="clr-row clr-justify-content-center">
+    <!-- Block view filters -->
     <div class="clr-col-xl-5 clr-col-12 bottom-1">
       <h4> Block View Filters </h4>
       <div class="clr-row">
+        <!-- Filters -->
         <div id="filters" class="label-container clr-col-xl-8 clr-col-10">
+          <!-- No filters message -->
           <div *ngIf="filters.length === 0"
                class="no-selections filter-labels">
             No filters have been created yet
           </div>
 
+          <!-- Labels -->
           <div *ngIf="filters.length > 0" class="filter-labels">
             <span *ngFor="let f of filters" class="label"
                   [ngClass]="{ 'label-info': !f.hides(),
@@ -20,6 +25,8 @@
             </span>
           </div>
         </div>
+
+        <!-- Button to open filter tools -->
         <div class="clr-col-2">
           <button class="btn btn-primary" (click)="filter.emit()">
             <clr-icon shape="pencil" class="is-solid"></clr-icon> Edit
@@ -27,9 +34,13 @@
         </div>
       </div>
     </div>
+
+    <!-- 'Jump to interval' input -->
     <div class="clr-col-xl-3 clr-col-5 bottom-1">
       <div class="clr-row">
         <h4> Jump to Interval </h4>
+
+        <!-- Usage examples -->
         <clr-signpost id="reference-interval-info">
           <clr-icon shape="info" clrSignpostTrigger></clr-icon>
           <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
@@ -42,15 +53,18 @@
         </clr-signpost>
       </div>
 
+      <!-- Interval input -->
       <clr-input-container>
         <label for="reference-interval"></label>
 
         <input id="reference-interval" clrInput
-               [(ngModel)]="refInterval"
                placeholder="Enter a valid interval"
+               [(ngModel)]="refInterval"
                (keyup.enter)="jumpToInterval()">
       </clr-input-container>
     </div>
+
+    <!-- Navigation buttons -->
     <div class="clr-col-xl-3 clr-col-5 bottom-1">
       <h4> Block View Navigation </h4>
       <!-- Navigation buttons -->
@@ -84,7 +98,7 @@
           <!-- Dropdown selection -->
           <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
             <!-- Gene selections -->
-            <div *ngIf="this.selectedRefGenes.length > 0">
+            <div *ngIf="selectedRefGenes.length > 0">
               <label class="dropdown-header">Genes</label>
 
               <button *ngFor="let gene of selectedRefGenes"
@@ -95,7 +109,7 @@
             </div>
 
             <!-- Divider -->
-            <div *ngIf="selectedQTLs.length > 0 && this.selectedRefGenes.length > 0"
+            <div *ngIf="selectedQTLs.length > 0 && selectedRefGenes.length > 0"
                  class="dropdown-divider">
             </div>
 
@@ -129,18 +143,30 @@
         </button>
       </div>
     </div>
+
+    <!-- Block view options -->
     <div class="clr-col-xl-1 clr-col-2 bottom-1">
       <h4> Options </h4>
+
+      <!-- Button group -->
       <div class="btn-group btn-icon">
+        <!-- Download button -->
         <button class="btn block-view-option"
                 [disabled]="!compGenes"
                 (click)="download()">
           <clr-icon shape="download"></clr-icon>
         </button>
+
+        <!-- Block view options button -->
         <clr-signpost class="btn block-view-option">
+          <!-- Options button icon -->
           <clr-icon shape="cog" clrSignpostTrigger></clr-icon>
+
+          <!-- Menu containing options -->
           <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
             <h4> Block View Browser Settings </h4>
+
+            <!-- Show gene symbols checkbox -->
             <clr-checkbox-wrapper>
               <input type="checkbox" clrCheckbox id="symbols"
                      [(ngModel)]="options.symbols"/>
@@ -149,6 +175,8 @@
                 <span> (may affect performance) </span>
               </label>
             </clr-checkbox-wrapper>
+
+            <!-- Show anchors checkbox -->
             <clr-checkbox-wrapper>
               <input type="checkbox" clrCheckbox
                      id="anchors"
@@ -158,6 +186,8 @@
                 <span> (may affect performance) </span>
               </label>
             </clr-checkbox-wrapper>
+
+            <!-- True orientation checkbox -->
             <clr-checkbox-wrapper>
               <input type="checkbox" clrCheckbox
                      id="orientation"
@@ -171,9 +201,8 @@
   </div>
 
   <!-- Block view browser -->
-  <svg id="browser-svg"
-       [attr.viewBox]="'0 0 ' + (width + 10) + ' ' + (height + 10)"
-       preserveAspectRatio="xMinYMin meet">
+  <svg id="browser-svg" preserveAspectRatio="xMinYMin meet"
+       [attr.viewBox]="'0 0 ' + (width + 10) + ' ' + (height + 10)">
 
     <!-- Content Background -->
     <rect [attr.width]="width + 10" [attr.height]="height + 10" fill="#FFF"></rect>
@@ -530,34 +559,23 @@
         </g>
       </g>
 
-      <!-- Progress bar and loading overlay -->
+      <!-- Margins (visually blocks overflow from container) -->
+      <rect [attr.height]="height + 10" width="4" fill="#FFF"></rect>
+      <rect [attr.height]="height + 10" width="4" fill="#FFF"
+            [attr.transform]="translate([width + 6, 0])">
+      </rect>
+
+      <!-- Loading overlay -->
       <g *ngIf="!(blocks && refGenes && compGenes)" id="loading-overlay">
         <rect [attr.width]="width" [attr.height]="height"></rect>
-
-        <g id="progress-bar" [attr.transform]="translate([width * 0.05, height / 2])">
-          <rect height="5" rx="2" ry="2" fill-opacity="0.4"
-                [attr.width]="width * 0.9">
-          </rect>
-
-          <rect [attr.width]="progress * (width * 0.9)" height="5"
-                rx="2" ry="2"
-                fill-opacity="0.7">
-          </rect>
-        </g>
       </g>
     </g>
-
-    <!-- Margins (visually blocks overflow from container) -->
-    <rect [attr.height]="height + 10" width="4" fill="#FFF"></rect>
-    <rect [attr.height]="height + 10" width="4" fill="#FFF"
-          [attr.transform]="translate([width + 6, 0])">
-    </rect>
   </svg>
 
   <!-- Tooltip -->
   <app-tooltip #tooltip id="tt"
-               [ngStyle]="{ 'left': this.tooltip.offsetX,
-                            'top': this.tooltip.offsetY,
-                            'display': this.tooltip.getDisplay() }">
+               [ngStyle]="{ 'left': tooltip.offsetX,
+                            'top': tooltip.offsetY,
+                            'display': tooltip.getDisplay() }">
   </app-tooltip>
 </div>

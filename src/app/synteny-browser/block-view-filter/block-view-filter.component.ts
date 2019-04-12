@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Species } from '../classes/species';
 import { FilterCondition, NavigationObject } from '../classes/interfaces';
 import { Gene } from '../classes/gene';
@@ -25,7 +25,6 @@ export class BlockViewFilterComponent implements OnInit {
   filterErrorState: string = null;
   filterTestResults: string = null;
   attributes: Array<string>;
-  species: Array<string>= [ 'both', 'ref', 'comp' ];
   filterMode: string = 'add';
   editingFilter: Filter = null;
 
@@ -47,11 +46,22 @@ export class BlockViewFilterComponent implements OnInit {
     this.createNewEditableFilter();
   }
 
+
+  // Operational Methods
+
+  /**
+   * Creates a new default filter and sets it as the current filter
+   */
   createNewEditableFilter(): void {
     this.filters.push(this.getNewFilter());
     this.currentFilter = this.getCurrentFilter();
   }
 
+  /**
+   * Marks the specified filter as the current filter (editable) if the user is
+   * in the edit page
+   * @param {Filter} filter - the filter to mark as the current one to edit
+   */
   editFilter(filter: Filter): void {
     if(this.activePage === 'edit') {
       filter.editing = true;
@@ -63,7 +73,13 @@ export class BlockViewFilterComponent implements OnInit {
     }
   }
 
+  /**
+   * Marks the current filter as finished (aka "created") so that it is added to
+   * the filter labels as long as there aren't any empty fields and creates a
+   * new blank filter to edit
+   */
   finishFilter(): void {
+    // clear any current messages
     this.filterErrorState = '';
     this.filterTestResults = '';
 
@@ -77,6 +93,10 @@ export class BlockViewFilterComponent implements OnInit {
     }
   }
 
+  /**
+   * Applies the current selections in the preview checklist by making the
+   * current filter list reflecting the selected filters
+   */
   applyFilterSelections(): void {
     this.filters = this.filters.filter(f => f.selected);
   }
@@ -87,9 +107,15 @@ export class BlockViewFilterComponent implements OnInit {
    */
   removeFilter(filter: Filter): void {
     this.filters = this.filters.filter(f => f.id !== filter.id);
+
+    // update filter ids so they reflect their current index in the filter list
     this.reassignFilterIDs();
   }
 
+  /**
+   * Displays the number of features/genes the current filter's condition(s)
+   * will affect in its current state
+   */
   showCurrentFilterResults(): void {
     this.filterErrorState = '';
     this.filterTestResults = '';
@@ -103,15 +129,19 @@ export class BlockViewFilterComponent implements OnInit {
     // only show number of affected genes if all fields are properly filled out
     if(this.currentFilter.allConditionsAreComplete()) {
       let genes = this.currentFilter.speciesKey === 'both' ?
-        this.allGenes : (this.currentFilter.speciesKey === 'ref' ?
-          this.refGenes : this.compGenes);
+                    this.allGenes : (this.currentFilter.speciesKey === 'ref' ?
+                                      this.refGenes : this.compGenes);
       let numGenes = this.getMatches(genes, [this.currentFilter]).length;
 
       this.filterTestResults = `${this.currentFilter.mode}s ${numGenes} 
-                              feature${numGenes !== 1 ? 's' : ''}`;
+                                feature${numGenes !== 1 ? 's' : ''}`;
     }
   }
 
+  /**
+   * Removes the specified condition from the current filter
+   * @param {FilterCondition} cond - the condition to remove
+   */
   removeCondition(cond: FilterCondition): void {
     this.currentFilter.removeCondition(cond);
 
@@ -166,113 +196,12 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
 
-  // // Operational Methods
-  //
-  // /**
-  //  * Updates the list of filters with the filters that are marked as selected
-  //  * from the filter checklist in the preview page of the modal
-  //  */
-  //
-  // /**
-  //  * Marks a filter as being edited so that when it's submitted it won't be
-  //  * added as a new filter and moves the species selection and condition to the
-  //  * select and input fields to be edited
-  //  * @param {FilterCondition} filterToEdit - the filter that is being edited
-  //  */
-  // editThisFilter(filterToEdit: Filter): void {
-  //   this.filterMode = 'edit';
-  //   // this.currentFilter = filterToEdit.title;
-  //   // this.conditionSpecies = filterToEdit.species;
-  //   this.editingFilter = filterToEdit;
-  // }
-  //
-  // /**
-  //  * Depending on what keys are pressed, adds a new filter, changes an
-  //  * existing filter, or tests a filter based on the current user input in
-  //  * fields
-  //  * @param {KeyboardEvent} event - event object for a key press, if any
-  //  */
-  // processFilter(event: KeyboardEvent = null): void {
-  //   // if no event (button click) or just "Enter", add the filter or edit it
-  //   if(!event || (event.key === 'Enter' && !event.shiftKey)) {
-  //     // if we're in adding mode, add a new filter
-  //     if(this.filterMode === 'add') {
-  //       this.addFilter();
-  //     // if we're in editing mode, find the original filter condition that is
-  //     // edited and replace it
-  //     } else {
-  //       let origFilter = this.editingFilter;
-  //       // let i = this.filters.map(f => f.species + ', ' + f.title)
-  //       //                     .indexOf(origFilter.species + ', ' + origFilter.title);
-  //       // this.filters[i] = this.createNewFilter();
-  //
-  //       // return all filter fields and mode to defaults
-  //       this.filterMode = 'add';
-  //       this.editingFilter = null;
-  //       //this.currentFilter = '';
-  //       this.filterErrorState = null;
-  //       this.filterTestResults = null;
-  //     }
-  //   // if the key event is a "Shift+Enter", test run the filter
-  //   } else if(event && event.key === 'Enter' && event.shiftKey) {
-  //     this.testFilter();
-  //   }
-  // }
-  //
-  // /**
-  //  * Adds a filter object to the list by parsing the user input
-  //  */
-  // addFilter(): void {
-  //   this.filterErrorState = null;
-  //   this.filterTestResults = null;
-  //
-  //   let newFilter = this.createNewFilter();
-  //
-  //   if(newFilter) {
-  //     this.filters.push(newFilter);
-  //     //this.currentFilter = '';
-  //     this.filterErrorState = null;
-  //     this.filterTestResults = null;
-  //   }
-  // }
-  //
-  //
-  // /**
-  //  * Tests the filter (don't add it), get the number of features that the filter
-  //  * that the current state of input fields would affect and print the number of
-  //  * features under the condition inputs
-  //  */
-  // // testFilter(): void {
-  // //   // clear what's there now
-  // //   this.filterErrorState = null;
-  // //   this.filterTestResults = null;
-  // //
-  // //   // if the condition is complete enough to consider a proper condition,
-  // //   // continue getting data
-  // //   // if(this.currentFilter.includes('=')) {
-  // //     let filter = this.createNewFilter();
-  // //     let numGenes;
-  // //
-  // //     // if the filter was created without any errors (errors will cause 'filter'
-  // //     // to be null) get the number of genes
-  // //     if(filter) {
-  // //       if(filter.species === 'ref') {
-  // //         numGenes = this.getMatches(this.refGenes, [filter]).length;
-  // //       } else if(filter.species === 'comp') {
-  // //         numGenes = this.getMatches(this.compGenes, [filter]).length;
-  // //       } else {
-  // //         numGenes = this.getMatches(this.allGenes, [filter]).length;
-  // //       }
-  // //
-  // //       this.filterTestResults = `This filter will
-  // //                                 ${filter.hides ? 'hide' : 'highlight'}
-  // //                                 ${numGenes}
-  // //                                 ${numGenes === 1 ? 'feature' : 'features'}`;
-  // //     }
-  // //   }
-  // // }
-  //
+  // Getter Methods
 
+  /**
+   * Returns the list of types available to filter by based on what the selected
+   * species is for the current filter
+   */
   getFeatureTypes(): Array<string> {
     let genes = this.getGenesForSpecies(this.currentFilter.speciesKey);
     let types = Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();
@@ -286,6 +215,11 @@ export class BlockViewFilterComponent implements OnInit {
     return types;
   }
 
+  /**
+   * Returns the list of genes associated with the specified species key ('ref',
+   * 'comp', or 'both')
+   * @param {string} speciesKey - the key associated with a species selection
+   */
   getGenesForSpecies(speciesKey: string): Array<Gene> {
     return speciesKey === 'ref' ?
            this.refGenes :
@@ -338,9 +272,18 @@ export class BlockViewFilterComponent implements OnInit {
     return `${pag.firstItem + 1} - ${pag.lastItem + 1} of ${pag.totalItems}`;
   }
 
+  /**
+   * Returns the current filter being edited
+   */
   getCurrentFilter(): Filter { return this.filters.filter(f => f.editing)[0]; }
 
+  /**
+   * Returns the list of filters that have been completed/created
+   */
   getCreatedFilters(): Array<Filter> { return this.filters.filter(f => f.created); }
+
+
+  // Condition Checks
 
   /**
    * Returns true/false if all of the filters are currently selected
@@ -350,28 +293,37 @@ export class BlockViewFilterComponent implements OnInit {
       this.getCreatedFilters().filter(f => f.selected).length;
   }
 
+
+  // Private Methods
+
+  /**
+   * Creates a new filter and returns it
+   */
   private getNewFilter(): Filter {
     return new Filter(this.refSpecies, this.compSpecies, this.filters.length);
   }
 
+  /**
+   * Sets each of the current filter's ID to its index in the list
+   */
   private reassignFilterIDs(): void { this.filters.forEach((f, i) => f.id = i); }
 
   /**
-   * Returns an array of genes that are affected by the current (selected in
-   * the filter checklist) filters for the table
+   * Returns an array of genes that are affected by the current selected filters
+   * for the table
    */
   private applyFilters(): Array<Gene> {
     this.refGenes.forEach(g => g.resetFilterStatus());
     this.compGenes.forEach(g => g.resetFilterStatus());
 
     if(this.anyFiltersSelected()) {
-      let fils = this.getCreatedFilters();
+      let filters = this.getCreatedFilters();
       // order matters here because if a gene satisfies an 'exclude' criteria AND
       // an 'include' criteria, the include should take precendence over the
       // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
       // should be filtered
-      this.hideGenes(fils.filter(f => f.hides() && f.selected));
-      this.filterGenes(fils.filter(f => !f.hides() && f.selected));
+      this.hideGenes(filters.filter(f => f.hides() && f.selected));
+      this.filterGenes(filters.filter(f => !f.hides() && f.selected));
 
       return this.refGenes.concat(...this.compGenes)
                           .filter(g => g.filtered || g.hidden);
@@ -380,15 +332,18 @@ export class BlockViewFilterComponent implements OnInit {
     return [];
   }
 
+  /**
+   * Returns true/false if at least one filter is selected in the checklist
+   */
   private anyFiltersSelected(): boolean {
     return this.getCreatedFilters().filter(f => f.selected).length > 0;
   }
 
   /**
-   * Returns a subset of genes from the specified list of genes that match at
-   * least one of the specified list of filters
+   * Returns a list of genes from the specified list of genesthat match at least
+   * one of the specified filters
    * @param {Array<Gene>} genes - the list of genes to search for matches
-   * @param {Array<Filter>} filters - the list of conditions to check for matches
+   * @param {Array<Filter>} filters - the list of filters to check for matches
    */
   private getMatches(genes: Array<Gene>, filters: Array<Filter>): Array<Gene> {
     return genes.filter(g => {
