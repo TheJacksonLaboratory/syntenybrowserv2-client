@@ -218,8 +218,6 @@
 
             <!-- Table pagination -->
             <clr-dg-footer>
-              <!-- Clarity doesn't really handle non-paginated results very well so if
-              proper pagination is required, show that, otherwise, use custom label -->
               <clr-dg-pagination #pag [clrDgPageSize]="15">
                 <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
                   Features per page

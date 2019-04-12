@@ -19,7 +19,9 @@
       <label for="attribute"> Attribute </label>
 
       <select clrSelect id="attribute" [(ngModel)]="values.attribute">
-        <option *ngFor="let a of attributes" [value]="a"> {{ a | titlecase }} </option>
+        <option *ngFor="let a of attributes" [value]="a">
+          {{ a | titlecase }}
+        </option>
       </select>
     </clr-select-container>
 
