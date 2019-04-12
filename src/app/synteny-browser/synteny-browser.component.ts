@@ -1,10 +1,10 @@
 import { ApiService } from './services/api.service';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { FilterComponent } from './filter/filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { Metadata } from './classes/interfaces';
+import { FilterCondition, Metadata } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 
@@ -27,7 +27,7 @@ export class SyntenyBrowserComponent implements OnInit {
   viewInBrowser: boolean = false;
 
   filterOpen: boolean = false;
-  filterConditions: Array<any> = [];
+  filterConditions: Array<FilterCondition> = [];
 
   constructor(private http: ApiService, private cdr: ChangeDetectorRef) { }
 
@@ -67,17 +67,7 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
-
-    // TODO: Remove after filter implementation is finished
-    // this.cdr.detectChanges();
-    //
-    // setTimeout(() => {
-    //   this.genomeView.renderChordMapForChr('16');
-    //   this.getChromosomeFeatures();
-    // }, 1500);
-    // setTimeout(() => {
-    //   this.filterOpen = true;
-    // }, 3000);
+    
   }
 
   /**

@@ -11,7 +11,11 @@ h5 {
   margin-top: 1em !important;
 }
 
-h6 { margin-top: 6px; }
+h6 {
+  margin-top: 6px;
+  text-transform: uppercase;
+  height: 1rem;
+}
 
 p { margin-top: 0.2em; }
 
@@ -25,8 +29,15 @@ p { margin-top: 0.2em; }
   min-width: 0;
 }
 
-.clr-input { min-width: 380px !important; }
+.clr-input { min-width: 300px !important; }
 
 .clr-select { min-width: 0; }
 
 .error-msg { color: #F00; }
+
+.test-run-msg { color: #0079b8; }
+
+.filter-buttons {
+  padding: 0;
+  margin-top: 0.5rem;
+}

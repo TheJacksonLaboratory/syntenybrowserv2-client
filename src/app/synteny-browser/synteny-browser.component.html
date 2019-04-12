@@ -51,26 +51,18 @@
   </div>
 </div>
 
-<div *ngIf="features && genomeView" class="footer">
-  <a href="https://www.jax.org/"><span>&copy; 2019 The Jackson Laboratory</span></a>
-</div>
-
 <clr-modal id="block-view-filters"
            [(clrModalOpen)]="filterOpen"
            [clrModalClosable]="true"
-           [clrModalSize]="'lg'">
+           [clrModalSize]="'xl'">
   <h3 class="modal-title"> Filtering the Block View </h3>
 
   <div class="modal-body">
     <app-filter *ngIf="blockView && blockView.compGenes"
                 [refSpecies]="refSpecies" [compSpecies]="compSpecies"
-                [filters]="filterConditions">
+                [refGenes]="blockView.refGenes" [compGenes]="blockView.compGenes"
+                [filters]="filterConditions"
+                (userClose)="getFilters()">
     </app-filter>
-  </div>
-
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="getFilters()">
-      Done
-    </button>
   </div>
 </clr-modal>

@@ -167,7 +167,7 @@ export class BlockViewBrowserComponent {
 
   /**
    * Marks all reference and comparison genes that match at least one of the
-   * specified conditions as 'filtered'
+   * specified conditions as 'hidden'
    * @param {Array<any>} conditions - list of conditions to check genes against
    */
   hideGenes(conditions: Array<any>): void {
@@ -559,7 +559,7 @@ export class BlockViewBrowserComponent {
                                   matchesFilter = true : null
                               });
                    return matchesFilter;
-                 })
+                 });
   }
 
   /**
@@ -699,9 +699,9 @@ export class BlockViewBrowserComponent {
                    // with distinct values/genes
                    g.homologs.forEach(hom => {
                      if(homIDs[hom.gene_symbol]) {
-                       homIDs[hom.gene_symbol].push(i);
+                       homIDs[hom.gene_symbol].push(g.gene_id);
                      } else {
-                       homIDs[hom.gene_symbol] = [i];
+                       homIDs[hom.gene_symbol] = [g.gene_id];
                        compGenes.push(hom);
                      }
                    });
@@ -711,10 +711,10 @@ export class BlockViewBrowserComponent {
                      g.sel = true;
                      g.homologs.forEach(hom => hom.sel = true);
 
-                     return new Gene(g, [i], this.trackHeight);
+                     return new Gene(g, [g.gene_id], this.trackHeight);
                    }
 
-                   return new Gene(g, [i], this.trackHeight);
+                   return new Gene(g, [g.gene_id], this.trackHeight);
                  } else {
                    g.sel = featureSymbols.indexOf(g.gene_symbol) >= 0;
 
@@ -1113,7 +1113,7 @@ export class BlockViewBrowserComponent {
    * the specified homolog ID of a reference gene
    * @param {number} homID - the homolog ID to search for comparison matches
    */
-  private getComparisonHomologs(homID: number): Array<Gene> {
+  private getComparisonHomologs(homID: string): Array<Gene> {
     return this.compGenes.filter(g => g.homologIDs.indexOf(homID) >= 0);
   }
 
@@ -1122,7 +1122,7 @@ export class BlockViewBrowserComponent {
    * the any of specified homolog IDs of a comparison gene
    * @param {Array<number>} homIDs - the homolog IDs to search for reference matches
    */
-  private getReferenceHomologs(homIDs: Array<number>): Array<Gene> {
+  private getReferenceHomologs(homIDs: Array<string>): Array<Gene> {
     return this.refGenes.filter(g => {
                            let match = false;
                            g.homologIDs.forEach(h => {

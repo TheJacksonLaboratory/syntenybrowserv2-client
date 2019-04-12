@@ -28,8 +28,6 @@
       {{ (col === 'start' || col === 'end') ? col + ' (bases)' : col }}
     </clr-dg-column>
 
-    <clr-dg-placeholder> Start searching for features! </clr-dg-placeholder>
-
     <clr-dg-row *clrDgItems="let row of filteredRows"
                 (mousedown)="dragStart(row)"
                 (mouseenter)="dragOver(row)"
