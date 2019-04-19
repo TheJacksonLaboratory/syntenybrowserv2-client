@@ -3,7 +3,7 @@ import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
 import { saveAs } from 'file-saver';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
-import { ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
+import { BlockViewBrowserOptions, ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
@@ -28,7 +28,7 @@ export class BlockViewBrowserComponent {
   refChr: string;
   refInterval: string = '';
 
-  options: any;
+  options: BlockViewBrowserOptions;
 
   selectedRefGenes: Array<Gene> = [];
   selectedCompGenes: Array<Gene> = [];
