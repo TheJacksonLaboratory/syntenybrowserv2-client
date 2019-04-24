@@ -94,9 +94,17 @@ button { text-transform: uppercase !important; }
 
   .modal-footer { padding: 1rem; }
 
-  #edit-filters .signpost .signpost-action clr-icon {
-    height: 0.75rem !important;
+  #edit-filters .signpost .signpost-action clr-icon { height: 0.75rem !important; }
+
+  .block-body {
+    dt.stack-block-label { display: none; }
+
+    dd.stack-block-content { padding: .25rem 1rem !important; }
   }
+
+  .split dd.stack-block-content { display: inherit; }
+
+  dl.stack-view { height: 45vh !important; }
 
   button.signpost-action {
     height: 1.1rem !important;
