@@ -18,7 +18,7 @@ export class BlockViewFilterComponent implements OnInit {
   @Input() compGenes: Array<Gene>;
 
   navigation: Array<NavigationObject>;
-  activePage: string = 'guide';
+  activePage: string = 'edit';
 
   currentFilter: Filter;
   conditionSpecies: string = 'both';
