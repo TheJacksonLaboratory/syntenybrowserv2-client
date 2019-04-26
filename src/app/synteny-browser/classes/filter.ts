@@ -1,0 +1,208 @@
+import { Species } from './species';
+import { FilterCondition } from './interfaces';
+import { Gene } from './gene';
+
+export class Filter {
+  attributes: Array<string> = [ 'type', 'id', 'symbol', 'chr' ];
+  species: Array<string> = [ 'both', 'ref', 'comp' ];
+
+  mode: string = 'Highlight';
+  speciesKey: string = 'both';
+  refSpecies: Species;
+  compSpecies: Species;
+  conditions: Array<FilterCondition> = [];
+  id: number;
+
+  selected: boolean = true;
+  created: boolean = false;
+  editing: boolean = true;
+
+  constructor(ref: Species, comp: Species, id: number) {
+    this.refSpecies = ref;
+    this.compSpecies = comp;
+    this.id = id;
+
+    // make a new default condition
+    this.addNewCondition();
+  }
+
+
+  // Operational Methods
+
+  /**
+   * Creates a new condition for the filter (will cause the template to render a
+   * condition constructor component for each condition in the filter
+   */
+  addNewCondition(): void {
+    this.conditions.push({
+      filterBy: 'attribute',
+      attribute: 'type',
+      type: null,
+      qualifier: 'equal',
+      value: '',
+      removable: this.conditions.length > 0,
+      id: this.conditions.length});
+  }
+
+  /**
+   * Removes the specified condition from the filter's list of conditions
+   * @param {FilterCondition} cond - the condition to remove
+   */
+  removeCondition(cond: FilterCondition): void {
+    // remove the condition from the condition array
+    this.conditions.splice(cond.id, 1);
+
+    // fix the ids to reflect the conditions' new positions in the array
+    this.conditions.forEach((c, i) => c.id = i);
+  }
+
+
+  // Getter Methods
+
+  /**
+   * Returns the list of attributes that should be available to choose for each
+   * condition; if the species selection for the filter is reference only, it's
+   * pointless to allow filtering by chromosome so remove the option
+   */
+  getValidAttrs(): Array<string> {
+    return this.speciesKey === 'ref' ?
+           this.attributes.filter(a => a !== 'chr') : this.attributes;
+  }
+
+  /**
+   * Returns the common names of the species that the filter will affect
+   */
+  getSpecies(): string {
+    return (this.speciesKey === 'ref' ? this.refSpecies.commonName :
+      (this.speciesKey === 'comp' ? this.compSpecies.commonName :
+        this.refSpecies.commonName + ' & ' + this.compSpecies.commonName));
+  }
+
+  /**
+   * Returns the color that text related to this filter should be based on the
+   * type of filter it is (hiding/highlighting)
+   */
+  getColor(): string { return this.hides() ? '#F00' : '#2A9FE0'; }
+
+  /**
+   * Returns the text that should appear within a label component, including the
+   * filter mode (hiding/highlighting), the conditions and affected species
+   */
+  getLabel(): string {
+    return `${this.mode} [${this.getStringifiedConditions()}] in ${this.getSpecies()}`;
+  }
+
+  /**
+   * Returns the label text for the filter based on title (adds formatting)
+   */
+  getStringifiedConditions(): string {
+    return this.conditions.map(c => this.getCompiledCondition(c)).join(' AND ');
+  }
+
+  /**
+   * Returns the stringified, tab-separated details about the filter and its
+   * conditions for the purposes of being included in the file representing the
+   * table
+   */
+  getTSVRowForFilter(): string {
+    let conds = this.getStringifiedConditions();
+    return [ this.mode, this.getSpecies(), conds ].join('\t');
+  }
+
+
+  // Condition Checks
+
+  /**
+   * Returns true/false if the filter is set to hide matching features
+   */
+  hides(): boolean { return this.mode === 'Hide'; }
+
+  /**
+   * Returns true/false if the specified gene matches ALL of the filter's conditions
+   * @param {Gene} gene - the gene to check against all conditions
+   */
+  matchesFilter(gene: Gene): boolean {
+    for(let i = 0; i < this.conditions.length; i++) {
+      // as soon as we find a condition the gene doesn't match, return false
+      if(!this.matchesCondition(gene, this.conditions[i])) return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns true/false if all conditions don't have empty or unselected fields
+   */
+  allConditionsAreComplete(): boolean {
+    return this.conditions.filter(c => !this.getConditionValue(c)).length === 0;
+  }
+
+  /**
+   * Returns true/false if the filter applies to the reference features; the
+   * boolean condition takes into consideration if the species selection is both
+   * species
+   */
+  isRefFilter(): boolean { return this.speciesKey !== 'comp' };
+
+  /**
+   * Returns true/false if the filter applies to the comparison features; the
+   * boolean condition takes into consideration if the species selection is both
+   * species
+   */
+  isCompFilter(): boolean { return this.speciesKey !== 'ref'; }
+
+
+  // Private Methods
+
+  /**
+   * Returns a stringified version of the specified condition so that the
+   * condition includes the qualifier
+   * @param {FilterCondition} cond - the condition to stringify and make readable
+   */
+  private getCompiledCondition(cond: FilterCondition): string {
+    let value = cond.attribute === 'type' ? cond.type : cond.value;
+    return cond.attribute + this.getQualifier(cond) + value;
+  }
+
+  /**
+   * Returns the value of the condition (by default this is the condition's
+   * 'value' attribute but if filtering by type, then we need to get the
+   * condition's 'type' attribute which models the type selection)
+   * @param {FilterCondition} cond - the condition to get the filter by value of
+   */
+  private getConditionValue(cond: FilterCondition): string {
+    return cond.attribute === 'type' ? cond.type : cond.value;
+  }
+
+  /**
+   * Returns a stringified qualifier to represent the condition's restriction
+   * factor, if applicable (i.e. 'symbol = ufd1' vs 'symbol like ufd1', where
+   * 'symbol like ufd1' could return features with names like ufd11 or ufd12)
+   * @param {FilterCondition} condition - the condition to get the qualifier for
+   */
+  private getQualifier(condition: FilterCondition): string {
+    let qualifier = condition.qualifier;
+    return qualifier.includes('not') ?
+           (qualifier.includes('equal') ? ' &ne ' : ' not like ') :
+           (qualifier.includes('equal') ? ' = ' : ' like ')
+  }
+
+  /**
+   * Returns true/false if the specified gene matches the specified condition
+   * @param {Gene} gene - the gene to check against the specified condition
+   * @param {FilterCondition} cond - the condition to check the specified gene
+   *                                 against
+   */
+  private matchesCondition(gene: Gene, cond: FilterCondition): boolean {
+    let geneValue = gene[cond.attribute];
+    let condValue = this.getConditionValue(cond);
+
+    if(cond.qualifier.includes('not')) {
+      return cond.qualifier.includes('equal') ?
+        geneValue !== condValue : !geneValue.includes(condValue);
+    } else {
+      return cond.qualifier.includes('equal') ?
+        geneValue === condValue : geneValue.includes(condValue);
+    }
+  }
+}

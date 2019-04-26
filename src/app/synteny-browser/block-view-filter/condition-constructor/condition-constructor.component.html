@@ -1,0 +1,70 @@
+<div class="clr-row">
+  <!-- Prepended 'AND' if it's not the first condition of a filter -->
+  <h5 *ngIf="isConditionRemovable()"> AND </h5>
+
+  <!-- Filter by select -->
+  <clr-select-container class="right-2">
+    <label for="filter-by"> Filter By </label>
+
+    <select clrSelect id="filter-by" [(ngModel)]="values.filterBy">
+      <option value="attribute"> Attribute </option>
+      <option disabled value="ontology"> Ontology </option>
+    </select>
+  </clr-select-container>
+
+  <!-- Filter by attribute inputs and selects -->
+  <div class="clr-row">
+    <!-- Attribute select -->
+    <clr-select-container *ngIf="isAttributeCondition()">
+      <label for="attribute"> Attribute </label>
+
+      <select clrSelect id="attribute" [(ngModel)]="values.attribute">
+        <option *ngFor="let a of attributes" [value]="a">
+          {{ a | titlecase }}
+        </option>
+      </select>
+    </clr-select-container>
+
+    <!-- Type select -->
+    <clr-select-container *ngIf="conditionNeedsTypeSelection()">
+      <label for="type"> Type </label>
+
+      <select clrSelect id="type"
+              [(ngModel)]="values.type"
+              (ngModelChange)="stateChange.emit()">
+        <option [value]="null"> -- Select a type -- </option>
+        <option *ngFor="let t of types" [value]="t"> {{ t }} </option>
+      </select>
+    </clr-select-container>
+
+    <!-- Qualifier select -->
+    <clr-select-container *ngIf="conditionNeedsQualifier()">
+      <label for="qualifier"> Qualifier </label>
+
+      <select clrSelect id="qualifier"
+              [(ngModel)]="values.qualifier"
+              (ngModelChange)="stateChange.emit()">
+        <option value="equal"> is equal to </option>
+        <option value="like"> is like </option>
+        <option value="not-equal"> is not equal to </option>
+        <option value="not-like"> is not like </option>
+      </select>
+    </clr-select-container>
+
+    <!-- Value input (chr, symbol, id) -->
+    <clr-input-container *ngIf="conditionNeedsUserInput()">
+      <label for="value"> Value </label>
+
+      <input id="value" clrInput placeholder="Enter a value here"
+             [(ngModel)]="values.value"
+             (input)="valueChanged.next($event.target.value)">
+    </clr-input-container>
+
+    <!-- Remove this condition button -->
+    <button *ngIf="isConditionRemovable()" type="button"
+            class="btn btn-sm btn-danger-outline left-1"
+            (click)="remove.emit()">
+      <clr-icon shape="close"></clr-icon> Remove
+    </button>
+  </div>
+</div>

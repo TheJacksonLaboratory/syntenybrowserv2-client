@@ -9,15 +9,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // components
 import { SyntenyBrowserComponent } from './synteny-browser.component';
-import { FilterComponent } from './filter/filter.component';
+import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { TooltipComponent } from './tooltip/tooltip.component';
+import {ConditionConstructorComponent} from './block-view-filter/condition-constructor/condition-constructor.component';
 
 // services
 import { ApiService } from './services/api.service';
+
 
 @NgModule({
   imports: [
@@ -35,7 +37,8 @@ import { ApiService } from './services/api.service';
     GenomeViewComponent,
     SpeciesSelectionComponent,
     TooltipComponent,
-    FilterComponent
+    BlockViewFilterComponent,
+    ConditionConstructorComponent
   ], 
   providers: [ApiService, HttpClient]
 })

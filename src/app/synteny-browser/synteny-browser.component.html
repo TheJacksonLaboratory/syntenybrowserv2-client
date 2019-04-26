@@ -58,11 +58,13 @@
   <h3 class="modal-title"> Filtering the Block View </h3>
 
   <div class="modal-body">
-    <app-filter *ngIf="blockView && blockView.compGenes"
-                [refSpecies]="refSpecies" [compSpecies]="compSpecies"
-                [refGenes]="blockView.refGenes" [compGenes]="blockView.compGenes"
-                [filters]="filterConditions"
-                (userClose)="getFilters()">
-    </app-filter>
+    <app-block-view-filter *ngIf="blockViewBrowser && blockViewBrowser.compGenes"
+                           [refSpecies]="refSpecies"
+                           [compSpecies]="compSpecies"
+                           [refGenes]="blockViewBrowser.refGenes"
+                           [compGenes]="blockViewBrowser.compGenes"
+                           [filters]="filters"
+                           (userClose)="getFilters()">
+    </app-block-view-filter>
   </div>
 </clr-modal>

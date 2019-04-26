@@ -2,11 +2,12 @@ import { ApiService } from './services/api.service';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
-import { FilterComponent } from './filter/filter.component';
+import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { FilterCondition, Metadata } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
+import {Filter} from './classes/filter';
 
 @Component({
   selector: 'app-synteny-browser',
@@ -17,8 +18,8 @@ export class SyntenyBrowserComponent implements OnInit {
   @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
   @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
   @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
-  @ViewChild(BlockViewBrowserComponent) blockView: BlockViewBrowserComponent;
-  @ViewChild(FilterComponent) filters: FilterComponent;
+  @ViewChild(BlockViewBrowserComponent) blockViewBrowser: BlockViewBrowserComponent;
+  @ViewChild(BlockViewFilterComponent) blockViewFilters: BlockViewFilterComponent;
 
   refSpecies: Species;
   compSpecies: Species;
@@ -27,7 +28,7 @@ export class SyntenyBrowserComponent implements OnInit {
   viewInBrowser: boolean = false;
 
   filterOpen: boolean = false;
-  filterConditions: Array<FilterCondition> = [];
+  filters: Array<Filter> = [];
 
   constructor(private http: ApiService, private cdr: ChangeDetectorRef) { }
 
@@ -67,7 +68,6 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
-    
   }
 
   /**
@@ -94,11 +94,12 @@ export class SyntenyBrowserComponent implements OnInit {
 
     // allow the block view synteny-browser to initialize
     this.cdr.detectChanges();
-    this.blockView.render(this.refSpecies,
-                          this.compSpecies,
-                          this.genomeColors,
-                          features.chr,
-                          features.features);
+
+    this.blockViewBrowser.render(this.refSpecies,
+                                 this.compSpecies,
+                                 this.genomeColors,
+                                 features.chr,
+                                 features.features);
 
     setTimeout(() => {
       // TODO: this currently only will work in Firefox and Chrome
@@ -112,7 +113,8 @@ export class SyntenyBrowserComponent implements OnInit {
    */
   getFilters(): void {
     this.filterOpen = false;
-    this.filterConditions = this.filters.filters;
-    this.blockView.applyFilterConditions(this.filterConditions);
+    this.filters = this.blockViewFilters.getCreatedFilters();
+
+    this.blockViewBrowser.applyFilters(this.filters);
   }
 }
