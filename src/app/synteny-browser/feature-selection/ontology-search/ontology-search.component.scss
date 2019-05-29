@@ -1,0 +1,18 @@
+.less-padding { padding: 0.25rem 0.5rem 0 0.5rem; }
+
+.datagrid-row-detail .details { width: 100%; }
+
+.details p {
+  margin-top: 0.3rem !important;
+  margin-left: 0.5rem;
+  color: black;
+}
+
+.datagrid .datagrid-cell { font-size: .4rem !important; }
+
+.datagrid-cell {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

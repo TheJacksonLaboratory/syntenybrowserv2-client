@@ -1,5 +1,6 @@
 import { Feature } from './feature';
 import { SyntenyBlock } from './synteny-block';
+import {ClrLoadingState} from '@clr/angular';
 
 export interface Response {
   species?: Array<RawSpecies>;
@@ -7,7 +8,14 @@ export interface Response {
   blocks?: Array<SyntenyBlock>;
   qtls?: Array<QTLMetadata>;
   ont_genes?: Array<OntologyGeneMetadata>;
+  terms?: Array<OntologyTerm>;
+}
 
+export interface OntologyTerm {
+  id: string;
+  name: string;
+  descendant_count?: number;
+  selecting?: ClrLoadingState;
 }
 
 export interface RawSpecies {

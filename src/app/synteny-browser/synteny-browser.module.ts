@@ -15,7 +15,9 @@ import { FeatureSelectionComponent } from './feature-selection/feature-selection
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { TooltipComponent } from './tooltip/tooltip.component';
-import {ConditionConstructorComponent} from './block-view-filter/condition-constructor/condition-constructor.component';
+import { ConditionConstructorComponent } from './block-view-filter/condition-constructor/condition-constructor.component';
+import {OntologySearchComponent} from './feature-selection/ontology-search/ontology-search.component';
+import {FeatureSearchComponent} from './feature-selection/feature-search/feature-search.component';
 
 // services
 import { ApiService } from './services/api.service';
@@ -38,7 +40,9 @@ import { ApiService } from './services/api.service';
     SpeciesSelectionComponent,
     TooltipComponent,
     BlockViewFilterComponent,
-    ConditionConstructorComponent
+    ConditionConstructorComponent,
+    OntologySearchComponent,
+    FeatureSearchComponent,
   ], 
   providers: [ApiService, HttpClient]
 })

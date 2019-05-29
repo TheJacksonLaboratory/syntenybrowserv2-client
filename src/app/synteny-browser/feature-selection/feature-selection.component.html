@@ -1,55 +1,51 @@
 <div *ngIf="refSpecies" class="clr-row">
-  <clr-select-container class="clr-col-6">
+  <clr-select-container class="clr-col-4">
     <label for="search-type"> Search features by </label>
 
     <select clrSelect id="search-type"
             [(ngModel)]="searchType"
             (ngModelChange)="setTypeDependentElements()">
-      <option *ngFor="let type of refSpecies.searchTypes"
-              [value]="type.value"
-              [disabled]="type.value === 'ontology'">
+      <option *ngFor="let type of refSpecies.searchTypes" [value]="type.value">
         {{ refSpecies.commonName + ': ' + type.name }}
       </option>
     </select>
   </clr-select-container>
 
-  <clr-input-container>
-    <label for="search-term"> search term </label>
+  <clr-select-container *ngIf="searchType === 'ontology'" class="clr-col-4">
+    <label for="ontology"> Ontology </label>
+
+    <select clrSelect id="ontology"
+            [(ngModel)]="ontology"
+            (ngModelChange)="loadOntologyTerms()">
+      <option *ngFor="let ont of refSpecies.onts" [value]="ont.value">
+        {{ ont.name }}
+      </option>
+    </select>
+  </clr-select-container>
+
+  <clr-input-container class="clr-col-4">
+    <label for="search-term"> {{ getSearchLabel() }} </label>
 
     <input id="search-term" clrInput
            [(ngModel)]="search"
-           [placeholder]="searchPlaceholder"
+           [placeholder]="getSearchPlaceholder()"
            (keyup)="searchForFeatures()">
   </clr-input-container>
 </div>
+
 <div class="clr-row">
-  <clr-datagrid class="clr-col-12" [clrDgLoading]="loading">
-    <clr-dg-column *ngFor="let col of columns" [clrDgSortBy]="getSorter(col)">
-      {{ (col === 'start' || col === 'end') ? col + ' (bases)' : col }}
-    </clr-dg-column>
+  <app-feature-search class="clr-col-12"
+                      [hidden]="searchType !== 'symbol'"
+                      (update)="updateSelections()">
+  </app-feature-search>
 
-    <clr-dg-row *clrDgItems="let row of filteredRows"
-                (mousedown)="dragStart(row)"
-                (mouseenter)="dragOver(row)"
-                (mouseup)="dragEnd()"
-                [ngClass]="{ 'selected': row.selected }">
-      <clr-dg-cell *ngFor="let col of columns">
-        {{ getCell(row, col) }}
-      </clr-dg-cell>
-    </clr-dg-row>
-
-    <clr-dg-footer>
-      <!-- Clarity doesn't really handle non-paginated results very well so if
-      proper pagination is required, show that, otherwise, use custom label -->
-      <clr-dg-pagination #pagination>
-        <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
-          Features per page
-        </clr-dg-page-size>
-        {{ getPaginatorLabel(pagination) }}
-      </clr-dg-pagination>
-    </clr-dg-footer>
-  </clr-datagrid>
+  <app-ontology-search class="clr-col-12"
+                       [hidden]="searchType !== 'ontology'"
+                       (update)="updateSelections()"
+                       (switchView)="setSearch()">
+  </app-ontology-search>
 </div>
+
 <div class="clr-row">
   <h4>Current selections</h4>
   <br/>

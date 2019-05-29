@@ -1,5 +1,5 @@
 import { environment } from '../../../environments/environment';
-import { GeneMetadata, OntologyGeneMetadata, QTLMetadata, Response } from '../classes/interfaces';
+import {GeneMetadata, OntologyGeneMetadata, OntologyTerm, QTLMetadata, Response} from '../classes/interfaces';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
@@ -37,6 +37,18 @@ export class ApiService {
                     );
   }
 
+  getOntologyTerms(taxonID: string, ontology: string)
+                  : Observable<Array<OntologyTerm>> {
+    let url = `${this.root}/ontology-terms/${taxonID}/${ontology}`;
+    return this.http.get<Response>(url)
+                    .pipe(map(resp => resp.terms));
+  }
+
+  getDirectDescendantOntologyTerms(ontID: string): Observable<Array<OntologyTerm>> {
+    let url = `${this.root}/ontology-terms/direct-descendants/${ontID}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.terms));
+  }
+
   /**
    * Returns a list of genes belonging to the specified ontology (by taxon ID)
    * which also matches the ont search term
@@ -44,10 +56,13 @@ export class ApiService {
    * @param {string} ontType - ontology type keyword
    * @param {string} search - string to search for genes by matching ontologies
    */
-  getOntGeneMatches(taxonID: string, ontType: string, search: string)
-                   : Observable<Array<OntologyGeneMetadata>> {
-    let url = `${this.root}/ont/${ontType}/genes/${taxonID}/${search}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.ont_genes));
+  getGeneAssociationsForOntology(taxonID: string, ontType: string, search: string)
+                   : Observable<Array<Feature>> {
+    let url = `${this.root}/ontology-terms/associated-features/${taxonID}/${ontType}/${search}`;
+    return this.http.get<Response>(url)
+                    .pipe(
+                      map(resp => resp.genes.map(g => new Feature(g, true)))
+                    );
   }
 
   /**

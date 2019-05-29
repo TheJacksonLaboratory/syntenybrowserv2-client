@@ -56,6 +56,7 @@ export class SyntenyBrowserComponent implements OnInit {
    * renders the genome view with the updated reference and comparison species
    */
   updateSpecies(): void {
+    this.viewInBrowser = false;
     // update the species
     this.refSpecies = this.species.getReferenceSelection();
     this.compSpecies = this.species.getComparisonSelection();
@@ -63,11 +64,12 @@ export class SyntenyBrowserComponent implements OnInit {
     // allow the species selects to stabilize
     this.cdr.detectChanges();
 
-    // load the feature selection using the most recent reference species
-    this.features.load(this.refSpecies);
-
     // render the genome view for the new selections
     this.genomeView.render(this.refSpecies, this.compSpecies, this.genomeColors);
+
+    // load the feature selection using the most recent reference species
+    // do this second as it might take a second or two
+    this.features.load(this.refSpecies);
   }
 
   /**

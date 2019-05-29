@@ -411,5 +411,8 @@ export class GenomeViewComponent implements OnInit {
     this.genomeData = null;
     this.refChr = null;
     this.tempCompGenome = null;
+
+    this.features = [];
+    this.featureBlocks = [];
   }
 }
