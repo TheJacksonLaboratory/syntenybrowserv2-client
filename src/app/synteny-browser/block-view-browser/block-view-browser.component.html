@@ -560,9 +560,11 @@
       </g>
 
       <!-- Margins (visually blocks overflow from container) -->
-      <rect [attr.height]="height + 10" width="4" fill="#FFF"></rect>
       <rect [attr.height]="height + 10" width="4" fill="#FFF"
-            [attr.transform]="translate([width + 6, 0])">
+            [attr.transform]="translate([-5, 0])">
+      </rect>
+      <rect [attr.height]="height + 10" width="4" fill="#FFF"
+            [attr.transform]="translate([width + 1, 0])">
       </rect>
 
       <!-- Loading overlay -->
