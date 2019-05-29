@@ -1,5 +1,5 @@
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, SelectedFeatures } from '../classes/interfaces';
+import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures } from '../classes/interfaces';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
@@ -28,11 +28,11 @@ export class GenomeViewComponent implements OnInit {
   width: number = 500;
   radius: number = this.width * 0.5;
   bandThickness: number = 20;
-  refRadii: any;
-  compRadii: any;
-  featureRadii: any;
+  refRadii: RadiiDictionary;
+  compRadii: RadiiDictionary;
+  featureRadii: RadiiDictionary;
 
-  refChr: any;
+  refChr: ReferenceChr;
 
   features: Array<Feature>;
   featureBlocks: Array<SyntenyBlock>;

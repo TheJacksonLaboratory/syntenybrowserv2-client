@@ -24,12 +24,6 @@ export class TableData<T> {
   // only features are stored in the selections array
   selections: Array<Feature> = [];
 
-  constructor(columns: Array<string>, searchable: Array<string>) {
-    this.loading = false;
-    this.columns = columns;
-    this.searchableColumns = searchable;
-  }
-
   // sorting classes
   idComp = new IDComparator();
   symbolComp = new SymbolComparator();
@@ -38,6 +32,20 @@ export class TableData<T> {
   descComp = new DescendantsComparator();
   nameComp = new NameComparator();
 
+  constructor(columns: Array<string>, searchable: Array<string>) {
+    this.loading = false;
+    this.columns = columns;
+    this.searchableColumns = searchable;
+  }
+
+  /**
+   * Sets the rows (and filtered rows) of the table and sorts the rows if a
+   * sortOn parameter is specified, and stops the loading
+   * @param {Array<OntologyTerm|Feature>} rows - rows for the table which may be
+*                              ontology terms or features depending on the table
+   * @param {string} sortOn - a key that exists in the row objects that can be
+   *                          used to sort the rows
+   */
   setRows(rows: Array<T>, sortOn: string = ''): void {
     this.rows = sortOn ? rows.sort((a, b) => this.compare(a, b, sortOn)) : rows;
 
@@ -45,6 +53,11 @@ export class TableData<T> {
     this.loading = false;
   }
 
+  /**
+   * Uses the specified search string to filter the rows in the table to those
+   * only that match in at least one column
+   * @param {string} search - the search string to use to filter the table rows
+   */
   searchFor(search: string): void {
     if(search === '') {
       this.filteredRows = this.rows;
@@ -165,6 +178,13 @@ export class TableData<T> {
     return numRows > 0 ? `1 - ${numRows} of ${numRows}` : '0 of 0';
   }
 
+  /**
+   * Returns the result (of the appropriate sorting class) of the two objects
+   * (a and b) as long as the specified sortBy key exists on both objects
+   * @param {OntologyTerm|Feature} a - the reference object
+   * @param {OntologyTerm|Feature} b - the comparison object
+   * @param {string} sortBy - the key to use for comparing the objects
+   */
   private compare(a: T, b: T, sortBy: string): number {
     if(typeof a[sortBy] !== 'undefined' && typeof b[sortBy] !== 'undefined') {
       let comp = this.getSorter(sortBy);

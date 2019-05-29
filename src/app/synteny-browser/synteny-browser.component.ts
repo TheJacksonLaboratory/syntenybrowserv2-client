@@ -7,7 +7,7 @@ import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { FilterCondition, Metadata } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
-import {Filter} from './classes/filter';
+import { Filter } from './classes/filter';
 
 @Component({
   selector: 'app-synteny-browser',

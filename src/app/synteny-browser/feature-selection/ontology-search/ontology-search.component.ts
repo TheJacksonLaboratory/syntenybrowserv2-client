@@ -1,10 +1,11 @@
-import {Component, EventEmitter, Output} from '@angular/core';
-import {ApiService} from '../../services/api.service';
-import {Species} from '../../classes/species';
-import {OntologyTerm} from '../../classes/interfaces';
-import {Feature} from '../../classes/feature';
-import {ClrLoadingState} from '@clr/angular';
-import {TableData} from '../../classes/table-data';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { ApiService} from '../../services/api.service';
+import { Species } from '../../classes/species';
+import { OntologyTerm } from '../../classes/interfaces';
+import { Feature } from '../../classes/feature';
+import { ClrLoadingState } from '@clr/angular';
+import { TableData } from '../../classes/table-data';
+
 
 @Component({
   selector: 'app-ontology-search',
@@ -19,21 +20,26 @@ export class OntologySearchComponent {
   termsSearch: string = '';
   currentTerm: OntologyTerm;
 
-  selectingFeatures: ClrLoadingState = ClrLoadingState.DEFAULT;
-
-  features: TableData<Feature>;
-  featuresSearch: string = '';
+  associations: TableData<Feature>;
+  associationsSearch: string = '';
 
   @Output() update: EventEmitter<any> = new EventEmitter();
   @Output() switchView: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: ApiService) {
     this.terms = new TableData(['id', 'name'], ['id', 'name']);
-    this.features = new TableData(['termID', 'term', 'id', 'symbol'],
+    this.associations = new TableData(['termID', 'term', 'id', 'symbol'],
                                   ['term', 'id', 'symbol']);
   }
 
-  loadOntologyTerms(refSpecies: Species, ontology: string): void {
+  /**
+   * Sets the reference species and current ontology, and retrieves the terms
+   * for the specified reference species and ontology and sets the table rows
+   * with the results, sorted by ontology term ID
+   * @param {Species} refSpecies - the current reference species
+   * @param {string} ontology - the ontology ID prefix
+   */
+  loadTerms(refSpecies: Species, ontology: string): void {
     this.refSpecies = refSpecies;
     this.ontology = ontology;
 
@@ -44,17 +50,28 @@ export class OntologySearchComponent {
              .subscribe(terms => this.terms.setRows(terms, 'id'));
   }
 
+  /**
+   * Switches the view away from the association table back to the term table
+   */
   backToTerms(): void {
     this.currentTerm = null;
     this.switchView.emit();
   }
 
-  loadFeaturesForTerm(term: OntologyTerm, showResults: boolean = true): void {
+  /**
+   * Retrieves the gene associations for the specified ontology term and switches
+   * the view to the associations table if the user wants to see the associations
+   * or automatically marks all associations as selected if the user wants all
+   * associations
+   * @param {OntologyTerm} term - the term selected
+   * @param {boolean} showResults - whether the user wants to see the results
+   */
+  loadAssociationsForTerm(term: OntologyTerm, showResults: boolean = true): void {
     if(!showResults) {
       term.selecting = ClrLoadingState.LOADING;
     }
     this.currentTerm = showResults ? term : null;
-    this.features.loading = showResults;
+    this.associations.loading = showResults;
     this.switchView.emit();
 
     let termToSearch = this.currentTerm ? this.currentTerm.name : term.name;
@@ -64,33 +81,50 @@ export class OntologySearchComponent {
                                              termToSearch)
              .subscribe(genes => {
                if(showResults) {
-                 this.features.setRows(genes, 'term')
+                 this.associations.setRows(genes, 'term')
                } else {
                  genes.forEach(g => g.select());
-                 this.features.rows = genes;
-                 this.features.selections = genes;
+                 this.associations.rows = genes;
+                 this.associations.selections = genes;
                  term.selecting = ClrLoadingState.SUCCESS;
                  this.update.emit();
                }
              });
   }
 
-  updateFeatureSelections(): void {
-    this.features.dragEnd();
+  /**
+   * Ends the drag behavior and emits an update event to parent component
+   */
+  updateAssociationSelections(): void {
+    this.associations.dragEnd();
     this.update.emit();
   }
 
-  getViewFeaturesTitle(term: OntologyTerm): string {
-    return 'View features associated with this term' +
+  /**
+   * Returns the text for the title tooltip describing what the view associations
+   * button does and if it's disabled (and the reason)
+   * @param {OntologyTerm} term - the term that the tooltip needs content for
+   */
+  getViewAssociationsTitle(term: OntologyTerm): string {
+    return 'View gene associations with this term' +
       (term.descendant_count >= 500 ? ' [disabled for being too broad]' : '');
   }
 
-  getSelectAllFeaturesTitle(term: OntologyTerm): string {
-    return 'Select all features associated with this term' +
+  /**
+   * Returns the text for the title tooltip describing what the 'select all
+   * associations' button does and if it's disabled (and the reason)
+   * @param {OntologyTerm} term - the term that the tooltip needs content for
+   */
+  getSelectAllAssociationsTitle(term: OntologyTerm): string {
+    return 'Select all gene associations with this term' +
       (term.descendant_count >= 500 ? ' [disabled for being too broad]' : '');
   }
 
-  removeFeature(symbol: string): void {
-    this.features.removeSelection(symbol);
+  /**
+   * Removes the gene association with the specified symbol from the selections
+   * @param {string} symbol - the symbol of the gene association to remove
+   */
+  removeAssociation(symbol: string): void {
+    this.associations.removeSelection(symbol);
   }
 }

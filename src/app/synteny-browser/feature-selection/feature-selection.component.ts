@@ -1,14 +1,14 @@
 import { ApiService } from '../services/api.service';
-import {ChangeDetectorRef, Component, EventEmitter, Output, ViewChild} from '@angular/core';
-import {ClrDatagridComparatorInterface, ClrDatagridPagination} from '@clr/angular';
-import {Metadata, OntologyTerm, SearchType} from '../classes/interfaces';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
+import { Metadata, OntologyTerm, SearchType } from '../classes/interfaces';
 import { Species } from '../classes/species';
 import { Feature } from '../classes/feature';
 import { format } from 'd3';
 import { ChrComparator, DescendantsComparator, IDComparator, NameComparator,
          SymbolComparator, TypeComparator } from '../classes/comparators';
-import {OntologySearchComponent} from './ontology-search/ontology-search.component';
-import {FeatureSearchComponent} from './feature-search/feature-search.component';
+import { OntologySearchComponent } from './ontology-search/ontology-search.component';
+import { FeatureSearchComponent } from './feature-search/feature-search.component';
 
 @Component({
   selector: 'app-feature-selection',
@@ -45,7 +45,7 @@ export class FeatureSelectionComponent {
     // empty out selection lists
     this.selections = [];
     this.featureSearch.features.selections = [];
-    this.ontologySearch.features.selections = [];
+    this.ontologySearch.associations.selections = [];
 
     // set the search term placeholder and table columns based on the search type
     this.setTypeDependentElements();
@@ -60,8 +60,8 @@ export class FeatureSelectionComponent {
       this.featureSearch.features.searchFor(this.search);
     } else {
       if(this.ontologySearch.currentTerm) {
-        this.ontologySearch.featuresSearch = this.search;
-        this.ontologySearch.features.searchFor(this.search);
+        this.ontologySearch.associationsSearch = this.search;
+        this.ontologySearch.associations.searchFor(this.search);
       } else {
         this.ontologySearch.termsSearch = this.search;
         this.ontologySearch.terms.searchFor(this.search);
@@ -93,16 +93,16 @@ export class FeatureSelectionComponent {
 
   setSearch(): void {
     let os = this.ontologySearch;
-    this.search = os.currentTerm ? os.featuresSearch : os.termsSearch;
+    this.search = os.currentTerm ? os.associationsSearch : os.termsSearch;
   }
 
   loadOntologyTerms(ontology: string = this.ontology): void {
-    this.ontologySearch.loadOntologyTerms(this.refSpecies, ontology);
+    this.ontologySearch.loadTerms(this.refSpecies, ontology);
   }
 
   updateSelections(): void {
     let selsFromFeatureSearch = this.featureSearch.features.selections;
-    let selsFromOntologySearch = this.ontologySearch.features.selections;
+    let selsFromOntologySearch = this.ontologySearch.associations.selections;
     let allSelections = selsFromFeatureSearch.concat(...selsFromOntologySearch);
 
     this.selections = Array.from(new Set(allSelections));
@@ -113,7 +113,7 @@ export class FeatureSelectionComponent {
     // if the feature with specified symbol isn't in one of the selection lists,
     // nothing will happen
     this.featureSearch.removeFeature(symbol);
-    this.ontologySearch.removeFeature(symbol);
+    this.ontologySearch.removeAssociation(symbol);
 
     this.updateSelections();
   }

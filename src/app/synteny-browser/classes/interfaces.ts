@@ -126,3 +126,15 @@ export interface Exon {
 }
 
 export interface TooltipContent extends Object {}
+
+export interface ReferenceChr {
+  chr: string;
+  size: number;
+  blocks: Array<SyntenyBlock>;
+}
+
+export interface RadiiDictionary {
+  ringInner: number;
+  ringOuter: number;
+  labels?: number;
+}

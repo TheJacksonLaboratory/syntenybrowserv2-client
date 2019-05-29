@@ -18,16 +18,16 @@
       </clr-dg-cell>
       <clr-dg-cell class="less-padding">
         <button class="btn btn-sm btn-link"
-                [title]="getViewFeaturesTitle(row)"
+                [title]="getViewAssociationsTitle(row)"
                 [disabled]="row.descendant_count >= 500"
-                (click)="loadFeaturesForTerm(row)">
+                (click)="loadAssociationsForTerm(row)">
           <clr-icon shape="view-list"></clr-icon>
         </button>
         <button class="btn btn-sm btn-link"
-                [title]="getSelectAllFeaturesTitle(row)"
+                [title]="getSelectAllAssociationsTitle(row)"
                 [disabled]="row.descendant_count >= 500"
                 [clrLoading]="row.selecting"
-                (click)="loadFeaturesForTerm(row, false)">
+                (click)="loadAssociationsForTerm(row, false)">
           <clr-icon shape="check"></clr-icon>
         </button>
       </clr-dg-cell>
@@ -53,19 +53,19 @@
   </clr-datagrid>
 
   <clr-datagrid [hidden]="!currentTerm" class="clr-col"
-                [clrDgLoading]="features.loading">
-    <clr-dg-column *ngFor="let col of features.columns"
-                   [clrDgSortBy]="features.getSorter(col)">
+                [clrDgLoading]="associations.loading">
+    <clr-dg-column *ngFor="let col of associations.columns"
+                   [clrDgSortBy]="associations.getSorter(col)">
       {{ col }}
     </clr-dg-column>
 
-    <clr-dg-row *clrDgItems="let row of features.filteredRows"
-                (mousedown)="features.dragStart(row)"
-                (mouseenter)="features.dragOver(row)"
-                (mouseup)="updateFeatureSelections()"
+    <clr-dg-row *clrDgItems="let row of associations.filteredRows"
+                (mousedown)="associations.dragStart(row)"
+                (mouseenter)="associations.dragOver(row)"
+                (mouseup)="updateAssociationSelections()"
                 [ngClass]="{ 'selected': row.selected }">
-            <clr-dg-cell *ngFor="let col of features.columns">
-              {{ features.getCell(row, col) }}
+            <clr-dg-cell *ngFor="let col of associations.columns">
+              {{ associations.getCell(row, col) }}
             </clr-dg-cell>
           </clr-dg-row>
 
@@ -76,7 +76,7 @@
         <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
           Features per page
         </clr-dg-page-size>
-        {{ features.getPaginatorLabel(pagination) }}
+        {{ associations.getPaginatorLabel(pagination) }}
       </clr-dg-pagination>
     </clr-dg-footer>
   </clr-datagrid>

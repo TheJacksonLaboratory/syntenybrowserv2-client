@@ -1,8 +1,8 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {Species} from '../../classes/species';
-import {ApiService} from '../../services/api.service';
-import {TableData} from '../../classes/table-data';
-import {Feature} from '../../classes/feature';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Species } from '../../classes/species';
+import { ApiService } from '../../services/api.service';
+import { TableData } from '../../classes/table-data';
+import { Feature } from '../../classes/feature';
 
 @Component({
   selector: 'app-feature-search',
@@ -22,6 +22,12 @@ export class FeatureSearchComponent {
                                   ['id', 'symbol', 'type']);
   }
 
+  /**
+   * Sets the reference species, retrieves the terms or the specified reference
+   * species and ontology and sets the table rows with the results, sorted by
+   * gene symbol
+   * @param {Species} refSpecies - the current reference species
+   */
   loadFeatures(refSpecies: Species): void {
     this.refSpecies = refSpecies;
     this.http.getAllGenes(this.refSpecies.getID())
