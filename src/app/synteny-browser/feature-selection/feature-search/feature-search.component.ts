@@ -46,13 +46,18 @@ export class FeatureSearchComponent {
              });
   }
 
+  /**
+   * Ends the drag behavior and emits an update event to parent component
+   */
   updateFeatureSelections(): void {
     this.features.dragEnd();
     this.update.emit();
   }
 
-  removeFeature(symbol: string): void {
-    this.features.removeSelection(symbol);
-  }
+  /**
+   * Removes the gene association with the specified symbol from the selections
+   * @param {string} symbol - the symbol of the gene association to remove
+   */
+  removeFeature(symbol: string): void { this.features.removeSelection(symbol); }
 
 }

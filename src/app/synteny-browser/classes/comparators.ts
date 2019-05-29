@@ -1,6 +1,6 @@
-import {ClrDatagridComparatorInterface} from '@clr/angular';
-import {Feature} from './feature';
-import {OntologyTerm} from './interfaces';
+import { ClrDatagridComparatorInterface } from '@clr/angular';
+import { Feature } from './feature';
+import { OntologyTerm } from './interfaces';
 
 /**
  * Comparator for sorting features in the feature search table by ID
@@ -22,9 +22,7 @@ export class SymbolComparator implements ClrDatagridComparatorInterface<any> {
  * Comparator for sorting features in the feature search table by symbol
  */
 export class NameComparator implements ClrDatagridComparatorInterface<any> {
-  compare(a, b) {
-    return a.name.localeCompare(b.name);
-  }
+  compare(a, b) { return a.name.localeCompare(b.name); }
 }
 
 /**
@@ -58,7 +56,5 @@ export class ChrComparator implements ClrDatagridComparatorInterface<any> {
  * Comparator for sorting genes in the feature search table by type
  */
 export class DescendantsComparator implements ClrDatagridComparatorInterface<any> {
-  compare(a, b) {
-    return a.descendants - b.descendants;
-  }
+  compare(a, b) { return a.descendants - b.descendants; }
 }

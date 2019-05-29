@@ -1,6 +1,6 @@
 import { Feature } from './feature';
 import { SyntenyBlock } from './synteny-block';
-import {ClrLoadingState} from '@clr/angular';
+import { ClrLoadingState } from '@clr/angular';
 
 export interface Response {
   species?: Array<RawSpecies>;
