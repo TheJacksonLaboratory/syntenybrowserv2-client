@@ -1,5 +1,5 @@
 import { Species } from './species';
-import { FilterCondition } from './interfaces';
+import { FilterCondition, SearchType } from './interfaces';
 import { Gene } from './gene';
 
 export class Filter {
@@ -37,6 +37,7 @@ export class Filter {
     this.conditions.push({
       filterBy: 'attribute',
       attribute: 'type',
+      ontology: null,
       type: null,
       qualifier: 'equal',
       value: '',
@@ -67,6 +68,23 @@ export class Filter {
   getValidAttrs(): Array<string> {
     return this.speciesKey === 'ref' ?
            this.attributes.filter(a => a !== 'chr') : this.attributes;
+  }
+
+  /**
+   * Returns the list of ontologies that are available to choose from for each
+   * condition given the selected species for the filter
+   */
+  getValidOntologies(): Array<SearchType> {
+    let refOnts = this.refSpecies.onts;
+    let compOnts = this.compSpecies.onts;
+
+    switch (this.speciesKey) {
+      case 'ref': return refOnts;
+      case 'comp': return compOnts;
+      default: {
+        return refOnts.filter(ro => compOnts.map(co => co.value).indexOf(ro.value) >= 0);
+      }
+    }
   }
 
   /**

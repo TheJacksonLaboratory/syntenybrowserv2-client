@@ -44,6 +44,7 @@ export interface NavigationObject extends Option { }
 export interface FilterCondition {
   filterBy: string;
   attribute: string;
+  ontology: string;
   type: string;
   qualifier: string;
   value: string;

@@ -69,6 +69,7 @@
           <app-condition-constructor *ngFor="let c of currentFilter.conditions"
                                      class="clr-col-12"
                                      [attributes]="currentFilter.getValidAttrs()"
+                                     [ontologies]="currentFilter.getValidOntologies()"
                                      [types]="getFeatureTypes()"
                                      [values]="c"
                                      (remove)="removeCondition(c)"

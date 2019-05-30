@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FilterCondition } from '../../classes/interfaces';
+import { FilterCondition, SearchType } from '../../classes/interfaces';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class ConditionConstructorComponent {
   @Input() attributes: Array<string>;
+  @Input() ontologies: Array<SearchType>;
   @Input() types: Array<string>;
   @Input() values: FilterCondition;
 
@@ -30,21 +31,26 @@ export class ConditionConstructorComponent {
   /**
    * Returns true/false if the condition needs to filter by type
    */
-  conditionNeedsTypeSelection(): boolean { return this.getAttr() === 'type'; }
+  conditionNeedsTypeSelection(): boolean {
+    return this.getAttr() === 'type' && this.isAttributeCondition();
+  }
 
   /**
    * Returns true/false if the condition needs a qualifier selection (necessary
    * when filtering by symbol or id)
    */
   conditionNeedsQualifier(): boolean {
-    return this.getAttr() !== 'type' && this.getAttr() !== 'chr';
+    return this.getAttr() !== 'type' && this.getAttr() !== 'chr' &&
+      this.getFilterBy() === 'attribute';
   }
 
   /**
    * Returns true/false if the condition needs an input (in all circumstances
    * minus that where the condition filters by type)
    */
-  conditionNeedsUserInput(): boolean { return this.getAttr() !== 'type'; }
+  conditionNeedsUserInput(): boolean {
+    return this.getAttr() !== 'type' || !this.isAttributeCondition();
+  }
 
   /**
    * Returns true/false if the condition is filtering by attribute
