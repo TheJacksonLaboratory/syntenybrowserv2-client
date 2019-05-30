@@ -14,7 +14,7 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
   styleUrls: ['./genome-view.component.scss']
 })
 export class GenomeViewComponent implements OnInit {
-  @ViewChild('tooltip') tooltip: TooltipComponent;
+  @ViewChild('tooltip', {static: false}) tooltip: TooltipComponent;
 
   ref: Species;
   comp: Species;

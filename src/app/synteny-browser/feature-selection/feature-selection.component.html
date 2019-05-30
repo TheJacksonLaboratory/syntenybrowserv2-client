@@ -34,12 +34,12 @@
 </div>
 
 <div class="clr-row">
-  <app-feature-search class="clr-col-12"
+  <app-feature-search class="clr-col-12 no-padding"
                       [hidden]="searchType !== 'symbol'"
                       (update)="updateSelections()">
   </app-feature-search>
 
-  <app-ontology-search class="clr-col-12"
+  <app-ontology-search class="clr-col-12 no-padding"
                        [hidden]="searchType !== 'ontology'"
                        (update)="updateSelections()"
                        (switchView)="setSearch()">

@@ -15,11 +15,11 @@ import { Filter } from './classes/filter';
 })
 
 export class SyntenyBrowserComponent implements OnInit {
-  @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
-  @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
-  @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
-  @ViewChild(BlockViewBrowserComponent) blockViewBrowser: BlockViewBrowserComponent;
-  @ViewChild(BlockViewFilterComponent) blockViewFilters: BlockViewFilterComponent;
+  @ViewChild(SpeciesSelectionComponent, {static: false}) species: SpeciesSelectionComponent;
+  @ViewChild(FeatureSelectionComponent, {static: false}) features: FeatureSelectionComponent;
+  @ViewChild(GenomeViewComponent, {static: false}) genomeView: GenomeViewComponent;
+  @ViewChild(BlockViewBrowserComponent, {static: false}) blockViewBrowser: BlockViewBrowserComponent;
+  @ViewChild(BlockViewFilterComponent, {static: false}) blockViewFilters: BlockViewFilterComponent;
 
   refSpecies: Species;
   compSpecies: Species;

@@ -1,5 +1,5 @@
 <div class="clr-row">
-  <clr-datagrid class="clr-col-12" [clrDgLoading]="features.loading">
+  <clr-datagrid class="clr-col-12 no-padding" [clrDgLoading]="features.loading">
     <clr-dg-column *ngFor="let col of features.columns"
                    [clrDgSortBy]="features.getSorter(col)">
       {{ col }}

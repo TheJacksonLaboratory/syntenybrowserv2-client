@@ -20,7 +20,7 @@ import { Filter } from '../classes/filter';
   styleUrls: ['./block-view-browser.component.scss']
 })
 export class BlockViewBrowserComponent {
-  @ViewChild('tooltip') tooltip: TooltipComponent;
+  @ViewChild('tooltip', {static: false}) tooltip: TooltipComponent;
 
   ref: Species;
   comp: Species;

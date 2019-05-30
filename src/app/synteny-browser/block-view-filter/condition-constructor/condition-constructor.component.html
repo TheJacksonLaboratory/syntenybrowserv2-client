@@ -75,7 +75,7 @@
   </div>
 
   <div class="clr-row" *ngIf="!isAttributeCondition()">
-    <div class="clr-row">
+    <div class="clr-row clr-col-12">
       <!-- Ontology select -->
       <clr-select-container >
         <label for="ontology"> Ontology </label>
@@ -88,23 +88,20 @@
         </select>
       </clr-select-container>
     </div>
-  </div>
 
-  <div class="clr-row">
-    <!-- Term input -->
-    <clr-input-container>
-      <label for="term"> Value </label>
+    <div class="clr-row clr-col-12">
+      <!-- Term input -->
+      <clr-input-container>
+        <label for="term"> Value </label>
 
-      <input id="term" clrInput
-             [placeholder]="'Enter a ' + values.ontology + 'term'"
-             [(ngModel)]="values.value"
-             (input)="valueChanged.next($event.target.value)">
-    </clr-input-container>
+        <input id="term" clrInput
+               [placeholder]="'Enter a ' + values.ontology + 'term'"
+               [(ngModel)]="values.value"
+               (input)="valueChanged.next($event.target.value)">
+      </clr-input-container>
 
-    <!-- Exact match switch -->
-    <clr-toggle-wrapper>
-      <input type="checkbox" clrToggle value="option1" name="options" />
-      <label>Option 1</label>
-    </clr-toggle-wrapper>
+      <!-- Exact match switch -->
+
+    </div>
   </div>
 </div>
