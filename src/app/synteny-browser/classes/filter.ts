@@ -35,11 +35,12 @@ export class Filter {
    */
   addNewCondition(): void {
     this.conditions.push({
-      filterBy: 'attribute',
+      filterBy: 'ontology', // TODO: change back to 'attribute' when finished developing
       attribute: 'type',
       ontology: null,
       type: null,
       qualifier: 'equal',
+      exact: true,
       value: '',
       removable: this.conditions.length > 0,
       id: this.conditions.length});
@@ -131,12 +132,12 @@ export class Filter {
   // Condition Checks
 
   /**
-   * Returns true/false if the filter is set to hide matching features
+   * Returns true if the filter is set to hide matching features
    */
   hides(): boolean { return this.mode === 'Hide'; }
 
   /**
-   * Returns true/false if the specified gene matches ALL of the filter's conditions
+   * Returns true if the specified gene matches ALL of the filter's conditions
    * @param {Gene} gene - the gene to check against all conditions
    */
   matchesFilter(gene: Gene): boolean {
@@ -149,25 +150,38 @@ export class Filter {
   }
 
   /**
-   * Returns true/false if all conditions don't have empty or unselected fields
+   * Returns true if all conditions don't have empty or unselected fields
    */
   allConditionsAreComplete(): boolean {
-    return this.conditions.filter(c => !this.getConditionValue(c)).length === 0;
+    return this.conditions.filter(c => {
+      if(c.filterBy === 'attribute') {
+        return c.attribute === 'type' ? (c.type === null) : (c.value === '');
+      } else {
+        return c.ontology === null && c.value === '';
+      }
+    }).length === 0;
   }
 
   /**
-   * Returns true/false if the filter applies to the reference features; the
+   * Returns true if the filter applies to the reference features; the
    * boolean condition takes into consideration if the species selection is both
    * species
    */
   isRefFilter(): boolean { return this.speciesKey !== 'comp' };
 
   /**
-   * Returns true/false if the filter applies to the comparison features; the
+   * Returns true if the filter applies to the comparison features; the
    * boolean condition takes into consideration if the species selection is both
    * species
    */
   isCompFilter(): boolean { return this.speciesKey !== 'ref'; }
+
+  /**
+   * Returns true if the filter contains at least one ontology-related condition
+   */
+  isFilteringByOntologyTerm(): boolean {
+    return this.conditions.filter(c => c.filterBy === 'ontology').length > 0;
+  }
 
 
   // Private Methods

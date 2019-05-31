@@ -4,6 +4,7 @@ import { FilterCondition, NavigationObject } from '../classes/interfaces';
 import { Gene } from '../classes/gene';
 import { ClrDatagridPagination } from '@clr/angular';
 import { Filter } from '../classes/filter';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-block-view-filter',
@@ -33,7 +34,7 @@ export class BlockViewFilterComponent implements OnInit {
 
   @Output() userClose: EventEmitter<any> = new EventEmitter();
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private http: ApiService) {
     this.navigation = [ { name: 'edit filters', value: 'edit' },
                         { name: 'preview filters', value: 'preview' },
                         { name: 'filtering guide', value: 'guide' } ];
@@ -129,8 +130,8 @@ export class BlockViewFilterComponent implements OnInit {
     // only show number of affected genes if all fields are properly filled out
     if(this.currentFilter.allConditionsAreComplete()) {
       let genes = this.currentFilter.speciesKey === 'both' ?
-                    this.allGenes : (this.currentFilter.speciesKey === 'ref' ?
-                                      this.refGenes : this.compGenes);
+        this.allGenes : (this.currentFilter.speciesKey === 'ref' ?
+          this.refGenes : this.compGenes);
       let numGenes = this.getMatches(genes, [this.currentFilter]).length;
 
       this.filterTestResults = `${this.currentFilter.mode}s ${numGenes} 
@@ -346,6 +347,7 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {Array<Filter>} filters - the list of filters to check for matches
    */
   private getMatches(genes: Array<Gene>, filters: Array<Filter>): Array<Gene> {
+
     return genes.filter(g => {
       for(let i = 0; i < filters.length; i++) {
         if(filters[i].matchesFilter(g)) return true;

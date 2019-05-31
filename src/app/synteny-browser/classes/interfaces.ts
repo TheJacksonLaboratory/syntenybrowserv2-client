@@ -47,6 +47,7 @@ export interface FilterCondition {
   ontology: string;
   type: string;
   qualifier: string;
+  exact: boolean;
   value: string;
   removable: boolean;
   id: number;

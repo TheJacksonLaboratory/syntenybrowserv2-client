@@ -70,6 +70,9 @@ export class SyntenyBrowserComponent implements OnInit {
     // load the feature selection using the most recent reference species
     // do this second as it might take a second or two
     this.features.load(this.refSpecies);
+
+    // TODO: this is here for work on filters
+    this.automateFlowToWorkOnFilters();
   }
 
   /**
@@ -118,5 +121,14 @@ export class SyntenyBrowserComponent implements OnInit {
     this.filters = this.blockViewFilters.getCreatedFilters();
 
     this.blockViewBrowser.applyFilters(this.filters);
+  }
+
+  private automateFlowToWorkOnFilters(): void {
+    setTimeout(() => {
+      this.genomeView.renderChordMapForChr('14');
+      this.getChromosomeFeatures();
+
+      this.filterOpen = true;
+    }, 120);
   }
 }
