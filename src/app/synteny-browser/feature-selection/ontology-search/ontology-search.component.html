@@ -1,0 +1,84 @@
+<div class="clr-row">
+  <div *ngIf="currentTerm" class="clr-col-2 top-2">
+    <button class="btn btn-outline" (click)="backToTerms()">
+      <clr-icon shape="undo"></clr-icon> Terms
+    </button>
+  </div>
+  <clr-datagrid class="clr-col" [hidden]="currentTerm" [clrDgLoading]="terms.loading">
+    <clr-dg-column *ngFor="let col of terms.columns"
+                   [clrDgSortBy]="terms.getSorter(col)">
+      {{ col }}
+    </clr-dg-column>
+    <clr-dg-column> Actions </clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of terms.filteredRows"
+                [ngClass]="{ 'selected': currentTerm && currentTerm.id === row.id }">
+      <clr-dg-cell *ngFor="let col of terms.columns">
+        {{ terms.getCell(row, col) }}
+      </clr-dg-cell>
+      <clr-dg-cell class="less-padding">
+        <button class="btn btn-sm btn-link"
+                [title]="getViewAssociationsTitle(row)"
+                [disabled]="row.descendant_count >= 500"
+                (click)="loadAssociationsForTerm(row)">
+          <clr-icon shape="view-list"></clr-icon>
+        </button>
+        <button class="btn btn-sm btn-link"
+                [title]="getSelectAllAssociationsTitle(row)"
+                [disabled]="row.descendant_count >= 500"
+                [clrLoading]="row.selecting"
+                (click)="loadAssociationsForTerm(row, false)">
+          <clr-icon shape="check"></clr-icon>
+        </button>
+      </clr-dg-cell>
+
+      <clr-dg-row-detail *clrIfExpanded>
+        <div class="details">
+          This {{ ontology | uppercase }} term has {{ row.descendant_count }}
+          descendant terms
+        </div>
+      </clr-dg-row-detail>
+    </clr-dg-row>
+
+    <clr-dg-footer>
+      <!-- Clarity doesn't really handle non-paginated results very well so if
+      proper pagination is required, show that, otherwise, use custom label -->
+      <clr-dg-pagination #pagination>
+        <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
+          Features per page
+        </clr-dg-page-size>
+        {{ terms.getPaginatorLabel(pagination) }}
+      </clr-dg-pagination>
+    </clr-dg-footer>
+  </clr-datagrid>
+
+  <clr-datagrid [hidden]="!currentTerm" class="clr-col"
+                [clrDgLoading]="associations.loading">
+    <clr-dg-column *ngFor="let col of associations.columns"
+                   [clrDgSortBy]="associations.getSorter(col)">
+      {{ col }}
+    </clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of associations.filteredRows"
+                (mousedown)="associations.dragStart(row)"
+                (mouseenter)="associations.dragOver(row)"
+                (mouseup)="updateAssociationSelections()"
+                [ngClass]="{ 'selected': row.selected }">
+            <clr-dg-cell *ngFor="let col of associations.columns">
+              {{ associations.getCell(row, col) }}
+            </clr-dg-cell>
+          </clr-dg-row>
+
+          <clr-dg-footer>
+            <!-- Clarity doesn't really handle non-paginated results very well so if
+            proper pagination is required, show that, otherwise, use custom label -->
+      <clr-dg-pagination #pagination>
+        <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
+          Features per page
+        </clr-dg-page-size>
+        {{ associations.getPaginatorLabel(pagination) }}
+      </clr-dg-pagination>
+    </clr-dg-footer>
+  </clr-datagrid>
+</div>
+

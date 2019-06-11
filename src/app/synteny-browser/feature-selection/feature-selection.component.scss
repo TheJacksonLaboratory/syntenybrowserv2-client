@@ -1,14 +1,5 @@
-.datagrid .datagrid-cell { font-size: .4rem !important; }
-
 .no-selections { color: #AAA; }
 
-.selected { background: rgba(0, 106, 145, 0.1); }
+.no-padding { padding: 0 !important; }
 
-.datagrid-cell {
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-
+.clr-input { min-width: 270px !important; }

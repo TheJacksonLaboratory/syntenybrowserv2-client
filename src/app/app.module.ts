@@ -9,6 +9,7 @@ import { AboutModule } from './about/about.module';
 import { DocsModule } from './docs/docs.module';
 import { ExamplesModule } from './examples/examples.module';
 import { SyntenyBrowserModule } from './synteny-browser/synteny-browser.module';
+import { FeatureSearchComponent } from './synteny-browser/feature-selection/feature-search/feature-search.component';
 
 @NgModule({
   declarations: [

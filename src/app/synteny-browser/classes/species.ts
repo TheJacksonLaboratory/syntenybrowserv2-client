@@ -56,8 +56,8 @@ export class Species {
       {name: 'Ontology', value: 'ontology'}
     ];
     this.onts = [
-      {value: 'go', name: 'Gene Ontology (GO) Term'},
-      {value: 'mp', name: 'Mammalian Pheno Ontology (MP) Term'}
+      {value: 'go', name: 'Gene Ontology (GO)'},
+      {value: 'mp', name: 'Mammalian Pheno Ontology (MP)'}
     ];
   }
 
@@ -85,8 +85,8 @@ export class Species {
       {name: 'Ontology', value: 'ontology'}
     ];
     this.onts = [
-      {value: 'go', name: 'Gene Ontology (GO) Term'},
-      {value: 'do', name: 'Disease Ontology (DO) Term'}
+      {value: 'go', name: 'Gene Ontology (GO)'},
+      {value: 'doid', name: 'Disease Ontology (DO)'}
     ];
   }
 
@@ -108,8 +108,8 @@ export class Species {
     };
     this.hasQTLs = false;
     this.onts = [ // Same as human
-      {value: 'go', name: 'Gene Ontology (GO) Term'},
-      {value: 'do', name: 'Disease Ontology (DO) Term'}
+      {value: 'go', name: 'Gene Ontology (GO)'},
+      {value: 'do', name: 'Disease Ontology (DO)'}
     ];
   };
 }

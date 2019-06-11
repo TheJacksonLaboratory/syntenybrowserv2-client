@@ -6,9 +6,13 @@ export class Feature {
   end: number;
   type: string;
   gene: boolean;
+
+  term: string;
+  termID: string;
+
   selected: boolean = false;
 
-  constructor(feature: any) {
+  constructor(feature: any, assocMode = false) {
     if(feature.gene_id) {
       this.id = feature.gene_id;
       this.symbol = feature.gene_symbol;
@@ -24,6 +28,11 @@ export class Feature {
     this.chr = feature.chr;
     this.start = feature.start;
     this.end = feature.end;
+
+    if(assocMode) {
+      this.term = feature.term_name;
+      this.termID = feature.term_id;
+    }
   }
 
 
@@ -59,6 +68,4 @@ export class Feature {
   is(symbol: string): boolean {
     return this.symbol.toLowerCase() === symbol.toLowerCase();
   }
-
-
 }
