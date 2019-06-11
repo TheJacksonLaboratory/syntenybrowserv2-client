@@ -29,14 +29,14 @@ export class ConditionConstructorComponent {
   // Condition Checks
 
   /**
-   * Returns true/false if the condition needs to filter by type
+   * Returns true if the condition needs to filter by type
    */
   conditionNeedsTypeSelection(): boolean {
     return this.getAttr() === 'type' && this.isAttributeCondition();
   }
 
   /**
-   * Returns true/false if the condition needs a qualifier selection (necessary
+   * Returns true if the condition needs a qualifier selection (necessary
    * when filtering by symbol or id)
    */
   conditionNeedsQualifier(): boolean {
@@ -45,7 +45,7 @@ export class ConditionConstructorComponent {
   }
 
   /**
-   * Returns true/false if the condition needs an input (in all circumstances
+   * Returns true if the condition needs an input (in all circumstances
    * minus that where the condition filters by type)
    */
   conditionNeedsUserInput(): boolean {
@@ -53,12 +53,12 @@ export class ConditionConstructorComponent {
   }
 
   /**
-   * Returns true/false if the condition is filtering by attribute
+   * Returns true if the condition is filtering by attribute
    */
   isAttributeCondition(): boolean { return this.getFilterBy() === 'attribute'; }
 
   /**
-   * Returns true/false if the condition is removable (is not the only condition
+   * Returns true if the condition is removable (is not the only condition
    * in the filter)
    */
   isConditionRemovable(): boolean { return this.values.removable; }

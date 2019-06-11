@@ -76,7 +76,7 @@ export class OntologySearchComponent {
 
     let termToSearch = this.currentTerm ? this.currentTerm.name : term.name;
 
-    this.http.getGeneAssociationsForOntology(this.refSpecies.getID(),
+    this.http.getGeneAssociationsForTerm(this.refSpecies.getID(),
                                              this.ontology,
                                              termToSearch)
              .subscribe(genes => {

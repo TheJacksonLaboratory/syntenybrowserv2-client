@@ -57,9 +57,11 @@ export class ApiService {
    * @param {string} ontology - ontology ID prefix
    * @param {string} search - string to search for genes by matching ontologies
    */
-  getGeneAssociationsForOntology(taxonID: string, ontology: string, search: string)
+  getGeneAssociationsForTerm(ontology: string, search: string, taxonID: string = null)
                    : Observable<Array<Feature>> {
-    let url = `${this.root}/ontologies/associations/${ontology}/${taxonID}/${search}`;
+    let url = taxonID ?
+      `${this.root}/ontologies/associations/${ontology}/${taxonID}/${search}` :
+      `${this.root}/ontologies/associations/${ontology}/${search}`;
     return this.http.get<Response>(url)
                     .pipe(
                       map(resp => resp.genes.map(g => new Feature(g, true)))

@@ -347,6 +347,31 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {Array<Filter>} filters - the list of filters to check for matches
    */
   private getMatches(genes: Array<Gene>, filters: Array<Filter>): Array<Gene> {
+    let ontologyFilters = filters.filter(f => f.isFilteringByOntologyTerm());
+
+    if(ontologyFilters.length > 0) {
+      ontologyFilters.forEach(f => {
+        let species = f.speciesKey === 'ref';
+
+        f.conditions.forEach(c => {
+          console.log(species);
+          console.log(c);
+          if(c.filterBy === 'ontology') {
+            if(f.speciesKey === 'both') {
+              this.http.getGeneAssociationsForTerm(c.ontology, c.value).subscribe(genes => {
+                console.log(genes);
+              });
+            } else {
+              this.http.getGeneAssociationsForTerm(c.ontology, c.value, ).subscribe(genes => {
+                console.log(genes);
+              });
+            }
+
+          }
+        });
+      });
+
+    }
 
     return genes.filter(g => {
       for(let i = 0; i < filters.length; i++) {
