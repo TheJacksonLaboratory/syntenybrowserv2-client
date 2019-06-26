@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FilterCondition, SearchType } from '../../classes/interfaces';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-condition-constructor',
@@ -14,15 +15,32 @@ export class ConditionConstructorComponent {
   @Input() types: Array<string>;
   @Input() values: FilterCondition;
 
+  terms: any;
+
   @Output() remove: EventEmitter<any> = new EventEmitter();
   @Output() stateChange: EventEmitter<any> = new EventEmitter();
 
   private valueChanged: Subject<string> = new Subject();
 
-  constructor() {
+  constructor(private http: ApiService) {
     // if the input value changes, set a emit on a 0.5 sec delay
-    this.valueChanged.pipe(debounceTime(500), distinctUntilChanged())
+    this.valueChanged.pipe(debounceTime(1000), distinctUntilChanged())
                      .subscribe(() => this.stateChange.emit());
+
+    this.getTermsForAutocomplete();
+  }
+
+  getTermsForAutocomplete(): void {
+    if(this.values && this.values.ontology) {
+      this.http.getTermsForAutocomplete(this.values.ontology)
+        .subscribe(terms => this.terms = terms);
+    }
+  }
+
+  checkTermChildren(): void {
+    if(this.values && this.values.value) {
+      console.log(this.terms);
+    }
   }
 
 

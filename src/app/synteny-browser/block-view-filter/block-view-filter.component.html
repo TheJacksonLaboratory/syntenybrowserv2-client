@@ -43,8 +43,7 @@
             <label for="species"> Species </label>
 
             <select clrSelect id="species"
-                    [(ngModel)]="currentFilter.speciesKey"
-                    (ngModelChange)="showCurrentFilterResults()">
+                    [(ngModel)]="currentFilter.speciesKey">
               <option *ngFor="let s of currentFilter.species" [value]="s">
                 {{ s | titlecase }}
               </option>
@@ -56,8 +55,7 @@
             <label for="mode"> Mode </label>
 
             <select clrSelect id="mode"
-                    [(ngModel)]="currentFilter.mode"
-                    (ngModelChange)="showCurrentFilterResults()">
+                    [(ngModel)]="currentFilter.mode">
               <option value="Highlight"> Highlight </option>
               <option value="Hide"> Hide </option>
             </select>
@@ -72,8 +70,7 @@
                                      [ontologies]="currentFilter.getValidOntologies()"
                                      [types]="getFeatureTypes()"
                                      [values]="c"
-                                     (remove)="removeCondition(c)"
-                                     (stateChange)="showCurrentFilterResults()">
+                                     (remove)="removeCondition(c)">
           </app-condition-constructor>
         </div>
 
@@ -105,7 +102,7 @@
 
             <!-- Results message -->
             <p *ngIf="filterTestResults" class="test-run-msg">
-              {{ filterTestResults }}
+              {{ currentFilter.mode }}s {{ filterTestResults.length }} features
             </p>
           </div>
         </div>
@@ -123,69 +120,69 @@
     <div *ngIf="activePage === 'preview'" id="preview-filters" class="clr-col-12">
       <!-- Content -->
       <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
-        <!-- Filter checklist -->
-        <div id="filter-checklist" class="clr-col-5">
-          <!-- Title -->
-          <div class="clr-row clr-justify-content-center">
-            <h5> Current Filters </h5>
-          </div>
+<!--        &lt;!&ndash; Filter checklist &ndash;&gt;-->
+<!--        <div id="filter-checklist" class="clr-col-5">-->
+<!--          &lt;!&ndash; Title &ndash;&gt;-->
+<!--          <div class="clr-row clr-justify-content-center">-->
+<!--            <h5> Current Filters </h5>-->
+<!--          </div>-->
 
-          <!-- Description -->
-          <div class="clr-row">
-            <p>
-              Select/Deselect filters to see how combinations of filters affect
-              how many/which features will be affected.
-            </p>
-          </div>
+<!--          &lt;!&ndash; Description &ndash;&gt;-->
+<!--          <div class="clr-row">-->
+<!--            <p>-->
+<!--              Select/Deselect filters to see how combinations of filters affect-->
+<!--              how many/which features will be affected.-->
+<!--            </p>-->
+<!--          </div>-->
 
-          <!-- Checklist -->
-          <div *ngIf="getCreatedFilters().length > 0" class="clr-row top-1">
-            <!-- Checklist tree -->
-            <clr-tree class="bottom-1">
-              <clr-tree-node *ngFor="let s of getFilterSpecies()"
-                             [clrExpanded]="true">
-                {{ getOptionName(s) }}
-                <clr-tree-node *ngFor="let f of getFiltersBySpecies(s)"
-                               (clrSelectedChange)="runFilters(f, $event)"
-                               [clrSelected]="f.selected"
-                               [ngStyle]="{ 'color': f.getColor() }">
-                  {{ f.mode + ' ' + f.getStringifiedConditions() }}
-                </clr-tree-node>
-              </clr-tree-node>
-            </clr-tree>
+<!--          &lt;!&ndash; Checklist &ndash;&gt;-->
+<!--          <div *ngIf="getCreatedFilters().length > 0" class="clr-row top-1">-->
+<!--            &lt;!&ndash; Checklist tree &ndash;&gt;-->
+<!--            <clr-tree class="bottom-1">-->
+<!--              <clr-tree-node *ngFor="let s of getFilterSpecies()"-->
+<!--                             [clrExpanded]="true">-->
+<!--                {{ getOptionName(s) }}-->
+<!--                <clr-tree-node *ngFor="let f of getFiltersBySpecies(s)"-->
+<!--                               (clrSelectedChange)="runFilters(f, $event)"-->
+<!--                               [clrSelected]="f.selected"-->
+<!--                               [ngStyle]="{ 'color': f.getColor() }">-->
+<!--                  {{ f.mode + ' ' + f.getStringifiedConditions() }}-->
+<!--                </clr-tree-node>-->
+<!--              </clr-tree-node>-->
+<!--            </clr-tree>-->
 
-            <!-- Apply selections button (and more info) -->
-            <div *ngIf="!allFiltersSelected()" class="clr-row">
-              <!-- Apply button -->
-              <button class="btn btn-sm"
-                      (click)="applyFilterSelections()"
-                      title="Update the filter list with only selected filters">
-                Apply changes to filter list
-              </button>
+<!--            &lt;!&ndash; Apply selections button (and more info) &ndash;&gt;-->
+<!--            <div *ngIf="!allFiltersSelected()" class="clr-row">-->
+<!--              &lt;!&ndash; Apply button &ndash;&gt;-->
+<!--              <button class="btn btn-sm"-->
+<!--                      (click)="applyFilterSelections()"-->
+<!--                      title="Update the filter list with only selected filters">-->
+<!--                Apply changes to filter list-->
+<!--              </button>-->
 
-              <!-- More info on what 'apply selections' means -->
-              <clr-signpost>
-                <clr-signpost-content *clrIfOpen>
-                  <p>
-                    If you want to apply your current selections from this list to
-                    the actual list of filters (using the checklist is only an
-                    exploration tool).
-                  </p>
-                </clr-signpost-content>
-              </clr-signpost>
-            </div>
+<!--              &lt;!&ndash; More info on what 'apply selections' means &ndash;&gt;-->
+<!--              <clr-signpost>-->
+<!--                <clr-signpost-content *clrIfOpen>-->
+<!--                  <p>-->
+<!--                    If you want to apply your current selections from this list to-->
+<!--                    the actual list of filters (using the checklist is only an-->
+<!--                    exploration tool).-->
+<!--                  </p>-->
+<!--                </clr-signpost-content>-->
+<!--              </clr-signpost>-->
+<!--            </div>-->
 
-          </div>
+<!--          </div>-->
 
-          <!-- Empty checklist placeholder -->
-          <div *ngIf="getCreatedFilters().length === 0"
-               class="clr-row clr-justify-content-center top-1 bottom-1">
-            <h4> No Filters Yet! </h4>
-          </div>
-        </div>
+<!--          &lt;!&ndash; Empty checklist placeholder &ndash;&gt;-->
+<!--          <div *ngIf="getCreatedFilters().length === 0"-->
+<!--               class="clr-row clr-justify-content-center top-1 bottom-1">-->
+<!--            <h4> No Filters Yet! </h4>-->
+<!--          </div>-->
+<!--        </div>-->
 
         <!-- Filter results table -->
-        <div id="filter-results" class="clr-col-7">
+        <div id="filter-results" class="clr-col-12">
           <!-- Title -->
           <div class="clr-row clr-col-12 clr-justify-content-center">
             <h5>Results of Filters</h5>
@@ -200,14 +197,13 @@
           </div>
 
           <!-- Results table -->
-          <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact"
-                        [clrDgLoading]="!refGenes || !compGenes">
+          <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact">
             <clr-dg-column *ngFor="let attr of filters[0].attributes">
               {{ attr }}
             </clr-dg-column>
             <clr-dg-column> species </clr-dg-column>
 
-            <clr-dg-placeholder> No filters to show! </clr-dg-placeholder>
+            <clr-dg-placeholder> No genes to show! </clr-dg-placeholder>
 
             <clr-dg-row *clrDgItems="let row of filteredGenes"
                         [ngClass]="{ 'hidden-row': row.hidden }">

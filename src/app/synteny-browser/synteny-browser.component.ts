@@ -120,7 +120,7 @@ export class SyntenyBrowserComponent implements OnInit {
     this.filterOpen = false;
     this.filters = this.blockViewFilters.getCreatedFilters();
 
-    this.blockViewBrowser.applyFilters(this.filters);
+    this.blockViewBrowser.filters = this.filters;
   }
 
   private automateFlowToWorkOnFilters(): void {
@@ -129,6 +129,6 @@ export class SyntenyBrowserComponent implements OnInit {
       this.getChromosomeFeatures();
 
       this.filterOpen = true;
-    }, 120);
+    }, 150);
   }
 }

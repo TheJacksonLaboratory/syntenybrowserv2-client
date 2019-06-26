@@ -9,13 +9,22 @@ export interface Response {
   qtls?: Array<QTLMetadata>;
   ont_genes?: Array<OntologyGeneMetadata>;
   terms?: Array<OntologyTerm>;
+  msg?: string;
 }
 
 export interface OntologyTerm {
   id: string;
   name: string;
-  descendant_count?: number;
+  count: number;
+  namespace: string;
+  descendants: Array<DescendantTerm>;
+  def: string;
   selecting?: ClrLoadingState;
+}
+
+export interface DescendantTerm {
+  id: string;
+  name: string;
 }
 
 export interface RawSpecies {

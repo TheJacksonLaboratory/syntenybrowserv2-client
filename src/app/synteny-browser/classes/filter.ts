@@ -192,8 +192,12 @@ export class Filter {
    * @param {FilterCondition} cond - the condition to stringify and make readable
    */
   private getCompiledCondition(cond: FilterCondition): string {
-    let value = cond.attribute === 'type' ? cond.type : cond.value;
-    return cond.attribute + this.getQualifier(cond) + value;
+    if(cond.filterBy === 'attribute') {
+      let value = cond.attribute === 'type' ? cond.type : cond.value;
+      return cond.attribute + this.getQualifier(cond) + value;
+    } else {
+      return 'genes assoc w/ ' + cond.value;
+    }
   }
 
   /**
