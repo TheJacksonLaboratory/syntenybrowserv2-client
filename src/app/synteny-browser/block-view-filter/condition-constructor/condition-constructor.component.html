@@ -34,7 +34,7 @@
       <select clrSelect id="type"
               [(ngModel)]="values.type"
               (ngModelChange)="stateChange.emit()">
-        <option [value]="null"> -- Select a type -- </option>
+        <option [value]="null" disabled> -- Select a type -- </option>
         <option *ngFor="let t of types" [value]="t"> {{ t }} </option>
       </select>
     </clr-select-container>
@@ -81,7 +81,7 @@
 
       <select clrSelect id="ontology"
               [(ngModel)]="values.ontology"
-              (ngModelChange)="getTermsForAutocomplete()">
+              (ngModelChange)="getTermsForAutocomplete(false)">
         <option [value]="null" disabled> -- Select an ontology -- </option>
         <option *ngFor="let o of ontologies" [value]="o.value">
           {{ o.name }}
@@ -90,27 +90,14 @@
     </clr-select-container>
 
     <!-- Term input -->
-    <ng-select *ngIf="terms" class="autocomplete"
+    <ng-select *ngIf="terms || values.value" class="autocomplete"
                bindLabel="name" bindValue="id"
                [items]="terms"
-               [(ngModel)]="values.value"
                [virtualScroll]="true"
+               [placeholder]="'Enter a term'"
+               [(ngModel)]="values.value"
                (change)="checkTermChildren()">
     </ng-select>
-<!--    <clr-input-container *ngIf="values.ontology">-->
-<!--      <label for="term"> Term </label>-->
-
-<!--      <input id="term" clrInput-->
-<!--             [placeholder]="'Enter an ontology term'"-->
-<!--             [(ngModel)]="values.value"-->
-<!--             (input)="valueChanged.next($event.target.value)">-->
-<!--    </clr-input-container>-->
-
-    <!-- Exact match toggle -->
-<!--    <clr-toggle-wrapper *ngIf="values.ontology">-->
-<!--      <input type="checkbox" id="exact" clrToggle [(ngModel)]="values.exact"/>-->
-<!--      <label for="exact"> Exact Match </label>-->
-<!--    </clr-toggle-wrapper>-->
 
     <!-- Remove this condition button -->
     <button *ngIf="isConditionRemovable()" type="button"

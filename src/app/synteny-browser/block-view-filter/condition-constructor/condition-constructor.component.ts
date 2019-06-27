@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FilterCondition, SearchType } from '../../classes/interfaces';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -15,31 +15,60 @@ export class ConditionConstructorComponent {
   @Input() types: Array<string>;
   @Input() values: FilterCondition;
 
-  terms: any;
+  terms: Array<any>;
 
   @Output() remove: EventEmitter<any> = new EventEmitter();
   @Output() stateChange: EventEmitter<any> = new EventEmitter();
+  @Output() warn: EventEmitter<any> = new EventEmitter();
 
   private valueChanged: Subject<string> = new Subject();
 
-  constructor(private http: ApiService) {
+  constructor(private cdr: ChangeDetectorRef, private http: ApiService) {
     // if the input value changes, set a emit on a 0.5 sec delay
     this.valueChanged.pipe(debounceTime(1000), distinctUntilChanged())
                      .subscribe(() => this.stateChange.emit());
 
-    this.getTermsForAutocomplete();
+    this.getTermsForAutocomplete(true);
   }
 
-  getTermsForAutocomplete(): void {
-    if(this.values && this.values.ontology) {
-      this.http.getTermsForAutocomplete(this.values.ontology)
-        .subscribe(terms => this.terms = terms);
+  /**
+   * Retrieves the ontology terms used in the autocomplete input and will retry
+   * the retrieval a couple times before giving up (if clicking on a filter to
+   * edit it, the recursive attempts are needed)
+   * @param {boolean} retry - whether the method should try more than once if
+   *                          'this.values' is false
+   * @param {number} numAttempts - how many attempts have already been made to
+   *                               get the terms
+   */
+  getTermsForAutocomplete(retry: boolean, numAttempts: number = 0): void {
+    if(this.values) {
+      if(this.values.ontology) {
+        this.http.getTermsForAutocomplete(this.values.ontology)
+                 .subscribe(terms => this.terms = terms);
+      }
+    } else {
+      if(retry && numAttempts <= 2) {
+        setTimeout(() => {
+          this.getTermsForAutocomplete(true, numAttempts + 1);
+        }, 500);
+      }
     }
   }
 
+  /**
+   * Emits a message if the term that's been selected is too broad to search
+   */
   checkTermChildren(): void {
     if(this.values && this.values.value) {
-      console.log(this.terms);
+      let terms = this.terms.map(t => t.id);
+
+      let term = this.terms[terms.indexOf(this.values.value)];
+
+      if(term.count && term.count > 500) {
+        this.warn.emit('Term too broad');
+      } else {
+        this.warn.emit('')
+      }
     }
   }
 

@@ -7,7 +7,7 @@ export class Filter {
   species: Array<string> = [ 'both', 'ref', 'comp' ];
 
   mode: string = 'Highlight';
-  speciesKey: string = 'both';
+  speciesKey: string = 'ref';
   refSpecies: Species;
   compSpecies: Species;
   conditions: Array<FilterCondition> = [];
@@ -35,7 +35,7 @@ export class Filter {
    */
   addNewCondition(): void {
     this.conditions.push({
-      filterBy: 'ontology', // TODO: change back to 'attribute' when finished developing
+      filterBy: 'attribute',
       attribute: 'type',
       ontology: null,
       type: null,
@@ -230,8 +230,8 @@ export class Filter {
    *                                 against
    */
   private matchesCondition(gene: Gene, cond: FilterCondition): boolean {
-    let geneValue = gene[cond.attribute];
-    let condValue = this.getConditionValue(cond);
+    let geneValue = gene[cond.attribute].toLowerCase();
+    let condValue = this.getConditionValue(cond).toLowerCase();
 
     if(cond.qualifier.includes('not')) {
       return cond.qualifier.includes('equal') ?

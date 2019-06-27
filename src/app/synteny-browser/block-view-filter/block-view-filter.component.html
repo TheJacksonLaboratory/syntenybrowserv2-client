@@ -70,7 +70,8 @@
                                      [ontologies]="currentFilter.getValidOntologies()"
                                      [types]="getFeatureTypes()"
                                      [values]="c"
-                                     (remove)="removeCondition(c)">
+                                     (remove)="removeCondition(c)"
+                                     (warn)="filterErrorState = $event">
           </app-condition-constructor>
         </div>
 
@@ -88,6 +89,7 @@
             <!-- Finish filter button -->
             <button type="button" class="btn btn-sm btn-success-outline"
                     title="Add this filter to the list"
+                    [disabled]="filterErrorState"
                     (click)="finishFilter()">
               <clr-icon shape="check"></clr-icon> Finish editing filter
             </button>
@@ -98,11 +100,6 @@
             <!-- Error message -->
             <p *ngIf="filterErrorState" class="error-msg">
               {{ filterErrorState }}
-            </p>
-
-            <!-- Results message -->
-            <p *ngIf="filterTestResults" class="test-run-msg">
-              {{ currentFilter.mode }}s {{ filterTestResults.length }} features
             </p>
           </div>
         </div>

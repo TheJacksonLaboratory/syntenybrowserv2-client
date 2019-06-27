@@ -22,9 +22,7 @@ export class BlockViewFilterComponent implements OnInit {
   activePage: string = 'edit';
 
   currentFilter: Filter;
-  conditionSpecies: string = 'both';
   filterErrorState: string = null;
-  filterTestResults: Array<Gene>;
   attributes: Array<string>;
   filterMode: string = 'add';
   editingFilter: Filter = null;
@@ -82,20 +80,21 @@ export class BlockViewFilterComponent implements OnInit {
   finishFilter(): void {
     // clear any current messages
     this.filterErrorState = '';
-    this.filterTestResults = null;
 
-    if(this.currentFilter.allConditionsAreComplete()) {
-      this.currentFilter.editing = false;
-      this.currentFilter.created = true;
-
-      // TODO: this is vastly inefficient and shouldn't be run every time
-      this.filteredGenes = [];
-      this.applyFilters();
-
-      this.createNewEditableFilter();
-    } else {
+    if(!this.currentFilter.allConditionsAreComplete()) {
       this.filterErrorState = 'Please fill out all fields';
+      return;
     }
+
+    this.currentFilter.editing = false;
+    this.currentFilter.created = true;
+
+    // TODO: this is vastly inefficient and shouldn't be run for every filter
+    //       every time a new one is finished
+    this.filteredGenes = [];
+    this.applyFilters();
+
+    this.createNewEditableFilter();
   }
 
   /**
@@ -116,33 +115,11 @@ export class BlockViewFilterComponent implements OnInit {
     // update filter ids so they reflect their current index in the filter list
     this.reassignFilterIDs();
 
+    // TODO: this is vastly inefficient and shouldn't be run for every filter
+    //       every time a new one is finished
     this.filteredGenes = [];
     this.applyFilters();
   }
-
-  /**
-   * Displays the number of features/genes the current filter's condition(s)
-   * will affect in its current state
-   */
-  // showCurrentFilterResults(): void {
-  //   this.filterErrorState = '';
-  //   this.filterTestResults = null;
-  //
-  //   // give the conditions' type selects a chance to update to reflect species
-  //   // in case they changed (if a condition contains a type selection that is no
-  //   // longer available after changing species selection, we don't want to show
-  //   // the results since the condition would be considered "incomplete"
-  //   this.cdr.detectChanges();
-  //
-  //   // only show number of affected genes if all fields are properly filled out
-  //   if(this.currentFilter.allConditionsAreComplete()) {
-  //     let genes = this.currentFilter.speciesKey === 'both' ?
-  //       this.allGenes : (this.currentFilter.speciesKey === 'ref' ?
-  //         this.refGenes : this.compGenes);
-  //
-  //     this.filterTestResults = this.getMatches(genes, [this.currentFilter]);
-  //   }
-  // }
 
   /**
    * Removes the specified condition from the current filter
