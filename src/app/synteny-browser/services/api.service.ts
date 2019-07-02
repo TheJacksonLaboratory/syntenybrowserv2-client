@@ -38,32 +38,36 @@ export class ApiService {
   }
 
   /**
-   * Returns a list of ontology terms that exist for the specified species (by
-   * taxon ID) and ontology
-   * @param {string} taxonID - stringified taxon ID for the reference species
+   * Returns a list of ontology terms that exist for the specified ontology
    * @param {string} ontology - ontology ID prefix
    */
-  getOntologyTerms(taxonID: string, ontology: string)
-                  : Observable<Array<OntologyTerm>> {
-    let url = `${this.root}/ontologies/terms/${ontology}/${taxonID}`;
-    return this.http.get<Response>(url)
-                    .pipe(map(resp => resp.terms));
+  getOntologyTerms(ontology: string): Observable<Array<OntologyTerm>> {
+    let url = `${this.root}/ontologies/terms/${ontology}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.terms));
   }
 
   /**
-   * Returns a list of associations for the specified species (by taxon ID) and ontology
-   * which also matches the search term
-   * @param {string} taxonID - stringified taxon ID for the reference species
-   * @param {string} ontology - ontology ID prefix
-   * @param {string} search - string to search for genes by matching ontologies
+   * Returns a list of associations for the specified species (by taxon ID) and
+   * ontology term
+   * @param {string} taxonID - stringified taxon ID for the desired species
+   * @param {string} termID - string to search for genes by matching ontologies
    */
-  getGeneAssociationsForOntology(taxonID: string, ontology: string, search: string)
-                   : Observable<Array<Feature>> {
-    let url = `${this.root}/ontologies/associations/${ontology}/${taxonID}/${search}`;
+  getAssociationsForTerm(taxonID: string, termID: string): Observable<Array<Feature>> {
+    let url = `${this.root}/ontologies/associations/${taxonID}/${termID}`;
+
     return this.http.get<Response>(url)
                     .pipe(
                       map(resp => resp.genes.map(g => new Feature(g, true)))
                     );
+  }
+
+  /**
+   * Returns a list of ontology term names and IDs for the specified ontology
+   * @param {string} ontology - ontology ID prefix
+   */
+  getTermsForAutocomplete(ontology: string): Observable<Array<any>> {
+    let url = `${this.root}/ontologies/terms/simple/${ontology}`;
+    return this.http.get<Response>(url).pipe(map(resp => resp.terms));
   }
 
   /**

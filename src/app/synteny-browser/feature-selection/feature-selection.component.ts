@@ -16,8 +16,8 @@ import { FeatureSearchComponent } from './feature-search/feature-search.componen
   styleUrls: ['./feature-selection.component.scss']
 })
 export class FeatureSelectionComponent {
-  @ViewChild(OntologySearchComponent) ontologySearch: OntologySearchComponent;
-  @ViewChild(FeatureSearchComponent) featureSearch: FeatureSearchComponent;
+  @ViewChild(OntologySearchComponent, {static: true}) ontologySearch: OntologySearchComponent;
+  @ViewChild(FeatureSearchComponent, {static: true}) featureSearch: FeatureSearchComponent;
 
   refSpecies: Species;
 

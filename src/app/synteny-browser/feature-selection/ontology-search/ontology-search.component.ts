@@ -46,7 +46,7 @@ export class OntologySearchComponent {
     this.currentTerm = null;
     this.terms.loading = true;
     this.termsSearch = '';
-    this.http.getOntologyTerms(this.refSpecies.getID(), this.ontology)
+    this.http.getOntologyTerms(this.ontology)
              .subscribe(terms => this.terms.setRows(terms, 'id'));
   }
 
@@ -74,11 +74,9 @@ export class OntologySearchComponent {
     this.associations.loading = showResults;
     this.switchView.emit();
 
-    let termToSearch = this.currentTerm ? this.currentTerm.name : term.name;
+    let termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
-    this.http.getGeneAssociationsForOntology(this.refSpecies.getID(),
-                                             this.ontology,
-                                             termToSearch)
+    this.http.getAssociationsForTerm(this.refSpecies.getID(), termToSearch)
              .subscribe(genes => {
                if(showResults) {
                  this.associations.setRows(genes, 'term')
@@ -107,7 +105,7 @@ export class OntologySearchComponent {
    */
   getViewAssociationsTitle(term: OntologyTerm): string {
     return 'View gene associations with this term' +
-      (term.descendant_count >= 500 ? ' [disabled for being too broad]' : '');
+      (term.count >= 500 ? ' [disabled for being too broad]' : '');
   }
 
   /**
@@ -117,7 +115,7 @@ export class OntologySearchComponent {
    */
   getSelectAllAssociationsTitle(term: OntologyTerm): string {
     return 'Select all gene associations with this term' +
-      (term.descendant_count >= 500 ? ' [disabled for being too broad]' : '');
+      (term.count >= 500 ? ' [disabled for being too broad]' : '');
   }
 
   /**

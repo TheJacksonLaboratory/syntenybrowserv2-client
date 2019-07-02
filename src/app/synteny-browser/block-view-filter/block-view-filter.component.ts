@@ -2,8 +2,9 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } fro
 import { Species } from '../classes/species';
 import { FilterCondition, NavigationObject } from '../classes/interfaces';
 import { Gene } from '../classes/gene';
-import { ClrDatagridPagination } from '@clr/angular';
+import { ClrDatagridPagination, ClrLoadingState } from '@clr/angular';
 import { Filter } from '../classes/filter';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-block-view-filter',
@@ -21,9 +22,7 @@ export class BlockViewFilterComponent implements OnInit {
   activePage: string = 'edit';
 
   currentFilter: Filter;
-  conditionSpecies: string = 'both';
   filterErrorState: string = null;
-  filterTestResults: string = null;
   attributes: Array<string>;
   filterMode: string = 'add';
   editingFilter: Filter = null;
@@ -33,7 +32,7 @@ export class BlockViewFilterComponent implements OnInit {
 
   @Output() userClose: EventEmitter<any> = new EventEmitter();
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private http: ApiService) {
     this.navigation = [ { name: 'edit filters', value: 'edit' },
                         { name: 'preview filters', value: 'preview' },
                         { name: 'filtering guide', value: 'guide' } ];
@@ -81,16 +80,21 @@ export class BlockViewFilterComponent implements OnInit {
   finishFilter(): void {
     // clear any current messages
     this.filterErrorState = '';
-    this.filterTestResults = '';
 
-    if(this.currentFilter.allConditionsAreComplete()) {
-      this.currentFilter.editing = false;
-      this.currentFilter.created = true;
-
-      this.createNewEditableFilter();
-    } else {
+    if(!this.currentFilter.allConditionsAreComplete()) {
       this.filterErrorState = 'Please fill out all fields';
+      return;
     }
+
+    this.currentFilter.editing = false;
+    this.currentFilter.created = true;
+
+    // TODO: this is vastly inefficient and shouldn't be run for every filter
+    //       every time a new one is finished
+    this.filteredGenes = [];
+    this.applyFilters();
+
+    this.createNewEditableFilter();
   }
 
   /**
@@ -110,32 +114,11 @@ export class BlockViewFilterComponent implements OnInit {
 
     // update filter ids so they reflect their current index in the filter list
     this.reassignFilterIDs();
-  }
 
-  /**
-   * Displays the number of features/genes the current filter's condition(s)
-   * will affect in its current state
-   */
-  showCurrentFilterResults(): void {
-    this.filterErrorState = '';
-    this.filterTestResults = '';
-
-    // give the conditions' type selects a chance to update to reflect species
-    // in case they changed (if a condition contains a type selection that is no
-    // longer available after changing species selection, we don't want to show
-    // the results since the condition would be considered "incomplete"
-    this.cdr.detectChanges();
-
-    // only show number of affected genes if all fields are properly filled out
-    if(this.currentFilter.allConditionsAreComplete()) {
-      let genes = this.currentFilter.speciesKey === 'both' ?
-                    this.allGenes : (this.currentFilter.speciesKey === 'ref' ?
-                                      this.refGenes : this.compGenes);
-      let numGenes = this.getMatches(genes, [this.currentFilter]).length;
-
-      this.filterTestResults = `${this.currentFilter.mode}s ${numGenes} 
-                                feature${numGenes !== 1 ? 's' : ''}`;
-    }
+    // TODO: this is vastly inefficient and shouldn't be run for every filter
+    //       every time a new one is finished
+    this.filteredGenes = [];
+    this.applyFilters();
   }
 
   /**
@@ -144,9 +127,6 @@ export class BlockViewFilterComponent implements OnInit {
    */
   removeCondition(cond: FilterCondition): void {
     this.currentFilter.removeCondition(cond);
-
-    // show an updated results number after the removal
-    this.showCurrentFilterResults();
   }
 
   /**
@@ -318,12 +298,20 @@ export class BlockViewFilterComponent implements OnInit {
 
     if(this.anyFiltersSelected()) {
       let filters = this.getCreatedFilters();
+      let hidingFilters = filters.filter(f => f.hides() && f.selected);
+      let highlightFilters = filters.filter(f => !f.hides() && f.selected);
+
       // order matters here because if a gene satisfies an 'exclude' criteria AND
       // an 'include' criteria, the include should take precendence over the
       // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
       // should be filtered
-      this.hideGenes(filters.filter(f => f.hides() && f.selected));
-      this.filterGenes(filters.filter(f => !f.hides() && f.selected));
+      if(hidingFilters.length > 0) {
+        this.hideGenes(filters.filter(f => f.hides() && f.selected));
+      }
+
+      if(highlightFilters.length > 0) {
+        this.filterGenes(filters.filter(f => !f.hides() && f.selected));
+      }
 
       return this.refGenes.concat(...this.compGenes)
                           .filter(g => g.filtered || g.hidden);
@@ -344,15 +332,47 @@ export class BlockViewFilterComponent implements OnInit {
    * one of the specified filters
    * @param {Array<Gene>} genes - the list of genes to search for matches
    * @param {Array<Filter>} filters - the list of filters to check for matches
+   * @param {Species} species - the species for the filter (if the filter uses
+   *                            both, it'll use this method twice, so pass a
+   *                            species each time to reduce the computational
+   *                            weight)
    */
-  private getMatches(genes: Array<Gene>, filters: Array<Filter>): Array<Gene> {
-    return genes.filter(g => {
-      for(let i = 0; i < filters.length; i++) {
-        if(filters[i].matchesFilter(g)) return true;
-      }
+  private getMatches(genes: Array<Gene>, filters: Array<Filter>, species: Species) {
+    let ontologyFilters = filters.filter(f => f.isFilteringByOntologyTerm());
+    let attributeFilters = filters.filter(f => !f.isFilteringByOntologyTerm());
 
-      return false;
-    });
+    // check ontology filters first since they will take the longest
+    if(ontologyFilters.length > 0) {
+      ontologyFilters.forEach(f => {
+        f.conditions.forEach(c => {
+          this.http.getAssociationsForTerm(species.getID(), c.value)
+            .subscribe(assoc => {
+              let assocIDs = assoc.map(a => a.id);
+              let associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
+
+              associations.forEach(a => !f.hides() ? a.filter() : a.hide());
+              this.filteredGenes.push(...associations);
+
+            });
+        });
+      });
+    }
+
+    // check attribute filters
+    if(attributeFilters.length > 0) {
+      let matches = genes.filter(g => {
+        for(let i = 0; i < attributeFilters.length; i++) {
+          if(attributeFilters[i].matchesFilter(g)) {
+            !attributeFilters[i].hides() ? g.filter() : g.hide();
+            return true;
+          }
+        }
+
+        return false;
+      });
+
+      this.filteredGenes.push(...matches);
+    }
   }
 
   /**
@@ -364,8 +384,13 @@ export class BlockViewFilterComponent implements OnInit {
     let refFilters = filters.filter(f => f.isRefFilter());
     let compFilters = filters.filter(f => f.isCompFilter());
 
-    this.getMatches(this.refGenes, refFilters).forEach(g => g.hide());
-    this.getMatches(this.compGenes, compFilters).forEach(g => g.hide());
+    if(refFilters.length > 0) {
+      this.getMatches(this.refGenes, refFilters, this.refSpecies);
+    }
+
+    if(compFilters.length > 0) {
+      this.getMatches(this.compGenes, compFilters, this.compSpecies);
+    }
   }
 
   /**
@@ -377,7 +402,12 @@ export class BlockViewFilterComponent implements OnInit {
     let refFilters = filters.filter(f => f.isRefFilter());
     let compFilters = filters.filter(f => f.isCompFilter());
 
-    this.getMatches(this.refGenes, refFilters).forEach(g => g.filter());
-    this.getMatches(this.compGenes, compFilters).forEach(g => g.filter());
+    if(refFilters.length > 0) {
+      this.getMatches(this.refGenes, refFilters, this.refSpecies);
+    }
+
+    if(compFilters.length > 0) {
+      this.getMatches(this.compGenes, compFilters, this.compSpecies);
+    }
   }
 }

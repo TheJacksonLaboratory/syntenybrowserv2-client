@@ -7,7 +7,7 @@ import {
   TypeComparator } from './comparators';
 import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
 import { Feature } from './feature';
-import { OntologyTerm } from './interfaces';
+import { DescendantTerm, OntologyTerm } from './interfaces';
 import { format } from 'd3-format';
 import { EventEmitter, Output } from '@angular/core';
 
@@ -91,6 +91,22 @@ export class TableData<T> {
       case 'descendants': return this.descComp;
       default: break;
     }
+  }
+
+  getDescendants(term: OntologyTerm): Array<DescendantTerm> {
+    if(term.descendants.length > 10) {
+      let descs = term.descendants.slice(0, 10);
+      let numRemain = term.descendants.length - 10;
+
+      descs.push({
+        id: '',
+        name: `and ${numRemain} other terms`
+      });
+
+      return descs;
+    }
+
+    return term.descendants;
   }
 
   /**

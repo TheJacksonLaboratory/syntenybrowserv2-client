@@ -353,7 +353,7 @@
               </g>
 
               <!-- Gene -->
-              <line class="gene" y1="2" y2="2"
+              <line y1="2" y2="2" stroke-width="1"
                     [attr.x2]="gene.getWidth(refBPToPixels)"
                     [ngStyle]="{ 'stroke': gene.getColor(),
                                  'display': gene.hidden ? 'none' : 'initial' }">
@@ -409,7 +409,7 @@
 
               <!-- Transcript -->
               <g *ngIf="interval.width <= 5000000">
-                <rect *ngFor="let exon of gene.transcript"
+                <rect *ngFor="let exon of gene.transcript" height="4"
                       [attr.x]="gene.getCompExonXPos(exon, getScale(gene),
                                                    options.trueOrientation)"
                       [attr.width]="gene.getExonWidth(exon, getScale(gene))"
@@ -419,7 +419,7 @@
               </g>
 
               <!-- Gene -->
-              <line y1="2" y2="2"
+              <line y1="2" y2="2" stroke-width="1"
                     [attr.x2]="gene.getWidth(getScale(gene))"
                     [ngStyle]="{ 'stroke': gene.getColor(),
                                  'display': gene.hidden ? 'none' : 'initial' }">
@@ -560,9 +560,11 @@
       </g>
 
       <!-- Margins (visually blocks overflow from container) -->
-      <rect [attr.height]="height + 10" width="4" fill="#FFF"></rect>
       <rect [attr.height]="height + 10" width="4" fill="#FFF"
-            [attr.transform]="translate([width + 6, 0])">
+            [attr.transform]="translate([-5, 0])">
+      </rect>
+      <rect [attr.height]="height + 10" width="4" fill="#FFF"
+            [attr.transform]="translate([width + 1, 0])">
       </rect>
 
       <!-- Loading overlay -->

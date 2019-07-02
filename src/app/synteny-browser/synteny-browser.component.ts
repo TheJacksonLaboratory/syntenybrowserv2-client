@@ -15,11 +15,11 @@ import { Filter } from './classes/filter';
 })
 
 export class SyntenyBrowserComponent implements OnInit {
-  @ViewChild(SpeciesSelectionComponent) species: SpeciesSelectionComponent;
-  @ViewChild(FeatureSelectionComponent) features: FeatureSelectionComponent;
-  @ViewChild(GenomeViewComponent) genomeView: GenomeViewComponent;
-  @ViewChild(BlockViewBrowserComponent) blockViewBrowser: BlockViewBrowserComponent;
-  @ViewChild(BlockViewFilterComponent) blockViewFilters: BlockViewFilterComponent;
+  @ViewChild(SpeciesSelectionComponent, {static: false}) species: SpeciesSelectionComponent;
+  @ViewChild(FeatureSelectionComponent, {static: false}) features: FeatureSelectionComponent;
+  @ViewChild(GenomeViewComponent, {static: false}) genomeView: GenomeViewComponent;
+  @ViewChild(BlockViewBrowserComponent, {static: false}) blockViewBrowser: BlockViewBrowserComponent;
+  @ViewChild(BlockViewFilterComponent, {static: false}) blockViewFilters: BlockViewFilterComponent;
 
   refSpecies: Species;
   compSpecies: Species;
@@ -70,6 +70,9 @@ export class SyntenyBrowserComponent implements OnInit {
     // load the feature selection using the most recent reference species
     // do this second as it might take a second or two
     this.features.load(this.refSpecies);
+
+    // TODO: this is here for work on filters
+    // this.automateFlowToWorkOnFilters();
   }
 
   /**
@@ -117,6 +120,18 @@ export class SyntenyBrowserComponent implements OnInit {
     this.filterOpen = false;
     this.filters = this.blockViewFilters.getCreatedFilters();
 
-    this.blockViewBrowser.applyFilters(this.filters);
+    this.blockViewBrowser.filters = this.filters;
+  }
+
+  /**
+   * Temporary automated helper method to get to the filter dialog quickly
+   */
+  private automateFlowToWorkOnFilters(): void {
+    setTimeout(() => {
+      this.genomeView.renderChordMapForChr('14');
+      this.getChromosomeFeatures();
+
+      this.filterOpen = true;
+    }, 150);
   }
 }

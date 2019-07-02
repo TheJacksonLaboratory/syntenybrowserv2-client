@@ -1,3 +1,5 @@
+@import "~@ng-select/ng-select/themes/material.theme.css";
+
 /* You can add global styles to this file, and also import other style files */
 .top-0 { margin-top: 0 !important; }
 .top-1 { margin-top: 1rem !important; }
@@ -35,7 +37,19 @@
   padding: 4px;
 }
 
-.modal-body { overflow-y: visible; }
+.modal-body {
+  overflow-y: visible;
+}
+
+.autocomplete {
+  width: 300px !important;
+  margin-top: 0.3rem !important;
+
+  .ng-value-container {
+    border: 0;
+    padding: 0;
+  }
+}
 
 // The following styles need to be here; any further up in the chain and they
 // won't override D3's default stylings

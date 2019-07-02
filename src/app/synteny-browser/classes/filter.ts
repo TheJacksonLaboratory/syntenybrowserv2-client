@@ -1,5 +1,5 @@
 import { Species } from './species';
-import { FilterCondition } from './interfaces';
+import { FilterCondition, SearchType } from './interfaces';
 import { Gene } from './gene';
 
 export class Filter {
@@ -7,7 +7,7 @@ export class Filter {
   species: Array<string> = [ 'both', 'ref', 'comp' ];
 
   mode: string = 'Highlight';
-  speciesKey: string = 'both';
+  speciesKey: string = 'ref';
   refSpecies: Species;
   compSpecies: Species;
   conditions: Array<FilterCondition> = [];
@@ -37,8 +37,10 @@ export class Filter {
     this.conditions.push({
       filterBy: 'attribute',
       attribute: 'type',
+      ontology: null,
       type: null,
       qualifier: 'equal',
+      exact: true,
       value: '',
       removable: this.conditions.length > 0,
       id: this.conditions.length});
@@ -67,6 +69,23 @@ export class Filter {
   getValidAttrs(): Array<string> {
     return this.speciesKey === 'ref' ?
            this.attributes.filter(a => a !== 'chr') : this.attributes;
+  }
+
+  /**
+   * Returns the list of ontologies that are available to choose from for each
+   * condition given the selected species for the filter
+   */
+  getValidOntologies(): Array<SearchType> {
+    let refOnts = this.refSpecies.onts;
+    let compOnts = this.compSpecies.onts;
+
+    switch (this.speciesKey) {
+      case 'ref': return refOnts;
+      case 'comp': return compOnts;
+      default: {
+        return refOnts.filter(ro => compOnts.map(co => co.value).indexOf(ro.value) >= 0);
+      }
+    }
   }
 
   /**
@@ -113,12 +132,12 @@ export class Filter {
   // Condition Checks
 
   /**
-   * Returns true/false if the filter is set to hide matching features
+   * Returns true if the filter is set to hide matching features
    */
   hides(): boolean { return this.mode === 'Hide'; }
 
   /**
-   * Returns true/false if the specified gene matches ALL of the filter's conditions
+   * Returns true if the specified gene matches ALL of the filter's conditions
    * @param {Gene} gene - the gene to check against all conditions
    */
   matchesFilter(gene: Gene): boolean {
@@ -131,25 +150,38 @@ export class Filter {
   }
 
   /**
-   * Returns true/false if all conditions don't have empty or unselected fields
+   * Returns true if all conditions don't have empty or unselected fields
    */
   allConditionsAreComplete(): boolean {
-    return this.conditions.filter(c => !this.getConditionValue(c)).length === 0;
+    return this.conditions.filter(c => {
+      if(c.filterBy === 'attribute') {
+        return c.attribute === 'type' ? (c.type === null) : (c.value === '');
+      } else {
+        return c.ontology === null && c.value === '';
+      }
+    }).length === 0;
   }
 
   /**
-   * Returns true/false if the filter applies to the reference features; the
+   * Returns true if the filter applies to the reference features; the
    * boolean condition takes into consideration if the species selection is both
    * species
    */
   isRefFilter(): boolean { return this.speciesKey !== 'comp' };
 
   /**
-   * Returns true/false if the filter applies to the comparison features; the
+   * Returns true if the filter applies to the comparison features; the
    * boolean condition takes into consideration if the species selection is both
    * species
    */
   isCompFilter(): boolean { return this.speciesKey !== 'ref'; }
+
+  /**
+   * Returns true if the filter contains at least one ontology-related condition
+   */
+  isFilteringByOntologyTerm(): boolean {
+    return this.conditions.filter(c => c.filterBy === 'ontology').length > 0;
+  }
 
 
   // Private Methods
@@ -160,8 +192,12 @@ export class Filter {
    * @param {FilterCondition} cond - the condition to stringify and make readable
    */
   private getCompiledCondition(cond: FilterCondition): string {
-    let value = cond.attribute === 'type' ? cond.type : cond.value;
-    return cond.attribute + this.getQualifier(cond) + value;
+    if(cond.filterBy === 'attribute') {
+      let value = cond.attribute === 'type' ? cond.type : cond.value;
+      return cond.attribute + this.getQualifier(cond) + value;
+    } else {
+      return 'genes assoc w/ ' + cond.value;
+    }
   }
 
   /**
@@ -194,8 +230,8 @@ export class Filter {
    *                                 against
    */
   private matchesCondition(gene: Gene, cond: FilterCondition): boolean {
-    let geneValue = gene[cond.attribute];
-    let condValue = this.getConditionValue(cond);
+    let geneValue = gene[cond.attribute].toLowerCase();
+    let condValue = this.getConditionValue(cond).toLowerCase();
 
     if(cond.qualifier.includes('not')) {
       return cond.qualifier.includes('equal') ?

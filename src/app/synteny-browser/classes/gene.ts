@@ -45,13 +45,7 @@ export class Gene {
     if(blocks) this.setBlockID(blocks);
 
     // get the transcript of the gene
-    let t = gene.canonical_transcript.map(t => `${t.start_pos}-${t.end_pos}`);
-    // remove any duplicated exons
-    let newT: Array<string> = Array.from(new Set(t));
-    this.transcript = newT.map(t => {
-      let coords = t.split('-');
-      return { start: Number(coords[0]), end: Number(coords[1])};
-    })
+    this.transcript = gene.transcript.map(t => ({ start: t.start, end: t.end}));
   }
 
 

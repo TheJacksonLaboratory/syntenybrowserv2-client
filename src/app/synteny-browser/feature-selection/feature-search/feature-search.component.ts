@@ -30,6 +30,7 @@ export class FeatureSearchComponent {
    */
   loadFeatures(refSpecies: Species): void {
     this.refSpecies = refSpecies;
+    this.features.loading = true;
     this.http.getAllGenes(this.refSpecies.getID())
              .subscribe(genes => {
                let rows = genes;

@@ -20,7 +20,7 @@ import { Filter } from '../classes/filter';
   styleUrls: ['./block-view-browser.component.scss']
 })
 export class BlockViewBrowserComponent {
-  @ViewChild('tooltip') tooltip: TooltipComponent;
+  @ViewChild('tooltip', {static: false}) tooltip: TooltipComponent;
 
   ref: Species;
   comp: Species;
@@ -147,49 +147,6 @@ export class BlockViewBrowserComponent {
             .forEach(obj => obj.setAttribute('font-size', '8px'));
     document.querySelectorAll('line, rect')
             .forEach(obj => obj.setAttribute('shape-rendering', 'crispEdges'));
-  }
-
-  /**
-   * Filters and hides genes as they match with the specified conditions
-   * @param {Array<any>} filters - the conditions to filter/hide genes with
-   */
-  applyFilters(filters: Array<Filter>): void {
-    this.refGenes.forEach(g => g.resetFilterStatus());
-    this.compGenes.forEach(g => g.resetFilterStatus());
-
-    this.filters = filters;
-    // order matters here because if a gene satisfies an 'exclude' criteria AND
-    // an 'include' criteria, the include should take precendence over the
-    // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
-    // should be filtered
-    this.hideGenes(filters.filter(f => f.hides()));
-    this.filterGenes(filters.filter(f => !f.hides()));
-  }
-
-  /**
-   * Marks all reference and comparison genes that match at least one of the
-   * specified filters as 'hidden'
-   * @param {Array<Filter>} filters - list of filters to check genes against
-   */
-  hideGenes(filters: Array<Filter>): void {
-    let refFilters = filters.filter(f => f.isRefFilter());
-    let compFilters = filters.filter(f => f.isCompFilter());
-
-    this.getMatches(this.refGenes, refFilters).forEach(g => g.hide());
-    this.getMatches(this.compGenes, compFilters).forEach(g => g.hide());
-  }
-
-  /**
-   * Marks all reference and comparison genes that match at least one of the
-   * specified filters as 'filtered'
-   * @param {Array<Filter>} filters - list of filters to check genes against
-   */
-  filterGenes(filters: Array<Filter>): void {
-    let refFilters = filters.filter(f => f.isRefFilter());
-    let compFilters = filters.filter(f => f.isCompFilter());
-
-    this.getMatches(this.refGenes, refFilters).forEach(g => g.filter());
-    this.getMatches(this.compGenes, compFilters).forEach(g => g.filter());
   }
 
   /**
@@ -540,22 +497,6 @@ export class BlockViewBrowserComponent {
     });
 
     return command;
-  }
-
-  /**
-   * Returns a subset of genes from the specified list of genes that match at
-   * least one of the specified list of filters
-   * @param {Array<Gene>} genes - the list of genes to search for matches
-   * @param {Array<Filter>} filters - the list of filters to check for matches
-   */
-  getMatches(genes: Array<Gene>, filters: Array<Filter>): Array<Gene> {
-    return genes.filter(g => {
-      for(let i = 0; i < filters.length; i++) {
-        if(filters[i].matchesFilter(g)) return true;
-      }
-
-      return false;
-    });
   }
 
   /**

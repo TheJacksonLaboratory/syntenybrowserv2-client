@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { NgSelectModule} from '@ng-select/ng-select';
 
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
@@ -28,6 +29,7 @@ import { ApiService } from './services/api.service';
     ClarityModule,
     ClrSelectModule,
     CommonModule,
+    NgSelectModule,
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule
