@@ -72,7 +72,7 @@ export class SyntenyBrowserComponent implements OnInit {
     this.features.load(this.refSpecies);
 
     // TODO: this is here for work on filters
-    this.automateFlowToWorkOnFilters();
+    // this.automateFlowToWorkOnFilters();
   }
 
   /**
@@ -123,6 +123,9 @@ export class SyntenyBrowserComponent implements OnInit {
     this.blockViewBrowser.filters = this.filters;
   }
 
+  /**
+   * Temporary automated helper method to get to the filter dialog quickly
+   */
   private automateFlowToWorkOnFilters(): void {
     setTimeout(() => {
       this.genomeView.renderChordMapForChr('14');
