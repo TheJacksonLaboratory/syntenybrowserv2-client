@@ -46,18 +46,7 @@ export class Feature {
   // Condition Checks
 
   /**
-   * Returns true/false if the feature's symbol *contains* the specified
-   * search string
-   * @param {string} search - the search string
-   */
-  matchesSearch(search: string): boolean {
-    return this.symbol.toLowerCase().includes(search.toLowerCase()) ||
-           this.id.toLowerCase().includes(search.toLowerCase()) ||
-           this.type.toLowerCase().includes(search.toLowerCase());
-  }
-
-  /**
-   * Returns true/false if the feature's symbol *is the same as* the
+   * Returns true if the feature's symbol *is the same as* the
    * specified symbol
    * @param {string} symbol - the symbol to compare to
    */

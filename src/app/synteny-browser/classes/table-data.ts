@@ -63,16 +63,12 @@ export class TableData<T> {
       this.filteredRows = this.rows;
     } else {
       this.filteredRows = this.rows.filter(r => {
-        if(r instanceof Feature) {
-          return r.matchesSearch(search);
-        } else {
-          for(let i = 0; i < this.searchableColumns.length; i++) {
-            let column = r[this.searchableColumns[i]].toString().toLowerCase();
-            if(column.includes(search.toLowerCase())) { return true; }
-          }
-
-          return false;
+        for(let i = 0; i < this.searchableColumns.length; i++) {
+          let column = r[this.searchableColumns[i]].toString().toLowerCase();
+          if(column.includes(search.toLowerCase())) { return true; }
         }
+
+        return false;
       });
     }
   }
