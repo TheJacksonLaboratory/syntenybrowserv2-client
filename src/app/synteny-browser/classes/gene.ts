@@ -1,4 +1,4 @@
-import {Exon, TooltipContent} from './interfaces';
+import { Exon, TooltipContent } from './interfaces';
 import { format, ScaleLinear } from 'd3';
 import { SyntenyBlock } from './synteny-block';
 
@@ -25,27 +25,25 @@ export class Gene {
 
   format: Function = format(',');
 
-  constructor(gene: any, ids: Array<string>, trackHeight: number,
-              blocks: Array<SyntenyBlock> = null) {
-    this.species = (gene.start_pos) ? 'ref' : 'comp';
-    this.start = (gene.start_pos) ? gene.start_pos : gene.gene_start_pos;
-    this.end = (gene.end_pos) ? gene.end_pos : gene.gene_end_pos;
+  constructor(gene: any, vHeight: number, blocks: Array<SyntenyBlock> = null) {
+    this.species = gene.homologs ? 'comp' : 'ref';
+    this.start = gene.start;
+    this.end = gene.end;
     this.size = this.end - this.start;
-    this.symbol = gene.gene_symbol;
-    this.id = gene.gene_id;
-    this.chr = gene.gene_chr;
-    this.strand = (gene.strand) ? gene.strand : gene.gene_strand;
+    this.symbol = gene.symbol;
+    this.id = gene.id;
+    this.chr = gene.chr;
+    this.strand = gene.strand;
     this.type = gene.type;
-    this.yPos = this.getYPos(trackHeight);
-
-    this.homologIDs = ids;
-    this.selected = gene.sel ? gene.sel : false;
+    this.yPos = this.getYPos(vHeight);
+    this.homologIDs = gene.homologs;
+    this.selected = gene.sel;
 
     // set the block ID if the gene is in the comparison genome
     if(blocks) this.setBlockID(blocks);
 
     // get the transcript of the gene
-    this.transcript = gene.transcript.map(t => ({ start: t.start, end: t.end}));
+    this.transcript = gene.exons;
   }
 
 

@@ -52,6 +52,7 @@ export class BlockViewBrowserComponent {
   blockLookup: object = {};
   refGenes: Array<Gene>;
   compGenes: Array<Gene>;
+  homRefGenes: Array<string>;
   staticRefBPToPixels: ScaleLinear<number, number>;
   staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
@@ -617,72 +618,61 @@ export class BlockViewBrowserComponent {
    * @param {Array<Feature>} features - the selected features from the genome view
    */
   private getGenes(refID: string, compID: string, features: Array<Feature>): void {
-    this.http.getGenes(refID, compID, this.refChr)
-             .subscribe(genes => {
-               // stores homolog id arrays by comparison gene symbol
-               let homIDs = {};
+    this.homRefGenes = [];
+    let featureIDs = features.map(f => f.id);
 
-               // comparison genes (reference genes' new/distinct homologs)
-               let compGenes = [];
+    this.http.getHomologs(refID, compID, this.refChr)
+             .subscribe(homologs => {
+               this.selectedCompGenes = [];
+               this.compGenes = homologs.map(h => {
+                 h.sel = false;
+                 // reduce the homologs attribute to array of reference gene IDs
+                 h.homologs = h.homologs.map(rh => {
+                   // while we're doing this, check each of the homolog IDs
+                   // against the list of selected features to determine if this
+                   // gene should be marked as selected
+                   if(!h.sel) { h.sel = featureIDs.indexOf(rh.id) > -1; }
+                   return rh.id;
+                 });
 
-               let featureSymbols = features.map(f => f.symbol);
+                 return new Gene(h, this.trackHeight, this.blocks);
+               }).filter(h => {
+                 let syntenic = h.isSyntenic();
 
-               // add a homolog id to all of the reference genes
-               this.refGenes = genes.map(g => {
-                 g.gene_chr = this.refChr;
-                 // if there are homologs, figure out homolog information
-                 if(g.homologs.length !== 0) {
-                   // load the homIDs dictionary and the compGenes array
-                   // with distinct values/genes
-                   g.homologs.forEach(hom => {
-                     if(homIDs[hom.gene_symbol]) {
-                       homIDs[hom.gene_symbol].push(g.gene_id);
-                     } else {
-                       homIDs[hom.gene_symbol] = [g.gene_id];
-                       compGenes.push(hom);
-                     }
-                   });
-
-                   if(featureSymbols.indexOf(g.gene_symbol) >= 0) {
-                     // set a temporary flag
-                     g.sel = true;
-                     g.homologs.forEach(hom => hom.sel = true);
-
-                     return new Gene(g, [g.gene_id], this.trackHeight);
-                   }
-
-                   return new Gene(g, [g.gene_id], this.trackHeight);
-                 } else {
-                   g.sel = featureSymbols.indexOf(g.gene_symbol) >= 0;
-
-                   return new Gene(g, [], this.trackHeight);
+                 // while we're here
+                 if(syntenic) {
+                   // if the gene is syntenic, take note of the homolog ID(s) so
+                   // that we can mark the reference genes accordingly
+                   this.homRefGenes.push(...h.homologIDs);
+                   // if the gene is marked as selected, push it to the selected
+                   // comparison gene array
+                   if(h.selected) { this.selectedCompGenes.push(h); }
                  }
+
+                 return syntenic;
                });
 
-               // create a list of comparison genes from the temp compGenes array,
-               // add the list of homolog IDs for each, as found from homIDs,
-               // and add block ID for genes in a syntenic region, then filter
-               // that list to only genes that have a block ID
-               this.compGenes = compGenes.map(g => {
-                                           let homs = homIDs[g.gene_symbol];
-                                           return new Gene(g,
-                                                           homs,
-                                                           this.trackHeight,
-                                                           this.blocks);
-                                         }).filter(g => g.isSyntenic());
+               this.homRefGenes = Array.from(new Set(this.homRefGenes));
+             });
 
-               // go through reference genes to remove homolog IDs that are
-               // associated with comparison genes that were just filtered out
-               this.refGenes.filter(g => g.isHomologous())
-                            .forEach(g => {
-                              g.homologIDs = g.homologIDs.filter(h => {
-                                return this.getComparisonHomologs(h).length > 0;
-                              });
-                            });
+    this.http.getGenes(refID, this.refChr)
+             .subscribe(genes => {
+               this.selectedRefGenes = [];
 
-               // get selected features
-               this.selectedRefGenes = this.refGenes.filter(g => g.selected);
-               this.selectedCompGenes = this.compGenes.filter(g => g.selected);
+               this.refGenes = genes.map(g => {
+                 // if homologous, add a homologID array attribute with its ID
+                 g.homologs = this.homRefGenes.indexOf(g.id) > -1 ? [g.id] : [];
+                 // add selected attribute if it is listed as selected
+                 g.sel = featureIDs.indexOf(g.id) > -1;
+
+                 let gene = new Gene(g, this.trackHeight);
+
+                 // if the gene is selected, push it to the selected reference
+                 // gene array
+                 if(gene.selected) { this.selectedRefGenes.push(gene); }
+
+                 return gene
+               });
 
                // Keeping here until QTL arrangement is completely finished
                /* this.http.getQTLsByChr(this.ref.getID(), this.refChr)
