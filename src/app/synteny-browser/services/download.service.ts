@@ -1,0 +1,62 @@
+import { Injectable } from '@angular/core';
+import { saveAs } from 'file-saver';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DownloadService {
+
+  constructor() { }
+
+  /**
+   * Initiates a download of the specified text with the specified filename
+   * @param {string} text - the text to download
+   * @param {string} filename - the name of the file to save the SVG as
+   */
+  downloadText(text: string, filename: string): void {
+    let blob = new Blob([text], { type: 'data:text/plain;charset=utf-8,' });
+
+    if(navigator.msSaveBlob) { // IE 10+
+      navigator.msSaveBlob(blob, filename);
+    } else {
+      let link = document.createElement('a');
+
+      if(link.download !== undefined) {
+        let url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  }
+
+  /**
+   * Initiates a download of the SVG associated with the specified selector ID
+   * and saves it with the specified filename
+   * @param {string} svgSelector - the HTML ID of the SVG element to download
+   * @param {string} filename - the name of the file to save the SVG as
+   */
+  downloadSVG(svgSelector: string, filename: string): void {
+    let svg = document.querySelector('#genome-view-svg');
+    svg.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+
+    let canvas = document.createElement('canvas');
+    canvas.width = Number(svg.clientWidth);
+    canvas.height = Number(svg.clientHeight);
+
+    let ctx = canvas.getContext('2d');
+    let image = new Image();
+
+    image.onload = () => {
+      ctx.clearRect(0, 0, svg.clientWidth, svg.clientHeight);
+      ctx.drawImage(image, 0, 0, svg.clientWidth, svg.clientHeight);
+
+      canvas.toBlob((blob) => saveAs(blob, filename));
+    };
+
+    let serialized = new XMLSerializer().serializeToString(svg);
+    image.src = `data:image/svg+xml;base64,${btoa(serialized)}`;
+  }
+}
