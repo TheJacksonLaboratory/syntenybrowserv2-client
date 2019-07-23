@@ -25,7 +25,7 @@ export class FeatureSelectionComponent {
   ontology: string;
   search: string = '';
 
-  selections: Array<Feature> = [];
+  selections: Feature[] = [];
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 

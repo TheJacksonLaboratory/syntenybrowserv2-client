@@ -32,7 +32,7 @@ export class AppComponent {
   /**
    * Returns the list of page names
    */
-  getPages(): Array<string> { return Object.keys(this.pages); }
+  getPages(): string[] { return Object.keys(this.pages); }
 
 
   // Condition Checks

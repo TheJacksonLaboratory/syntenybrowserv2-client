@@ -1,10 +1,11 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Species } from '../classes/species';
 import { FilterCondition, NavigationObject } from '../classes/interfaces';
 import { Gene } from '../classes/gene';
 import { ClrDatagridPagination, ClrLoadingState } from '@clr/angular';
 import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
+import { DownloadService } from '../services/download.service';
 
 @Component({
   selector: 'app-block-view-filter',
@@ -14,25 +15,25 @@ import { ApiService } from '../services/api.service';
 export class BlockViewFilterComponent implements OnInit {
   @Input() refSpecies: Species;
   @Input() compSpecies: Species;
-  @Input() filters: Array<Filter>;
-  @Input() refGenes: Array<Gene>;
-  @Input() compGenes: Array<Gene>;
+  @Input() filters: Filter[];
+  @Input() refGenes: Gene[];
+  @Input() compGenes: Gene[];
 
-  navigation: Array<NavigationObject>;
+  navigation: NavigationObject[];
   activePage: string = 'edit';
 
   currentFilter: Filter;
   filterErrorState: string = null;
-  attributes: Array<string>;
+  attributes: string[];
   filterMode: string = 'add';
   editingFilter: Filter = null;
 
-  allGenes: Array<Gene>;
-  filteredGenes: Array<Gene>;
+  allGenes: Gene[];
+  filteredGenes: Gene[];
 
   @Output() userClose: EventEmitter<any> = new EventEmitter();
 
-  constructor(private cdr: ChangeDetectorRef, private http: ApiService) {
+  constructor(private http: ApiService, private download: DownloadService) {
     this.navigation = [ { name: 'edit filters', value: 'edit' },
                         { name: 'preview filters', value: 'preview' },
                         { name: 'filtering guide', value: 'guide' } ];
@@ -157,22 +158,7 @@ export class BlockViewFilterComponent implements OnInit {
                 Object.keys(rows[0]).join('\t') + '\n' +
                 rows.map(r => Object.values(r).join('\t')).join('\n');
 
-    let blob = new Blob([lines], { type: 'data:text/plain;charset=utf-8,' });
-
-    if(navigator.msSaveBlob) { // IE 10+
-      navigator.msSaveBlob(blob, 'filter-results.txt');
-    } else {
-      let link = document.createElement('a');
-
-      if(link.download !== undefined) {
-        let url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'filter-results.txt');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    }
+    this.download.downloadText(lines, 'filter-results.txt');
   }
 
 
@@ -182,7 +168,7 @@ export class BlockViewFilterComponent implements OnInit {
    * Returns the list of types available to filter by based on what the selected
    * species is for the current filter
    */
-  getFeatureTypes(): Array<string> {
+  getFeatureTypes(): string[] {
     let genes = this.getGenesForSpecies(this.currentFilter.speciesKey);
     let types = Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();
 
@@ -200,7 +186,7 @@ export class BlockViewFilterComponent implements OnInit {
    * 'comp', or 'both')
    * @param {string} speciesKey - the key associated with a species selection
    */
-  getGenesForSpecies(speciesKey: string): Array<Gene> {
+  getGenesForSpecies(speciesKey: string): Gene[] {
     return speciesKey === 'ref' ?
            this.refGenes :
            (speciesKey === 'comp' ? this.compGenes : this.allGenes);
@@ -222,14 +208,14 @@ export class BlockViewFilterComponent implements OnInit {
    * Returns the filters that apply only to the specified species
    * @param {string} species - the species to filter the filter conditions by
    */
-  getFiltersBySpecies(species: string): Array<Filter> {
+  getFiltersBySpecies(species: string): Filter[] {
     return this.getCreatedFilters().filter(f => f.speciesKey === species);
   }
 
   /**
    * Returns a list of species of the current filters (construct filter checklist)
    */
-  getFilterSpecies(): Array<string> {
+  getFilterSpecies(): string[] {
     let species = this.getCreatedFilters().map(f => f.speciesKey);
     return Array.from(new Set(species));
   }
@@ -260,7 +246,7 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Returns the list of filters that have been completed/created
    */
-  getCreatedFilters(): Array<Filter> { return this.filters.filter(f => f.created); }
+  getCreatedFilters(): Filter[] { return this.filters.filter(f => f.created); }
 
 
   // Condition Checks
@@ -292,7 +278,7 @@ export class BlockViewFilterComponent implements OnInit {
    * Returns an array of genes that are affected by the current selected filters
    * for the table
    */
-  private applyFilters(): Array<Gene> {
+  private applyFilters(): Gene[] {
     this.refGenes.forEach(g => g.resetFilterStatus());
     this.compGenes.forEach(g => g.resetFilterStatus());
 
@@ -330,14 +316,14 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Returns a list of genes from the specified list of genesthat match at least
    * one of the specified filters
-   * @param {Array<Gene>} genes - the list of genes to search for matches
-   * @param {Array<Filter>} filters - the list of filters to check for matches
+   * @param {Gene[]} genes - the list of genes to search for matches
+   * @param {Filter[]} filters - the list of filters to check for matches
    * @param {Species} species - the species for the filter (if the filter uses
    *                            both, it'll use this method twice, so pass a
    *                            species each time to reduce the computational
    *                            weight)
    */
-  private getMatches(genes: Array<Gene>, filters: Array<Filter>, species: Species) {
+  private getMatches(genes: Gene[], filters: Filter[], species: Species) {
     let ontologyFilters = filters.filter(f => f.isFilteringByOntologyTerm());
     let attributeFilters = filters.filter(f => !f.isFilteringByOntologyTerm());
 
@@ -378,9 +364,9 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Marks all reference and comparison genes that match at least one of the
    * specified filters as 'hidden'
-   * @param {Array<Filter>} filters - list of filters to check genes against
+   * @param {Filter[]} filters - list of filters to check genes against
    */
-  private hideGenes(filters: Array<Filter>): void {
+  private hideGenes(filters: Filter[]): void {
     let refFilters = filters.filter(f => f.isRefFilter());
     let compFilters = filters.filter(f => f.isCompFilter());
 
@@ -396,9 +382,9 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Marks all reference and comparison genes that match at least one of the
    * specified filters as 'filtered'
-   * @param {Array<Filter>} filters - list of conditions to check genes against
+   * @param {Filter[]} filters - list of conditions to check genes against
    */
-  private filterGenes(filters: Array<Filter>): void {
+  private filterGenes(filters: Filter[]): void {
     let refFilters = filters.filter(f => f.isRefFilter());
     let compFilters = filters.filter(f => f.isCompFilter());
 

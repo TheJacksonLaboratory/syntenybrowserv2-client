@@ -3,12 +3,12 @@ import { SyntenyBlock } from './synteny-block';
 import { ClrLoadingState } from '@clr/angular';
 
 export interface Response {
-  species?: Array<RawSpecies>;
-  genes?: Array<any>;
-  blocks?: Array<SyntenyBlock>;
-  qtls?: Array<QTLMetadata>;
-  ont_genes?: Array<OntologyGeneMetadata>;
-  terms?: Array<OntologyTerm>;
+  species?: RawSpecies[];
+  genes?: any[];
+  blocks?: SyntenyBlock[];
+  qtls?: QTLMetadata[];
+  ont_genes?: OntologyGeneMetadata[];
+  terms?: OntologyTerm[];
   msg?: string;
 }
 
@@ -17,7 +17,7 @@ export interface OntologyTerm {
   name: string;
   count: number;
   namespace: string;
-  descendants: Array<DescendantTerm>;
+  descendants: DescendantTerm[];
   def: string;
   selecting?: ClrLoadingState;
 }
@@ -108,7 +108,7 @@ export interface CartesianCoordinate {
 
 export interface SelectedFeatures {
   chr: string;
-  features: Array<Feature>;
+  features: Feature[];
 }
 
 export interface ComparisonBlockCoordinates {
@@ -141,7 +141,7 @@ export interface TooltipContent extends Object {}
 export interface ReferenceChr {
   chr: string;
   size: number;
-  blocks: Array<SyntenyBlock>;
+  blocks: SyntenyBlock[];
 }
 
 export interface RadiiDictionary {

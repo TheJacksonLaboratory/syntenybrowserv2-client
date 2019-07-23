@@ -3,14 +3,14 @@ import { FilterCondition, SearchType } from './interfaces';
 import { Gene } from './gene';
 
 export class Filter {
-  attributes: Array<string> = [ 'type', 'id', 'symbol', 'chr' ];
-  species: Array<string> = [ 'both', 'ref', 'comp' ];
+  attributes: string[] = [ 'type', 'id', 'symbol', 'chr' ];
+  species: string[] = [ 'both', 'ref', 'comp' ];
 
   mode: string = 'Highlight';
   speciesKey: string = 'ref';
   refSpecies: Species;
   compSpecies: Species;
-  conditions: Array<FilterCondition> = [];
+  conditions: FilterCondition[] = [];
   id: number;
 
   selected: boolean = true;
@@ -66,7 +66,7 @@ export class Filter {
    * condition; if the species selection for the filter is reference only, it's
    * pointless to allow filtering by chromosome so remove the option
    */
-  getValidAttrs(): Array<string> {
+  getValidAttrs(): string[] {
     return this.speciesKey === 'ref' ?
            this.attributes.filter(a => a !== 'chr') : this.attributes;
   }
@@ -75,7 +75,7 @@ export class Filter {
    * Returns the list of ontologies that are available to choose from for each
    * condition given the selected species for the filter
    */
-  getValidOntologies(): Array<SearchType> {
+  getValidOntologies(): SearchType[] {
     let refOnts = this.refSpecies.onts;
     let compOnts = this.compSpecies.onts;
 

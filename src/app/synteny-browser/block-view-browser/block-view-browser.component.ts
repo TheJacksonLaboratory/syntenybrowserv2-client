@@ -1,7 +1,6 @@
 import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
-import { saveAs } from 'file-saver';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { BlockViewBrowserOptions, ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
@@ -13,6 +12,7 @@ import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { TooltipComponent } from '../tooltip/tooltip.component';
 import { Filter } from '../classes/filter';
+import { DownloadService } from '../services/download.service';
 
 @Component({
   selector: 'app-block-view-browser',
@@ -30,11 +30,11 @@ export class BlockViewBrowserComponent {
 
   options: BlockViewBrowserOptions;
 
-  selectedRefGenes: Array<Gene> = [];
-  selectedCompGenes: Array<Gene> = [];
-  selectedQTLs: Array<QTL> = [];
+  selectedRefGenes: Gene[] = [];
+  selectedCompGenes: Gene[] = [];
+  selectedQTLs: QTL[] = [];
 
-  filters: Array<Filter> = [];
+  filters: Filter[] = [];
 
   progress: number = 0;
   zoom: ZoomBehavior<any, any>;
@@ -48,18 +48,18 @@ export class BlockViewBrowserComponent {
   minimumIntervalSize = 3000;
 
   interval: BrowserInterval;
-  blocks: Array<SyntenyBlock>;
+  blocks: SyntenyBlock[];
   blockLookup: object = {};
-  refGenes: Array<Gene>;
-  compGenes: Array<Gene>;
-  homRefGenes: Array<string>;
+  refGenes: Gene[];
+  compGenes: Gene[];
+  homRefGenes: string[];
   staticRefBPToPixels: ScaleLinear<number, number>;
   staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService) {
+  constructor(private http: ApiService, private downloader: DownloadService) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
@@ -75,10 +75,10 @@ export class BlockViewBrowserComponent {
    * @param {Species} comp - the comparison species
    * @param {object} colors - the genome color dictionary
    * @param {string} chr - the chromosome to get syntenic blocks and features for
-   * @param {Array<Feature>} features - list of selected features to display
+   * @param {Feature[]} features - list of selected features to display
    */
   render(ref: Species, comp: Species, colors: object,
-         chr: string, features: Array<Feature>): void {
+         chr: string, features: Feature[]): void {
     this.reset();
 
     this.ref = ref;
@@ -103,29 +103,10 @@ export class BlockViewBrowserComponent {
   download(): void {
     this.setObjectAttributes();
 
-    let svg = document.querySelector('#browser-svg');
-    svg.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+    let fname = this.ref.commonName + '_' + this.refChr + ':' +
+                this.interval.refStart+ '-' + this.interval.refEnd;
 
-    let canvas = document.createElement('canvas');
-    canvas.width = Number(svg.clientWidth);
-    canvas.height = Number(svg.clientHeight);
-
-    let ctx = canvas.getContext('2d');
-    let image = new Image();
-
-    image.onload = () => {
-      ctx.clearRect(0, 0, svg.clientWidth, svg.clientHeight);
-      ctx.drawImage(image, 0, 0, svg.clientWidth, svg.clientHeight);
-
-      canvas.toBlob((blob) => {
-        let name = this.ref.commonName + '_' + this.refChr + ':' +
-                   this.interval.refStart+ '-' + this.interval.refEnd;
-        saveAs(blob, name);
-      });
-    };
-
-    let serialized = new XMLSerializer().serializeToString(svg);
-    image.src = `data:image/svg+xml;base64,${btoa(serialized)}`;
+    this.downloader.downloadSVG('#browser-svg', fname);
   }
 
   /**
@@ -153,10 +134,10 @@ export class BlockViewBrowserComponent {
   /**
    * Returns a translate command in the form of a string to be used in the
    * template for custom translations
-   * @param {Array<number>} coords - a two value array where [0] = dx and
+   * @param {number[]} coords - a two value array where [0] = dx and
    *                                [1] = dy translations
    */
-  translate(coords: Array<number>): string {
+  translate(coords: number[]): string {
     return `translate(${coords[0]}, ${coords[1]})`;
   }
 
@@ -376,7 +357,7 @@ export class BlockViewBrowserComponent {
   /**
    * Returns a list of reference genes that are in the current browser's view
    */
-  getRefGenesInView(): Array<Gene> {
+  getRefGenesInView(): Gene[] {
     return this.refGenes.filter(g => {
                            return g.isInRefView(this.refBPToPixels, this.width);
                          });
@@ -386,14 +367,14 @@ export class BlockViewBrowserComponent {
    * Returns a list of reference genes that are homologous (have at least one
    * syntenic homolog)
    */
-  getHomologousRefGenes(): Array<Gene> {
+  getHomologousRefGenes(): Gene[] {
     return this.refGenes.filter(g => g.isHomologous());
   }
 
   /**
    * Returns a list of comparison genes that are in the current browser's view
    */
-  getCompGenesInView(): Array<Gene> {
+  getCompGenesInView(): Gene[] {
     return this.compGenes.filter(g => {
       return g.isInCompView(this.getScale(g),
                             this.width,
@@ -455,7 +436,7 @@ export class BlockViewBrowserComponent {
    * Returns the list of syntenic blocks where orientation between reference and
    * comparison regions do not align
    */
-  getNonMatchedBlocks(): Array<SyntenyBlock> {
+  getNonMatchedBlocks(): SyntenyBlock[] {
     return this.blocks.filter(block => !block.orientationMatches);
   }
 
@@ -556,10 +537,10 @@ export class BlockViewBrowserComponent {
   /**
    * Gets the synteny information and constructs dictionaries with important
    * information for each syntenic region
-   * @param {Array<Feature>} features - list of features for gene coloring
+   * @param {Feature[]} features - list of features for gene coloring
    * @param {object} colors - the genome color dictionary
    */
-  private getSyntenicBlocks(features: Array<Feature>, colors: object): void {
+  private getSyntenicBlocks(features: Feature[], colors: object): void {
     let refID = this.ref.getID();
     let compID = this.comp.getID();
 
@@ -615,9 +596,9 @@ export class BlockViewBrowserComponent {
    * selected features, and generates homolog IDs
    * @param {string} refID - the taxon ID of the reference species
    * @param {string} compID - the taxon ID of the comparison species
-   * @param {Array<Feature>} features - the selected features from the genome view
+   * @param {Feature[]} features - the selected features from the genome view
    */
-  private getGenes(refID: string, compID: string, features: Array<Feature>): void {
+  private getGenes(refID: string, compID: string, features: Feature[]): void {
     this.homRefGenes = [];
     let featureIDs = features.map(f => f.id);
 
@@ -711,9 +692,9 @@ export class BlockViewBrowserComponent {
 
   /**
    * Returns the array of QTLs with added data about offset and height
-   * @param {Array<any>} qtls - an array of QTLs
+   * @param {any[]} qtls - an array of QTLs
    */
-  private arrangeQTLs(qtls: Array<any>): Array<any> {
+  private arrangeQTLs(qtls: any[]): any[] {
     let tempQs = JSON.parse(JSON.stringify(qtls));
 
     let pointData = {};
@@ -905,7 +886,7 @@ export class BlockViewBrowserComponent {
                     // ignore brush via zoom occurrences
                     if(e.sourceEvent && e.sourceEvent.type === "zoom") return;
 
-                    let s: Array<number> = e.selection;
+                    let s: number[] = e.selection;
 
                     // adjust refBPToPixels by scaling start, s[0], and end, s[1],
                     // with static scale (used for chromosome view)
@@ -1002,7 +983,7 @@ export class BlockViewBrowserComponent {
    * @param {number} start - the starting point to start generating tick values
    * @param {number} end - the ending point to start generating tick values
    */
-  private getAxisTickValues(start: number, end: number): Array<number> {
+  private getAxisTickValues(start: number, end: number): number[] {
     let values = [];
 
     // add all but the last interval values to the list
@@ -1040,16 +1021,16 @@ export class BlockViewBrowserComponent {
    * the specified homolog ID of a reference gene
    * @param {number} homID - the homolog ID to search for comparison matches
    */
-  private getComparisonHomologs(homID: string): Array<Gene> {
+  private getComparisonHomologs(homID: string): Gene[] {
     return this.compGenes.filter(g => g.homologIDs.indexOf(homID) >= 0);
   }
 
   /**
    * Returns a list of reference genes that have a homolog ID that matches
    * the any of specified homolog IDs of a comparison gene
-   * @param {Array<number>} homIDs - the homolog IDs to search for reference matches
+   * @param {number[]} homIDs - the homolog IDs to search for reference matches
    */
-  private getReferenceHomologs(homIDs: Array<string>): Array<Gene> {
+  private getReferenceHomologs(homIDs: string[]): Gene[] {
     return this.refGenes.filter(g => {
                            let match = false;
                            g.homologIDs.forEach(h => {

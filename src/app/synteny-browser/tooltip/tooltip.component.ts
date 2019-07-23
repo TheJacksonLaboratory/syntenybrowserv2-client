@@ -60,6 +60,6 @@ export class TooltipComponent {
   /**
    * Returns the keys of the data (displayed as data types/titles for rows)
    */
-  getDataRowKeys(): Array<string> { return Object.keys(this.data); }
+  getDataRowKeys(): string[] { return Object.keys(this.data); }
 
 }

@@ -9,14 +9,14 @@ export class Gene {
   symbol: string;
   id: string;
   chr: string;
-  homologIDs: Array<string>;
+  homologIDs: string[];
   strand: string;
   type: string;
   blockID: string;
   species: string;
   orientationMatches: boolean;
   yPos: number;
-  transcript: Array<Exon>;
+  transcript: Exon[];
 
   highlighted: boolean = false;
   selected: boolean = false;
@@ -25,7 +25,7 @@ export class Gene {
 
   format: Function = format(',');
 
-  constructor(gene: any, vHeight: number, blocks: Array<SyntenyBlock> = null) {
+  constructor(gene: any, vHeight: number, blocks: SyntenyBlock[] = null) {
     this.species = gene.homologs ? 'comp' : 'ref';
     this.start = gene.start;
     this.end = gene.end;
@@ -205,7 +205,7 @@ export class Gene {
    * Returns the x, y positions (px) of a ref gene based on the specified scale
    * @param {ScaleLinear<number, number>} scale - scale to use to get the position
    */
-  getRefPxCoords(scale: ScaleLinear<number, number>): Array<number> {
+  getRefPxCoords(scale: ScaleLinear<number, number>): number[] {
     return [this.getRefXPos(scale), this.yPos];
   }
 
@@ -240,7 +240,7 @@ export class Gene {
    *                               point or matching starting point
    */
   getCompPxCoords(scale: ScaleLinear<number, number>,
-                  trueCoords: boolean): Array<number> {
+                  trueCoords: boolean): number[] {
     return [this.getCompXPos(scale, trueCoords), this.yPos] ;
   }
 
@@ -336,9 +336,9 @@ export class Gene {
   /**
    * Sets the block ID to that of the block the gene is contained in; if the
    * block doesn't fully contain the gene, it won't be considered syntenic
-   * @param {Array<SyntenyBlock>} blocks - blocks to use identify the gene's blockID
+   * @param {SyntenyBlock[]} blocks - blocks to use identify the gene's blockID
    */
-  private setBlockID(blocks: Array<SyntenyBlock>): void {
+  private setBlockID(blocks: SyntenyBlock[]): void {
     // get the block that contains the gene
     let b = blocks.filter(block => {
       return block.matchesCompChr(this.chr) && block.contains(this)
