@@ -102,7 +102,7 @@ export class GenomeViewComponent implements OnInit {
   download(): void {
     let fname = this.ref.commonName + (this.refChr ? '_' + this.refChr.chr : '');
 
-    this.downloader.downloadSVG('#genome-view-svg', fname);
+    this.downloader.downloadSVG('genome-view-svg', fname);
   }
 
   /**

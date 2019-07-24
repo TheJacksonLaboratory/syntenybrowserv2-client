@@ -106,7 +106,7 @@ export class BlockViewBrowserComponent {
     let fname = this.ref.commonName + '_' + this.refChr + ':' +
                 this.interval.refStart+ '-' + this.interval.refEnd;
 
-    this.downloader.downloadSVG('#browser-svg', fname);
+    this.downloader.downloadSVG('browser-svg', fname);
   }
 
   /**

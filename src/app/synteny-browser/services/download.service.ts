@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { saveAs } from 'file-saver';
+import { saveSvgAsPng } from 'save-svg-as-png';
 
 @Injectable({
   providedIn: 'root'
@@ -39,24 +39,7 @@ export class DownloadService {
    * @param {string} filename - the name of the file to save the SVG as
    */
   downloadSVG(svgSelector: string, filename: string): void {
-    let svg = document.querySelector('#genome-view-svg');
-    svg.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
-
-    let canvas = document.createElement('canvas');
-    canvas.width = Number(svg.clientWidth);
-    canvas.height = Number(svg.clientHeight);
-
-    let ctx = canvas.getContext('2d');
-    let image = new Image();
-
-    image.onload = () => {
-      ctx.clearRect(0, 0, svg.clientWidth, svg.clientHeight);
-      ctx.drawImage(image, 0, 0, svg.clientWidth, svg.clientHeight);
-
-      canvas.toBlob((blob) => saveAs(blob, filename));
-    };
-
-    let serialized = new XMLSerializer().serializeToString(svg);
-    image.src = `data:image/svg+xml;base64,${btoa(serialized)}`;
+    let options = { modifyCss: () => { return "margin-top: 0;" } };
+    saveSvgAsPng(document.getElementById(svgSelector), filename, options);
   }
 }
