@@ -3,7 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  root: 'http://localhost:5001',
+  oldRoot: 'http://localhost:5001',
+  newRoot: 'http://sb-test01.jax.org/api',
   production: false,
 };
 

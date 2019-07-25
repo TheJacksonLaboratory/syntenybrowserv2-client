@@ -1,5 +1,5 @@
 export const environment = {
-  root: 'http://sbtest-01.jax.org/sb/api/v1',
+  root: 'http://sb-test01.jax.org/api',
   mode: 'test',
   production: false
 };

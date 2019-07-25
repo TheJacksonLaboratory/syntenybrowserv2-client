@@ -13,18 +13,12 @@ export class Feature {
   selected: boolean = false;
 
   constructor(feature: any, assocMode = false) {
-    if(feature.gene_id) {
-      this.id = feature.gene_id;
-      this.symbol = feature.gene_symbol;
-      this.gene = true;
-      this.type = feature.gene_type;
-    } else {
-      this.id = feature.qtl_id;
-      this.symbol = feature.qtl_symbol;
-      this.gene = false;
-      this.type = 'QTL';
-    }
-
+    this.id = feature.id;
+    this.symbol = feature.symbol;
+    // TODO: this shouldn't be the determining factor for if it is a gene but it
+    //  is until genes get a type attribute from new API
+    this.gene = !feature.type;
+    this.type = this.gene ? '' : feature.type; // TODO: fix this as well
     this.chr = feature.chr;
     this.start = feature.start;
     this.end = feature.end;
@@ -52,16 +46,7 @@ export class Feature {
   // Condition Checks
 
   /**
-   * Returns true/false if the feature's symbol *contains* the specified
-   * search string
-   * @param {string} search - the search string
-   */
-  matchesSearch(search: string): boolean {
-    return this.symbol.toLowerCase().includes(search.toLowerCase());
-  }
-
-  /**
-   * Returns true/false if the feature's symbol *is the same as* the
+   * Returns true if the feature's symbol *is the same as* the
    * specified symbol
    * @param {string} symbol - the symbol to compare to
    */

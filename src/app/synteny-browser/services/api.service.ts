@@ -9,7 +9,8 @@ import { Feature } from '../classes/feature';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private root: string = environment.root;
+  private oldRoot: string = environment.oldRoot;
+  private newRoot: string = environment.newRoot;
 
   constructor(private http: HttpClient) { }
 
@@ -18,11 +19,9 @@ export class ApiService {
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
   getAllGenes(taxonID: string): Observable<Array<Feature>> {
-    let url = `${this.root}/genes/${taxonID}`;
-    return this.http.get<Response>(url)
-                    .pipe(
-                      map(resp => resp.genes.map(g => new Feature(g)))
-                    );
+    let url = `${this.newRoot}/genes/metadata/${taxonID}`;
+    return this.http.get<Array<Feature>>(url)
+                    .pipe(map(resp => resp.map(g => new Feature(g))));
   }
 
   /**
@@ -30,11 +29,9 @@ export class ApiService {
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
   getAllQTLs(taxonID: string): Observable<Array<Feature>> {
-    let url = `${this.root}/qtls/${taxonID}`;
-    return this.http.get<Response>(url)
-                    .pipe(
-                      map(resp => resp.qtls.map(q => new Feature(q)))
-                    );
+    let url = `${this.newRoot}/qtls/${taxonID}`;
+    return this.http.get<Array<Feature>>(url)
+                    .pipe(map(resp => resp.map(q => new Feature(q))));
   }
 
   /**
@@ -42,7 +39,7 @@ export class ApiService {
    * @param {string} ontology - ontology ID prefix
    */
   getOntologyTerms(ontology: string): Observable<Array<OntologyTerm>> {
-    let url = `${this.root}/ontologies/terms/${ontology}`;
+    let url = `${this.oldRoot}/ontologies/terms/${ontology}`;
     return this.http.get<Response>(url).pipe(map(resp => resp.terms));
   }
 
@@ -53,7 +50,7 @@ export class ApiService {
    * @param {string} termID - string to search for genes by matching ontologies
    */
   getAssociationsForTerm(taxonID: string, termID: string): Observable<Array<Feature>> {
-    let url = `${this.root}/ontologies/associations/${taxonID}/${termID}`;
+    let url = `${this.oldRoot}/ontologies/associations/${taxonID}/${termID}`;
 
     return this.http.get<Response>(url)
                     .pipe(
@@ -66,7 +63,7 @@ export class ApiService {
    * @param {string} ontology - ontology ID prefix
    */
   getTermsForAutocomplete(ontology: string): Observable<Array<any>> {
-    let url = `${this.root}/ontologies/terms/simple/${ontology}`;
+    let url = `${this.oldRoot}/ontologies/terms/simple/${ontology}`;
     return this.http.get<Response>(url).pipe(map(resp => resp.terms));
   }
 
@@ -79,10 +76,8 @@ export class ApiService {
    * TODO: one into a row in a relational table
    */
   getSpecies(): Observable<Array<number>> {
-    return this.http.get<Response>(`${this.root}/species`)
-                    .pipe(
-                      map(resp => resp.species.map(s => s.ref_taxonid).sort())
-                    );
+    return this.http.get<Array<any>>(`${this.newRoot}/species`)
+                    .pipe(map(resp => resp.map(s => s.organism.taxon_id).sort()));
   }
 
   /**
@@ -93,11 +88,9 @@ export class ApiService {
    */
   getGenomeSynteny(refTaxonID: string, compTaxonID: string)
                   : Observable<Array<SyntenyBlock>> {
-    let url = `${this.root}/syntenic-blocks/${refTaxonID}/${compTaxonID}`;
-    return this.http.get<Response>(url)
-                    .pipe(
-                      map(resp => resp.blocks.map(b => new SyntenyBlock(b)))
-                    );
+    let url = `${this.newRoot}/blocks/${refTaxonID}/${compTaxonID}`;
+    return this.http.get<Array<SyntenyBlock>>(url)
+                    .pipe(map(resp => resp.map(b => new SyntenyBlock(b))));
   }
 
   /**
@@ -109,33 +102,34 @@ export class ApiService {
    */
   getChromosomeSynteny(refTaxonID: string, compTaxonID: string, chr: string)
                       : Observable<Array<SyntenyBlock>> {
-    let url = `${this.root}/syntenic-blocks/${refTaxonID}/${compTaxonID}/${chr}`;
-    return this.http.get<Response>(url)
-                    .pipe(
-                      map(resp => {
-                        return resp.blocks.map(b => new SyntenyBlock(b, true));
-                      })
-                    );
+    let url = `${this.newRoot}/blocks/${refTaxonID}/${compTaxonID}/${chr}`;
+    return this.http.get<Array<SyntenyBlock>>(url)
+                    .pipe(map(resp => resp.map(b => new SyntenyBlock(b, true))));
   }
 
   /**
    * Returns a list of genes for a specified chromosome and reference species
    * with homolog data for the specified comparison species
    * @param {string} refTaxonID - stringified taxon ID for reference species
-   * @param {string} compTaxonID - stringified taxon ID for comparison species
    * @param {string} chr - the chromosome to get genes for
    */
-  getGenes(refTaxonID: string, compTaxonID: string, chr: string)
+  getGenes(refTaxonID: string, chr: string)
           : Observable<Array<any>> {
-    let url = `${this.root}/chr-genes/${refTaxonID}/${compTaxonID}/${chr}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.genes));
+    let url = `${this.newRoot}/genes/${refTaxonID}/${chr}`;
+    return this.http.get<Array<any>>(url);
+  }
+
+  getHomologs(refTaxonID: string, compTaxonID: string, refChr: string)
+             : Observable<Array<any>> {
+    let url = `${this.newRoot}/homologs/${refTaxonID}/${compTaxonID}/${refChr}`;
+    return this.http.get<Array<Feature>>(url);
   }
 
   /**
    * Returns color hex value dictionary for chromosomes
    */
   getGenomeColorMap(): Observable<any> {
-    return this.http.get<Response>(`${this.root}/genome-colors`);
+    return this.http.get<any>(`${this.newRoot}/color-map`);
   }
 
   /**
@@ -144,7 +138,7 @@ export class ApiService {
    * @param {string} chr - the chromosome to get QTLs for
    */
   getQTLsByChr(taxonID: string, chr: string): Observable<Array<any>> {
-    let url = `${this.root}/chr-qtls/${taxonID}/${chr}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.qtls));
+    let url = `${this.newRoot}/chr-qtls/${taxonID}/${chr}`;
+    return this.http.get<Array<any>>(url).pipe(map(resp => resp));
   }
 }
