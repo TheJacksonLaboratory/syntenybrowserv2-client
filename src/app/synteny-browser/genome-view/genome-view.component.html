@@ -25,8 +25,8 @@
               stroke="#000" stroke-width="0.25" fill="transparent"
               [attr.d]="getChrBandPath(refRadii, refGMap, chr, ref.genome)"
               (click)="renderChordMapForChr(chr)"
-              (mouseenter)="revealTooltip(chr, ref, $event)"
-              (mouseleave)="tooltip.clear()">
+              (mouseenter)="getTooltipContent(chr, ref)"
+              (mouseleave)="hideTooltip()">
         </path>
       </g>
 
@@ -58,8 +58,8 @@
               stroke="#000" stroke-width="0.25"
               [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
               [attr.fill]="getChrColor(chr)"
-              (mouseenter)="revealTooltip(chr, comp, $event)"
-              (mouseleave)="tooltip.clear()">
+              (mouseenter)="getTooltipContent(chr, comp)"
+              (mouseleave)="hideTooltip()">
         </path>
       </g>
 
@@ -94,8 +94,8 @@
         <path *ngFor="let chr of getChromosomes(comp.genome)" class="inner"
               [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
               [attr.fill]="getChrColor(chr)"
-              (mouseenter)="revealTooltip(chr, comp, $event)"
-              (mouseleave)="tooltip.clear()">
+              (mouseenter)="getTooltipContent(chr, comp)"
+              (mouseleave)="hideTooltip()">
         </path>
       </g>
 
@@ -104,7 +104,7 @@
         <path *ngFor="let blk of refChr.blocks" stroke-width="0.3"
               [attr.d]="getChordPath(compRadii.ringInner, compGMap, blk)"
               [attr.fill]="blk.getColor()"
-              [attr.stroke]="blk.getColor()" >
+              [attr.stroke]="blk.getColor()">
         </path>
       </g>
 
@@ -116,14 +116,18 @@
         </text>
       </g>
     </g>
-  </svg>
 
-  <!-- Tooltip -->
-  <app-tooltip #tooltip id="tt"
-               [ngStyle]="{
-                            'left': this.tooltip.offsetX,
-                            'top': this.tooltip.offsetY,
-                            'display': this.tooltip.getDisplay()
-                          }">
-  </app-tooltip>
+    <!-- Tooltip Content -->
+    <g *ngIf="tooltipContent" id="genome-view-tooltip"
+       [ngStyle]="{'transform': 'translate(50%, 50%)'}">
+      <text id="tt-title"
+            text-anchor="middle">
+        {{ tooltipContent.title }}
+      </text>
+      <text id="tt-chr"
+            text-anchor="middle" [attr.dy]="13">
+        Chr {{ tooltipContent.chr }}
+      </text>
+    </g>
+  </svg>
 </div>

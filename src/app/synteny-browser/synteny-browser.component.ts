@@ -4,7 +4,7 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, OnInit, Output,
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { FilterCondition, Metadata } from './classes/interfaces';
+import { FilterCondition, Metadata, TooltipContent } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { Filter } from './classes/filter';

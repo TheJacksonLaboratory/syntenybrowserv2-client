@@ -26,6 +26,7 @@ export class FeatureSelectionComponent {
   search: string = '';
 
   selections: Feature[] = [];
+  highlighted: string[];
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 
@@ -116,5 +117,9 @@ export class FeatureSelectionComponent {
     this.ontologySearch.removeAssociation(symbol);
 
     this.updateSelections();
+  }
+
+  isHighlighted(featureID: string): boolean {
+    return this.highlighted && this.highlighted.indexOf(featureID) > -1;
   }
 }

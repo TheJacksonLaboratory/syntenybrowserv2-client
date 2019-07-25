@@ -1,6 +1,6 @@
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures } from '../classes/interfaces';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures, TooltipContent } from '../classes/interfaces';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
 import { Species } from '../classes/species';
@@ -14,8 +14,6 @@ import { DownloadService } from '../services/download.service';
   styleUrls: ['./genome-view.component.scss']
 })
 export class GenomeViewComponent implements OnInit {
-  @ViewChild('tooltip', {static: false}) tooltip: TooltipComponent;
-
   ref: Species;
   comp: Species;
   colors: object;
@@ -36,6 +34,10 @@ export class GenomeViewComponent implements OnInit {
 
   features: Feature[];
   featureBlocks: SyntenyBlock[];
+
+  tooltipContent: TooltipContent = null;
+
+  @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private http: ApiService, private downloader: DownloadService) { }
 
@@ -153,17 +155,12 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Shows the tooltip for the specified chromosome and species
-   * @param {string} chr - the chromosome that needs the tooltip
-   * @param {Species} species - the species the specified chromosome belongs to
-   * @param {MouseEvent} event - the hover event we use to get cursor location
+   * Hides the tooltip content as well as clears the highlighted features in
+   * the feature selection
    */
-  revealTooltip(chr: string, species: Species, event: MouseEvent): void {
-    let offsetY = (this.features && this.chrFeatures(chr).length > 0) ?
-                  event.offsetY - 75 : event.offsetY - 60;
-
-    this.tooltip.display(this.getTooltipContent(chr, species),
-                         event.offsetX - 65, offsetY, species.name);
+  hideTooltip(): void {
+    this.tooltipContent = null;
+    this.highlightFeatures.emit([]);
   }
 
 
@@ -321,22 +318,30 @@ export class GenomeViewComponent implements OnInit {
    * @param {string} chr - the chromosome that needs the tooltip
    * @param {Species} species - the species of the specified chromosome
    */
-  private getTooltipContent(chr: string, species: Species): object {
-    let data = { 'Chr': chr };
-    let hasFeatures = this.features && this.features.length > 0;
+  private getTooltipContent(chr: string, species: Species): void {
+    this.tooltipContent = {
+      title: species.name,
+      chr: chr
+    };
+
+    let chrFeatures = this.chrFeatures(chr);
+    let hasFeatures = this.features && chrFeatures.length > 0;
 
     // if tooltip is for reference species and there are features, display
     // the feature symbols in the tooltip
     if(species.taxonID === this.ref.taxonID && hasFeatures) {
-      let genes = this.features.filter(f => f.gene && f.chr === chr);
-      let qtls = this.features.filter(f => !f.gene && f.chr === chr);
+      let genes = chrFeatures.filter(f => f.gene).map(g => g.id);
+      let qtls = chrFeatures.filter(f => !f.gene).map(qtl => qtl.id);
 
-      if(genes.length > 0) data['Genes'] = genes.map(g => g.symbol).join(', ');
+      let features = [];
 
-      if(qtls.length > 0) data['QTLs'] = qtls.map(qtl => qtl.symbol).join(', ');
+      if(genes.length > 0) features.push(...genes);
+      if(qtls.length > 0) features.push(...qtls);
+
+      this.highlightFeatures.emit(features);
+    } else {
+      this.highlightFeatures.emit([]);
     }
-
-    return data;
   }
 
   /**
