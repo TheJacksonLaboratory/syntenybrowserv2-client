@@ -576,8 +576,8 @@
 
   <!-- Tooltip -->
   <app-tooltip #tooltip id="tt"
-               [ngStyle]="{ 'left': tooltip.offsetX,
-                            'top': tooltip.offsetY,
+               [ngStyle]="{ 'left': tooltip.x,
+                            'top': tooltip.y,
                             'display': tooltip.getDisplay() }">
   </app-tooltip>
 </div>

@@ -283,7 +283,9 @@ export class BlockViewBrowserComponent {
 
     // generate the tooltip for the gene
     this.tooltip.display(gene.getTooltipData(),
-                         e.offsetX, e.offsetY + 10, gene.symbol);
+                         this.getTooltipXValue(e.clientX),
+                         e.clientY,
+                         gene.symbol);
   }
 
   /**
@@ -303,7 +305,9 @@ export class BlockViewBrowserComponent {
 
     // generate the tooltip for the gene
     this.tooltip.display(gene.getTooltipData(),
-                         e.offsetX, e.offsetY + 10, gene.symbol);
+                         this.getTooltipXValue(e.clientX),
+                         e.clientY,
+                         gene.symbol);
   }
 
   /**
@@ -337,7 +341,9 @@ export class BlockViewBrowserComponent {
     if(block.getPxWidth() <= 125) {
       let speciesName = isComp ? this.comp.name : this.ref.name;
       this.tooltip.display(block.getTooltipData(isComp),
-                           e.offsetX, e.offsetY + 40, speciesName);
+                           this.getTooltipXValue(e.clientX),
+                           e.clientY,
+                           speciesName);
     }
   }
 
@@ -348,7 +354,9 @@ export class BlockViewBrowserComponent {
    */
   hoverQTL(qtl: QTL, e: MouseEvent): void {
     this.tooltip.display(qtl.getTooltipData(),
-                         e.offsetX, e.offsetY + 40, qtl.symbol);
+                         this.getTooltipXValue(e.clientX),
+                         e.clientY,
+                         qtl.symbol);
   }
 
 
@@ -1039,5 +1047,16 @@ export class BlockViewBrowserComponent {
                                         });
                            return match;
                          });
+  }
+
+  /**
+   * Returns the x value of the tooltip as the cursor x-value if the cursor is
+   * in the left 3/4 of the browser window in which case the tooltip will appear
+   * to the right of the cursor, otherwise the tooltip will appear to the left
+   * of the cursor
+   * @param {number} cursorX - the x-value of the cursor
+   */
+  private getTooltipXValue(cursorX: number): number {
+    return (cursorX >= window.innerWidth * 0.75) ? cursorX - 300 : cursorX;
   }
 }

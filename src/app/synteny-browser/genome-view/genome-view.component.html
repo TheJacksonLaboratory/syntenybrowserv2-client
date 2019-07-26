@@ -118,14 +118,11 @@
     </g>
 
     <!-- Tooltip Content -->
-    <g *ngIf="tooltipContent" id="genome-view-tooltip"
-       [ngStyle]="{'transform': 'translate(50%, 50%)'}">
-      <text id="tt-title"
-            text-anchor="middle">
+    <g *ngIf="tooltipContent" [ngStyle]="{'transform': 'translate(50%, 50%)'}">
+      <text id="tt-title" text-anchor="middle">
         {{ tooltipContent.title }}
       </text>
-      <text id="tt-chr"
-            text-anchor="middle" [attr.dy]="13">
+      <text id="tt-chr" text-anchor="middle" [attr.dy]="13">
         Chr {{ tooltipContent.chr }}
       </text>
     </g>

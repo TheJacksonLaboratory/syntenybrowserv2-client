@@ -137,7 +137,7 @@ export interface Exon {
 }
 
 export interface TooltipContent extends Object {
-  title: string;
+  title?: string;
   chr?: string;
   genes?: string;
   qtls?: string;
