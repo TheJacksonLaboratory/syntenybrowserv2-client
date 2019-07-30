@@ -99,10 +99,10 @@ export class SyntenyBlock {
   getTooltipData(isComp: boolean): object {
     return {
       'Chromosome': isComp ? this.compChr : this.refChr,
-      'Location': isComp ?
-                  `${this.getLabel(this.getTrueCompStart())} - 
-                   ${this.getLabel(this.getTrueCompEnd())}` :
-                  `${this.getLabel(this.refStart)} - ${this.getLabel(this.refEnd)}`
+      'Start': isComp ? this.getLabel(this.getTrueCompStart()) :
+                        this.getLabel(this.refStart),
+      'End': isComp ? this.getLabel(this.getTrueCompEnd()) :
+                      this.getLabel(this.refEnd)
     };
   }
 

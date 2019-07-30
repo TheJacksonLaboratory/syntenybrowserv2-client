@@ -81,3 +81,20 @@ clr-signpost-content {
     font-size: 10px;
   }
 }
+
+#tt {
+  font-size: 10px;
+
+  tspan, text.title { font-weight: bold; }
+
+  text.title {
+    text-anchor: middle;
+    font-size: 12px;
+  }
+
+  rect {
+    fill: #FFF;
+    fill-opacity: 0.7;
+    width: 1200px;
+  }
+}

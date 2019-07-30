@@ -2,7 +2,7 @@ import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
-import { BlockViewBrowserOptions, ComparisonScaling, Metadata, QTLMetadata } from '../classes/interfaces';
+import { BlockViewBrowserOptions, ComparisonScaling, Metadata, QTLMetadata, TooltipContent } from '../classes/interfaces';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
@@ -20,8 +20,6 @@ import { DownloadService } from '../services/download.service';
   styleUrls: ['./block-view-browser.component.scss']
 })
 export class BlockViewBrowserComponent {
-  @ViewChild('tooltip', {static: false}) tooltip: TooltipComponent;
-
   ref: Species;
   comp: Species;
   legend: Legend;
@@ -41,10 +39,10 @@ export class BlockViewBrowserComponent {
   brush: BrushBehavior<any>;
 
   width: number = 1200;
-  height: number = 520;
-  chromosomeViewHeight = 80;
-  browserOffset = 175;
-  trackHeight = 100;
+  height: number = 400;
+  chromosomeViewHeight = 60;
+  browserOffset = 120;
+  trackHeight = 80;
   minimumIntervalSize = 3000;
 
   interval: BrowserInterval;
@@ -56,6 +54,8 @@ export class BlockViewBrowserComponent {
   staticRefBPToPixels: ScaleLinear<number, number>;
   staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
+
+  tooltip: any = null;
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
@@ -274,18 +274,23 @@ export class BlockViewBrowserComponent {
    *                                 call is from the overview or browser
    */
   highlightRefGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
+    this.tooltip = {
+      title: gene.symbol,
+      content: gene.getTooltipData(),
+      x: this.width / 2 - 75
+    };
+
     if(!simple) {
       gene.highlight();
 
       // highlight gene's homologs comparison
       this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
-    }
 
-    // generate the tooltip for the gene
-    this.tooltip.display(gene.getTooltipData(),
-                         this.getTooltipXValue(e.clientX),
-                         e.clientY,
-                         gene.symbol);
+      this.tooltip.y = 35;
+
+    } else {
+      this.tooltip.y = 100;
+    }
   }
 
   /**
@@ -296,18 +301,22 @@ export class BlockViewBrowserComponent {
    *                                 call is from the overview or browser
    */
   highlightCompGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
+    this.tooltip = {
+      title: gene.symbol,
+      content: gene.getTooltipData(),
+      x: this.width / 2 - 75
+    };
+
     if(!simple) {
       gene.highlight();
 
       // highlight gene's homologs in the reference
       this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
-    }
 
-    // generate the tooltip for the gene
-    this.tooltip.display(gene.getTooltipData(),
-                         this.getTooltipXValue(e.clientX),
-                         e.clientY,
-                         gene.symbol);
+      this.tooltip.y = 145;
+    } else {
+      this.tooltip.y = 100;
+    }
   }
 
   /**
@@ -324,8 +333,8 @@ export class BlockViewBrowserComponent {
                    .forEach(g => g.unhighlight());
     }
 
-    // hide the tooltip for the gene
-    this.tooltip.clear();
+    // hide the tooltip
+    this.tooltip = null
   }
 
   /**
@@ -339,11 +348,12 @@ export class BlockViewBrowserComponent {
   hoverBlock(block: SyntenyBlock, e: MouseEvent, isComp: boolean = false): void {
     // if the block too small to not have its block coords shown, show a tooltip
     if(block.getPxWidth() <= 125) {
-      let speciesName = isComp ? this.comp.name : this.ref.name;
-      this.tooltip.display(block.getTooltipData(isComp),
-                           this.getTooltipXValue(e.clientX),
-                           e.clientY,
-                           speciesName);
+      this.tooltip = {
+        title: this.ref.name,
+        content: block.getTooltipData(isComp),
+        x: this.width / 2 - 75,
+        y: isComp ? 180 : 70
+      };
     }
   }
 
@@ -353,10 +363,12 @@ export class BlockViewBrowserComponent {
    * @param {MouseEvent} e - the mouseover event to get cursor coordinates
    */
   hoverQTL(qtl: QTL, e: MouseEvent): void {
-    this.tooltip.display(qtl.getTooltipData(),
-                         this.getTooltipXValue(e.clientX),
-                         e.clientY,
-                         qtl.symbol);
+    this.tooltip = {
+      title: qtl.symbol,
+      content: qtl.getTooltipData(),
+      x: this.width / 2 - 75,
+      y: 66
+    }
   }
 
 
@@ -498,6 +510,17 @@ export class BlockViewBrowserComponent {
                          .replace(/!/g, '')
                          .replace(/\+/g, ' ');
   }
+
+  /**
+   * Returns the keys of the tooltip's content attribute
+   */
+  getTTItems(): string[] { return Object.keys(this.tooltip.content); }
+
+  /**
+   * Returns the height the tooltip should be based on the number of data items
+   * it will contain
+   */
+  getTTHeight(): number { return this.getTTItems().length * 11 + 23; }
 
 
   // Condition Checks
@@ -887,7 +910,7 @@ export class BlockViewBrowserComponent {
           ~ A.L.
      */
     this.brush = d3.brushX()
-                  .extent([[0, 10], [this.width, this.chromosomeViewHeight - 4]])
+                  .extent([[0, 12], [this.width, this.chromosomeViewHeight - 7]])
                   .on('brush', () => {
                     let e = d3.event;
 
@@ -1047,16 +1070,5 @@ export class BlockViewBrowserComponent {
                                         });
                            return match;
                          });
-  }
-
-  /**
-   * Returns the x value of the tooltip as the cursor x-value if the cursor is
-   * in the left 3/4 of the browser window in which case the tooltip will appear
-   * to the right of the cursor, otherwise the tooltip will appear to the left
-   * of the cursor
-   * @param {number} cursorX - the x-value of the cursor
-   */
-  private getTooltipXValue(cursorX: number): number {
-    return (cursorX >= window.innerWidth * 0.75) ? cursorX - 300 : cursorX;
   }
 }

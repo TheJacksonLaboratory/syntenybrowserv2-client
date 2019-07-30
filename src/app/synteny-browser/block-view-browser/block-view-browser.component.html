@@ -208,7 +208,7 @@
     <rect [attr.width]="width + 10" [attr.height]="height + 10" fill="#FFF"></rect>
 
     <!-- Content container -->
-    <g id="block-view-content-container" [attr.transform]="translate([5, 5])">
+    <g id="block-view-content-container" [attr.transform]="translate([5, 0])">
       <!-- Chromsome view -->
       <g id="chromosome-view" font-size="8" font-family="Metropolis, sans-serif">
         <!-- Chromosome view syntenic blocks (and background) -->
@@ -228,7 +228,7 @@
 
         <!-- Indicators for selected and filtered genes in the reference chromosome -->
         <path *ngFor="let gene of selectedRefGenes" stroke="#F00"
-              [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 8, 5)"
+              [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
               (mouseenter)="highlightRefGene(gene, $event, true)"
               (mouseleave)="unhighlightGene(true)">
         </path>
@@ -236,7 +236,7 @@
         <!-- Indicators for selected/filtered features in the comparison chromosome -->
         <path *ngFor="let gene of selectedCompGenes" stroke="#F00"
               [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)),
-                                   8,
+                                   5,
                                    chromosomeViewHeight - 8)"
               (mouseenter)="highlightCompGene(gene, $event, true)"
               (mouseleave)="unhighlightGene(true)">
@@ -249,12 +249,12 @@
                                    qtl.getIndWidth(2),
                                    qtl.getIndStart())"
               (mouseenter)="hoverQTL(qtl, $event)"
-              (mouseleave)="tooltip.clear()">
+              (mouseleave)="tooltip = null">
         </path>
 
         <!-- Static axis for chromosome view -->
         <g id="chr-view-axis"
-           [attr.transform]="translate([0, chromosomeViewHeight + 5])">
+           [attr.transform]="translate([0, chromosomeViewHeight])">
         </g>
       </g>
 
@@ -269,11 +269,6 @@
 
         <!-- Background -->
         <rect class="trans-bg bg" [attr.height]="(2 * trackHeight) + 30"></rect>
-
-        <!-- Dynamic axis that scales with browser for more reference context -->
-        <g id="browser-axis" text-anchor="middle"
-           [attr.transform]="translate([0, -15])">
-        </g>
 
         <!-- Reference chromosome track -->
         <g id="reference-genome">
@@ -313,7 +308,7 @@
                   [attr.width]="block.getPxWidth()"
                   [attr.height]="trackHeight"
                   (mouseenter)="hoverBlock(block, $event)"
-                  (mouseleave)="tooltip.clear()">
+                  (mouseleave)="tooltip = null">
             </rect>
           </g>
 
@@ -325,7 +320,7 @@
                   [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
                   [attr.height]="qtl.height"
                   (mouseenter)="hoverQTL(qtl, $event)"
-                  (mouseleave)="tooltip.clear()">
+                  (mouseleave)="tooltip = null">
             </rect>
           </g>
 
@@ -387,7 +382,7 @@
                   [attr.width]="block.getPxWidth()"
                   [attr.height]="trackHeight"
                   (mouseenter)="hoverBlock(block, $event, true)"
-                  (mouseleave)="tooltip.clear()"
+                  (mouseleave)="tooltip = null"
                   [ngStyle]="{ 'fill': block.getColor(legend.hoverChr),
                                'stroke': block.getColor(legend.hoverChr) }">
             </rect>
@@ -476,10 +471,10 @@
 
         <!-- Interval coordinates for current view extents in reference positions -->
         <g *ngIf="interval" id="reference-interval-coordinates" font-size="10"
-           [attr.transform]="translate([0, -35])">
+           [attr.transform]="translate([0, -15])">
           <!-- Vertical line extending start point of reference interval -->
           <path stroke="#000" stroke-width="1.5"
-                [attr.d]="getVLinePath(0, trackHeight + 43, -8)">
+                [attr.d]="getVLinePath(0, trackHeight + 23, -8)">
           </path>
 
           <!-- Start position -->
@@ -494,7 +489,7 @@
 
           <!-- Vertical line extending end point of reference interval -->
           <path stroke="#000" stroke-width="1.5"
-                [attr.d]="getVLinePath(width, trackHeight + 43, -8)">
+                [attr.d]="getVLinePath(width, trackHeight + 23, -8)">
           </path>
         </g>
 
@@ -567,17 +562,22 @@
             [attr.transform]="translate([width + 1, 0])">
       </rect>
 
-      <!-- Loading overlay -->
-      <g *ngIf="!(blocks && refGenes && compGenes)" id="loading-overlay">
-        <rect [attr.width]="width" [attr.height]="height"></rect>
+      <g *ngIf="tooltip; let t" id="tt"
+         [attr.transform]="translate([0, t.y])">
+        <rect [attr.height]="getTTHeight()" y="-13"></rect>
+        <g id="tt-content" [attr.transform]="translate([t.x, 0])">
+          <text class="title" x="75">{{ t.title }}</text>
+          <text *ngFor="let key of getTTItems(); let i=index" x="5"
+                [attr.transform]="translate([0, (i * 11) + 13])">
+            <tspan>{{ key }}:</tspan> {{ t.content[key] }}
+          </text>
+        </g>
       </g>
     </g>
-  </svg>
 
-  <!-- Tooltip -->
-  <app-tooltip #tooltip id="tt"
-               [ngStyle]="{ 'left': tooltip.x,
-                            'top': tooltip.y,
-                            'display': tooltip.getDisplay() }">
-  </app-tooltip>
+    <!-- Loading overlay -->
+    <g *ngIf="!(blocks && refGenes && compGenes)" id="loading-overlay">
+      <rect [attr.width]="width + 10" [attr.height]="height + 10"></rect>
+    </g>
+  </svg>
 </div>
