@@ -2,7 +2,7 @@ import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
-import { BlockViewBrowserOptions, ComparisonScaling, Metadata, QTLMetadata, TooltipContent } from '../classes/interfaces';
+import { BlockViewBrowserOptions, ComparisonScaling, QTLMetadata } from '../classes/interfaces';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
@@ -10,7 +10,6 @@ import { Legend } from '../classes/legend';
 import { QTL } from '../classes/qtl';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
-import { TooltipComponent } from '../tooltip/tooltip.component';
 import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 

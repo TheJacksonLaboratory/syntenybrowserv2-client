@@ -5,7 +5,6 @@ import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
-import { TooltipComponent } from '../tooltip/tooltip.component';
 import { DownloadService } from '../services/download.service';
 
 @Component({

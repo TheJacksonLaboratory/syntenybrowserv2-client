@@ -15,7 +15,6 @@ import { BlockViewBrowserComponent } from './block-view-browser/block-view-brows
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
-import { TooltipComponent } from './tooltip/tooltip.component';
 import { ConditionConstructorComponent } from './block-view-filter/condition-constructor/condition-constructor.component';
 import { OntologySearchComponent } from './feature-selection/ontology-search/ontology-search.component';
 import { FeatureSearchComponent } from './feature-selection/feature-search/feature-search.component';
@@ -40,12 +39,11 @@ import { ApiService } from './services/api.service';
     FeatureSelectionComponent,
     GenomeViewComponent,
     SpeciesSelectionComponent,
-    TooltipComponent,
     BlockViewFilterComponent,
     ConditionConstructorComponent,
     OntologySearchComponent,
     FeatureSearchComponent,
-  ], 
+  ],
   providers: [
     ApiService,
     HttpClient
