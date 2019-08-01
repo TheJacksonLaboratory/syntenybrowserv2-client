@@ -230,7 +230,8 @@
         <path *ngFor="let gene of selectedRefGenes" stroke="#F00"
               [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
               (mouseenter)="highlightRefGene(gene, $event, true)"
-              (mouseleave)="unhighlightGene(true)">
+              (mouseleave)="unhighlightGene(true)"
+              (click)="showDataForGene(gene)">
         </path>
 
         <!-- Indicators for selected/filtered features in the comparison chromosome -->
@@ -239,7 +240,8 @@
                                    5,
                                    chromosomeViewHeight - 8)"
               (mouseenter)="highlightCompGene(gene, $event, true)"
-              (mouseleave)="unhighlightGene(true)">
+              (mouseleave)="unhighlightGene(true)"
+              (click)="showDataForGene(gene)">
         </path>
 
         <!-- Indicators for selected QTLs -->
@@ -333,7 +335,8 @@
                     [ngStyle]="{ 'fill': gene.getColor(),
                                  'display': gene.hidden ? 'none' : 'initial' }"
                     (mouseenter)="highlightRefGene(gene, $event)"
-                    (mouseleave)="unhighlightGene()">
+                    (mouseleave)="unhighlightGene()"
+                    (click)="showDataForGene(gene)">
                 {{ gene.symbol }}
               </text>
 
@@ -358,7 +361,8 @@
               <rect height="5" fill="transparent"
                     [attr.width]="gene.getWidth(refBPToPixels)"
                     (mouseenter)="highlightRefGene(gene, $event)"
-                    (mouseleave)="unhighlightGene()">
+                    (mouseleave)="unhighlightGene()"
+                    (click)="showDataForGene(gene)">
               </rect>
             </g>
           </g>
@@ -398,7 +402,8 @@
                     [ngStyle]="{ 'fill': gene.getColor(),
                                  'display': gene.hidden ? 'none' : 'initial' }"
                     (mouseenter)="highlightCompGene(gene, $event)"
-                    (mouseleave)="unhighlightGene()">
+                    (mouseleave)="unhighlightGene()"
+                    (click)="showDataForGene(gene)">
                 {{ gene.symbol }}
               </text>
 
@@ -424,7 +429,8 @@
               <rect height="5" fill="transparent"
                     [attr.width]="gene.getWidth(getScale(gene))"
                     (mouseenter)="highlightCompGene(gene, $event)"
-                    (mouseleave)="unhighlightGene()">
+                    (mouseleave)="unhighlightGene()"
+                    (click)="showDataForGene(gene)">
               </rect>
             </g>
           </g>
@@ -567,7 +573,7 @@
         <rect [attr.height]="getTTHeight()" y="-13"></rect>
         <g id="tt-content" [attr.transform]="translate([t.x, 0])">
           <text class="title" x="75">{{ t.title }}</text>
-          <text *ngFor="let key of getTTItems(); let i=index" x="5"
+          <text *ngFor="let key of getTTItems(tooltip); let i=index" x="5"
                 [attr.transform]="translate([0, (i * 11) + 13])">
             <tspan>{{ key }}:</tspan> {{ t.content[key] }}
           </text>
@@ -581,3 +587,18 @@
     </g>
   </svg>
 </div>
+
+<clr-modal *ngIf="clicktip; let c" [(clrModalOpen)]="clicktipOpen">
+  <h3 class="modal-title" style="font-weight: bold">{{ c.title }}</h3>
+  <div class="modal-body">
+    <h4>Basic Information</h4>
+    <p *ngFor="let key of getTTItems(c)">
+      <span style="font-weight: bold">{{ key }}:</span> {{ c.content[key] }}
+    </p>
+    <br/>
+    <h4>Resources</h4>
+    <p *ngFor="let r of c.resources">
+      <a [href]="r.url + c.id" target="_blank">See information on {{ r.name }}</a>
+    </p>
+  </div>
+</clr-modal>

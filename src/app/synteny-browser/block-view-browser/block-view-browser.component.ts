@@ -56,6 +56,8 @@ export class BlockViewBrowserComponent {
   refBPToPixels: ScaleLinear<number, number>;
 
   tooltip: any = null;
+  clicktip: any = null;
+  clicktipOpen = false;
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
@@ -371,6 +373,21 @@ export class BlockViewBrowserComponent {
     }
   }
 
+  /**
+   * Retrieves the information necessary to show gene data in the clicktip dialog
+   * @param {Gene} gene - the gene clicked to retrieve data for
+   */
+  showDataForGene(gene: Gene): void {
+    this.clicktip = {
+      title: gene.symbol,
+      content: gene.getClicktipData(),
+      resources: gene.species === 'ref' ? this.ref.resources : this.comp.resources,
+      id: gene.id
+    };
+
+    this.clicktipOpen = true;
+  }
+
 
   // Getter Methods
 
@@ -514,13 +531,13 @@ export class BlockViewBrowserComponent {
   /**
    * Returns the keys of the tooltip's content attribute
    */
-  getTTItems(): string[] { return Object.keys(this.tooltip.content); }
+  getTTItems(tooltip: any): string[] { return Object.keys(tooltip.content); }
 
   /**
    * Returns the height the tooltip should be based on the number of data items
    * it will contain
    */
-  getTTHeight(): number { return this.getTTItems().length * 11 + 23; }
+  getTTHeight(): number { return this.getTTItems(this.tooltip).length * 11 + 23; }
 
 
   // Condition Checks
@@ -647,7 +664,7 @@ export class BlockViewBrowserComponent {
                    return rh.id;
                  });
 
-                 return new Gene(h, this.trackHeight, this.blocks);
+                 return new Gene(h, this.trackHeight, this.ref.taxonID, this.blocks);
                }).filter(h => {
                  let syntenic = h.isSyntenic();
 
@@ -677,7 +694,7 @@ export class BlockViewBrowserComponent {
                  // add selected attribute if it is listed as selected
                  g.sel = featureIDs.indexOf(g.id) > -1;
 
-                 let gene = new Gene(g, this.trackHeight);
+                 let gene = new Gene(g, this.trackHeight, this.ref.taxonID);
 
                  // if the gene is selected, push it to the selected reference
                  // gene array
