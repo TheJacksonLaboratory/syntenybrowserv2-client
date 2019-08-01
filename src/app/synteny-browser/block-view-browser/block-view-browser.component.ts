@@ -32,6 +32,9 @@ export class BlockViewBrowserComponent {
   selectedCompGenes: Gene[] = [];
   selectedQTLs: QTL[] = [];
 
+  filteredRefGenes: Gene[] = [];
+  filteredCompGenes: Gene[] = [];
+
   filters: Filter[] = [];
 
   progress: number = 0;

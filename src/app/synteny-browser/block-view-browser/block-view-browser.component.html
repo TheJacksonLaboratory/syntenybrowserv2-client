@@ -226,7 +226,7 @@
           <g id="chr-view-inv-cover"></g>
         </g>
 
-        <!-- Indicators for selected and filtered genes in the reference chromosome -->
+        <!-- Indicators for selected genes in the reference chromosome -->
         <path *ngFor="let gene of selectedRefGenes" stroke="#F00"
               [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
               (mouseenter)="highlightRefGene(gene, $event, true)"
@@ -234,8 +234,26 @@
               (click)="showDataForGene(gene)">
         </path>
 
-        <!-- Indicators for selected/filtered features in the comparison chromosome -->
+        <!-- Indicators for selected features in the comparison chromosome -->
         <path *ngFor="let gene of selectedCompGenes" stroke="#F00"
+              [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)),
+                                   5,
+                                   chromosomeViewHeight - 8)"
+              (mouseenter)="highlightCompGene(gene, $event, true)"
+              (mouseleave)="unhighlightGene(true)"
+              (click)="showDataForGene(gene)">
+        </path>
+
+        <!-- Indicators for filtered genes in the reference chromosome -->
+        <path *ngFor="let gene of filteredRefGenes" stroke="#00F"
+              [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
+              (mouseenter)="highlightRefGene(gene, $event, true)"
+              (mouseleave)="unhighlightGene(true)"
+              (click)="showDataForGene(gene)">
+        </path>
+
+        <!-- Indicators for filtered features in the comparison chromosome -->
+        <path *ngFor="let gene of filteredCompGenes" stroke="#00F"
               [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)),
                                    5,
                                    chromosomeViewHeight - 8)"

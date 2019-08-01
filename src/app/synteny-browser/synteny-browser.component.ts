@@ -72,7 +72,7 @@ export class SyntenyBrowserComponent implements OnInit {
     this.features.load(this.refSpecies);
 
     // TODO: this is here for work on filters
-    // this.automateFlowToWorkOnFilters();
+    this.automateFlowToWorkOnFilters();
   }
 
   /**
@@ -117,10 +117,17 @@ export class SyntenyBrowserComponent implements OnInit {
    * Updates the block view with the most recent filter conditions
    */
   getFilters(): void {
-    this.filterOpen = false;
-    this.filters = this.blockViewFilters.getCreatedFilters();
+    let bvb = this.blockViewBrowser;
+    let bvf = this.blockViewFilters;
 
-    this.blockViewBrowser.filters = this.filters;
+    this.filters = bvf.getCreatedFilters();
+    bvb.filters = this.filters;
+
+    const filteredGenes = bvf.filteredGenes.filter(g => g.filtered);
+    bvb.filteredRefGenes = filteredGenes.filter(g => g.species === 'ref');
+    bvb.filteredCompGenes = filteredGenes.filter(g => g.species === 'comp');
+
+    this.filterOpen = false;
   }
 
   /**
