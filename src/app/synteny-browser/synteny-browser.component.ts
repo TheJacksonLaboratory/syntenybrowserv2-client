@@ -1,10 +1,9 @@
 import { ApiService } from './services/api.service';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { FilterCondition, Metadata, TooltipContent } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { Filter } from './classes/filter';

@@ -1,5 +1,5 @@
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures, TooltipContent } from '../classes/interfaces';
+import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures } from '../classes/interfaces';
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
@@ -34,7 +34,7 @@ export class GenomeViewComponent implements OnInit {
   features: Feature[];
   featureBlocks: SyntenyBlock[];
 
-  tooltipContent: TooltipContent = null;
+  tooltipContent: any = null;
 
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 

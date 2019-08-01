@@ -1,4 +1,4 @@
-import { Exon, TooltipContent } from './interfaces';
+import { Exon } from './interfaces';
 import { format, ScaleLinear } from 'd3';
 import { SyntenyBlock } from './synteny-block';
 
