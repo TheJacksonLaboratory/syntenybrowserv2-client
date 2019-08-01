@@ -136,13 +136,6 @@ export interface Exon {
   end: number;
 }
 
-export interface TooltipContent extends Object {
-  title?: string;
-  chr?: string;
-  genes?: string;
-  qtls?: string;
-}
-
 export interface ReferenceChr {
   chr: string;
   size: number;
