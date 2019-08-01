@@ -61,6 +61,9 @@ export class BlockViewBrowserComponent {
   clicktip: any = null;
   clicktipOpen = false;
 
+  downloadFilename: string = '';
+  filenameModalOpen = false;
+
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: ApiService, private downloader: DownloadService) {
@@ -106,11 +109,9 @@ export class BlockViewBrowserComponent {
    */
   download(): void {
     this.setObjectAttributes();
-
-    let fname = this.ref.commonName + '_' + this.refChr + ':' +
-                this.interval.refStart+ '-' + this.interval.refEnd;
-
-    this.downloader.downloadSVG('browser-svg', fname);
+    this.downloader.downloadSVG('browser-svg', this.downloadFilename);
+    this.filenameModalOpen = false;
+    this.downloadFilename = '';
   }
 
   /**

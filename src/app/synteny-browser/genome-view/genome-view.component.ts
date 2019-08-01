@@ -36,6 +36,9 @@ export class GenomeViewComponent implements OnInit {
 
   tooltipContent: any = null;
 
+  downloadFilename: string = '';
+  filenameModalOpen = false;
+
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private http: ApiService, private downloader: DownloadService) { }
@@ -101,9 +104,9 @@ export class GenomeViewComponent implements OnInit {
    * TODO: let users choose the name they want to use for the download
    */
   download(): void {
-    let fname = this.ref.commonName + (this.refChr ? '_' + this.refChr.chr : '');
-
-    this.downloader.downloadSVG('genome-view-svg', fname);
+    this.downloader.downloadSVG('genome-view-svg', this.downloadFilename);
+    this.filenameModalOpen = false;
+    this.downloadFilename = '';
   }
 
   /**

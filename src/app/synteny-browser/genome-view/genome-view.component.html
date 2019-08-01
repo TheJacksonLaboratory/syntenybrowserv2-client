@@ -1,6 +1,6 @@
 <div *ngIf="genomeData" id="genome-view-container">
   <div class="clr-row clr-justify-content-end">
-    <button class="btn" (click)="download()">
+    <button class="btn" (click)="filenameModalOpen = true">
       <clr-icon shape="download"></clr-icon> Download
     </button>
   </div>
@@ -128,3 +128,27 @@
     </g>
   </svg>
 </div>
+
+<clr-modal [(clrModalOpen)]="filenameModalOpen">
+  <h3 class="modal-title">Download SVG</h3>
+  <div class="modal-body">
+    <h4>Choose a Filename</h4>
+    <div class="clr-row bottom-1 left-1">
+      <p><i>Downloaded files will be in PNG format</i></p>
+      <div class="clr-col-7">
+        <clr-input-container style="margin-top: 0.4rem;">
+          <label for="filename-input"></label>
+
+          <input id="filename-input" clrInput placeholder="Name the file (.png)"
+                 [(ngModel)]="downloadFilename">
+        </clr-input-container>
+      </div>
+      <div class="clr-col">
+        <button class="btn" [disabled]="downloadFilename === ''"
+                (click)="download()">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</clr-modal>
