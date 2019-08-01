@@ -71,7 +71,7 @@ export class SyntenyBrowserComponent implements OnInit {
     this.features.load(this.refSpecies);
 
     // TODO: this is here for work on filters
-    this.automateFlowToWorkOnFilters();
+    // this.automateFlowToWorkOnFilters();
   }
 
   /**

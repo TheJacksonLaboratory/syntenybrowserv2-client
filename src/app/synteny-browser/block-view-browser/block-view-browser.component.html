@@ -153,7 +153,7 @@
         <!-- Download button -->
         <button class="btn block-view-option"
                 [disabled]="!compGenes"
-                (click)="download()">
+                (click)="filenameModalOpen = true">
           <clr-icon shape="download"></clr-icon>
         </button>
 
@@ -606,7 +606,7 @@
   </svg>
 </div>
 
-<clr-modal *ngIf="clicktip; let c" [(clrModalOpen)]="clicktipOpen">
+<clr-modal *ngIf="clicktip; let c" id="ctip" [(clrModalOpen)]="clicktipOpen">
   <h3 class="modal-title" style="font-weight: bold">{{ c.title }}</h3>
   <div class="modal-body">
     <h4>Basic Information</h4>
@@ -618,5 +618,29 @@
     <p *ngFor="let r of c.resources">
       <a [href]="r.url + c.id" target="_blank">See information on {{ r.name }}</a>
     </p>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="filenameModalOpen">
+  <h3 class="modal-title">Download SVG</h3>
+  <div class="modal-body">
+    <h4>Choose a Filename</h4>
+    <div class="clr-row bottom-1">
+      <p><i>Downloaded files will be in PNG format</i></p>
+      <div class="clr-col-7">
+        <clr-input-container style="margin-top: 0.4rem;">
+          <label for="filename-input"></label>
+
+          <input id="filename-input" clrInput placeholder="Name the file (.png)"
+                 [(ngModel)]="downloadFilename">
+        </clr-input-container>
+      </div>
+      <div class="clr-col">
+        <button class="btn" [disabled]="downloadFilename === ''"
+                (click)="download()">
+          OK
+        </button>
+      </div>
+    </div>
   </div>
 </clr-modal>
