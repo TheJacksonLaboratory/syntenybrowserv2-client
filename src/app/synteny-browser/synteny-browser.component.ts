@@ -4,7 +4,7 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, OnInit, Output,
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { FilterCondition, Metadata } from './classes/interfaces';
+import { FilterCondition, Metadata, TooltipContent } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { Filter } from './classes/filter';
@@ -28,7 +28,7 @@ export class SyntenyBrowserComponent implements OnInit {
   viewInBrowser: boolean = false;
 
   filterOpen: boolean = false;
-  filters: Array<Filter> = [];
+  filters: Filter[] = [];
 
   constructor(private http: ApiService, private cdr: ChangeDetectorRef) { }
 
@@ -40,7 +40,7 @@ export class SyntenyBrowserComponent implements OnInit {
       // get available species from the API
       this.http.getSpecies().subscribe(species => {
         // create species for species and pass them to the selection component
-        this.species.setSpecies(species.map(id => new Species(id)));
+        this.species.setSpecies(species.map(s => new Species(s)));
 
         this.updateSpecies();
       });

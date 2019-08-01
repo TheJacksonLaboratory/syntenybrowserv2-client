@@ -55,7 +55,8 @@
     </div>
 
     <div *ngIf="selections.length > 0">
-      <span *ngFor="let sel of selections" class="label label-light-blue">
+      <span *ngFor="let sel of selections" class="label label-light-blue"
+            [ngClass]="{'highlighted': isHighlighted(sel.id)}">
         {{ sel.symbol }}
         <clr-icon shape="close" (click)="removeSelection(sel.symbol)"></clr-icon>
       </span>

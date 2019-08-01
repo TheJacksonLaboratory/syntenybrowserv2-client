@@ -9,8 +9,8 @@ import { TooltipContent } from '../classes/interfaces';
 export class TooltipComponent {
   data: TooltipContent;
   title: string;
-  offsetX: string = '0px';
-  offsetY: string = '0px';
+  x: string = '0px';
+  y: string = '0px';
   hidden: boolean = true;
 
   constructor() { }
@@ -29,8 +29,8 @@ export class TooltipComponent {
     this.data = data;
     this.title = title;
 
-    this.offsetX = `${x}px`;
-    this.offsetY = `${y}px`;
+    this.x = `${x}px`;
+    this.y = `${y}px`;
 
     this.hidden = false;
   }
@@ -43,8 +43,8 @@ export class TooltipComponent {
     this.data = null;
     this.title = null;
 
-    this.offsetX = null;
-    this.offsetY = null;
+    this.x = null;
+    this.y = null;
 
     this.hidden = true;
   }
@@ -60,6 +60,6 @@ export class TooltipComponent {
   /**
    * Returns the keys of the data (displayed as data types/titles for rows)
    */
-  getDataRowKeys(): Array<string> { return Object.keys(this.data); }
+  getDataRowKeys(): string[] { return Object.keys(this.data); }
 
 }

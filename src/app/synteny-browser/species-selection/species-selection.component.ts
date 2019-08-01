@@ -6,7 +6,7 @@ import { Species } from '../classes/species';
   templateUrl: './species-selection.component.html'
 })
 export class SpeciesSelectionComponent {
-  species: Array<Species>;
+  species: Species[];
   refSpecies: string;
   compSpecies: string;
 
@@ -20,9 +20,9 @@ export class SpeciesSelectionComponent {
   /**
    * Sets the reference and comparison species to the the first and
    * second species available, respectively
-   * @param {Array<Species>} species - list of available species to compare
+   * @param {Species[]} species - list of available species to compare
    */
-  setSpecies(species: Array<Species>): void {
+  setSpecies(species: Species[]): void {
     this.species = species;
     this.refSpecies = this.species[0].getID();
     this.compSpecies = this.species[1].getID();

@@ -7,22 +7,22 @@ import {
   TypeComparator } from './comparators';
 import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
 import { Feature } from './feature';
-import { DescendantTerm, OntologyTerm } from './interfaces';
+import { DescendantTerm, ExternalResource, OntologyTerm } from './interfaces';
 import { format } from 'd3-format';
 import { EventEmitter, Output } from '@angular/core';
 
 export class TableData<T> {
   loading: boolean;
-  rows: Array<T> =[];
-  filteredRows: Array<T> = [];
-  columns: Array<string>;
-  searchableColumns: Array<string>;
+  rows: T[] =[];
+  filteredRows: T[] = [];
+  columns: string[];
+  searchableColumns: string[];
 
   dragging: boolean = false;
   dragMode: string = null;
 
   // only features are stored in the selections array
-  selections: Array<Feature> = [];
+  selections: Feature[] = [];
 
   // sorting classes
   idComp = new IDComparator();
@@ -32,7 +32,7 @@ export class TableData<T> {
   descComp = new DescendantsComparator();
   nameComp = new NameComparator();
 
-  constructor(columns: Array<string>, searchable: Array<string>) {
+  constructor(columns: string[], searchable: string[]) {
     this.loading = false;
     this.columns = columns;
     this.searchableColumns = searchable;
@@ -41,12 +41,12 @@ export class TableData<T> {
   /**
    * Sets the rows (and filtered rows) of the table and sorts the rows if a
    * sortOn parameter is specified, and stops the loading
-   * @param {Array<OntologyTerm|Feature>} rows - rows for the table which may be
+   * @param {OntologyTerm[]|Feature[]} rows - rows for the table which may be
 *                              ontology terms or features depending on the table
    * @param {string} sortOn - a key that exists in the row objects that can be
    *                          used to sort the rows
    */
-  setRows(rows: Array<T>, sortOn: string = ''): void {
+  setRows(rows: T[], sortOn: string = ''): void {
     this.rows = sortOn ? rows.sort((a, b) => this.compare(a, b, sortOn)) : rows;
 
     this.filteredRows = this.rows;
@@ -89,7 +89,7 @@ export class TableData<T> {
     }
   }
 
-  getDescendants(term: OntologyTerm): Array<DescendantTerm> {
+  getDescendants(term: OntologyTerm): DescendantTerm[] {
     if(term.descendants.length > 10) {
       let descs = term.descendants.slice(0, 10);
       let numRemain = term.descendants.length - 10;

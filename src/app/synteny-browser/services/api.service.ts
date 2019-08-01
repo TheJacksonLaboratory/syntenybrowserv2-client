@@ -18,9 +18,9 @@ export class ApiService {
    * Returns a list of all genes belonging to the specified species (by taxon ID)
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
-  getAllGenes(taxonID: string): Observable<Array<Feature>> {
+  getAllGenes(taxonID: string): Observable<Feature[]> {
     let url = `${this.newRoot}/genes/metadata/${taxonID}`;
-    return this.http.get<Array<Feature>>(url)
+    return this.http.get<Feature[]>(url)
                     .pipe(map(resp => resp.map(g => new Feature(g))));
   }
 
@@ -28,9 +28,9 @@ export class ApiService {
    * Returns a list of all QTLs belonging to the specified species (by taxon ID)
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
-  getAllQTLs(taxonID: string): Observable<Array<Feature>> {
+  getAllQTLs(taxonID: string): Observable<Feature[]> {
     let url = `${this.newRoot}/qtls/${taxonID}`;
-    return this.http.get<Array<Feature>>(url)
+    return this.http.get<Feature[]>(url)
                     .pipe(map(resp => resp.map(q => new Feature(q))));
   }
 
@@ -38,7 +38,7 @@ export class ApiService {
    * Returns a list of ontology terms that exist for the specified ontology
    * @param {string} ontology - ontology ID prefix
    */
-  getOntologyTerms(ontology: string): Observable<Array<OntologyTerm>> {
+  getOntologyTerms(ontology: string): Observable<OntologyTerm[]> {
     let url = `${this.oldRoot}/ontologies/terms/${ontology}`;
     return this.http.get<Response>(url).pipe(map(resp => resp.terms));
   }
@@ -49,7 +49,7 @@ export class ApiService {
    * @param {string} taxonID - stringified taxon ID for the desired species
    * @param {string} termID - string to search for genes by matching ontologies
    */
-  getAssociationsForTerm(taxonID: string, termID: string): Observable<Array<Feature>> {
+  getAssociationsForTerm(taxonID: string, termID: string): Observable<Feature[]> {
     let url = `${this.oldRoot}/ontologies/associations/${taxonID}/${termID}`;
 
     return this.http.get<Response>(url)
@@ -62,22 +62,17 @@ export class ApiService {
    * Returns a list of ontology term names and IDs for the specified ontology
    * @param {string} ontology - ontology ID prefix
    */
-  getTermsForAutocomplete(ontology: string): Observable<Array<any>> {
+  getTermsForAutocomplete(ontology: string): Observable<any[]> {
     let url = `${this.oldRoot}/ontologies/terms/simple/${ontology}`;
     return this.http.get<Response>(url).pipe(map(resp => resp.terms));
   }
 
   /**
-   * Returns a list of species that present in the database
-   * TODO: Currently we're getting taxon IDs using a query not really intended
-   * TODO: for this, not to mention that the DB doesn't actually have a table
-   * TODO: for just species and species-related data. We need a loader script
-   * TODO: that takes a config like we have in the original repo and turn each
-   * TODO: one into a row in a relational table
+   * Returns a list of species that are present in the database
    */
-  getSpecies(): Observable<Array<number>> {
-    return this.http.get<Array<any>>(`${this.newRoot}/species`)
-                    .pipe(map(resp => resp.map(s => s.organism.taxon_id).sort()));
+  getSpecies(): Observable<number[]> {
+    return this.http.get<any[]>(`${this.newRoot}/species`)
+                    .pipe(map(resp => resp.map(s => s.organism)));
   }
 
   /**
@@ -87,9 +82,9 @@ export class ApiService {
    * @param {string} compTaxonID - stringified taxon ID for comparison species
    */
   getGenomeSynteny(refTaxonID: string, compTaxonID: string)
-                  : Observable<Array<SyntenyBlock>> {
+                  : Observable<SyntenyBlock[]> {
     let url = `${this.newRoot}/blocks/${refTaxonID}/${compTaxonID}`;
-    return this.http.get<Array<SyntenyBlock>>(url)
+    return this.http.get<SyntenyBlock[]>(url)
                     .pipe(map(resp => resp.map(b => new SyntenyBlock(b))));
   }
 
@@ -101,9 +96,9 @@ export class ApiService {
    * @param {string} chr - the chromosome to get blocks for
    */
   getChromosomeSynteny(refTaxonID: string, compTaxonID: string, chr: string)
-                      : Observable<Array<SyntenyBlock>> {
+                      : Observable<SyntenyBlock[]> {
     let url = `${this.newRoot}/blocks/${refTaxonID}/${compTaxonID}/${chr}`;
-    return this.http.get<Array<SyntenyBlock>>(url)
+    return this.http.get<SyntenyBlock[]>(url)
                     .pipe(map(resp => resp.map(b => new SyntenyBlock(b, true))));
   }
 
@@ -114,15 +109,15 @@ export class ApiService {
    * @param {string} chr - the chromosome to get genes for
    */
   getGenes(refTaxonID: string, chr: string)
-          : Observable<Array<any>> {
+          : Observable<any[]> {
     let url = `${this.newRoot}/genes/${refTaxonID}/${chr}`;
-    return this.http.get<Array<any>>(url);
+    return this.http.get<any[]>(url);
   }
 
   getHomologs(refTaxonID: string, compTaxonID: string, refChr: string)
-             : Observable<Array<any>> {
+             : Observable<any[]> {
     let url = `${this.newRoot}/homologs/${refTaxonID}/${compTaxonID}/${refChr}`;
-    return this.http.get<Array<Feature>>(url);
+    return this.http.get<Feature[]>(url);
   }
 
   /**
@@ -137,8 +132,8 @@ export class ApiService {
    * @param {string} taxonID - stringified taxon ID for species
    * @param {string} chr - the chromosome to get QTLs for
    */
-  getQTLsByChr(taxonID: string, chr: string): Observable<Array<any>> {
+  getQTLsByChr(taxonID: string, chr: string): Observable<any[]> {
     let url = `${this.newRoot}/chr-qtls/${taxonID}/${chr}`;
-    return this.http.get<Array<any>>(url).pipe(map(resp => resp));
+    return this.http.get<any[]>(url).pipe(map(resp => resp));
   }
 }

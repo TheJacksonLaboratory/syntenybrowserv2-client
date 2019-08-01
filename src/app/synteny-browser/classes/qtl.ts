@@ -17,8 +17,8 @@ export class QTL {
   format: Function = format(',');
 
   constructor(qtl: any, index: number, staticScale: ScaleLinear<number, number>) {
-    this.id = qtl.qtl_id;
-    this.symbol = qtl.qtl_symbol;
+    this.id = qtl.id;
+    this.symbol = qtl.symbol;
     this.chr = qtl.chr;
     this.start = qtl.start;
     this.end = qtl.end;
@@ -73,8 +73,9 @@ export class QTL {
   getTooltipData(): object {
     return {
       'QTL ID': this.id,
-      'chromosome': this.chr,
-      'Location': `${this.format(this.start)}bp - ${this.format(this.end)}bp`
+      'Chromosome': this.chr,
+      'Start': `${this.format(this.start)}bp`,
+      'End': `${this.format(this.end)}bp`
     }
   }
 

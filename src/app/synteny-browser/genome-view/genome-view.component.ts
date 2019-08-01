@@ -1,12 +1,12 @@
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures } from '../classes/interfaces';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures, TooltipContent } from '../classes/interfaces';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
-import { saveAs } from 'file-saver';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { TooltipComponent } from '../tooltip/tooltip.component';
+import { DownloadService } from '../services/download.service';
 
 @Component({
   selector: 'app-genome-view',
@@ -14,12 +14,10 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
   styleUrls: ['./genome-view.component.scss']
 })
 export class GenomeViewComponent implements OnInit {
-  @ViewChild('tooltip', {static: false}) tooltip: TooltipComponent;
-
   ref: Species;
   comp: Species;
   colors: object;
-  genomeData: Array<SyntenyBlock>;
+  genomeData: SyntenyBlock[];
   refGMap: GenomeMap;
   compGMap: GenomeMap;
   tempCompGenome: object;
@@ -34,10 +32,14 @@ export class GenomeViewComponent implements OnInit {
 
   refChr: ReferenceChr;
 
-  features: Array<Feature>;
-  featureBlocks: Array<SyntenyBlock>;
+  features: Feature[];
+  featureBlocks: SyntenyBlock[];
 
-  constructor(private http: ApiService) { }
+  tooltipContent: TooltipContent = null;
+
+  @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
+
+  constructor(private http: ApiService, private downloader: DownloadService) { }
 
   ngOnInit() {
     // generate a radii dictionary to help with rendering the reference plot
@@ -100,28 +102,9 @@ export class GenomeViewComponent implements OnInit {
    * TODO: let users choose the name they want to use for the download
    */
   download(): void {
-    let svg = document.querySelector('#genome-view-svg');
-    svg.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+    let fname = this.ref.commonName + (this.refChr ? '_' + this.refChr.chr : '');
 
-    let canvas = document.createElement('canvas');
-    canvas.width = Number(svg.clientWidth);
-    canvas.height = Number(svg.clientHeight);
-
-    let ctx = canvas.getContext('2d');
-    let image = new Image();
-
-    image.onload = () => {
-      ctx.clearRect(0, 0, svg.clientWidth, svg.clientHeight);
-      ctx.drawImage(image, 0, 0, svg.clientWidth, svg.clientHeight);
-
-      canvas.toBlob((blob) => {
-        let name = this.ref.commonName + '_' + (this.refChr ? this.refChr.chr : '');
-        saveAs(blob, name);
-      });
-    };
-
-    let serialized = new XMLSerializer().serializeToString(svg);
-    image.src = `data:image/svg+xml;base64,${btoa(serialized)}`;
+    this.downloader.downloadSVG('genome-view-svg', fname);
   }
 
   /**
@@ -152,9 +135,9 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Updates the list of features to display in the circos plot
-   * @param {Array<Feature>} features - the current list of features to display
+   * @param {Feature[]} features - the current list of features to display
    */
-  updateFeatures(features: Array<Feature>): void {
+  updateFeatures(features: Feature[]): void {
     this.features = features;
 
     // generate a list of syntenic blocks to highlight; the features.map() is
@@ -166,30 +149,25 @@ export class GenomeViewComponent implements OnInit {
                             return this.genomeData.filter(b => b.isAFeatureBlock(f))
                           }));
 
-    // create a list of distinct blocks (we don't want to render 
+    // create a list of distinct blocks (we don't want to render
     // the same block more than once)
     this.featureBlocks = Array.from(new Set(blocks));
   }
 
   /**
-   * Shows the tooltip for the specified chromosome and species
-   * @param {string} chr - the chromosome that needs the tooltip
-   * @param {Species} species - the species the specified chromosome belongs to
-   * @param {MouseEvent} event - the hover event we use to get cursor location
+   * Hides the tooltip content as well as clears the highlighted features in
+   * the feature selection
    */
-  revealTooltip(chr: string, species: Species, event: MouseEvent): void {
-    let offsetY = (this.features && this.chrFeatures(chr).length > 0) ?
-                  event.offsetY - 75 : event.offsetY - 60;
-
-    this.tooltip.display(this.getTooltipContent(chr, species),
-                         event.offsetX - 65, offsetY, species.name);
+  hideTooltip(): void {
+    this.tooltipContent = null;
+    this.highlightFeatures.emit([]);
   }
 
 
   // Getter Methods
 
   /**
-   * Returns the chromosome the user chose as well as a list of any features to 
+   * Returns the chromosome the user chose as well as a list of any features to
    * render in the block view
    */
   getChromosomeFeaturesToView(): SelectedFeatures {
@@ -324,7 +302,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns array of chromosome for the specified genome
    * @param {any} genome - the genome dictionary of the specified species
    */
-  getChromosomes(genome: any): Array<string> { return Object.keys(genome); }
+  getChromosomes(genome: any): string[] { return Object.keys(genome); }
 
   /**
    * Returns the color for the specified chromosome
@@ -340,22 +318,30 @@ export class GenomeViewComponent implements OnInit {
    * @param {string} chr - the chromosome that needs the tooltip
    * @param {Species} species - the species of the specified chromosome
    */
-  private getTooltipContent(chr: string, species: Species): object {
-    let data = { 'Chr': chr };
-    let hasFeatures = this.features && this.features.length > 0;
+  private getTooltipContent(chr: string, species: Species): void {
+    this.tooltipContent = {
+      title: species.name,
+      chr: chr
+    };
+
+    let chrFeatures = this.chrFeatures(chr);
+    let hasFeatures = this.features && chrFeatures.length > 0;
 
     // if tooltip is for reference species and there are features, display
     // the feature symbols in the tooltip
     if(species.taxonID === this.ref.taxonID && hasFeatures) {
-      let genes = this.features.filter(f => f.gene && f.chr === chr);
-      let qtls = this.features.filter(f => !f.gene && f.chr === chr);
+      let genes = chrFeatures.filter(f => f.gene).map(g => g.id);
+      let qtls = chrFeatures.filter(f => !f.gene).map(qtl => qtl.id);
 
-      if(genes.length > 0) data['Genes'] = genes.map(g => g.symbol).join(', ');
+      let features = [];
 
-      if(qtls.length > 0) data['QTLs'] = qtls.map(qtl => qtl.symbol).join(', ');
+      if(genes.length > 0) features.push(...genes);
+      if(qtls.length > 0) features.push(...qtls);
+
+      this.highlightFeatures.emit(features);
+    } else {
+      this.highlightFeatures.emit([]);
     }
-
-    return data;
   }
 
   /**
@@ -396,7 +382,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the features that are in the specified chromosome
    * @param {string} chr - the chromosome to check
    */
-  private chrFeatures(chr: string): Array<Feature> {
+  private chrFeatures(chr: string): Feature[] {
     return this.features.filter(f => f.chr === chr);
   }
 

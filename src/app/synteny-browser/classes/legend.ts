@@ -1,13 +1,13 @@
 export class Legend {
-  allChrs: Array<string>;
-  activeChrs: Array<string>;
+  allChrs: string[];
+  activeChrs: string[];
   hoverChr: string = null;
 
-  offsetY: number = 460;
+  offsetY: number = 350;
   offsetX: number;
   colors: object;
 
-  constructor(genome: object, colors: object, chrs: Array<string>, width: number) {
+  constructor(genome: object, colors: object, chrs: string[], width: number) {
     this.allChrs = Object.keys(genome);
     this.activeChrs = chrs;
     this.colors = colors;

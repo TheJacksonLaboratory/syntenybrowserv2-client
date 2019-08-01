@@ -10,12 +10,12 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./condition-constructor.component.scss']
 })
 export class ConditionConstructorComponent {
-  @Input() attributes: Array<string>;
-  @Input() ontologies: Array<SearchType>;
-  @Input() types: Array<string>;
+  @Input() attributes: string[];
+  @Input() ontologies: SearchType[];
+  @Input() types: string[];
   @Input() values: FilterCondition;
 
-  terms: Array<any>;
+  terms: any[];
 
   @Output() remove: EventEmitter<any> = new EventEmitter();
   @Output() stateChange: EventEmitter<any> = new EventEmitter();

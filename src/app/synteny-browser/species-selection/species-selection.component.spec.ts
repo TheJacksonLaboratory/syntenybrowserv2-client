@@ -6,8 +6,8 @@ import { ClrFormsNextModule } from '@clr/angular';
 import { Species } from '../classes/species';
 import { By } from '@angular/platform-browser';
 
-const DUAL_SPECIES: Array<Species> = [ new Species(9606), new Species(10090) ];
-const MULTI_SPECIES: Array<Species> = [ new Species(9606), new Species(10090), new Species(0) ];
+const DUAL_SPECIES: Species[] = [ new Species(9606), new Species(10090) ];
+const MULTI_SPECIES: Species[] = [ new Species(9606), new Species(10090), new Species(0) ];
 
 describe('SpeciesSelectionComponent', () => {
   let component: SpeciesSelectionComponent;

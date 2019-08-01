@@ -27,7 +27,9 @@
             the reference genome.
           </div>
 
-          <app-genome-view *ngIf="refSpecies && compSpecies"></app-genome-view>
+          <app-genome-view *ngIf="refSpecies && compSpecies"
+                           (highlightFeatures)="features.highlighted = $event">
+          </app-genome-view>
         </div>
       </div>
     </div>

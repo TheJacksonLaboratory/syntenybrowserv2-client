@@ -7,7 +7,7 @@ export class BrowserInterval {
   refChr: string;
   refScale: ScaleLinear<number, number>;
   width: number;
-  
+
   compStart: number;
   compStartChr: string;
   compEnd: number;
@@ -17,12 +17,12 @@ export class BrowserInterval {
   blockStarts: object = {};
   blockEnds: object = {};
   format: Function = format(',');
-  
-  constructor(refChr: string, refChrWidth: number, blocks: Array<SyntenyBlock>, 
+
+  constructor(refChr: string, refChrWidth: number, blocks: SyntenyBlock[],
               refScale: ScaleLinear<number, number>, trueOrientation: boolean) {
     this.refChr = refChr;
     this.trueOrientation = trueOrientation;
-    
+
     blocks.forEach(block => {
       this.blockStarts[block.refStart] = block;
       this.blockEnds[block.refEnd] = block;
@@ -163,5 +163,5 @@ export class BrowserInterval {
       this.compEnd = block.getEnd(this.trueOrientation);
     }
   }
-  
+
 }
