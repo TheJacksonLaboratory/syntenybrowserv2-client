@@ -90,6 +90,8 @@ export class GenomeViewComponent implements OnInit {
     // get genome-wide syntenic blocks from API
     this.http.getGenomeSynteny(refID, compID)
              .subscribe(blocks => {
+               this.ref.genome['0'] = this.getSpeciesLabelWidth('ref') * 2700000;
+               this.comp.genome['0'] = this.getSpeciesLabelWidth('comp') * 4200000;
                this.refGMap = new GenomeMap(this.ref.genome);
                this.compGMap = new GenomeMap(this.comp.genome);
 
@@ -125,6 +127,7 @@ export class GenomeViewComponent implements OnInit {
     newCompGenome['ref'+ chr] = this.ref.genome[chr];
 
     this.tempCompGenome = newCompGenome;
+    this.tempCompGenome['0'] = this.getSpeciesLabelWidth('comp') * 4400000;
     this.compGMap = new GenomeMap(newCompGenome);
 
     // set the reference chromosome
@@ -199,6 +202,30 @@ export class GenomeViewComponent implements OnInit {
                                    gMap.bpToCartesian(chr, end, outer),
                                    inner,
                                    outer);
+  }
+
+  /**
+   * Return the path command for the curved line that the label for the
+   * specified genome will be based on
+   * @param {any} radiiDict - the radius dictionary of the specified genome
+   * @param {GenomeMap} gMap - the genome map for the specified genome
+   *                             (reference or comparison)
+   * @param {any} genome - the genome of the specified species (dictionary
+ *                         describing chr sizes)
+   */
+  getSpeciesLabelPath(radiiDict: any, gMap: GenomeMap, genome: any): string {
+    let inner = radiiDict.ringInner;
+    let start = gMap.bpToCartesian('0', 0, inner);
+    let end = gMap.bpToCartesian('0', genome['0'], inner);
+    return `M${start.x},${start.y} A${inner},${inner} 0 0,1 ${end.x},${end.y}Z`;
+  }
+
+  /**
+   * Returns the pixel width of the specified species label
+   * @param {string} selector - 'ref' or 'comp'
+   */
+  getSpeciesLabelWidth(selector: string): number {
+    return document.getElementById(`${selector}-species-abbrev`).clientWidth;
   }
 
   /**
@@ -304,7 +331,11 @@ export class GenomeViewComponent implements OnInit {
    * Returns array of chromosome for the specified genome
    * @param {any} genome - the genome dictionary of the specified species
    */
-  getChromosomes(genome: any): string[] { return Object.keys(genome); }
+  getChromosomes(genome: any): string[] {
+    let chrs = Object.keys(genome);
+    chrs.shift();
+    return chrs
+  }
 
   /**
    * Returns the color for the specified chromosome
@@ -312,15 +343,12 @@ export class GenomeViewComponent implements OnInit {
    */
   getChrColor(chr: string): string { return this.colors[chr]; }
 
-
-  // Private Methods
-
   /**
    * Returns the content for a tooltip for the specified chromosome and species
    * @param {string} chr - the chromosome that needs the tooltip
    * @param {Species} species - the species of the specified chromosome
    */
-  private getTooltipContent(chr: string, species: Species): void {
+  getTooltipContent(species: Species, chr: string = null): void {
     this.tooltipContent = {
       title: species.name,
       chr: chr
@@ -345,6 +373,9 @@ export class GenomeViewComponent implements OnInit {
       this.highlightFeatures.emit([]);
     }
   }
+
+
+  // Private Methods
 
   /**
    * Returns a path command for the given four specified coordinates (x, y pairs)
