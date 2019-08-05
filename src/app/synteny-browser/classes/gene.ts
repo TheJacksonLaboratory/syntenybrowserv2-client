@@ -1,4 +1,4 @@
-import { Exon, TooltipContent } from './interfaces';
+import { Exon } from './interfaces';
 import { format, ScaleLinear } from 'd3';
 import { SyntenyBlock } from './synteny-block';
 
@@ -25,8 +25,8 @@ export class Gene {
 
   format: Function = format(',');
 
-  constructor(gene: any, vHeight: number, blocks: SyntenyBlock[] = null) {
-    this.species = gene.homologs ? 'comp' : 'ref';
+  constructor(gene: any, vHeight: number, refTaxonID: number, blocks: SyntenyBlock[] = null) {
+    this.species = gene.taxon_id === refTaxonID ? 'ref' : 'comp';
     this.start = gene.start;
     this.end = gene.end;
     this.size = this.end - this.start;
@@ -170,6 +170,20 @@ export class Gene {
       'Chromosome': this.chr,
       'Start': `${this.format(this.start)}bp`,
       'End': `${this.format(this.end)}bp`,
+      'Strand': this.strand
+    }
+  }
+
+  /**
+   * Returns the content for a click tooltip for the gene which includes ID,
+   * symbol and genomic location, type and strand
+   */
+  getClicktipData(): object {
+    return {
+      'Gene Symbol': this.symbol,
+      'Gene ID': this.id,
+      'Type': this.type,
+      'Location': `Chr${this.chr}: ${this.format(this.start)}bp - ${this.format(this.end)}bp`,
       'Strand': this.strand
     }
   }

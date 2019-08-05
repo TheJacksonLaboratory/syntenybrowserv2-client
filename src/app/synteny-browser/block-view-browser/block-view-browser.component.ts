@@ -2,7 +2,7 @@ import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
-import { BlockViewBrowserOptions, ComparisonScaling, Metadata, QTLMetadata, TooltipContent } from '../classes/interfaces';
+import { BlockViewBrowserOptions, ComparisonScaling, QTLMetadata } from '../classes/interfaces';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
@@ -10,7 +10,6 @@ import { Legend } from '../classes/legend';
 import { QTL } from '../classes/qtl';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
-import { TooltipComponent } from '../tooltip/tooltip.component';
 import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 
@@ -31,6 +30,9 @@ export class BlockViewBrowserComponent {
   selectedRefGenes: Gene[] = [];
   selectedCompGenes: Gene[] = [];
   selectedQTLs: QTL[] = [];
+
+  filteredRefGenes: Gene[] = [];
+  filteredCompGenes: Gene[] = [];
 
   filters: Filter[] = [];
 
@@ -56,6 +58,11 @@ export class BlockViewBrowserComponent {
   refBPToPixels: ScaleLinear<number, number>;
 
   tooltip: any = null;
+  clicktip: any = null;
+  clicktipOpen = false;
+
+  downloadFilename: string = '';
+  filenameModalOpen = false;
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
@@ -102,11 +109,9 @@ export class BlockViewBrowserComponent {
    */
   download(): void {
     this.setObjectAttributes();
-
-    let fname = this.ref.commonName + '_' + this.refChr + ':' +
-                this.interval.refStart+ '-' + this.interval.refEnd;
-
-    this.downloader.downloadSVG('browser-svg', fname);
+    this.downloader.downloadSVG('browser-svg', this.downloadFilename);
+    this.filenameModalOpen = false;
+    this.downloadFilename = '';
   }
 
   /**
@@ -371,6 +376,21 @@ export class BlockViewBrowserComponent {
     }
   }
 
+  /**
+   * Retrieves the information necessary to show gene data in the clicktip dialog
+   * @param {Gene} gene - the gene clicked to retrieve data for
+   */
+  showDataForGene(gene: Gene): void {
+    this.clicktip = {
+      title: gene.symbol,
+      content: gene.getClicktipData(),
+      resources: gene.species === 'ref' ? this.ref.resources : this.comp.resources,
+      id: gene.id
+    };
+
+    this.clicktipOpen = true;
+  }
+
 
   // Getter Methods
 
@@ -514,13 +534,13 @@ export class BlockViewBrowserComponent {
   /**
    * Returns the keys of the tooltip's content attribute
    */
-  getTTItems(): string[] { return Object.keys(this.tooltip.content); }
+  getTTItems(tooltip: any): string[] { return Object.keys(tooltip.content); }
 
   /**
    * Returns the height the tooltip should be based on the number of data items
    * it will contain
    */
-  getTTHeight(): number { return this.getTTItems().length * 11 + 23; }
+  getTTHeight(): number { return this.getTTItems(this.tooltip).length * 11 + 23; }
 
 
   // Condition Checks
@@ -647,7 +667,7 @@ export class BlockViewBrowserComponent {
                    return rh.id;
                  });
 
-                 return new Gene(h, this.trackHeight, this.blocks);
+                 return new Gene(h, this.trackHeight, this.ref.taxonID, this.blocks);
                }).filter(h => {
                  let syntenic = h.isSyntenic();
 
@@ -677,7 +697,7 @@ export class BlockViewBrowserComponent {
                  // add selected attribute if it is listed as selected
                  g.sel = featureIDs.indexOf(g.id) > -1;
 
-                 let gene = new Gene(g, this.trackHeight);
+                 let gene = new Gene(g, this.trackHeight, this.ref.taxonID);
 
                  // if the gene is selected, push it to the selected reference
                  // gene array

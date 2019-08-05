@@ -1,5 +1,5 @@
 import { ApiService } from '../services/api.service';
-import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
 import { Metadata, OntologyTerm, SearchType } from '../classes/interfaces';
 import { Species } from '../classes/species';

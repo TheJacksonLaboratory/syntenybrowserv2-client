@@ -1,10 +1,9 @@
 import { ApiService } from './services/api.service';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { FilterCondition, Metadata, TooltipContent } from './classes/interfaces';
 import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { Filter } from './classes/filter';
@@ -117,10 +116,17 @@ export class SyntenyBrowserComponent implements OnInit {
    * Updates the block view with the most recent filter conditions
    */
   getFilters(): void {
-    this.filterOpen = false;
-    this.filters = this.blockViewFilters.getCreatedFilters();
+    let bvb = this.blockViewBrowser;
+    let bvf = this.blockViewFilters;
 
-    this.blockViewBrowser.filters = this.filters;
+    this.filters = bvf.getCreatedFilters();
+    bvb.filters = this.filters;
+
+    const filteredGenes = bvf.filteredGenes.filter(g => g.filtered);
+    bvb.filteredRefGenes = filteredGenes.filter(g => g.species === 'ref');
+    bvb.filteredCompGenes = filteredGenes.filter(g => g.species === 'comp');
+
+    this.filterOpen = false;
   }
 
   /**

@@ -1,11 +1,10 @@
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures, TooltipContent } from '../classes/interfaces';
+import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures } from '../classes/interfaces';
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { GenomeMap } from '../classes/genome-map';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
-import { TooltipComponent } from '../tooltip/tooltip.component';
 import { DownloadService } from '../services/download.service';
 
 @Component({
@@ -35,7 +34,10 @@ export class GenomeViewComponent implements OnInit {
   features: Feature[];
   featureBlocks: SyntenyBlock[];
 
-  tooltipContent: TooltipContent = null;
+  tooltipContent: any = null;
+
+  downloadFilename: string = '';
+  filenameModalOpen = false;
 
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
@@ -102,9 +104,9 @@ export class GenomeViewComponent implements OnInit {
    * TODO: let users choose the name they want to use for the download
    */
   download(): void {
-    let fname = this.ref.commonName + (this.refChr ? '_' + this.refChr.chr : '');
-
-    this.downloader.downloadSVG('genome-view-svg', fname);
+    this.downloader.downloadSVG('genome-view-svg', this.downloadFilename);
+    this.filenameModalOpen = false;
+    this.downloadFilename = '';
   }
 
   /**
