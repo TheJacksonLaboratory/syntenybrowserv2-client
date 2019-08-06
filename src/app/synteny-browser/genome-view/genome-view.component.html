@@ -8,17 +8,35 @@
        [attr.viewBox]="'0 0 ' + width + ' ' + width"
        preserveAspectRatio="xMinYMin meet">
     <defs>
-      <path *ngIf="genomeData" id="ref-label" stroke="transparent" fill="transparent"
+      <path *ngIf="genomeData" id="ref-label"
             [attr.d]="getSpeciesLabelPath(refRadii, refGMap, ref.genome)">
       </path>
-      <path *ngIf="genomeData" id="comp-label" stroke="transparent" fill="transparent"
+      <path *ngIf="genomeData" id="comp-label"
             [attr.d]="getSpeciesLabelPath(compRadii, compGMap, comp.genome)">
       </path>
       <text *ngIf="ref" id="ref-species-abbrev">{{ ref.abbrev }}</text>
       <text *ngIf="comp" id="comp-species-abbrev">{{ comp.abbrev }}</text>
     </defs>
+
+    <!-- Background -->
     <rect [attr.width]="width" [attr.height]="width" fill="#FFF"></rect>
 
+    <!-- Non-syntenic selected features -->
+    <g *ngIf="featuresNoBlocks && featuresNoBlocks.length > 0" id="non-syntenic"
+       [attr.transform]="translate(5, 8)">
+      <text font-weight="bold">Non-syntenic Features</text>
+
+      <text *ngFor="let f of featuresNoBlocks | slice:0:4; let i=index"
+            [attr.transform]="translate(0, (11 * i) + 12)">
+        {{ f.symbol }}, Chr{{ f.chr }}
+      </text>
+      <text *ngIf="featuresNoBlocks.length > 4"
+            [attr.transform]="translate(0, 56)">
+        and {{ featuresNoBlocks.length - 4 }} more...
+      </text>
+    </g>
+
+    <!-- Genome plots -->
     <g *ngIf="genomeData" [attr.transform]="getCenter()">
       <!-- Reference ring -->
       <g id="reference-plot">
@@ -149,7 +167,7 @@
         <g id="comp-labels">
           <text *ngFor="let chr of getChromosomes(tempCompGenome)" text-anchor="middle"
                 [attr.transform]="getCompLabelPos(chr, compGMap, true)">
-            {{ chr }}
+            {{ chr.includes('ref') ? chr.replace('ref', ref.abbrev + ', chr') : chr }}
           </text>
         </g>
       </g>

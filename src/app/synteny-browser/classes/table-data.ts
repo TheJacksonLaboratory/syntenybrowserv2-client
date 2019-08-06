@@ -89,6 +89,10 @@ export class TableData<T> {
     }
   }
 
+  /**
+   * Returns the list of descendent term names and IDs
+   * @param {OntologyTerm} term - the term to get descendant terms for
+   */
   getDescendants(term: OntologyTerm): DescendantTerm[] {
     if(term.descendants.length > 10) {
       let descs = term.descendants.slice(0, 10);

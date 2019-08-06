@@ -32,19 +32,12 @@ export class FeatureSearchComponent {
     this.refSpecies = refSpecies;
     this.features.loading = true;
     this.http.getAllGenes(this.refSpecies.getID())
-             .subscribe(genes => {
-               let rows = genes;
+             .subscribe(genes => this.features.setRows(genes));
 
-               if(this.refSpecies.hasQTLs) {
-                 this.http.getAllQTLs(this.refSpecies.getID())
-                          .subscribe(qtls => {
-                            rows.push(...qtls);
-                            this.features.setRows(rows, 'symbol');
-                          });
-               } else {
-                 this.features.setRows(rows, 'symbol');
-               }
-             });
+    if(this.refSpecies.hasQTLs) {
+      this.http.getAllQTLs(this.refSpecies.getID())
+               .subscribe(qtls => this.features.rows.push(...qtls));
+    }
   }
 
   /**

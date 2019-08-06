@@ -32,6 +32,7 @@ export class GenomeViewComponent implements OnInit {
   refChr: ReferenceChr;
 
   features: Feature[];
+  featuresNoBlocks: Feature[];
   featureBlocks: SyntenyBlock[];
 
   tooltipContent: any = null;
@@ -153,6 +154,10 @@ export class GenomeViewComponent implements OnInit {
                           features.map(f => {
                             return this.genomeData.filter(b => b.isAFeatureBlock(f))
                           }));
+
+    this.featuresNoBlocks = features.filter(f => {
+      return this.genomeData.filter(b => b.isAFeatureBlock(f)).length === 0;
+    });
 
     // create a list of distinct blocks (we don't want to render
     // the same block more than once)
