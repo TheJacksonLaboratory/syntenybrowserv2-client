@@ -18,8 +18,14 @@ button { z-index: 100; }
   #tt-title { font-weight: bold; }
 }
 
-#ref-species-abbrev,
-#comp-species-abbrev {
-  font-weight: bold;
-  font-size: 28px;
+defs {
+  text {
+    font-weight: bold;
+    font-size: 25px;
+  }
+
+  path {
+    stroke: transparent;
+    fill: transparent;
+  }
 }

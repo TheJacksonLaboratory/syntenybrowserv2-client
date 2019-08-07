@@ -8,17 +8,35 @@
        [attr.viewBox]="'0 0 ' + width + ' ' + width"
        preserveAspectRatio="xMinYMin meet">
     <defs>
-      <path *ngIf="genomeData" id="ref-label" stroke="transparent" fill="transparent"
+      <path *ngIf="genomeData" id="ref-label"
             [attr.d]="getSpeciesLabelPath(refRadii, refGMap, ref.genome)">
       </path>
-      <path *ngIf="genomeData" id="comp-label" stroke="transparent" fill="transparent"
+      <path *ngIf="genomeData" id="comp-label"
             [attr.d]="getSpeciesLabelPath(compRadii, compGMap, comp.genome)">
       </path>
       <text *ngIf="ref" id="ref-species-abbrev">{{ ref.abbrev }}</text>
       <text *ngIf="comp" id="comp-species-abbrev">{{ comp.abbrev }}</text>
     </defs>
+
+    <!-- Background -->
     <rect [attr.width]="width" [attr.height]="width" fill="#FFF"></rect>
 
+    <!-- Non-syntenic selected features -->
+    <g *ngIf="featuresNoBlocks && featuresNoBlocks.length > 0" font-size="11"
+       [attr.transform]="translate(5, 10)">
+      <text font-weight="bold">Non-syntenic Features</text>
+
+      <text *ngFor="let f of featuresNoBlocks | slice:0:4; let i=index"
+            [attr.transform]="translate(0, (11 * i) + 12)">
+        {{ f.symbol }}, Chr{{ f.chr }}
+      </text>
+      <text *ngIf="featuresNoBlocks.length > 4"
+            [attr.transform]="translate(0, 56)">
+        and {{ featuresNoBlocks.length - 4 }} more...
+      </text>
+    </g>
+
+    <!-- Genome plots -->
     <g *ngIf="genomeData" [attr.transform]="getCenter()">
       <!-- Reference ring -->
       <g id="reference-plot">
@@ -31,7 +49,7 @@
           </path>
         </g>
 
-        <text class="species-label" font-weight="bold" font-size="28" fill="#999"
+        <text class="species-label" font-weight="bold" font-size="25" fill="#999"
               (mouseenter)="tooltipContent = { title: 'Reference Species', species: ref.name }"
               (mouseleave)="hideTooltip()">
           <textPath xlink:href="#ref-label"
@@ -39,6 +57,26 @@
             {{ ref.abbrev }}
           </textPath>
         </text>
+
+        <g *ngIf="features" id="ref-band-legend-lines" font-size="8">
+          <g *ngFor="let chr of getChrsWithFeatures()">
+            <path stroke="#000" stroke-width="0.5" fill="transparent"
+                  [attr.d]="getLegendPath(chr)">
+            </path>
+            <g [attr.transform]="getLegendListPosition(chr)">
+              <text *ngFor="let f of getChrFeatures(chr) | slice:0:3; let i=index"
+                    [attr.transform]="getLegendListItemPosition(chr, i)"
+                    [attr.text-anchor]="getLegendListAlign(chr)">
+                {{ f.symbol }}
+              </text>
+              <text *ngIf="getChrFeatures(chr).length > 3"
+                    [attr.transform]="getLegendListItemPosition(chr, 3)"
+                    [attr.text-anchor]="getLegendListAlign(chr)">
+                and {{ getChrFeatures(chr).length - 3 }} more...
+              </text>
+            </g>
+          </g>
+        </g>
 
         <!-- Reference chromosome bands (transparent containers) -->
         <g id="ref-bands">
@@ -72,7 +110,7 @@
 
       <!-- Comparison ring (no selected reference chr) -->
       <g *ngIf="!refChr" id="comparison-plot">
-        <text class="species-label" font-weight="bold" font-size="28" fill="#999"
+        <text class="species-label" font-weight="bold" font-size="25" fill="#999"
               (mouseenter)="tooltipContent = { title: 'Comparison Species', species: comp.name }"
               (mouseleave)="hideTooltip()">
           <textPath xlink:href="#comp-label"
@@ -103,7 +141,7 @@
 
       <!-- Comparison ring (with selected reference chr) -->
       <g *ngIf="refChr" id="comparison-plot">
-        <text class="species-label" font-weight="bold" font-size="28" fill="#999"
+        <text class="species-label" font-weight="bold" font-size="25" fill="#999"
               (mouseenter)="tooltipContent = { title: 'Comparison Species', species: comp.name }"
               (mouseleave)="hideTooltip()">
           <textPath xlink:href="#comp-label"
@@ -149,7 +187,7 @@
         <g id="comp-labels">
           <text *ngFor="let chr of getChromosomes(tempCompGenome)" text-anchor="middle"
                 [attr.transform]="getCompLabelPos(chr, compGMap, true)">
-            {{ chr }}
+            {{ chr.includes('ref') ? chr.replace('ref', ref.abbrev + ', chr') : chr }}
           </text>
         </g>
       </g>
