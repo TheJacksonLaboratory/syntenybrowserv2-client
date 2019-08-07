@@ -24,7 +24,7 @@ export class GenomeViewComponent implements OnInit {
   // rendering constants
   width: number = 500;
   radius: number = this.width * 0.5;
-  bandThickness: number = 20;
+  bandThickness: number = 18;
   refRadii: RadiiDictionary;
   compRadii: RadiiDictionary;
   featureRadii: RadiiDictionary;
@@ -46,26 +46,27 @@ export class GenomeViewComponent implements OnInit {
 
   ngOnInit() {
     // generate a radii dictionary to help with rendering the reference plot
-    let refRadius = Math.round(this.radius * (2/3) + 30);
+    let refRadius = Math.round(this.radius * 0.62),
+        compRadius = (this.radius * 0.4);
 
     this.refRadii = {
       ringInner: refRadius,
       ringOuter: refRadius + this.bandThickness,
-      labels: refRadius + 35,
+      labels: refRadius + this.bandThickness + 10
     };
 
     // generate a radii dictionary for feature blocks
     this.featureRadii = {
-      ringInner: this.refRadii.ringInner - this.bandThickness,
+      ringInner: this.refRadii.ringInner - (this.bandThickness * 0.75),
       ringOuter: this.refRadii.ringInner
     };
 
     // generate a radii dictionary to help with rendering the comparison plot
-    let compRadius = (this.radius * 0.4) + 30;
+
     this.compRadii = {
       ringInner: compRadius,
       ringOuter: compRadius + this.bandThickness,
-      labels: compRadius + 30
+      labels: compRadius + this.bandThickness + 10
     };
   }
 
@@ -85,14 +86,14 @@ export class GenomeViewComponent implements OnInit {
     this.comp = comparison;
     this.colors = colors;
 
-    let refID = this.ref.getID();
-    let compID = this.comp.getID();
+    let refID = this.ref.getID(),
+        compID = this.comp.getID();
 
     // get genome-wide syntenic blocks from API
     this.http.getGenomeSynteny(refID, compID)
              .subscribe(blocks => {
-               this.ref.genome['0'] = this.getSpeciesLabelWidth('ref') * 2700000;
-               this.comp.genome['0'] = this.getSpeciesLabelWidth('comp') * 4200000;
+               this.ref.genome['0'] = this.getSpeciesLabelWidth('ref') * 3000000;
+               this.comp.genome['0'] = this.getSpeciesLabelWidth('comp') * 5200000;
                this.refGMap = new GenomeMap(this.ref.genome);
                this.compGMap = new GenomeMap(this.comp.genome);
 
@@ -128,7 +129,7 @@ export class GenomeViewComponent implements OnInit {
     newCompGenome['ref'+ chr] = this.ref.genome[chr];
 
     this.tempCompGenome = newCompGenome;
-    this.tempCompGenome['0'] = this.getSpeciesLabelWidth('comp') * 4400000;
+    this.tempCompGenome['0'] = this.getSpeciesLabelWidth('comp') * 5500000;
     this.compGMap = new GenomeMap(newCompGenome);
 
     // set the reference chromosome
@@ -185,7 +186,7 @@ export class GenomeViewComponent implements OnInit {
 
     return {
       chr: trueChr,
-      features: this.features ? this.chrFeatures(trueChr) : []
+      features: this.features ? this.getChrFeatures(trueChr) : []
     }
   }
 
@@ -198,15 +199,24 @@ export class GenomeViewComponent implements OnInit {
    * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
    */
   getChrBandPath(radiiDict: any, gMap: GenomeMap, chr: string, genome: any): string {
-    let end = genome[chr];
-    let inner = radiiDict.ringInner;
-    let outer = radiiDict.ringOuter;
+    let end = genome[chr],
+        inner = radiiDict.ringInner,
+        outer = radiiDict.ringOuter;
+
     return this.getBandPathCommand(gMap.bpToCartesian(chr, 0, inner),
                                    gMap.bpToCartesian(chr, end, inner),
                                    gMap.bpToCartesian(chr, 0, outer),
                                    gMap.bpToCartesian(chr, end, outer),
                                    inner,
                                    outer);
+  }
+
+  getLegendPath(chr: string): string {
+    let end = this.ref.genome[chr],
+        inEnd = this.refGMap.bpToCartesian(chr, end, this.refRadii.ringInner),
+        outEnd = this.refGMap.bpToCartesian(chr, end, this.refRadii.ringOuter + (this.bandThickness * 1.2));
+
+    return this.getLegendPathCommand(inEnd, outEnd);
   }
 
   /**
@@ -219,9 +229,10 @@ export class GenomeViewComponent implements OnInit {
  *                         describing chr sizes)
    */
   getSpeciesLabelPath(radiiDict: any, gMap: GenomeMap, genome: any): string {
-    let inner = radiiDict.ringInner;
-    let start = gMap.bpToCartesian('0', 0, inner);
-    let end = gMap.bpToCartesian('0', genome['0'], inner);
+    let inner = radiiDict.ringInner,
+        start = gMap.bpToCartesian('0', 0, inner),
+        end = gMap.bpToCartesian('0', genome['0'], inner);
+
     return `M${start.x},${start.y} A${inner},${inner} 0 0,1 ${end.x},${end.y}Z`;
   }
 
@@ -246,11 +257,11 @@ export class GenomeViewComponent implements OnInit {
                    block: SyntenyBlock, comp: boolean = false): string {
     // if the block is located in the inner plot and it has a temporary chr
     // (only the reference chr), use the temp chr
-    let chr = (comp && block.tempChr) ? block.tempChr : block.refChr;
-    let start = block.refStart;
-    let end = block.refEnd;
-    let inner = radiiDict.ringInner;
-    let outer = radiiDict.ringOuter;
+    let chr = (comp && block.tempChr) ? block.tempChr : block.refChr,
+        start = block.refStart,
+        end = block.refEnd,
+        inner = radiiDict.ringInner,
+        outer = radiiDict.ringOuter;
 
     return this.getBandPathCommand(gMap.bpToCartesian(chr, start, inner),
                                    gMap.bpToCartesian(chr, end, inner),
@@ -280,10 +291,10 @@ export class GenomeViewComponent implements OnInit {
    */
   getChordPath(radius: number, gMap: GenomeMap, block: SyntenyBlock) {
     // get all 4 points of the chord
-    let refStart = gMap.bpToCartesian(block.tempChr, block.refStart, radius);
-    let refEnd = gMap.bpToCartesian(block.tempChr, block.refEnd, radius);
-    let compStart = gMap.bpToCartesian(block.compChr, block.compStart, radius);
-    let compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, radius);
+    let refStart = gMap.bpToCartesian(block.tempChr, block.refStart, radius),
+        refEnd = gMap.bpToCartesian(block.tempChr, block.refEnd, radius),
+        compStart = gMap.bpToCartesian(block.compChr, block.compStart, radius),
+        compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, radius);
 
     return `M${refStart.x},${refStart.y}
             A205,205 0 0,1 ${refEnd.x},${refEnd.y}
@@ -316,8 +327,8 @@ export class GenomeViewComponent implements OnInit {
  *                           the temp genome or the true comp genome dictionary
    */
   getCompLabelPos(chr: string, gMap: GenomeMap, temp: boolean = false): string {
-    let genome = temp ? this.tempCompGenome : this.comp.genome;
-    let pos = gMap.bpToCartesian(chr,
+    let genome = temp ? this.tempCompGenome : this.comp.genome,
+        pos = gMap.bpToCartesian(chr,
                                  genome[chr] * 0.5,
                                  this.compRadii.labels);
 
@@ -359,16 +370,15 @@ export class GenomeViewComponent implements OnInit {
       chr: chr
     };
 
-    let chrFeatures = this.chrFeatures(chr);
-    let hasFeatures = this.features && chrFeatures.length > 0;
+    let chrFeatures = this.getChrFeatures(chr),
+        hasFeatures = this.features && chrFeatures.length > 0;
 
     // if tooltip is for reference species and there are features, display
     // the feature symbols in the tooltip
     if(species.taxonID === this.ref.taxonID && hasFeatures) {
-      let genes = chrFeatures.filter(f => f.gene).map(g => g.id);
-      let qtls = chrFeatures.filter(f => !f.gene).map(qtl => qtl.id);
-
-      let features = [];
+      let genes = chrFeatures.filter(f => f.gene).map(g => g.id),
+          qtls = chrFeatures.filter(f => !f.gene).map(qtl => qtl.id),
+          features = [];
 
       if(genes.length > 0) features.push(...genes);
       if(qtls.length > 0) features.push(...qtls);
@@ -377,6 +387,44 @@ export class GenomeViewComponent implements OnInit {
     } else {
       this.highlightFeatures.emit([]);
     }
+  }
+
+  /**
+   * Returns the features that are in the specified chromosome
+   * @param {string} chr - the chromosome to check
+   */
+  getChrFeatures(chr: string): Feature[] {
+    return this.features.filter(f => f.chr === chr);
+  }
+
+  getChrsWithFeatures(): string[] {
+    return this.getChromosomes(this.ref.genome)
+               .filter(c => this.getChrFeatures(c).length > 0);
+  }
+
+  getLegendListPosition(chr: string): string {
+    let pos = this.getRawLegendListPos(chr),
+        x = pos[0],
+        y = pos[1];
+
+    y = y === 0 ? y : (y < 0 ? y - 2 : y + 8);
+    x = Math.abs(x) <= 100 ? x : (x > 0 ? x - 8 : x + 5);
+
+    return this.translate(x, y);
+  }
+
+  getLegendListItemPosition(chr: string, index: number): string {
+    let y = this.getRawLegendListPos(chr)[1];
+
+    y = y === 0 ? y : (y < 0 ? -(8 * index) : (8 * index));
+
+    return this.translate(0, y);
+  }
+
+  getLegendListAlign(chr: string): string {
+    let x = this.getRawLegendListPos(chr)[0];
+
+    return Math.abs(x) <= 100 ? 'middle' : (x > 0 ? 'start' : 'end');
   }
 
 
@@ -404,6 +452,14 @@ export class GenomeViewComponent implements OnInit {
             A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
   }
 
+  private getLegendPathCommand(inEnd: CartesianCoordinate,
+                               outEnd: CartesianCoordinate): string {
+    let vLineLength = Math.abs(outEnd.x) < 60 ? 5 : 15,
+        vLine = outEnd.y < 0 ? outEnd.y - vLineLength : outEnd.y + vLineLength;
+
+    return `M${inEnd.x},${inEnd.y} L${outEnd.x},${outEnd.y} V${vLine}`;
+  }
+
   /**
    * Returns a translate command in the form of a string to be used in the
    * template for custom translations
@@ -414,14 +470,6 @@ export class GenomeViewComponent implements OnInit {
    */
   private translate(dx: number, dy: number): string {
     return `translate(${dx}, ${dy})`
-  }
-
-  /**
-   * Returns the features that are in the specified chromosome
-   * @param {string} chr - the chromosome to check
-   */
-  private chrFeatures(chr: string): Feature[] {
-    return this.features.filter(f => f.chr === chr);
   }
 
   /**
@@ -438,5 +486,11 @@ export class GenomeViewComponent implements OnInit {
 
     this.features = [];
     this.featureBlocks = [];
+  }
+
+  private getRawLegendListPos(chr: string): number[] {
+    let commands = this.getLegendPath(chr).replace(/[^\d.,-/\s]/g, '').split(' ');
+
+    return [Number(commands[1].split(',')[0]), Number(commands[2])];
   }
 }
