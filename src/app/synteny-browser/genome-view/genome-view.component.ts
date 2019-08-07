@@ -92,6 +92,7 @@ export class GenomeViewComponent implements OnInit {
     // get genome-wide syntenic blocks from API
     this.http.getGenomeSynteny(refID, compID)
              .subscribe(blocks => {
+               // make space for species labels
                this.ref.genome['0'] = this.getSpeciesLabelWidth('ref') * 3000000;
                this.comp.genome['0'] = this.getSpeciesLabelWidth('comp') * 5200000;
                this.refGMap = new GenomeMap(this.ref.genome);
@@ -129,6 +130,7 @@ export class GenomeViewComponent implements OnInit {
     newCompGenome['ref'+ chr] = this.ref.genome[chr];
 
     this.tempCompGenome = newCompGenome;
+    // make space for species label
     this.tempCompGenome['0'] = this.getSpeciesLabelWidth('comp') * 5500000;
     this.compGMap = new GenomeMap(newCompGenome);
 
@@ -211,10 +213,17 @@ export class GenomeViewComponent implements OnInit {
                                    outer);
   }
 
+  /**
+   * Returns the path command for the legend chromosome lines for the specified
+   * chromosome
+   * @param {string} chr - the chromosome to get the legend path command for
+   */
   getLegendPath(chr: string): string {
     let end = this.ref.genome[chr],
-        inEnd = this.refGMap.bpToCartesian(chr, end, this.refRadii.ringInner),
-        outEnd = this.refGMap.bpToCartesian(chr, end, this.refRadii.ringOuter + (this.bandThickness * 1.2));
+        radii = this.refRadii,
+        inEnd = this.refGMap.bpToCartesian(chr, end, radii.ringInner),
+        outEnd = this.refGMap.bpToCartesian(chr, end, radii.ringOuter +
+                                                      (this.bandThickness * 1.2));
 
     return this.getLegendPathCommand(inEnd, outEnd);
   }
@@ -397,22 +406,45 @@ export class GenomeViewComponent implements OnInit {
     return this.features.filter(f => f.chr === chr);
   }
 
+  /**
+   * Returns the chromosomes that currently contain selected features
+   */
   getChrsWithFeatures(): string[] {
     return this.getChromosomes(this.ref.genome)
                .filter(c => this.getChrFeatures(c).length > 0);
   }
 
+  /**
+   * Returns the x, y transform string for the list of selected features in the
+   * specified chromosome with small adjustments depending on position in the SVG
+   * @param {string} chr - the chromosome to get the list position for
+   */
   getLegendListPosition(chr: string): string {
     let pos = this.getRawLegendListPos(chr),
         x = pos[0],
         y = pos[1];
 
+    // if the position is above the vertical center of the SVG, move the list
+    // position a little further up for padding purposes; if the position is
+    // below the vertical center, move the position down the height of the first
+    // line of the list
     y = y === 0 ? y : (y < 0 ? y - 2 : y + 8);
+
+    // if the position is close to the left edge of the SVG, move the list a
+    // couple pixels to the right and vice versa on the right edge of the SVG to
+    // allow as much room as possible
     x = Math.abs(x) <= 100 ? x : (x > 0 ? x - 8 : x + 5);
 
     return this.translate(x, y);
   }
 
+  /**
+   * Returns the x, y (but the y-position is the only one that matters in this
+   * case) transform string for the list item in the specified chromosome at the
+   * specified index
+   * @param {string} chr - the chromosome the list item belongs to
+   * @param {number} index - the index in the list of features
+   */
   getLegendListItemPosition(chr: string, index: number): string {
     let y = this.getRawLegendListPos(chr)[1];
 
@@ -421,6 +453,13 @@ export class GenomeViewComponent implements OnInit {
     return this.translate(0, y);
   }
 
+  /**
+   * Returns the text-anchor attribute for the list of the specified chromosome,
+   * depending on the x-position of the list; if the list is within the center
+   * 200px of the SVG, center the text, otherwise, have it left-aligned for the
+   * right side of the SVG and right-aligned for the left side
+   * @param {string} chr - the chromosome to get the text alignment for
+   */
   getLegendListAlign(chr: string): string {
     let x = this.getRawLegendListPos(chr)[0];
 
@@ -434,7 +473,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns a path command for the given four specified coordinates (x, y pairs)
    * and the desired radii
    * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally)
- *                                         the bottom left corner of band
+   *                                       the bottom left corner of band
    * @param {CartesianCoordinate} inEnd - ("") the bottom right corner of band
    * @param {CartesianCoordinate} outStrt - ("") the top left corner of band
    * @param {CartesianCoordinate} outEnd - ("") the top right corner of band
@@ -452,8 +491,23 @@ export class GenomeViewComponent implements OnInit {
             A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
   }
 
+  /**
+   * Returns the path command for the legend chromosome line given the two
+   * specified coordinates (x, y pairs) by constructing the angled line extending
+   * from the band and a vertical line either up or down from the end of the
+   * angled line, depending on y-position of the end of the angled line
+   * @param {CartesianCoordinate} inEnd - the bottom right corner of the
+   *                                      chromosome band
+   * @param {CartesianCoordinate} outEnd - the coordinate of the end of the
+   *                                       angled line following the end of the
+   *                                       chromosome band (it will extend past
+   *                                       the outer edge of the band)
+   */
   private getLegendPathCommand(inEnd: CartesianCoordinate,
                                outEnd: CartesianCoordinate): string {
+    // if the legend path is really close to the horizontal center of the SVG,
+    // make the vertical line marginally shorter since the "angled" line is
+    // already fairly vertical
     let vLineLength = Math.abs(outEnd.x) < 60 ? 5 : 15,
         vLine = outEnd.y < 0 ? outEnd.y - vLineLength : outEnd.y + vLineLength;
 
@@ -488,7 +542,13 @@ export class GenomeViewComponent implements OnInit {
     this.featureBlocks = [];
   }
 
+  /**
+   * Returns the end coordinates of the legend path for the specified chromosome
+   * in order to properly place the associated feature list
+   * @param {string} chr - the chromosome to get the position for
+   */
   private getRawLegendListPos(chr: string): number[] {
+    // reduce the path command to a list of comma-separated coordinates
     let commands = this.getLegendPath(chr).replace(/[^\d.,-/\s]/g, '').split(' ');
 
     return [Number(commands[1].split(',')[0]), Number(commands[2])];
