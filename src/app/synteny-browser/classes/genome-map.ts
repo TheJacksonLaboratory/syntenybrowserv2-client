@@ -63,11 +63,21 @@ export class GenomeMap {
     return this.polarToCartesian(this.scales[chr](bp), radius);
   }
 
+  /**
+   * Returns the size of the specified chromosome in radians
+   * @param {string} chr - the chromosome to get radians for
+   */
   getRadiansOfChromosome(chr: string): number {
     let range = this.scales[chr].range();
     return range[1] - range[0];
   }
 
+  /**
+   * Returns the radians for the start position of the chromosome at the
+   * specified index (which includes the preceeding chromosomes and the spacing
+   * between them)
+   * @param {number} i - the index of the chromosome to get the radian start for
+   */
   getChrRadianStart(i: number): number {
     let chrRads = this.getSummation(this.sizes.slice(0, i)) * this.bpToRads,
         spacingRads = this.spacing * i;
