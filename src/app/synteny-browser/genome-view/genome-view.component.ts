@@ -92,9 +92,6 @@ export class GenomeViewComponent implements OnInit {
     // get genome-wide syntenic blocks from API
     this.http.getGenomeSynteny(refID, compID)
              .subscribe(blocks => {
-               // make space for species labels
-               this.ref.genome['0'] = this.getSpeciesLabelWidth('ref') * 3000000;
-               this.comp.genome['0'] = this.getSpeciesLabelWidth('comp') * 5200000;
                this.refGMap = new GenomeMap(this.ref.genome);
                this.compGMap = new GenomeMap(this.comp.genome);
 
@@ -120,19 +117,19 @@ export class GenomeViewComponent implements OnInit {
    */
   renderChordMapForChr(chr: string): void {
     // get the blocks that should be shown in the comparison plot's ref chromosome
-    let featureBlocks = (this.featureBlocks) ?
+    let featureBlocks = this.featureBlocks ?
                         this.featureBlocks.filter(b => b.matchesRefChr(chr)) : [];
-    let blocks = (featureBlocks.length > 0) ?
+    let blocks = featureBlocks.length > 0 ?
                  featureBlocks : this.genomeData.filter(b => b.matchesRefChr(chr));
 
-    // make a new comparison genome dictionary with the temp reference chromosome
-    let newCompGenome = Object.assign({}, this.comp.genome);
-    newCompGenome['ref'+ chr] = this.ref.genome[chr];
+    // get the index of the selected chromosome
+    let chrIndex = this.getChromosomes(this.ref.genome).indexOf(chr);
 
-    this.tempCompGenome = newCompGenome;
-    // make space for species label
-    this.tempCompGenome['0'] = this.getSpeciesLabelWidth('comp') * 5500000;
-    this.compGMap = new GenomeMap(newCompGenome);
+    this.setTempCompGenome(chr);
+
+    // calculate the number of radians to rotate the new comp genome
+    let radsToRotate = this.refGMap.getChrRadianStart(chrIndex + 1);
+    this.compGMap = new GenomeMap(this.tempCompGenome, radsToRotate);
 
     // set the reference chromosome
     this.refChr = {
@@ -292,18 +289,19 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Returns a path command for the given syntenic mapping region and radius
-   * @param {number} radius - the inner radius of the comparison (inner) ring
    * @param {GenomeMap} gMap - the genome map (NOTE: must be updated with
    *                                the ref chr accessed by 'ref<chr>')
    * @param {SyntenyBlock} block - the syntenic region to render a chord for
    *                               (NOTE: refChr must be in the form 'ref<chr>')
    */
-  getChordPath(radius: number, gMap: GenomeMap, block: SyntenyBlock) {
+  getChordPath(gMap: GenomeMap, block: SyntenyBlock) {
     // get all 4 points of the chord
-    let refStart = gMap.bpToCartesian(block.tempChr, block.refStart, radius),
-        refEnd = gMap.bpToCartesian(block.tempChr, block.refEnd, radius),
-        compStart = gMap.bpToCartesian(block.compChr, block.compStart, radius),
-        compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, radius);
+    let startRad = this.refRadii.ringInner,
+        endRad = this.compRadii.ringInner,
+        refStart = this.refGMap.bpToCartesian(block.refChr, block.refStart, startRad),
+        refEnd = this.refGMap.bpToCartesian(block.refChr, block.refEnd, startRad),
+        compStart = gMap.bpToCartesian(block.compChr, block.compStart, endRad),
+        compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, endRad);
 
     return `M${refStart.x},${refStart.y}
             A205,205 0 0,1 ${refEnd.x},${refEnd.y}
@@ -356,11 +354,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns array of chromosome for the specified genome
    * @param {any} genome - the genome dictionary of the specified species
    */
-  getChromosomes(genome: any): string[] {
-    let chrs = Object.keys(genome);
-    chrs.shift();
-    return chrs
-  }
+  getChromosomes(genome: any): string[] { return Object.keys(genome); }
 
   /**
    * Returns the color for the specified chromosome
@@ -552,5 +546,31 @@ export class GenomeViewComponent implements OnInit {
     let commands = this.getLegendPath(chr).replace(/[^\d.,-/\s]/g, '').split(' ');
 
     return [Number(commands[1].split(',')[0]), Number(commands[2])];
+  }
+
+  /**
+   * Sets the temporary comparison genome to include the selected reference
+   * chromosome with a size adjusted to be measured in radians, converted to bp
+   * @param {string} chr - the selected reference chromosome
+   */
+  private setTempCompGenome(chr: string): void {
+    // copy the comp genome object (we don't want to alter the original)
+    let tempComp = Object.assign({}, this.comp.genome);
+
+    // get the radians the selected chromosome takes in the reference plot and
+    // scale it to the comparison using the current comparison's radsToBP
+    // conversion value
+    tempComp['ref' + chr] = (this.refGMap.getRadiansOfChromosome(chr)) *
+      this.compGMap.radsToBP;
+
+    // since the last measurement will be slightly off because the current
+    // comparison's "genome" doesn't include the selected chromosome, make a temp
+    // genome map for the comparison chromosome with the selected reference
+    // chromosome to get the genome map's radsToBP conversion value to size the
+    // reference chromosome
+    tempComp['ref' + chr] = (this.refGMap.getRadiansOfChromosome(chr)) *
+                            new GenomeMap(tempComp).radsToBP;
+
+    this.tempCompGenome = tempComp;
   }
 }

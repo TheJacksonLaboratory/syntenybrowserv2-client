@@ -7,16 +7,6 @@
   <svg id="genome-view-svg" font-family="Metropolis, sans-serif" font-size="12"
        [attr.viewBox]="'0 0 ' + width + ' ' + width"
        preserveAspectRatio="xMinYMin meet">
-    <defs>
-      <path *ngIf="genomeData" id="ref-label"
-            [attr.d]="getSpeciesLabelPath(refRadii, refGMap, ref.genome)">
-      </path>
-      <path *ngIf="genomeData" id="comp-label"
-            [attr.d]="getSpeciesLabelPath(compRadii, compGMap, comp.genome)">
-      </path>
-      <text *ngIf="ref" id="ref-species-abbrev">{{ ref.abbrev }}</text>
-      <text *ngIf="comp" id="comp-species-abbrev">{{ comp.abbrev }}</text>
-    </defs>
 
     <!-- Background -->
     <rect [attr.width]="width" [attr.height]="width" fill="#FFF"></rect>
@@ -48,15 +38,6 @@
                 (click)="renderChordMapForChr(blk.refChr)">
           </path>
         </g>
-
-        <text class="species-label" font-weight="bold" font-size="25" fill="#999"
-              (mouseenter)="tooltipContent = { title: 'Reference Species', species: ref.name }"
-              (mouseleave)="hideTooltip()">
-          <textPath xlink:href="#ref-label"
-                    [attr.textLength]="getSpeciesLabelWidth('ref') - 2">
-            {{ ref.abbrev }}
-          </textPath>
-        </text>
 
         <g *ngIf="features" id="ref-band-legend-lines" font-size="8">
           <g *ngFor="let chr of getChrsWithFeatures()">
@@ -110,14 +91,6 @@
 
       <!-- Comparison ring (no selected reference chr) -->
       <g *ngIf="!refChr" id="comparison-plot">
-        <text class="species-label" font-weight="bold" font-size="25" fill="#999"
-              (mouseenter)="tooltipContent = { title: 'Comparison Species', species: comp.name }"
-              (mouseleave)="hideTooltip()">
-          <textPath xlink:href="#comp-label"
-                    [attr.textLength]="getSpeciesLabelWidth('comp') - 3">
-            {{ comp.abbrev }}
-          </textPath>
-        </text>
 
         <!-- Comparison genome bands -->
         <g id="comp-bands">
@@ -141,28 +114,6 @@
 
       <!-- Comparison ring (with selected reference chr) -->
       <g *ngIf="refChr" id="comparison-plot">
-        <text class="species-label" font-weight="bold" font-size="25" fill="#999"
-              (mouseenter)="tooltipContent = { title: 'Comparison Species', species: comp.name }"
-              (mouseleave)="hideTooltip()">
-          <textPath xlink:href="#comp-label"
-                    [attr.textLength]="getSpeciesLabelWidth('comp') - 3">
-            {{ comp.abbrev }}
-          </textPath>
-        </text>
-
-        <!-- Reference chromosome-->
-        <g id="ref-band">
-          <!-- Reference chromosome band (transparent container) -->
-          <path stroke="#000" stroke-width="0.25" fill="transparent"
-                [attr.d]="getInnerRefBlockBandPath()">
-          </path>
-
-          <!-- Reference chromosome syntenic bands -->
-          <path *ngFor="let blk of refChr.blocks"
-                [attr.d]="getBlockBandPath(compRadii, compGMap, blk, true)"
-                [attr.fill]="blk.getColor()">
-          </path>
-        </g>
 
         <!-- Comparison genome bands -->
         <g id="comp-bands">
@@ -177,7 +128,7 @@
         <!-- Mapping chords from reference to comparison -->
         <g id="chord-mapping">
           <path *ngFor="let blk of refChr.blocks" stroke-width="0.3"
-                [attr.d]="getChordPath(compRadii.ringInner, compGMap, blk)"
+                [attr.d]="getChordPath(compGMap, blk)"
                 [attr.fill]="blk.getColor()"
                 [attr.stroke]="blk.getColor()">
           </path>
@@ -185,9 +136,9 @@
 
         <!-- Comparison genome labels -->
         <g id="comp-labels">
-          <text *ngFor="let chr of getChromosomes(tempCompGenome)" text-anchor="middle"
+          <text *ngFor="let chr of getChromosomes(comp.genome)" text-anchor="middle"
                 [attr.transform]="getCompLabelPos(chr, compGMap, true)">
-            {{ chr.includes('ref') ? chr.replace('ref', ref.abbrev + ', chr') : chr }}
+            {{ chr }}
           </text>
         </g>
       </g>
