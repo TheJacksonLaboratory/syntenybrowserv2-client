@@ -81,7 +81,7 @@ export class GenomeMap {
   getChrRadianStart(i: number): number {
     let chrRads = this.getSummation(this.sizes.slice(0, i)) * this.bpToRads,
         spacingRads = this.spacing * i;
-    return chrRads + spacingRads;
+    return this.clamp(chrRads + spacingRads);
   }
 
 
