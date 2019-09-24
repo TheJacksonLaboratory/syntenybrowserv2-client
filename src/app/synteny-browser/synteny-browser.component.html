@@ -21,10 +21,41 @@
 
         <div class="clr-col-xl-5 clr-col-lg-12">
           <div class="clr-row">
-            The reference genome will be displayed on the outer ring of circos
-            plot. The comparison species genome is the inner ring of the circos
-            plot and acts as a color legend for the syntenic blocks constructing
-            the reference genome.
+            <p>
+              Hovering over any chromosome will show the species and chromosome
+              value of that chromosome. Selecting a reference chromosome will map
+              the synteny of that chromsome to regions the comparison genome and
+              will let you explore the selected chromosome at a more granular
+              level if button below plot is clicked.
+            </p>
+
+            <clr-signpost>
+              <button class="btn btn-link" clrSignpostTrigger>
+                More info
+              </button>
+              <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+                Searching and selecting features from the table(s) will show the
+                features in the plot. Clicking on a chromosome without features
+                will show the mapping of the entire chromosome in reference to
+                the comparison genome. Clicking on a chromosome with at least
+                one selected feature will show the mapping of any syntenic
+                regions within that chromosome that contain a selected feature.
+              </clr-signpost-content>
+            </clr-signpost>
+          </div>
+
+          <hr/>
+
+          <!-- Genome view species "legend" -->
+          <div *ngIf="refSpecies && compSpecies" class="clr-row">
+            <span style="font-weight: bold">
+              Outer ring (reference genome): {{ refSpecies.commonName }}
+            ({{ refSpecies.name }})
+            </span>
+            <span style="font-weight: bold">
+              Inner ring (comparison genome): {{ compSpecies.commonName }}
+              ({{ compSpecies.name }})
+            </span>
           </div>
 
           <app-genome-view *ngIf="refSpecies && compSpecies"

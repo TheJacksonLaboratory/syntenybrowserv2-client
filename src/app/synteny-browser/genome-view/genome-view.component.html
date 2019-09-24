@@ -1,130 +1,158 @@
-<div *ngIf="genomeData" id="genome-view-container">
+<div id="genome-view-container">
   <div class="clr-row clr-justify-content-end">
     <button class="btn" (click)="filenameModalOpen = true">
       <clr-icon shape="download"></clr-icon> Download
     </button>
   </div>
-  <svg id="genome-view-svg" [attr.viewBox]="'0 0 ' + width + ' ' + width"
+  <svg id="genome-view-svg" font-family="Metropolis, sans-serif" font-size="12"
+       [attr.viewBox]="'0 0 ' + width + ' ' + width"
        preserveAspectRatio="xMinYMin meet">
+
+    <!-- Background -->
     <rect [attr.width]="width" [attr.height]="width" fill="#FFF"></rect>
-    <!-- Referemce plot -->
-    <g id="reference-plot" font-family="Metropolis, sans-serif" font-size="12"
-       [attr.transform]="getCenter()">
-      <!-- Reference genome synteny blocks -->
-      <g id="ref-blocks">
-        <path *ngFor="let blk of genomeData"
-              [attr.d]="getBlockBandPath(refRadii, refGMap, blk)"
-              [attr.fill]="blk.getColor()"
-              (click)="renderChordMapForChr(blk.refChr)">
-        </path>
-      </g>
 
-      <!-- Reference chromosome bands (transparent containers) -->
-      <g id="ref-bands">
-        <path *ngFor="let chr of getChromosomes(ref.genome)"
-              stroke="#000" stroke-width="0.25" fill="transparent"
-              [attr.d]="getChrBandPath(refRadii, refGMap, chr, ref.genome)"
-              (click)="renderChordMapForChr(chr)"
-              (mouseenter)="getTooltipContent(chr, ref)"
-              (mouseleave)="hideTooltip()">
-        </path>
-      </g>
+    <!-- Non-syntenic selected features -->
+    <g *ngIf="featuresNoBlocks && featuresNoBlocks.length > 0" font-size="11"
+       [attr.transform]="translate(5, 10)">
+      <text font-weight="bold">Non-syntenic Features</text>
 
-      <!-- Reference genome labels -->
-      <g id="ref-labels">
-        <text *ngFor="let chr of getChromosomes(ref.genome)" text-anchor="middle"
-              [attr.transform]="getRefLabelPos(chr, refGMap)"
-              (click)="renderChordMapForChr(chr)">
-          {{ chr }}
-        </text>
-      </g>
-
-      <!-- Blocks containing selected features -->
-      <g *ngIf="featureBlocks" id="feature-blocks">
-        <path *ngFor="let blk of featureBlocks"
-              [attr.d]="getBlockBandPath(featureRadii, refGMap, blk)"
-              [attr.fill]="blk.getColor()"
-              (click)="renderChordMapForChr(blk.refChr)">
-        </path>
-      </g>
-    </g>
-
-    <g *ngIf="!refChr" id="comparison-plot"
-       font-family="Metropolis, sans-serif" font-size="12"
-       [attr.transform]="getCenter()">
-      <!-- Comparison genome bands -->
-      <g id="comp-bands">
-        <path *ngFor="let chr of getChromosomes(comp.genome)"
-              stroke="#000" stroke-width="0.25"
-              [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
-              [attr.fill]="getChrColor(chr)"
-              (mouseenter)="getTooltipContent(chr, comp)"
-              (mouseleave)="hideTooltip()">
-        </path>
-      </g>
-
-      <!-- Comparison genome labels -->
-      <g id="comp-labels">
-        <text *ngFor="let chr of getChromosomes(comp.genome)" text-anchor="middle"
-              [attr.transform]="getCompLabelPos(chr, compGMap)">
-          {{ chr }}
-        </text>
-      </g>
-    </g>
-
-    <g *ngIf="refChr" id="comparison-plot"
-       font-family="Metropolis, sans-serif" font-size="12"
-       [attr.transform]="getCenter()">
-      <!-- Reference chromosome-->
-      <g id="ref-band">
-        <!-- Reference chromosome band (transparent container) -->
-        <path stroke="#000" stroke-width="0.25" fill="transparent"
-              [attr.d]="getInnerRefBlockBandPath()">
-        </path>
-
-        <!-- Reference chromosome syntenic bands -->
-        <path *ngFor="let blk of refChr.blocks"
-              [attr.d]="getBlockBandPath(compRadii, compGMap, blk, true)"
-              [attr.fill]="blk.getColor()">
-        </path>
-      </g>
-
-      <!-- Comparison genome bands -->
-      <g id="comp-bands">
-        <path *ngFor="let chr of getChromosomes(comp.genome)" class="inner"
-              [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
-              [attr.fill]="getChrColor(chr)"
-              (mouseenter)="getTooltipContent(chr, comp)"
-              (mouseleave)="hideTooltip()">
-        </path>
-      </g>
-
-      <!-- Mapping chords from reference to comparison -->
-      <g id="chord-mapping">
-        <path *ngFor="let blk of refChr.blocks" stroke-width="0.3"
-              [attr.d]="getChordPath(compRadii.ringInner, compGMap, blk)"
-              [attr.fill]="blk.getColor()"
-              [attr.stroke]="blk.getColor()">
-        </path>
-      </g>
-
-      <!-- Comparison genome labels -->
-      <g id="comp-labels">
-        <text *ngFor="let chr of getChromosomes(tempCompGenome)" text-anchor="middle"
-              [attr.transform]="getCompLabelPos(chr, compGMap, true)">
-          {{ chr }}
-        </text>
-      </g>
-    </g>
-
-    <!-- Tooltip Content -->
-    <g *ngIf="tooltipContent" [ngStyle]="{'transform': 'translate(50%, 50%)'}">
-      <text id="tt-title" text-anchor="middle">
-        {{ tooltipContent.title }}
+      <text *ngFor="let f of featuresNoBlocks | slice:0:4; let i=index"
+            [attr.transform]="translate(0, (11 * i) + 12)">
+        {{ f.symbol }}, Chr{{ f.chr }}
       </text>
-      <text id="tt-chr" text-anchor="middle" [attr.dy]="13">
-        Chr {{ tooltipContent.chr }}
+      <text *ngIf="featuresNoBlocks.length > 4"
+            [attr.transform]="translate(0, 56)">
+        and {{ featuresNoBlocks.length - 4 }} more...
       </text>
+    </g>
+
+    <!-- Genome plots -->
+    <g *ngIf="genomeData" [attr.transform]="getCenter()">
+      <!-- Reference ring -->
+      <g id="reference-plot">
+        <!-- Reference genome synteny blocks -->
+        <g id="ref-blocks">
+          <path *ngFor="let blk of genomeData"
+                [attr.d]="getBlockBandPath(refRadii, refGMap, blk)"
+                [attr.fill]="blk.getColor()"
+                (click)="renderChordMapForChr(blk.refChr)">
+          </path>
+        </g>
+
+        <g *ngIf="features" id="ref-band-legend-lines" font-size="8">
+          <g *ngFor="let chr of getChrsWithFeatures()">
+            <path stroke="#000" stroke-width="0.5" fill="transparent"
+                  [attr.d]="getLegendPath(chr)">
+            </path>
+            <g [attr.transform]="getLegendListPosition(chr)">
+              <text *ngFor="let f of getChrFeatures(chr) | slice:0:3; let i=index"
+                    [attr.transform]="getLegendListItemPosition(chr, i)"
+                    [attr.text-anchor]="getLegendListAlign(chr)">
+                {{ f.symbol }}
+              </text>
+              <text *ngIf="getChrFeatures(chr).length > 3"
+                    [attr.transform]="getLegendListItemPosition(chr, 3)"
+                    [attr.text-anchor]="getLegendListAlign(chr)">
+                and {{ getChrFeatures(chr).length - 3 }} more...
+              </text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Reference chromosome bands (transparent containers) -->
+        <g id="ref-bands">
+          <path *ngFor="let chr of getChromosomes(ref.genome)"
+                stroke="#000" stroke-width="0.25" fill="transparent"
+                [attr.d]="getChrBandPath(refRadii, refGMap, chr, ref.genome)"
+                (click)="renderChordMapForChr(chr)"
+                (mouseenter)="getTooltipContent(ref, chr)"
+                (mouseleave)="hideTooltip()">
+          </path>
+        </g>
+
+        <!-- Reference genome labels -->
+        <g id="ref-labels">
+          <text *ngFor="let chr of getChromosomes(ref.genome)" text-anchor="middle"
+                [attr.transform]="getRefLabelPos(chr, refGMap)"
+                (click)="renderChordMapForChr(chr)">
+            {{ chr }}
+          </text>
+        </g>
+
+        <!-- Blocks containing selected features -->
+        <g *ngIf="featureBlocks" id="feature-blocks">
+          <path *ngFor="let blk of featureBlocks"
+                [attr.d]="getBlockBandPath(featureRadii, refGMap, blk)"
+                [attr.fill]="blk.getColor()"
+                (click)="renderChordMapForChr(blk.refChr)">
+          </path>
+        </g>
+      </g>
+
+      <!-- Comparison ring (no selected reference chr) -->
+      <g *ngIf="!refChr" id="comparison-plot">
+
+        <!-- Comparison genome bands -->
+        <g id="comp-bands">
+          <path *ngFor="let chr of getChromosomes(comp.genome)"
+                stroke="#000" stroke-width="0.25"
+                [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
+                [attr.fill]="getChrColor(chr)"
+                (mouseenter)="getTooltipContent(comp, chr)"
+                (mouseleave)="hideTooltip()">
+          </path>
+        </g>
+
+        <!-- Comparison genome labels -->
+        <g id="comp-labels">
+          <text *ngFor="let chr of getChromosomes(comp.genome)" text-anchor="middle"
+                [attr.transform]="getCompLabelPos(chr, compGMap)">
+            {{ chr }}
+          </text>
+        </g>
+      </g>
+
+      <!-- Comparison ring (with selected reference chr) -->
+      <g *ngIf="refChr" id="comparison-plot">
+
+        <!-- Comparison genome bands -->
+        <g id="comp-bands">
+          <path *ngFor="let chr of getChromosomes(comp.genome)" class="inner"
+                [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
+                [attr.fill]="getChrColor(chr)"
+                (mouseenter)="getTooltipContent(comp, chr)"
+                (mouseleave)="hideTooltip()">
+          </path>
+        </g>
+
+        <!-- Mapping chords from reference to comparison -->
+        <g id="chord-mapping">
+          <path *ngFor="let blk of refChr.blocks" stroke-width="0.3"
+                [attr.d]="getChordPath(compGMap, blk)"
+                [attr.fill]="blk.getColor()"
+                [attr.stroke]="blk.getColor()">
+          </path>
+        </g>
+
+        <!-- Comparison genome labels -->
+        <g id="comp-labels">
+          <text *ngFor="let chr of getChromosomes(comp.genome)" text-anchor="middle"
+                [attr.transform]="getCompLabelPos(chr, compGMap, true)">
+            {{ chr }}
+          </text>
+        </g>
+      </g>
+
+      <!-- Tooltip Content -->
+      <g *ngIf="tooltipContent" id="gv-tooltip">
+        <text id="tt-title">{{ tooltipContent.title }}</text>
+        <text *ngIf="tooltipContent.chr" id="tt-chr" [attr.dy]="13">
+          Chr {{ tooltipContent.chr }}
+        </text>
+        <text *ngIf="tooltipContent.species" id="tt-species" [attr.dy]="13">
+          {{ tooltipContent.species }}
+        </text>
+      </g>
     </g>
   </svg>
 </div>

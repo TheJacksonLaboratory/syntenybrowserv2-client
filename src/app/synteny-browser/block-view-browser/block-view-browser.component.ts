@@ -318,7 +318,7 @@ export class BlockViewBrowserComponent {
       // highlight gene's homologs in the reference
       this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
 
-      this.tooltip.y = 145;
+      this.tooltip.y = 350;
     } else {
       this.tooltip.y = 100;
     }
@@ -357,7 +357,7 @@ export class BlockViewBrowserComponent {
         title: this.ref.name,
         content: block.getTooltipData(isComp),
         x: this.width / 2 - 75,
-        y: isComp ? 180 : 70
+        y: isComp ? 350 : 70
       };
     }
   }

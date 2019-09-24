@@ -3,6 +3,7 @@ import { ExternalResource, SearchType } from './interfaces';
 export class Species {
   taxonID: number;
   name: string;
+  abbrev: string;
   commonName: string;
   genome: any;
   onts: SearchType[];
@@ -16,11 +17,13 @@ export class Species {
    */
   constructor(species: any) {
     this.name = species.name;
+    this.abbrev = species.name.split(' ').map(w => w[0].toUpperCase()).join('');
     this.commonName = species.alias;
     this.taxonID = species.id;
     this.resources = species.resources;
     this.genome = species.genome;
-    this.hasQTLs = species.qtls;
+    // TODO: species config lists humans as having QTLs; fix this
+    this.hasQTLs = species.id === '10090' ? species.qtls : false;
     this.searchTypes = species.searches;
     this.onts = species.ontologies;
   }
