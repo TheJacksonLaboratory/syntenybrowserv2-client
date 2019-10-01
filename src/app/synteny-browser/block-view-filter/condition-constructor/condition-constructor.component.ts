@@ -5,7 +5,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 
 @Component({
-  selector: 'app-condition-constructor',
+  selector: 'condition-constructor',
   templateUrl: './condition-constructor.component.html',
   styleUrls: ['./condition-constructor.component.scss']
 })

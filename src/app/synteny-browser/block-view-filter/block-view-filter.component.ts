@@ -8,7 +8,7 @@ import { ApiService } from '../services/api.service';
 import { DownloadService } from '../services/download.service';
 
 @Component({
-  selector: 'app-block-view-filter',
+  selector: 'block-view-filter',
   templateUrl: './block-view-filter.component.html',
   styleUrls: ['./block-view-filter.component.scss']
 })
@@ -87,6 +87,13 @@ export class BlockViewFilterComponent implements OnInit {
       return;
     }
 
+    // if it's a "simple" filter, make sure that it only has a single condition
+    if(!this.currentFilter.advancedFilter) {
+      this.currentFilter.conditions = [this.currentFilter.conditions[0]];
+    }
+
+    this.currentFilter.setLabel();
+
     this.currentFilter.editing = false;
     this.currentFilter.created = true;
 
@@ -161,6 +168,40 @@ export class BlockViewFilterComponent implements OnInit {
     this.download.downloadText(lines, 'filter-results.txt');
   }
 
+  simpleFilterByAttribute(attribute: string): void {
+    this.currentFilter.conditions[0].filterBy = 'attribute';
+    this.currentFilter.conditions[0].attribute = attribute;
+  }
+
+  simpleFilterByOntology(ontology: string): void {
+    this.currentFilter.conditions[0].filterBy = 'ontology';
+    this.currentFilter.conditions[0].ontology = ontology;
+  }
+
+  simpleFilterByType(type: string): void {
+    const filter = this.currentFilter;
+    const c = filter.conditions[0];
+    filter.conditions[0].type = type;
+    filter.simpleFilterTitle = `that are ${c.type}s in ${filter.getSpecies()}`;
+    this.finishFilter();
+  }
+
+  simpleFilterQualifier(qualifier: string): void {
+    const filter = this.currentFilter;
+    const c = filter.conditions[0];
+    c.qualifier = qualifier;
+
+    const filterBy = c.filterBy === 'attribute' ? c.attribute : c.ontology + ' term';
+    const qual = qualifier === 'like' ? 'like' : '';
+    filter.simpleFilterTitle = `in ${filter.getSpecies()} by ${filterBy} ${qual}`;
+    this.currentFilter.simpleUserInputNeeded = true;
+  }
+
+  simpleFilterType(type: string): void {
+    this.currentFilter.conditions[0].type = type;
+    this.finishFilter();
+  }
+
 
   // Getter Methods
 
@@ -168,8 +209,8 @@ export class BlockViewFilterComponent implements OnInit {
    * Returns the list of types available to filter by based on what the selected
    * species is for the current filter
    */
-  getFeatureTypes(): string[] {
-    let genes = this.getGenesForSpecies(this.currentFilter.speciesKey);
+  getFeatureTypes(speciesKey: string): string[] {
+    let genes = this.getGenesForSpecies(speciesKey);
     let types = Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();
 
     // if the any of the conditions have type selections that aren't valid
@@ -188,8 +229,7 @@ export class BlockViewFilterComponent implements OnInit {
    */
   getGenesForSpecies(speciesKey: string): Gene[] {
     return speciesKey === 'ref' ?
-           this.refGenes :
-           (speciesKey === 'comp' ? this.compGenes : this.allGenes);
+           this.refGenes : (speciesKey === 'comp' ? this.compGenes : this.allGenes);
   }
 
   /**

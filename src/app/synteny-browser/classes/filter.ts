@@ -4,7 +4,7 @@ import { Gene } from './gene';
 
 export class Filter {
   attributes: string[] = [ 'type', 'id', 'symbol', 'chr' ];
-  species: string[] = [ 'both', 'ref', 'comp' ];
+  species: any[];
 
   mode: string = 'Highlight';
   speciesKey: string = 'ref';
@@ -12,6 +12,10 @@ export class Filter {
   compSpecies: Species;
   conditions: FilterCondition[] = [];
   id: number;
+  simpleFilterTitle: string;
+  filterLabel: string;
+  advancedFilter: boolean = false;
+  simpleUserInputNeeded: boolean = false;
 
   selected: boolean = true;
   created: boolean = false;
@@ -21,6 +25,11 @@ export class Filter {
     this.refSpecies = ref;
     this.compSpecies = comp;
     this.id = id;
+    this.species = [
+      {name: 'either species', value: 'both'},
+      {name: `${this.refSpecies.commonName} only`, value: 'ref'},
+      {name: `${this.compSpecies.commonName} only`, value: 'comp'}
+    ];
 
     // make a new default condition
     this.addNewCondition();
@@ -58,6 +67,14 @@ export class Filter {
     this.conditions.forEach((c, i) => c.id = i);
   }
 
+  /**
+   * Sets the text that should appear within a label component, including the
+   * filter mode (hiding/highlighting), the conditions and affected species
+   */
+  setLabel(): void {
+    this.filterLabel = `${this.mode} [${this.getStringifiedConditions()}] in ${this.getSpecies()}`;
+  }
+
 
   // Getter Methods
 
@@ -75,11 +92,11 @@ export class Filter {
    * Returns the list of ontologies that are available to choose from for each
    * condition given the selected species for the filter
    */
-  getValidOntologies(): SearchType[] {
+  getValidOntologies(speciesKey: string = this.speciesKey): SearchType[] {
     let refOnts = this.refSpecies.onts;
     let compOnts = this.compSpecies.onts;
 
-    switch (this.speciesKey) {
+    switch (speciesKey) {
       case 'ref': return refOnts;
       case 'comp': return compOnts;
       default: {
@@ -92,9 +109,9 @@ export class Filter {
    * Returns the common names of the species that the filter will affect
    */
   getSpecies(): string {
-    return (this.speciesKey === 'ref' ? this.refSpecies.commonName :
-      (this.speciesKey === 'comp' ? this.compSpecies.commonName :
-        this.refSpecies.commonName + ' & ' + this.compSpecies.commonName));
+    return (this.speciesKey === 'ref' ? `${this.refSpecies.commonName} only` :
+      (this.speciesKey === 'comp' ? `${this.compSpecies.commonName} only` :
+        'either species'));
   }
 
   /**
@@ -102,14 +119,6 @@ export class Filter {
    * type of filter it is (hiding/highlighting)
    */
   getColor(): string { return this.hides() ? '#F00' : '#2A9FE0'; }
-
-  /**
-   * Returns the text that should appear within a label component, including the
-   * filter mode (hiding/highlighting), the conditions and affected species
-   */
-  getLabel(): string {
-    return `${this.mode} [${this.getStringifiedConditions()}] in ${this.getSpecies()}`;
-  }
 
   /**
    * Returns the label text for the filter based on title (adds formatting)

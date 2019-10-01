@@ -9,9 +9,10 @@ import { ChrComparator, DescendantsComparator, IDComparator, NameComparator,
          SymbolComparator, TypeComparator } from '../classes/comparators';
 import { OntologySearchComponent } from './ontology-search/ontology-search.component';
 import { FeatureSearchComponent } from './feature-search/feature-search.component';
+import { DataStorageService } from '../services/data-storage.service';
 
 @Component({
-  selector: 'app-feature-selection',
+  selector: 'feature-selection',
   templateUrl: './feature-selection.component.html',
   styleUrls: ['./feature-selection.component.scss']
 })
@@ -30,17 +31,16 @@ export class FeatureSelectionComponent {
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 
-  constructor() { }
+  constructor(private data: DataStorageService) { }
 
 
   // Operational Methods
 
   /**
-   * Initializes the component based on the specified reference species
-   * @param {Species} referenceSpecies - the current reference species
+   * Initializes the component based on the current reference species
    */
-  load(referenceSpecies: Species): void {
-    this.refSpecies = referenceSpecies;
+  load(): void {
+    this.refSpecies = this.data.refSpecies;
     this.ontology = this.refSpecies.onts[0].value;
 
     // empty out selection lists

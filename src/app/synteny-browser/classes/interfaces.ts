@@ -2,23 +2,16 @@ import { Feature } from './feature';
 import { SyntenyBlock } from './synteny-block';
 import { ClrLoadingState } from '@clr/angular';
 
-export interface Response {
-  species?: RawSpecies[];
-  genes?: any[];
-  blocks?: SyntenyBlock[];
-  qtls?: QTLMetadata[];
-  ont_genes?: OntologyGeneMetadata[];
-  terms?: OntologyTerm[];
-  msg?: string;
-}
+export interface ArrayResponse extends Array<any> {}
+export interface JSONResponse extends Object {}
 
 export interface OntologyTerm {
   id: string;
   name: string;
-  count: number;
-  namespace: string;
-  descendants: DescendantTerm[];
-  def: string;
+  count?: number;
+  namespace?: string;
+  descendants?: DescendantTerm[];
+  def?: string;
   selecting?: ClrLoadingState;
 }
 

@@ -34,16 +34,16 @@
 </div>
 
 <div class="clr-row">
-  <app-feature-search class="clr-col-12 no-padding"
+  <feature-search class="clr-col-12 no-padding"
                       [hidden]="searchType !== 'symbol'"
                       (update)="updateSelections()">
-  </app-feature-search>
+  </feature-search>
 
-  <app-ontology-search class="clr-col-12 no-padding"
+  <ontology-search class="clr-col-12 no-padding"
                        [hidden]="searchType !== 'ontology'"
                        (update)="updateSelections()"
                        (switchView)="setSearch()">
-  </app-ontology-search>
+  </ontology-search>
 </div>
 
 <div class="clr-row">

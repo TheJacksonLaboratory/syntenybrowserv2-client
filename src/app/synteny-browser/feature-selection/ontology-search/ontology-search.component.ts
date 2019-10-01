@@ -8,7 +8,7 @@ import { TableData } from '../../classes/table-data';
 
 
 @Component({
-  selector: 'app-ontology-search',
+  selector: 'ontology-search',
   templateUrl: './ontology-search.component.html',
   styleUrls: ['./ontology-search.component.scss']
 })
@@ -76,7 +76,8 @@ export class OntologySearchComponent {
 
     let termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
-    this.http.getAssociationsForTerm(this.refSpecies.getID(), termToSearch)
+    this.http.getAssociationsForTerm(this.refSpecies.getID(),
+                                     encodeURIComponent(termToSearch))
              .subscribe(genes => {
                if(showResults) {
                  this.associations.setRows(genes, 'term')

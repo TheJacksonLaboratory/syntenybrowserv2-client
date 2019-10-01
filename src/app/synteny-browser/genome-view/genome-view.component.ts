@@ -6,9 +6,10 @@ import { GenomeMap } from '../classes/genome-map';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { DownloadService } from '../services/download.service';
+import { DataStorageService } from '../services/data-storage.service';
 
 @Component({
-  selector: 'app-genome-view',
+  selector: 'genome-view',
   templateUrl: './genome-view.component.html',
   styleUrls: ['./genome-view.component.scss']
 })
@@ -42,7 +43,9 @@ export class GenomeViewComponent implements OnInit {
 
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private http: ApiService, private downloader: DownloadService) { }
+  constructor(private data: DataStorageService,
+              private http: ApiService,
+              private downloader: DownloadService) { }
 
   ngOnInit() {
     // generate a radii dictionary to help with rendering the reference plot
@@ -74,17 +77,14 @@ export class GenomeViewComponent implements OnInit {
   // Operational Methods
 
   /**
-   * Renders a genome view from a specified reference and comparison species
-   * @param {Species} reference - the current reference species
-   * @param {Species} comparison - the current comparison species
-   * @param {object} colors - the dictionary to map colors to chromosomes
+   * Renders a genome view for the current reference and comparison species
    */
-  render(reference: Species, comparison: Species, colors: object): void {
+  render(): void {
     this.reset();
 
-    this.ref = reference;
-    this.comp = comparison;
-    this.colors = colors;
+    this.ref = this.data.refSpecies;
+    this.comp = this.data.compSpecies;
+    this.colors = this.data.genomeColorMap;
 
     let refID = this.ref.getID(),
         compID = this.comp.getID();
@@ -96,7 +96,7 @@ export class GenomeViewComponent implements OnInit {
                this.compGMap = new GenomeMap(this.comp.genome);
 
                // set the color for each block
-               blocks.forEach(b => b.setColor(colors[b.compChr]));
+               blocks.forEach(b => b.setColor(this.colors[b.compChr]));
                this.genomeData = blocks;
              });
   }
@@ -173,21 +173,21 @@ export class GenomeViewComponent implements OnInit {
     this.highlightFeatures.emit([]);
   }
 
-
-  // Getter Methods
-
   /**
-   * Returns the chromosome the user chose as well as a list of any features to
+   * Stores the chromosome the user chose as well as a list of any features to
    * render in the block view
    */
-  getChromosomeFeaturesToView(): SelectedFeatures {
+  setChromosomeFeaturesToView(): void {
     let trueChr = this.refChr.chr.replace('ref', '');
 
-    return {
+    this.data.features = {
       chr: trueChr,
       features: this.features ? this.getChrFeatures(trueChr) : []
     }
   }
+
+
+  // Getter Methods
 
   /**
    * Returns a path command for a chromosome band

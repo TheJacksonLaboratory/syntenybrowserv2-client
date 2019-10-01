@@ -1,8 +1,9 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Species } from '../classes/species';
+import { DataStorageService } from '../services/data-storage.service';
 
 @Component({
-  selector: 'app-species-selection',
+  selector: 'species-selection',
   templateUrl: './species-selection.component.html'
 })
 export class SpeciesSelectionComponent {
@@ -12,7 +13,7 @@ export class SpeciesSelectionComponent {
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 
-  constructor() { }
+  constructor(private data: DataStorageService) { }
 
 
   // Operational Methods
@@ -20,10 +21,9 @@ export class SpeciesSelectionComponent {
   /**
    * Sets the reference and comparison species to the the first and
    * second species available, respectively
-   * @param {Species[]} species - list of available species to compare
    */
-  setSpecies(species: Species[]): void {
-    this.species = species;
+  getSpecies(): void {
+    this.species = this.data.species;
     this.refSpecies = this.species[0].getID();
     this.compSpecies = this.species[1].getID();
   }
@@ -33,9 +33,7 @@ export class SpeciesSelectionComponent {
    */
   changeComparison(): void {
     if(this.refSpecies === this.compSpecies) {
-      this.compSpecies = this.species.filter(s => {
-                                       return s.getID() !== this.refSpecies
-                                     })[0].getID();
+      this.compSpecies = this.species.filter(s => !this.isReference(s))[0].getID();
     }
 
     this.update.emit()
@@ -48,14 +46,22 @@ export class SpeciesSelectionComponent {
    * Returns the current reference species
    */
   getReferenceSelection(): Species {
-    return this.species.filter(s => s.getID() === this.refSpecies)[0];
+    return this.species.filter(s => this.isReference(s))[0];
   }
 
   /**
    * Returns the current comparison species
    */
   getComparisonSelection(): Species {
-    return this.species.filter(s => s.getID() === this.compSpecies)[0];
+    return this.species.filter(s => this.isComparison(s))[0];
+  }
+
+  private isComparison(species: Species): boolean {
+    return species.getID() === this.compSpecies;
+  }
+
+  private isReference(species: Species): boolean {
+    return species.getID() === this.refSpecies;
   }
 
 }

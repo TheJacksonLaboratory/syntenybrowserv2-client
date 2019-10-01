@@ -5,7 +5,7 @@ import { TableData } from '../../classes/table-data';
 import { Feature } from '../../classes/feature';
 
 @Component({
-  selector: 'app-feature-search',
+  selector: 'feature-search',
   templateUrl: './feature-search.component.html',
   styleUrls: ['./feature-search.component.scss']
 })

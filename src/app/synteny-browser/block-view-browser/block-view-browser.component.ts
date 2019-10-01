@@ -12,9 +12,10 @@ import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
+import { DataStorageService } from '../services/data-storage.service';
 
 @Component({
-  selector: 'app-block-view-browser',
+  selector: 'block-view-browser',
   templateUrl: './block-view-browser.component.html',
   styleUrls: ['./block-view-browser.component.scss']
 })
@@ -66,7 +67,9 @@ export class BlockViewBrowserComponent {
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService, private downloader: DownloadService) {
+  constructor(private data: DataStorageService,
+              private http: ApiService,
+              private downloader: DownloadService) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
@@ -75,23 +78,15 @@ export class BlockViewBrowserComponent {
   // Operational Methods
 
   /**
-   * Renders the block view with the specified reference and comparison species,
-   * using the specified color dictionary for the genomes, a list of features to
-   * highlight on the specified chromosome
-   * @param {Species} ref - the reference species
-   * @param {Species} comp - the comparison species
-   * @param {object} colors - the genome color dictionary
-   * @param {string} chr - the chromosome to get syntenic blocks and features for
-   * @param {Feature[]} features - list of selected features to display
+   * Renders the block view with the current reference and comparison species,
+   * and a list of features to highlight on the current chromosome
    */
-  render(ref: Species, comp: Species, colors: object,
-         chr: string, features: Feature[]): void {
+  render(): void {
     this.reset();
 
-    this.ref = ref;
-    this.comp = comp;
-
-    this.refChr = chr;
+    this.ref = this.data.refSpecies;
+    this.comp = this.data.compSpecies;
+    this.refChr = this.data.features.chr;
 
     // this one is going to get updated with transformations
     this.refBPToPixels = this.getRefScale(this.getRefChrSize());
@@ -100,7 +95,7 @@ export class BlockViewBrowserComponent {
     this.staticRefBPToPixels = this.getRefScale(this.getRefChrSize());
 
     // get syntenic block data
-    this.getSyntenicBlocks(features, colors);
+    this.getSyntenicBlocks(this.data.features.features);
   }
 
   /**
@@ -589,13 +584,13 @@ export class BlockViewBrowserComponent {
    * Gets the synteny information and constructs dictionaries with important
    * information for each syntenic region
    * @param {Feature[]} features - list of features for gene coloring
-   * @param {object} colors - the genome color dictionary
    */
-  private getSyntenicBlocks(features: Feature[], colors: object): void {
+  private getSyntenicBlocks(features: Feature[]): void {
     let refID = this.ref.getID();
     let compID = this.comp.getID();
+    let colors = this.data.genomeColorMap;
 
-    this.http.getChromosomeSynteny(refID, compID, this.refChr)
+    this.http.getChrSynteny(refID, compID, this.refChr)
              .subscribe(blocks => {
                let activeChrs = [];
                // create list of necessary block data dictionaries

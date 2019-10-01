@@ -36,11 +36,15 @@ p { margin-top: 0.2em; }
   margin-top: 0.5rem;
 }
 
+clr-select-container, clr-input-container {
+  margin-top: -0.3rem !important;
+}
+
 .hidden-row { background: rgba(255, 0, 0, 0.2); }
 
 clr-dg-row { background: rgba(42, 159, 224, 0.2); }
 
-app-condition-constructor { border-top: 1px solid #CCC; }
+condition-constructor { border-top: 1px solid #CCC; }
 
 clr-icon { margin-left: 5px; }
 
@@ -51,3 +55,13 @@ img { width: 100%; }
 #diagram { margin-top: 5vh; }
 
 #filter-modal-container { min-height: 50vh; }
+
+#type-menu {
+  overflow-y: scroll;
+  max-height: 300px;
+
+  button {
+    height: 30px;
+    overflow: visible;
+  }
+}

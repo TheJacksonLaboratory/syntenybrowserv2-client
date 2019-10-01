@@ -2,7 +2,7 @@
   <!-- Side navigation -->
   <clr-vertical-nav class="clr-col-2">
     <a *ngFor="let page of navigation" clrVerticalNavLink
-       (click)="activePage = page.value"
+       (click)="activePage=page.value"
        [ngStyle]="getNavItemStyle(page.value)">
       {{ page.name | titlecase }}
     </a>
@@ -23,7 +23,7 @@
           <span *ngFor="let f of getCreatedFilters()" class="label"
                 (click)="editFilter(f)"
                 [ngClass]="{ 'label-info': !f.hides(), 'label-danger': f.hides() }">
-            {{ f.getLabel() }}
+            {{ f.filterLabel }}
             <clr-icon shape="close" (click)="removeFilter(f)"></clr-icon>
           </span>
         </div>
@@ -34,73 +34,208 @@
     <div *ngIf="activePage === 'edit'" id="edit-filters" class="clr-col-12">
       <!-- Content -->
       <div class="clr-row clr-col-12 top-1">
-        <h6><b>Add/Edit Filter</b></h6>
+        <h5><b>Add/Edit Filter</b></h5>
+
+        <div *ngIf="!currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
+          <div class="clr-row clr-col-12">
+            <clr-select-container class="right-1">
+              <label for="simple-mode"> Mode </label>
+
+              <select clrSelect id="simple-mode" [(ngModel)]="currentFilter.mode">
+                <option value="Highlight"> Highlight </option>
+                <option value="Hide"> Hide </option>
+              </select>
+            </clr-select-container>
+
+            <h6 class="right-1"> features </h6>
+
+            <clr-dropdown class="right-1">
+              <button class="btn" clrDropdownTrigger>
+                {{ currentFilter.simpleFilterTitle || 'Select filter condition' }}
+                <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+                <clr-dropdown *ngFor="let s of currentFilter.species">
+                  <button clrDropdownTrigger (click)="currentFilter.speciesKey=s.value">
+                    In {{ s.name | titlecase }}
+                  </button>
+
+                  <clr-dropdown-menu>
+                    <clr-dropdown>
+                      <button clrDropdownTrigger
+                              (click)="simpleFilterByAttribute('type')">
+                        by type
+                      </button>
+                      <clr-dropdown-menu id="type-menu" clrPosition="left-top">
+                        <button *ngFor="let t of getFeatureTypes(s.value)"
+                                (click)="simpleFilterByType(t)"
+                                clrDropdownItem>
+                          {{ t }}
+                        </button>
+                      </clr-dropdown-menu>
+                    </clr-dropdown>
+
+                    <clr-dropdown>
+                      <button clrDropdownTrigger
+                              (click)="simpleFilterByAttribute('id')">
+                        by ID
+                      </button>
+                      <clr-dropdown-menu>
+                        <button clrDropdownItem
+                                (click)="simpleFilterQualifier('equal')">
+                          that equals...
+                        </button>
+                        <button clrDropdownItem
+                                (click)="simpleFilterQualifier('like')">
+                          that is like...
+                        </button>
+                      </clr-dropdown-menu>
+                    </clr-dropdown>
+
+                    <clr-dropdown>
+                      <button clrDropdownTrigger
+                              (click)="simpleFilterByAttribute('symbol')">
+                        by symbol
+                      </button>
+                      <clr-dropdown-menu>
+                        <button clrDropdownItem
+                                (click)="simpleFilterQualifier('equal')">
+                          that equals...
+                        </button>
+                        <button clrDropdownItem
+                                (click)="simpleFilterQualifier('like')">
+                          that is like...
+                        </button>
+                      </clr-dropdown-menu>
+                    </clr-dropdown>
+
+                    <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+                    <clr-dropdown>
+                      <button clrDropdownTrigger>by ontology term</button>
+
+                      <clr-dropdown-menu clrPosition="left-top">
+                        <clr-dropdown>
+                          <button clrDropdownTrigger
+                                  *ngFor="let o of currentFilter.getValidOntologies(s.value)"
+                                  (click)="simpleFilterByOntology(o.value)">
+                            from {{ o.name }}
+                          </button>
+
+                          <clr-dropdown-menu>
+                            <button clrDropdownItem
+                                    (click)="simpleFilterQualifier('equal')">
+                              that equals...
+                            </button>
+                          </clr-dropdown-menu>
+                        </clr-dropdown>
+                      </clr-dropdown-menu>
+                    </clr-dropdown>
+                  </clr-dropdown-menu>
+                </clr-dropdown>
+              </clr-dropdown-menu>
+            </clr-dropdown>
+
+            <clr-input-container *ngIf="currentFilter.simpleUserInputNeeded"
+                                 class="right-1">
+              <label for="simple-value"> Value </label>
+
+              <input id="simple-value" clrInput placeholder="Enter a value here"
+                     [(ngModel)]="currentFilter.conditions[0].value">
+            </clr-input-container>
+
+            <button type="button" *ngIf="currentFilter.simpleUserInputNeeded"
+                    class="btn btn-success-outline"
+                    title="Finish the filter"
+                    [disabled]="!currentFilter.conditions[0].value"
+                    (click)="finishFilter()">
+              <clr-icon shape="check"></clr-icon> Done
+            </button>
+          </div>
+
+          <div class="clr-row clr-col-12 top-2">
+            <p>Need something a little more specific?</p>
+            <button type="button" class="btn btn-sm btn-link"
+                    (click)="currentFilter.advancedFilter=true">
+              Create an Advanced Filter
+            </button>
+          </div>
+        </div>
+
+
 
         <!-- Current filter -->
-        <div class="clr-row clr-col-12">
+        <div *ngIf="currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
           <!-- Species select -->
           <clr-select-container class="right-1">
             <label for="species"> Species </label>
 
-            <select clrSelect id="species"
-                    [(ngModel)]="currentFilter.speciesKey">
-              <option *ngFor="let s of currentFilter.species" [value]="s">
-                {{ s | titlecase }}
+            <select clrSelect id="species" [(ngModel)]="currentFilter.speciesKey">
+              <option *ngFor="let s of currentFilter.species" [value]="s.value">
+                {{ s.name | titlecase }}
               </option>
             </select>
           </clr-select-container>
 
           <!-- Mode select -->
-          <clr-select-container>
-            <label for="mode"> Mode </label>
+          <clr-select-container class="right-2">
+            <label for="advanced-mode"> Mode </label>
 
-            <select clrSelect id="mode"
-                    [(ngModel)]="currentFilter.mode">
+            <select clrSelect id="advanced-mode" [(ngModel)]="currentFilter.mode">
               <option value="Highlight"> Highlight </option>
               <option value="Hide"> Hide </option>
             </select>
           </clr-select-container>
-        </div>
 
-        <!-- Conditions -->
-        <div *ngIf="allGenes" class="clr-row clr-col-12 top-1">
-          <app-condition-constructor *ngFor="let c of currentFilter.conditions"
-                                     class="clr-col-12"
-                                     [attributes]="currentFilter.getValidAttrs()"
-                                     [ontologies]="currentFilter.getValidOntologies()"
-                                     [types]="getFeatureTypes()"
-                                     [values]="c"
-                                     (remove)="removeCondition(c)"
-                                     (warn)="filterErrorState = $event">
-          </app-condition-constructor>
-        </div>
-
-        <!-- Filter controls -->
-        <div class="clr-row clr-col-12">
-          <!-- Buttons -->
-          <div class="clr-col-6 filter-controls">
-            <!-- Add another condition button -->
-            <button type="button" class="btn btn-sm btn-info-outline"
-                    title="Add another condition to this filter"
-                    (click)="currentFilter.addNewCondition()">
-              <clr-icon shape="add"></clr-icon> New condition
-            </button>
-
-            <!-- Finish filter button -->
-            <button type="button" class="btn btn-sm btn-success-outline"
-                    title="Add this filter to the list"
-                    [disabled]="filterErrorState"
-                    (click)="finishFilter()">
-              <clr-icon shape="check"></clr-icon> Finish editing filter
-            </button>
+          <!-- Conditions -->
+          <div *ngIf="allGenes" class="clr-row clr-col-12 top-1">
+            <condition-constructor *ngFor="let c of currentFilter.conditions"
+                                   class="clr-col-12"
+                                   [attributes]="currentFilter.getValidAttrs()"
+                                   [ontologies]="currentFilter.getValidOntologies()"
+                                   [types]="getFeatureTypes(currentFilter.speciesKey)"
+                                   [values]="c"
+                                   (remove)="removeCondition(c)"
+                                   (warn)="filterErrorState=$event">
+            </condition-constructor>
           </div>
 
-          <!-- Filter-related message -->
-          <div class="clr-col-6 filter-controls">
-            <!-- Error message -->
-            <p *ngIf="filterErrorState" class="error-msg">
-              {{ filterErrorState }}
-            </p>
+          <!-- Filter controls -->
+          <div class="clr-row clr-col-12">
+            <!-- Buttons -->
+            <div class="clr-col-6 filter-controls">
+              <!-- Add another condition button -->
+              <button type="button" class="btn btn-sm btn-info-outline"
+                      title="Add another condition to this filter"
+                      (click)="currentFilter.addNewCondition()">
+                <clr-icon shape="add"></clr-icon> New condition
+              </button>
+
+              <!-- Finish filter button -->
+              <button type="button" class="btn btn-sm btn-success-outline"
+                      title="Add this filter to the list"
+                      [disabled]="filterErrorState"
+                      (click)="finishFilter()">
+                <clr-icon shape="check"></clr-icon> Finish editing filter
+              </button>
+            </div>
+
+
+            <!-- Filter-related message -->
+            <div class="clr-col-6 filter-controls">
+              <!-- Error message -->
+              <p *ngIf="filterErrorState" class="error-msg">
+                {{ filterErrorState }}
+              </p>
+            </div>
+          </div>
+
+          <div class="clr-row clr-col-12 top-2">
+            <p>Don't need this many options?</p>
+            <button type="button" class="btn btn-sm btn-link"
+                    (click)="currentFilter.advancedFilter=false">
+              Create a Simple Filter
+            </button>
           </div>
         </div>
       </div>
@@ -108,7 +243,7 @@
       <!-- Done button -->
       <div class="clr-row clr-justify-content-end top-1 bottom-1">
         <button type="button" class="btn btn-primary" (click)="userClose.emit()">
-          Done
+          Close
         </button>
       </div>
     </div>
