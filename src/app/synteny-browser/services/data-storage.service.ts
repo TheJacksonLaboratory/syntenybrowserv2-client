@@ -18,8 +18,27 @@ export class DataStorageService {
   filters: Filter[] = [];
   features: SelectedFeatures;
 
+  ontologyTerms: any = {};
+
   constructor(private http: ApiService) {
-    this.http.getGenomeColorMap().subscribe(map => this.genomeColorMap = map);
-    this.http.getSpecies().subscribe(species => this.species = species);
+    this.http.getSpecies().subscribe(species => {
+      this.species = species;
+
+      this.http.getGenomeColorMap().subscribe(map => {
+        this.genomeColorMap = map;
+      });
+    });
+  }
+
+  getOntologyTerms() {
+    let onts = Array.from(new Set(
+      this.refSpecies.onts.map(o => o.value)
+        .concat(...this.compSpecies.onts.map(o => o.value))
+    ));
+
+    onts.forEach(o => {
+      this.http.getTermsForAutocomplete(o)
+        .subscribe(terms => this.ontologyTerms[o] = terms);
+    });
   }
 }

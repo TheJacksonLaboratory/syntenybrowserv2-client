@@ -51,6 +51,16 @@
   }
 }
 
+.simple-autocomplete {
+  width: 200px !important;
+  margin-top: -0.6rem !important;
+
+  .ng-value-container {
+    border: 0;
+    padding: 0;
+  }
+}
+
 // The following styles need to be here; any further up in the chain and they
 // won't override D3's default stylings
 rect.selection {

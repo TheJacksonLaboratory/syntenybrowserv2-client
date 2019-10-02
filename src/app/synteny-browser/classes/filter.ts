@@ -73,6 +73,21 @@ export class Filter {
    */
   setLabel(): void {
     this.filterLabel = `${this.mode} [${this.getStringifiedConditions()}] in ${this.getSpecies()}`;
+    this.setSimpleTitle();
+  }
+
+  /**
+   * Sets the label for the simple filter menu button
+   */
+  setSimpleTitle(): void {
+    let c = this.conditions[0];
+    if(c.type) {
+      this.simpleFilterTitle = `that are ${c.type}s in ${this.getSpecies()}`
+    } else {
+      const filterBy = c.filterBy === 'attribute' ? c.attribute : c.ontology + ' term';
+      const qual = c.qualifier === 'like' ? 'like' : '';
+      this.simpleFilterTitle = `in ${this.getSpecies()} by ${filterBy} ${qual}`;
+    }
   }
 
 
@@ -205,7 +220,7 @@ export class Filter {
       let value = cond.attribute === 'type' ? cond.type : cond.value;
       return cond.attribute + this.getQualifier(cond) + value;
     } else {
-      return 'genes assoc w/ ' + cond.value;
+      return 'assoc w/ ' + cond.value;
     }
   }
 

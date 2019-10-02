@@ -58,6 +58,8 @@ export class SyntenyBrowserComponent implements OnInit {
     // load the feature selection using the most recent reference species
     this.features.load();
 
+    this.data.getOntologyTerms();
+
     // TODO: this is here for work on filters
     this.automateFlowToWorkOnFilters();
   }

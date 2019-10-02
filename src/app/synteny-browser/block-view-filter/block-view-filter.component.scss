@@ -15,6 +15,8 @@ h6 {
 
 p { margin-top: 0.2em; }
 
+.mode-toggle p { margin-top: 0.23rem; }
+
 .smaller { font-size: 0.5rem; }
 
 .new-filter { border-top: 1px #AAA solid; }
@@ -36,9 +38,7 @@ p { margin-top: 0.2em; }
   margin-top: 0.5rem;
 }
 
-clr-select-container, clr-input-container {
-  margin-top: -0.3rem !important;
-}
+clr-select-container, clr-input-container { margin-top: -0.3rem !important; }
 
 .hidden-row { background: rgba(255, 0, 0, 0.2); }
 

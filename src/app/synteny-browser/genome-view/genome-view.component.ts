@@ -16,7 +16,6 @@ import { DataStorageService } from '../services/data-storage.service';
 export class GenomeViewComponent implements OnInit {
   ref: Species;
   comp: Species;
-  colors: object;
   genomeData: SyntenyBlock[];
   refGMap: GenomeMap;
   compGMap: GenomeMap;
@@ -84,7 +83,6 @@ export class GenomeViewComponent implements OnInit {
 
     this.ref = this.data.refSpecies;
     this.comp = this.data.compSpecies;
-    this.colors = this.data.genomeColorMap;
 
     let refID = this.ref.getID(),
         compID = this.comp.getID();
@@ -96,7 +94,7 @@ export class GenomeViewComponent implements OnInit {
                this.compGMap = new GenomeMap(this.comp.genome);
 
                // set the color for each block
-               blocks.forEach(b => b.setColor(this.colors[b.compChr]));
+               blocks.forEach(b => b.setColor(this.data.genomeColorMap[b.compChr]));
                this.genomeData = blocks;
              });
   }
@@ -360,7 +358,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the color for the specified chromosome
    * @param {string} chr - the chromosome to get the color of
    */
-  getChrColor(chr: string): string { return this.colors[chr]; }
+  getChrColor(chr: string): string { return this.data.genomeColorMap[chr]; }
 
   /**
    * Returns the content for a tooltip for the specified chromosome and species

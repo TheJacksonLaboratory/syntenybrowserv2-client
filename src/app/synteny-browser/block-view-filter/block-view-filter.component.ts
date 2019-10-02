@@ -6,6 +6,7 @@ import { ClrDatagridPagination, ClrLoadingState } from '@clr/angular';
 import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
 import { DownloadService } from '../services/download.service';
+import { DataStorageService } from '../services/data-storage.service';
 
 @Component({
   selector: 'block-view-filter',
@@ -33,7 +34,9 @@ export class BlockViewFilterComponent implements OnInit {
 
   @Output() userClose: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService, private download: DownloadService) {
+  constructor(private http: ApiService,
+              public data: DataStorageService,
+              private download: DownloadService) {
     this.navigation = [ { name: 'edit filters', value: 'edit' },
                         { name: 'preview filters', value: 'preview' },
                         { name: 'filtering guide', value: 'guide' } ];
@@ -64,6 +67,7 @@ export class BlockViewFilterComponent implements OnInit {
    */
   editFilter(filter: Filter): void {
     if(this.activePage === 'edit') {
+      this.filterMode = 'edit';
       filter.editing = true;
 
       this.currentFilter = this.getCurrentFilter();
@@ -102,6 +106,7 @@ export class BlockViewFilterComponent implements OnInit {
     this.filteredGenes = [];
     this.applyFilters();
 
+    this.filterMode = 'add';
     this.createNewEditableFilter();
   }
 
@@ -168,38 +173,74 @@ export class BlockViewFilterComponent implements OnInit {
     this.download.downloadText(lines, 'filter-results.txt');
   }
 
+  /**
+   * Sets the current filter's variables to filter by the specified attribute
+   * @param {string} attribute - the attribute to filter features by
+   */
   simpleFilterByAttribute(attribute: string): void {
     this.currentFilter.conditions[0].filterBy = 'attribute';
     this.currentFilter.conditions[0].attribute = attribute;
   }
 
+  /**
+   * Sets the current filter's variables to filter by a specified ontology
+   * @param {string} ontology - the ontology to filter features by
+   */
   simpleFilterByOntology(ontology: string): void {
     this.currentFilter.conditions[0].filterBy = 'ontology';
     this.currentFilter.conditions[0].ontology = ontology;
+    this.currentFilter.conditions[0].qualifier = 'equal';
+    this.currentFilter.simpleUserInputNeeded = true;
+    this.currentFilter.setSimpleTitle();
   }
 
+  /**
+   * Sets the current filter's type to be the specified feature type and
+   * finishes the filter
+   * @param {string} type - the feature type to filter features by
+   */
   simpleFilterByType(type: string): void {
-    const filter = this.currentFilter;
-    const c = filter.conditions[0];
-    filter.conditions[0].type = type;
-    filter.simpleFilterTitle = `that are ${c.type}s in ${filter.getSpecies()}`;
+    this.currentFilter.conditions[0].type = type;
     this.finishFilter();
   }
 
+  /**
+   * Sets the current filter's qualifier variables to consider user input
+   * @param {string} qualifier - whether the user wants exact matches or a more
+   *                             loose matching model
+   */
   simpleFilterQualifier(qualifier: string): void {
-    const filter = this.currentFilter;
-    const c = filter.conditions[0];
-    c.qualifier = qualifier;
-
-    const filterBy = c.filterBy === 'attribute' ? c.attribute : c.ontology + ' term';
-    const qual = qualifier === 'like' ? 'like' : '';
-    filter.simpleFilterTitle = `in ${filter.getSpecies()} by ${filterBy} ${qual}`;
+    this.currentFilter.conditions[0].qualifier = qualifier;
     this.currentFilter.simpleUserInputNeeded = true;
+    this.currentFilter.setSimpleTitle();
   }
 
+  /**
+   * Sets the current filter's type attribute and finishes the filter (since
+   * the user doesn't need to complete any other fields for a valid filter)
+   * @param {string} type - the type value for the filter
+   */
   simpleFilterType(type: string): void {
     this.currentFilter.conditions[0].type = type;
     this.finishFilter();
+  }
+
+  /**
+   * Emits a message if the term that's been selected is too broad to search
+   */
+  checkTermChildren(): void {
+    let c = this.currentFilter.conditions[0];
+    if(c && c.value) {
+      let terms = this.data.ontologyTerms[c.ontology].map(t => t.id);
+
+      let term = this.data.ontologyTerms[c.ontology][terms.indexOf(c.value)];
+
+      if(term.count && term.count > 500) {
+        this.filterErrorState = 'Term too broad';
+      } else {
+        this.filterErrorState = '';
+      }
+    }
   }
 
 

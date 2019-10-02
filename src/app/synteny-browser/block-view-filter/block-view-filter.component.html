@@ -33,8 +33,8 @@
     <!-- Filter editing page/tab -->
     <div *ngIf="activePage === 'edit'" id="edit-filters" class="clr-col-12">
       <!-- Content -->
-      <div class="clr-row clr-col-12 top-1">
-        <h5><b>Add/Edit Filter</b></h5>
+      <div class="clr-row clr-col-12">
+        <h5><b>{{ filterMode }} Filter</b></h5>
 
         <div *ngIf="!currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
           <div class="clr-row clr-col-12">
@@ -115,20 +115,11 @@
                       <button clrDropdownTrigger>by ontology term</button>
 
                       <clr-dropdown-menu clrPosition="left-top">
-                        <clr-dropdown>
-                          <button clrDropdownTrigger
-                                  *ngFor="let o of currentFilter.getValidOntologies(s.value)"
-                                  (click)="simpleFilterByOntology(o.value)">
+                          <button *ngFor="let o of currentFilter.getValidOntologies(s.value)"
+                                  (click)="simpleFilterByOntology(o.value)"
+                                  clrDropdownItem>
                             from {{ o.name }}
                           </button>
-
-                          <clr-dropdown-menu>
-                            <button clrDropdownItem
-                                    (click)="simpleFilterQualifier('equal')">
-                              that equals...
-                            </button>
-                          </clr-dropdown-menu>
-                        </clr-dropdown>
                       </clr-dropdown-menu>
                     </clr-dropdown>
                   </clr-dropdown-menu>
@@ -136,13 +127,24 @@
               </clr-dropdown-menu>
             </clr-dropdown>
 
-            <clr-input-container *ngIf="currentFilter.simpleUserInputNeeded"
+            <clr-input-container *ngIf="currentFilter.simpleUserInputNeeded &&
+            !currentFilter.isFilteringByOntologyTerm()"
                                  class="right-1">
               <label for="simple-value"> Value </label>
 
               <input id="simple-value" clrInput placeholder="Enter a value here"
                      [(ngModel)]="currentFilter.conditions[0].value">
             </clr-input-container>
+
+            <ng-select *ngIf="currentFilter.simpleUserInputNeeded &&
+                              currentFilter.isFilteringByOntologyTerm()"
+                       class="simple-autocomplete right-1" bindLabel="name" bindValue="id"
+                       [items]="data.ontologyTerms[currentFilter.conditions[0].ontology]"
+                       [virtualScroll]="true"
+                       [placeholder]="'Enter a term'"
+                       [(ngModel)]="currentFilter.conditions[0].value"
+                       (change)="checkTermChildren()">
+            </ng-select>
 
             <button type="button" *ngIf="currentFilter.simpleUserInputNeeded"
                     class="btn btn-success-outline"
@@ -153,7 +155,7 @@
             </button>
           </div>
 
-          <div class="clr-row clr-col-12 top-2">
+          <div class="clr-row clr-col-12 top-2 mode-toggle">
             <p>Need something a little more specific?</p>
             <button type="button" class="btn btn-sm btn-link"
                     (click)="currentFilter.advancedFilter=true">
@@ -161,8 +163,6 @@
             </button>
           </div>
         </div>
-
-
 
         <!-- Current filter -->
         <div *ngIf="currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
@@ -230,7 +230,7 @@
             </div>
           </div>
 
-          <div class="clr-row clr-col-12 top-2">
+          <div class="clr-row clr-col-12 top-2 mode-toggle">
             <p>Don't need this many options?</p>
             <button type="button" class="btn btn-sm btn-link"
                     (click)="currentFilter.advancedFilter=false">
