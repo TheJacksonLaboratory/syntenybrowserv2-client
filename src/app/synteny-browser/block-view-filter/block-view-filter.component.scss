@@ -27,7 +27,7 @@ p { margin-top: 0.2em; }
   min-width: 0;
 }
 
-.clr-input, .clr-select { min-width: 0 !important; }
+.clr-select { min-width: 0 !important; }
 
 .error-msg { color: #F00; }
 
@@ -43,10 +43,6 @@ clr-select-container, clr-input-container { margin-top: -0.3rem !important; }
 .hidden-row { background: rgba(255, 0, 0, 0.2); }
 
 clr-dg-row { background: rgba(42, 159, 224, 0.2); }
-
-condition-constructor { border-top: 1px solid #CCC; }
-
-clr-icon { margin-left: 5px; }
 
 .datagrid .datagrid-cell { font-size: 0.45rem; }
 

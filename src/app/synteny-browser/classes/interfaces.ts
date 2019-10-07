@@ -43,18 +43,6 @@ export interface SearchType extends Option { }
 
 export interface NavigationObject extends Option { }
 
-export interface FilterCondition {
-  filterBy: string;
-  attribute: string;
-  ontology: string;
-  type: string;
-  qualifier: string;
-  exact: boolean;
-  value: string;
-  removable: boolean;
-  id: number;
-}
-
 export interface ExternalResource {
   name: string;
   url: string;

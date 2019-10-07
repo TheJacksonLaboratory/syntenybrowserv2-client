@@ -31,7 +31,7 @@ export class Species {
   /**
    * Returns the taxon ID in string form
    */
-  getID(): string {
-    return this.taxonID.toString();
-  }
+  getID(): string { return this.taxonID.toString(); }
+
+  getChromosomes(): string[] { return Object.keys(this.genome); }
 }

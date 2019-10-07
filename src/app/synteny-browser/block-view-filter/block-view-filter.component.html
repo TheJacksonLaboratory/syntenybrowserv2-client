@@ -34,7 +34,9 @@
     <div *ngIf="activePage === 'edit'" id="edit-filters" class="clr-col-12">
       <!-- Content -->
       <div class="clr-row clr-col-12">
-        <h5><b>{{ filterMode }} Filter</b></h5>
+        <div class="clr-row clr-col-12 clr-justify-content-center">
+          <h5>{{ filterMode }} Filter</h5>
+        </div>
 
         <div *ngIf="!currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
           <div class="clr-row clr-col-12">
@@ -55,19 +57,18 @@
                 <clr-icon shape="caret down"></clr-icon>
               </button>
               <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-                <clr-dropdown *ngFor="let s of currentFilter.species">
-                  <button clrDropdownTrigger (click)="currentFilter.speciesKey=s.value">
-                    In {{ s.name | titlecase }}
+                <clr-dropdown *ngFor="let s of currentFilter.getSimpleSpeciesOptions()">
+                  <button clrDropdownTrigger (click)="currentFilter.selectSimpleSpecies(s)">
+                    In {{ s }}
                   </button>
 
                   <clr-dropdown-menu>
                     <clr-dropdown>
-                      <button clrDropdownTrigger
-                              (click)="simpleFilterByAttribute('type')">
+                      <button clrDropdownTrigger (click)="simpleFilterByAttribute('type')">
                         by type
                       </button>
                       <clr-dropdown-menu id="type-menu" clrPosition="left-top">
-                        <button *ngFor="let t of getFeatureTypes(s.value)"
+                        <button *ngFor="let t of getFeatureTypes(currentFilter)"
                                 (click)="simpleFilterByType(t)"
                                 clrDropdownItem>
                           {{ t }}
@@ -113,9 +114,8 @@
 
                     <clr-dropdown>
                       <button clrDropdownTrigger>by ontology term</button>
-
                       <clr-dropdown-menu clrPosition="left-top">
-                          <button *ngFor="let o of currentFilter.getValidOntologies(s.value)"
+                          <button *ngFor="let o of currentFilter.getOntologies()"
                                   (click)="simpleFilterByOntology(o.value)"
                                   clrDropdownItem>
                             from {{ o.name }}
@@ -139,7 +139,7 @@
             <ng-select *ngIf="currentFilter.simpleUserInputNeeded &&
                               currentFilter.isFilteringByOntologyTerm()"
                        class="simple-autocomplete right-1" bindLabel="name" bindValue="id"
-                       [items]="data.ontologyTerms[currentFilter.conditions[0].ontology]"
+                       [items]="data.ontologyTerms[currentFilter.conditions[0].getOntology()]"
                        [virtualScroll]="true"
                        [placeholder]="'Enter a term'"
                        [(ngModel)]="currentFilter.conditions[0].value"
@@ -165,64 +165,172 @@
         </div>
 
         <!-- Current filter -->
-        <div *ngIf="currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
-          <!-- Species select -->
-          <clr-select-container class="right-1">
-            <label for="species"> Species </label>
+        <div *ngIf="currentFilter.advancedFilter" class="clr-row clr-col-12">
+          <h6 class="clr-col-12">Filter Settings</h6>
 
-            <select clrSelect id="species" [(ngModel)]="currentFilter.speciesKey">
-              <option *ngFor="let s of currentFilter.species" [value]="s.value">
-                {{ s.name | titlecase }}
-              </option>
-            </select>
-          </clr-select-container>
+          <div class="clr-row clr-col-12">
+            <clr-radio-container class="right-1">
+              <label>Mode</label>
+              <clr-radio-wrapper>
+                <input type="radio" clrRadio id="highlight-radio" value="Highlight"
+                       [(ngModel)]="currentFilter.mode" />
+                <label for="highlight-radio">Highlight matches</label>
+              </clr-radio-wrapper>
+              <clr-radio-wrapper>
+                <input type="radio" clrRadio id="hide-radio" value="Hide"
+                       [(ngModel)]="currentFilter.mode" />
+                <label for="hide-radio">Hide matches</label>
+              </clr-radio-wrapper>
+            </clr-radio-container>
 
-          <!-- Mode select -->
-          <clr-select-container class="right-2">
-            <label for="advanced-mode"> Mode </label>
-
-            <select clrSelect id="advanced-mode" [(ngModel)]="currentFilter.mode">
-              <option value="Highlight"> Highlight </option>
-              <option value="Hide"> Hide </option>
-            </select>
-          </clr-select-container>
-
-          <!-- Conditions -->
-          <div *ngIf="allGenes" class="clr-row clr-col-12 top-1">
-            <condition-constructor *ngFor="let c of currentFilter.conditions"
-                                   class="clr-col-12"
-                                   [attributes]="currentFilter.getValidAttrs()"
-                                   [ontologies]="currentFilter.getValidOntologies()"
-                                   [types]="getFeatureTypes(currentFilter.speciesKey)"
-                                   [values]="c"
-                                   (remove)="removeCondition(c)"
-                                   (warn)="filterErrorState=$event">
-            </condition-constructor>
+            <clr-checkbox-container>
+              <label>Search species</label>
+              <clr-checkbox-wrapper>
+                <input type="checkbox" clrCheckbox id="ref-checkbox"
+                       [value]="currentFilter.species.ref.value"
+                       [(ngModel)]="currentFilter.species.ref.selected" />
+                <label for="ref-checkbox">
+                  Reference ({{ currentFilter.species.ref.name }})
+                </label>
+              </clr-checkbox-wrapper>
+              <clr-checkbox-wrapper>
+                <input type="checkbox" clrCheckbox id="comp-checkbox"
+                       [value]="currentFilter.species.comp.value"
+                       [(ngModel)]="currentFilter.species.comp.selected" />
+                <label for="comp-checkbox">
+                  Comparison ({{ currentFilter.species.comp.name }})
+                </label>
+              </clr-checkbox-wrapper>
+            </clr-checkbox-container>
           </div>
 
-          <!-- Filter controls -->
-          <div class="clr-row clr-col-12">
-            <!-- Buttons -->
-            <div class="clr-col-6 filter-controls">
-              <!-- Add another condition button -->
-              <button type="button" class="btn btn-sm btn-info-outline"
-                      title="Add another condition to this filter"
-                      (click)="currentFilter.addNewCondition()">
-                <clr-icon shape="add"></clr-icon> New condition
+          <h6 class="clr-col-12 top-1">Conditions</h6>
+          <p class="clr-col-12">
+            <b>Any filtered feature for this filter must meet <i>all</i> of the
+              following criteria:</b>
+          </p>
+
+          <div *ngFor="let c of currentFilter.conditions" class="clr-row clr-col-12">
+            <div *ngIf="!c.editing" class="clr-row clr-col-12">
+              <h5 class="clr-col-8">{{ c.getCompleteTitle() }}</h5>
+
+              <button class="btn btn-icon btn-info-outline" title="Edit condition"
+                      (click)="c.editing=true">
+                <clr-icon shape="pencil"></clr-icon>
               </button>
 
-              <!-- Finish filter button -->
-              <button type="button" class="btn btn-sm btn-success-outline"
-                      title="Add this filter to the list"
-                      [disabled]="filterErrorState"
-                      (click)="finishFilter()">
-                <clr-icon shape="check"></clr-icon> Finish editing filter
+              <button *ngIf="c.removable" class="btn btn-icon btn-danger-outline"
+                      title="Remove condition" (click)="removeCondition(c)">
+                <clr-icon shape="trash"></clr-icon>
               </button>
             </div>
 
+            <div *ngIf="c.editing" class="clr-col-12 top-1">
+              <clr-select-container class="clr-col-12 bottom-1">
+                <label for="filter-by"> Filter By </label>
+
+                <select clrSelect id="filter-by" [(ngModel)]="c.filterBy"
+                        (ngModelChange)="c.value = ''">
+                  <option value="" disabled>
+                    -- Select a condition criteria --
+                  </option>
+                  <option value="type">Is categorized as a...</option>
+                  <option value="id">Has an ID that...</option>
+                  <option value="symbol">Has a symbol that...</option>
+                  <option *ngIf="!currentFilter.isRefFilter()" value="chr">
+                    Is located on chromosome...
+                  </option>
+                  <option *ngFor="let o of currentFilter.getOntologies()"
+                          value="ont-{{o.value}}">
+                    Is associated with a {{ o.name }} term...
+                  </option>
+                </select>
+              </clr-select-container>
+
+              <div *ngIf="c.filterBy" class="top-1">
+                <clr-select-container *ngIf="c.isType()" class="clr-col-12">
+                  <label for="type"> Type </label>
+
+                  <select clrSelect id="type" [(ngModel)]="c.value"
+                          (ngModelChange)="currentFilter.setLabel()">
+                    <option value="" disabled> -- Select a type -- </option>
+                    <option *ngFor="let t of getFeatureTypes(currentFilter)"
+                            [value]="t">
+                      {{ t }}
+                    </option>
+                  </select>
+                </clr-select-container>
+
+                <clr-select-container *ngIf="c.filterBy === 'chr'" class="clr-col-12">
+                  <label for="chr"> Chromosome </label>
+
+                  <select clrSelect id="chr" [(ngModel)]="c.value"
+                          (ngModelChange)="currentFilter.setLabel()">
+                    <option value="" disabled> -- Select a chr -- </option>
+                    <option *ngFor="let t of compSpecies.getChromosomes()" [value]="t">
+                      {{ t }}
+                    </option>
+                  </select>
+                </clr-select-container>
+
+                <div *ngIf="c.requiresInput()" class="clr-row clr-col-12">
+                  <clr-select-container class="right-1">
+                    <label for="qualifier"> Qualifier </label>
+
+                    <select clrSelect id="qualifier" [(ngModel)]="c.qualifier">
+                      <option value="equal">is equal to</option>
+                      <option value="like">is like</option>
+                      <option value="not-equal">is not equal to</option>
+                      <option value="not-like">is not like</option>
+                    </select>
+                  </clr-select-container>
+
+                  <clr-input-container>
+                    <label for="value"> Value </label>
+
+                    <input id="value" clrInput placeholder="Enter a value here"
+                           [(ngModel)]="c.value" (ngModelChange)="currentFilter.setLabel()">
+                  </clr-input-container>
+                </div>
+
+                <ng-select *ngIf="c.isOntology()" class="autocomplete"
+                           bindLabel="name" bindValue="id"
+                           [items]="data.ontologyTerms[c.getOntology()]"
+                           [virtualScroll]="true" placeholder="Enter a term"
+                           [(ngModel)]="c.value" (change)="checkTermChildren()">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="currentFilter.allConditionsAreComplete()" class="clr-col-12 text-center">
+            <!-- Add another condition button -->
+            <button type="button" class="btn btn-sm btn-info-outline"
+                    title="Add another condition to this filter"
+                    (click)="currentFilter.addNewCondition()">
+              <clr-icon shape="add"></clr-icon> Add a condition
+            </button>
+          </div>
+
+          <div class="clr-row clr-col-12 top-1">
+            <clr-input-container class="right-1">
+              <label for="filter-name"> Name the filter </label>
+
+              <input id="filter-name" clrInput
+                     [disabled]="!currentFilter.filterLabel"
+                     [(ngModel)]="currentFilter.filterLabel">
+            </clr-input-container>
+
+            <!-- Finish filter button -->
+            <button type="button" class="btn btn-success-outline right-1"
+                    title="Finish filter"
+                    [disabled]="filterErrorState || !currentFilter.allConditionsAreComplete()"
+                    (click)="finishFilter()">
+              <clr-icon shape="check"></clr-icon> Done
+            </button>
 
             <!-- Filter-related message -->
-            <div class="clr-col-6 filter-controls">
+            <div class="filter-controls">
               <!-- Error message -->
               <p *ngIf="filterErrorState" class="error-msg">
                 {{ filterErrorState }}
@@ -230,7 +338,7 @@
             </div>
           </div>
 
-          <div class="clr-row clr-col-12 top-2 mode-toggle">
+          <div class="clr-row clr-col-12 mode-toggle clr-justify-content-end">
             <p>Don't need this many options?</p>
             <button type="button" class="btn btn-sm btn-link"
                     (click)="currentFilter.advancedFilter=false">
@@ -252,67 +360,6 @@
     <div *ngIf="activePage === 'preview'" id="preview-filters" class="clr-col-12">
       <!-- Content -->
       <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
-<!--        &lt;!&ndash; Filter checklist &ndash;&gt;-->
-<!--        <div id="filter-checklist" class="clr-col-5">-->
-<!--          &lt;!&ndash; Title &ndash;&gt;-->
-<!--          <div class="clr-row clr-justify-content-center">-->
-<!--            <h5> Current Filters </h5>-->
-<!--          </div>-->
-
-<!--          &lt;!&ndash; Description &ndash;&gt;-->
-<!--          <div class="clr-row">-->
-<!--            <p>-->
-<!--              Select/Deselect filters to see how combinations of filters affect-->
-<!--              how many/which features will be affected.-->
-<!--            </p>-->
-<!--          </div>-->
-
-<!--          &lt;!&ndash; Checklist &ndash;&gt;-->
-<!--          <div *ngIf="getCreatedFilters().length > 0" class="clr-row top-1">-->
-<!--            &lt;!&ndash; Checklist tree &ndash;&gt;-->
-<!--            <clr-tree class="bottom-1">-->
-<!--              <clr-tree-node *ngFor="let s of getFilterSpecies()"-->
-<!--                             [clrExpanded]="true">-->
-<!--                {{ getOptionName(s) }}-->
-<!--                <clr-tree-node *ngFor="let f of getFiltersBySpecies(s)"-->
-<!--                               (clrSelectedChange)="runFilters(f, $event)"-->
-<!--                               [clrSelected]="f.selected"-->
-<!--                               [ngStyle]="{ 'color': f.getColor() }">-->
-<!--                  {{ f.mode + ' ' + f.getStringifiedConditions() }}-->
-<!--                </clr-tree-node>-->
-<!--              </clr-tree-node>-->
-<!--            </clr-tree>-->
-
-<!--            &lt;!&ndash; Apply selections button (and more info) &ndash;&gt;-->
-<!--            <div *ngIf="!allFiltersSelected()" class="clr-row">-->
-<!--              &lt;!&ndash; Apply button &ndash;&gt;-->
-<!--              <button class="btn btn-sm"-->
-<!--                      (click)="applyFilterSelections()"-->
-<!--                      title="Update the filter list with only selected filters">-->
-<!--                Apply changes to filter list-->
-<!--              </button>-->
-
-<!--              &lt;!&ndash; More info on what 'apply selections' means &ndash;&gt;-->
-<!--              <clr-signpost>-->
-<!--                <clr-signpost-content *clrIfOpen>-->
-<!--                  <p>-->
-<!--                    If you want to apply your current selections from this list to-->
-<!--                    the actual list of filters (using the checklist is only an-->
-<!--                    exploration tool).-->
-<!--                  </p>-->
-<!--                </clr-signpost-content>-->
-<!--              </clr-signpost>-->
-<!--            </div>-->
-
-<!--          </div>-->
-
-<!--          &lt;!&ndash; Empty checklist placeholder &ndash;&gt;-->
-<!--          <div *ngIf="getCreatedFilters().length === 0"-->
-<!--               class="clr-row clr-justify-content-center top-1 bottom-1">-->
-<!--            <h4> No Filters Yet! </h4>-->
-<!--          </div>-->
-<!--        </div>-->
-
         <!-- Filter results table -->
         <div id="filter-results" class="clr-col-12">
           <!-- Title -->
@@ -330,7 +377,7 @@
 
           <!-- Results table -->
           <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact">
-            <clr-dg-column *ngFor="let attr of filters[0].attributes">
+            <clr-dg-column *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
               {{ attr }}
             </clr-dg-column>
             <clr-dg-column> species </clr-dg-column>
@@ -339,7 +386,7 @@
 
             <clr-dg-row *clrDgItems="let row of filteredGenes"
                         [ngClass]="{ 'hidden-row': row.hidden }">
-              <clr-dg-cell *ngFor="let attr of filters[0].attributes">
+              <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
                 {{ row[attr] }}
               </clr-dg-cell>
               <clr-dg-cell> {{ row.species }} </clr-dg-cell>
