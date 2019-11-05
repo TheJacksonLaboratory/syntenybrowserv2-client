@@ -254,19 +254,19 @@
                 <label for="filter-by"> Match a feature if it </label>
 
                 <select clrSelect id="filter-by" [(ngModel)]="c.filterBy"
-                        (ngModelChange)="c.value = ''">
+                        (ngModelChange)="c.value=null">
                   <option value="" disabled>
                     -- Select a condition criteria --
                   </option>
-                  <option value="type">Is categorized as a...</option>
-                  <option value="id">Has an ID that...</option>
-                  <option value="symbol">Has a symbol that...</option>
+                  <option value="type">is categorized as a...</option>
+                  <option value="id">has an ID that...</option>
+                  <option value="symbol">has a symbol that...</option>
                   <option *ngIf="!currentFilter.isRefFilter()" value="chr">
-                    Is located on chromosome...
+                    is located on chromosome...
                   </option>
                   <option *ngFor="let o of currentFilter.getOntologies()"
                           value="ont-{{o.value}}">
-                    Is associated with a {{ o.name }} term...
+                    is associated with a {{ o.name }} term...
                   </option>
                 </select>
               </clr-select-container>

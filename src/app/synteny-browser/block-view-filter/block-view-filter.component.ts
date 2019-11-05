@@ -56,7 +56,7 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new default filter and sets it as the current filter
    */
-  createNewEditableFilter(advancedMode: boolean = false): void {
+  createNewEditableFilter(advancedMode: boolean = true): void {
     this.filters.push(this.getNewFilter(advancedMode));
     this.currentFilter = this.getCurrentFilter();
   }
@@ -193,7 +193,7 @@ export class BlockViewFilterComponent implements OnInit {
   simpleFilterByOntology(ontology: string): void {
     this.currentFilter.conditions[0].filterBy = 'ont-' + ontology;
     this.currentFilter.conditions[0].qualifier = 'equal';
-    this.currentFilter.conditions[0].value = '';
+    this.currentFilter.conditions[0].value = null;
     this.currentFilter.simpleUserInputNeeded = true;
     this.currentFilter.setSimpleTitle();
   }
