@@ -13,7 +13,7 @@ export class Filter {
   id: number;
   simpleFilterTitle: string;
   filterLabel: string;
-  advancedFilter: boolean = true;
+  advancedFilter: boolean = false;
   simpleUserInputNeeded: boolean = false;
 
   selected: boolean = true;
@@ -69,6 +69,10 @@ export class Filter {
     this.setLabel();
   }
 
+  /**
+   * Marks the appropriate species as (de)selected
+   * @param {string} speciesKey - the value associated with the selected species
+   */
   selectSimpleSpecies(speciesKey: string): void {
     if(speciesKey.includes('either')) {
       this.species.ref.selected = true;
@@ -133,6 +137,9 @@ export class Filter {
       (!ref && comp ? `${this.compSpecies.commonName} only` : 'either species'));
   }
 
+  /**
+   * Returns a list of option titles for species selection in simple filter mode
+   */
   getSimpleSpeciesOptions(): any[] {
     return [
       'either species',
@@ -247,10 +254,13 @@ export class Filter {
     }
   }
 
+  /**
+   * Returns list of search ontologies that exist for both species for
+   * filtering by ontology options
+   */
   private getMutualOntologies(): SearchType[] {
     return this.refSpecies.onts.filter(ro => {
-      return this.compSpecies.onts.map(co => co.value)
-                                  .indexOf(ro.value) >= 0;
+      return this.compSpecies.onts.map(co => co.value).indexOf(ro.value) >= 0;
     })
   }
 }

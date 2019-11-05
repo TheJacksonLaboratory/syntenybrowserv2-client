@@ -2,7 +2,7 @@ export class FilterCondition {
   filterBy: string = '';
   qualifier = 'equal';
   exact = true;
-  value = '';
+  value = null;
   removable: boolean;
   id: number;
   editing = true;

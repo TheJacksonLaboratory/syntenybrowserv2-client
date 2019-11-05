@@ -47,7 +47,7 @@ export class BlockViewFilterComponent implements OnInit {
     this.allGenes = this.refGenes.concat(... this.compGenes);
     this.filteredGenes = [];
 
-    this.createNewEditableFilter(true);
+    this.createNewEditableFilter();
   }
 
 
@@ -56,7 +56,7 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new default filter and sets it as the current filter
    */
-  createNewEditableFilter(advancedMode: boolean): void {
+  createNewEditableFilter(advancedMode: boolean = false): void {
     this.filters.push(this.getNewFilter(advancedMode));
     this.currentFilter = this.getCurrentFilter();
   }
