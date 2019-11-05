@@ -253,7 +253,7 @@ export class BlockViewFilterComponent implements OnInit {
     // anymore, revert them to null so that user must choose a new type
     this.currentFilter.conditions.forEach(c => {
       if(c.hasInvalidType(types)) {
-        c.value = '';
+        c.value = null;
       }
     });
 
