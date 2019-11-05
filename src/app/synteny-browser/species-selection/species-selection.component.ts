@@ -56,10 +56,18 @@ export class SpeciesSelectionComponent {
     return this.species.filter(s => this.isComparison(s))[0];
   }
 
+  /**
+   * Returns true if the specified species is the comparison species
+   * @param {Species} species - species to check against the comp species value
+   */
   private isComparison(species: Species): boolean {
     return species.getID() === this.compSpecies;
   }
 
+  /**
+   * Returns true if the specified species is the reference species
+   * @param {Species} species - species to check against the ref species value
+   */
   private isReference(species: Species): boolean {
     return species.getID() === this.refSpecies;
   }
