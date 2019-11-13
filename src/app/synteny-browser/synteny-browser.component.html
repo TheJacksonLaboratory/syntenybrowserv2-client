@@ -10,13 +10,11 @@
             (or destination).
           </div>
 
-          <app-species-selection (update)="updateSpecies()"></app-species-selection>
+          <species-selection (update)="updateSpecies()"></species-selection>
 
           <hr/>
 
-          <app-feature-selection *ngIf="refSpecies"
-                                 (update)="updateFeatures()">
-          </app-feature-selection>
+          <feature-selection (update)="updateFeatures()"></feature-selection>
         </div>
 
         <div class="clr-col-xl-5 clr-col-lg-12">
@@ -33,7 +31,7 @@
               <button class="btn btn-link" clrSignpostTrigger>
                 More info
               </button>
-              <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+              <clr-signpost-content clrPosition="bottom-middle" *clrIfOpen>
                 Searching and selecting features from the table(s) will show the
                 features in the plot. Clicking on a chromosome without features
                 will show the mapping of the entire chromosome in reference to
@@ -47,20 +45,18 @@
           <hr/>
 
           <!-- Genome view species "legend" -->
-          <div *ngIf="refSpecies && compSpecies" class="clr-row">
+          <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row">
             <span style="font-weight: bold">
-              Outer ring (reference genome): {{ refSpecies.commonName }}
-            ({{ refSpecies.name }})
+              Outer ring (reference genome): {{ data.refSpecies.commonName }}
+            ({{ data.refSpecies.name }})
             </span>
             <span style="font-weight: bold">
-              Inner ring (comparison genome): {{ compSpecies.commonName }}
-              ({{ compSpecies.name }})
+              Inner ring (comparison genome): {{ data.compSpecies.commonName }}
+              ({{ data.compSpecies.name }})
             </span>
           </div>
 
-          <app-genome-view *ngIf="refSpecies && compSpecies"
-                           (highlightFeatures)="features.highlighted = $event">
-          </app-genome-view>
+          <genome-view (highlightFeatures)="features.highlighted=$event"></genome-view>
         </div>
       </div>
     </div>
@@ -81,26 +77,25 @@
       <div class="card-header"> BLOCK VIEW BROWSER </div>
 
       <div class="card-block">
-        <app-block-view-browser (filter)="filterOpen = true"></app-block-view-browser>
+        <block-view-browser (filter)="filterOpen=true"></block-view-browser>
       </div>
     </div>
   </div>
 </div>
 
-<clr-modal id="block-view-filters"
+<clr-modal id="block-view-filters" clrModalSize="xl"
            [(clrModalOpen)]="filterOpen"
-           [clrModalClosable]="true"
-           [clrModalSize]="'xl'">
+           [clrModalClosable]="true">
   <h3 class="modal-title"> Filtering the Block View </h3>
 
   <div class="modal-body">
-    <app-block-view-filter *ngIf="blockViewBrowser && blockViewBrowser.refGenes"
-                           [refSpecies]="refSpecies"
-                           [compSpecies]="compSpecies"
-                           [refGenes]="blockViewBrowser.refGenes"
-                           [compGenes]="blockViewBrowser.compGenes"
-                           [filters]="filters"
-                           (userClose)="getFilters()">
-    </app-block-view-filter>
+    <block-view-filter *ngIf="blockViewBrowser && blockViewBrowser.refGenes"
+                       [refSpecies]="data.refSpecies"
+                       [compSpecies]="data.compSpecies"
+                       [refGenes]="blockViewBrowser.refGenes"
+                       [compGenes]="blockViewBrowser.compGenes"
+                       [filters]="data.filters"
+                       (userClose)="getFilters()">
+    </block-view-filter>
   </div>
 </clr-modal>

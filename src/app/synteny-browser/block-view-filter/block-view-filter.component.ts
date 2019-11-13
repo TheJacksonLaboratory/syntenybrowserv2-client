@@ -1,14 +1,16 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Species } from '../classes/species';
-import { FilterCondition, NavigationObject } from '../classes/interfaces';
+import { NavigationObject } from '../classes/interfaces';
 import { Gene } from '../classes/gene';
 import { ClrDatagridPagination, ClrLoadingState } from '@clr/angular';
 import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
 import { DownloadService } from '../services/download.service';
+import { DataStorageService } from '../services/data-storage.service';
+import { FilterCondition } from '../classes/filter-condition';
 
 @Component({
-  selector: 'app-block-view-filter',
+  selector: 'block-view-filter',
   templateUrl: './block-view-filter.component.html',
   styleUrls: ['./block-view-filter.component.scss']
 })
@@ -33,7 +35,9 @@ export class BlockViewFilterComponent implements OnInit {
 
   @Output() userClose: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService, private download: DownloadService) {
+  constructor(private http: ApiService,
+              public data: DataStorageService,
+              private download: DownloadService) {
     this.navigation = [ { name: 'edit filters', value: 'edit' },
                         { name: 'preview filters', value: 'preview' },
                         { name: 'filtering guide', value: 'guide' } ];
@@ -52,8 +56,8 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new default filter and sets it as the current filter
    */
-  createNewEditableFilter(): void {
-    this.filters.push(this.getNewFilter());
+  createNewEditableFilter(advancedMode: boolean = true): void {
+    this.filters.push(this.getNewFilter(advancedMode));
     this.currentFilter = this.getCurrentFilter();
   }
 
@@ -64,6 +68,7 @@ export class BlockViewFilterComponent implements OnInit {
    */
   editFilter(filter: Filter): void {
     if(this.activePage === 'edit') {
+      this.filterMode = 'edit';
       filter.editing = true;
 
       this.currentFilter = this.getCurrentFilter();
@@ -87,6 +92,14 @@ export class BlockViewFilterComponent implements OnInit {
       return;
     }
 
+    // if it's a "simple" filter, make sure that it only has a single condition
+    if(!this.currentFilter.advancedFilter) {
+      this.currentFilter.conditions = [this.currentFilter.conditions[0]];
+      this.currentFilter.setLabel();
+    }
+
+    this.currentFilter.conditions.forEach(c => c.editing = false);
+
     this.currentFilter.editing = false;
     this.currentFilter.created = true;
 
@@ -95,7 +108,10 @@ export class BlockViewFilterComponent implements OnInit {
     this.filteredGenes = [];
     this.applyFilters();
 
-    this.createNewEditableFilter();
+    this.filterMode = 'add';
+
+    // create a new filter using the current filter's advanced/simple setting
+    this.createNewEditableFilter(this.currentFilter.advancedFilter);
   }
 
   /**
@@ -161,63 +177,102 @@ export class BlockViewFilterComponent implements OnInit {
     this.download.downloadText(lines, 'filter-results.txt');
   }
 
+  /**
+   * Sets the current filter's variables to filter by the specified attribute
+   * @param {string} attribute - the attribute to filter features by
+   */
+  simpleFilterByAttribute(attribute: string): void {
+    this.currentFilter.conditions[0].filterBy = attribute;
+    this.currentFilter.conditions[0].value = attribute;
+  }
+
+  /**
+   * Sets the current filter's variables to filter by a specified ontology
+   * @param {string} ontology - the ontology to filter features by
+   */
+  simpleFilterByOntology(ontology: string): void {
+    this.currentFilter.conditions[0].filterBy = 'ont-' + ontology;
+    this.currentFilter.conditions[0].qualifier = 'equal';
+    this.currentFilter.conditions[0].value = null;
+    this.currentFilter.simpleUserInputNeeded = true;
+    this.currentFilter.setSimpleTitle();
+  }
+
+  /**
+   * Sets the current filter's type to be the specified feature type and
+   * finishes the filter
+   * @param {string} type - the feature type to filter features by
+   */
+  simpleFilterByType(type: string): void {
+    this.currentFilter.conditions[0].value = type;
+    this.finishFilter();
+  }
+
+  /**
+   * Sets the current filter's qualifier variables to consider user input
+   * @param {string} qualifier - whether the user wants exact matches or a more
+   *                             loose matching model
+   */
+  simpleFilterQualifier(qualifier: string): void {
+    this.currentFilter.conditions[0].qualifier = qualifier;
+    this.currentFilter.simpleUserInputNeeded = true;
+    this.currentFilter.setSimpleTitle();
+  }
+
+  /**
+   * Emits a message if the term that's been selected is too broad to search
+   */
+  checkTermChildren(cond: FilterCondition = this.currentFilter.conditions[0]): void {
+    let ontTerms = this.data.ontologyTerms[cond.getOntology()];
+    if(cond && cond.value) {
+      let termIDs = ontTerms.map(t => t.id);
+      let term = ontTerms[termIDs.indexOf(cond.value)];
+
+      if(term.count && term.count > 500) {
+        this.filterErrorState = 'Term too broad';
+      } else {
+        this.filterErrorState = '';
+        this.currentFilter.setLabel();
+      }
+    }
+  }
+
 
   // Getter Methods
 
   /**
    * Returns the list of types available to filter by based on what the selected
    * species is for the current filter
+   * @param {Filter} filter - the filter to get feature types for
    */
-  getFeatureTypes(): string[] {
-    let genes = this.getGenesForSpecies(this.currentFilter.speciesKey);
+  getFeatureTypes(filter: Filter): string[] {
+    let genes = this.getGenesForSpecies(filter);
     let types = Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();
 
-    // if the any of the conditions have type selections that aren't valid
+    // if any of the conditions have type selections that aren't valid
     // anymore, revert them to null so that user must choose a new type
     this.currentFilter.conditions.forEach(c => {
-      if(c.type !== null && types.indexOf(c.type) < 0) c.type = null;
+      if(c.hasInvalidType(types)) {
+        c.value = null;
+      }
     });
 
     return types;
   }
 
   /**
-   * Returns the list of genes associated with the specified species key ('ref',
-   * 'comp', or 'both')
-   * @param {string} speciesKey - the key associated with a species selection
+   * Returns the list of genes associated with the species identified by the
+   * specified filter
+   * @param {Filter} filter - the filter to get genes for
    */
-  getGenesForSpecies(speciesKey: string): Gene[] {
-    return speciesKey === 'ref' ?
-           this.refGenes :
-           (speciesKey === 'comp' ? this.compGenes : this.allGenes);
-  }
-
-  /**
-   * Returns the string that will appear in the species select option for the
-   * specified species to include the species name and identifier
-   * @param {string} species - the species to generate the option name for
-   */
-  getOptionName(species: string): string {
-    return species !== 'both' ?
-      (species === 'ref' ? this.refSpecies.commonName + ' (ref)' :
-        this.compSpecies.commonName + ' (comp)') :
-      'Both';
-  }
-
-  /**
-   * Returns the filters that apply only to the specified species
-   * @param {string} species - the species to filter the filter conditions by
-   */
-  getFiltersBySpecies(species: string): Filter[] {
-    return this.getCreatedFilters().filter(f => f.speciesKey === species);
-  }
-
-  /**
-   * Returns a list of species of the current filters (construct filter checklist)
-   */
-  getFilterSpecies(): string[] {
-    let species = this.getCreatedFilters().map(f => f.speciesKey);
-    return Array.from(new Set(species));
+  getGenesForSpecies(filter: Filter): Gene[] {
+    if(filter.isRefFilter() && filter.isCompFilter()) {
+      return this.allGenes
+    } else if(filter.isRefFilter()) {
+      return this.refGenes;
+    } else {
+      return this.compGenes;
+    }
   }
 
   /**
@@ -265,8 +320,11 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new filter and returns it
    */
-  private getNewFilter(): Filter {
-    return new Filter(this.refSpecies, this.compSpecies, this.filters.length);
+  private getNewFilter(advancedMode: boolean): Filter {
+    return new Filter(this.refSpecies,
+      this.compSpecies,
+      this.filters.length,
+      advancedMode);
   }
 
   /**

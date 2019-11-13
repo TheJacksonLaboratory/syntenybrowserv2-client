@@ -1,26 +1,34 @@
 import { Species } from './species';
-import { FilterCondition, SearchType } from './interfaces';
+import { SearchType } from './interfaces';
 import { Gene } from './gene';
+import { FilterCondition } from './filter-condition';
 
 export class Filter {
-  attributes: string[] = [ 'type', 'id', 'symbol', 'chr' ];
-  species: string[] = [ 'both', 'ref', 'comp' ];
+  species: any;
 
   mode: string = 'Highlight';
-  speciesKey: string = 'ref';
   refSpecies: Species;
   compSpecies: Species;
   conditions: FilterCondition[] = [];
   id: number;
+  simpleFilterTitle: string;
+  filterLabel: string;
+  advancedFilter: boolean = false;
+  simpleUserInputNeeded: boolean = false;
 
   selected: boolean = true;
   created: boolean = false;
   editing: boolean = true;
 
-  constructor(ref: Species, comp: Species, id: number) {
+  constructor(ref: Species, comp: Species, id: number, advanced: boolean) {
     this.refSpecies = ref;
     this.compSpecies = comp;
     this.id = id;
+    this.advancedFilter = advanced;
+    this.species = {
+      ref: {name: this.refSpecies.commonName, value: 'ref', selected: true},
+      comp: {name: this.compSpecies.commonName, value: 'comp', selected: true}
+    };
 
     // make a new default condition
     this.addNewCondition();
@@ -34,16 +42,11 @@ export class Filter {
    * condition constructor component for each condition in the filter
    */
   addNewCondition(): void {
-    this.conditions.push({
-      filterBy: 'attribute',
-      attribute: 'type',
-      ontology: null,
-      type: null,
-      qualifier: 'equal',
-      exact: true,
-      value: '',
-      removable: this.conditions.length > 0,
-      id: this.conditions.length});
+    let numConditions = this.conditions.length;
+
+    this.conditions.forEach(c => c.editing = false);
+    this.conditions.push(new FilterCondition(numConditions));
+    this.conditions.forEach(c => c.removable = numConditions > 0);
   }
 
   /**
@@ -55,36 +58,71 @@ export class Filter {
     this.conditions.splice(cond.id, 1);
 
     // fix the ids to reflect the conditions' new positions in the array
-    this.conditions.forEach((c, i) => c.id = i);
+    this.conditions.forEach((c, i, arr) => {
+      c.id = i;
+      c.removable = arr.length > 1;
+    });
+
+    if(this.conditions.length < 2) {
+
+    }
+    this.setLabel();
+  }
+
+  /**
+   * Marks the appropriate species as (de)selected
+   * @param {string} speciesKey - the value associated with the selected species
+   */
+  selectSimpleSpecies(speciesKey: string): void {
+    if(speciesKey.includes('either')) {
+      this.species.ref.selected = true;
+      this.species.comp.selected = true;
+    } else if(speciesKey.includes(this.refSpecies.commonName)) {
+      this.species.ref.selected = true;
+      this.species.comp.selected = false;
+    } else {
+      this.species.comp.selected = true;
+      this.species.ref.selected = false;
+    }
+  }
+
+  /**
+   * Sets the text that should appear within a label component, including the
+   * filter mode (hiding/highlighting), the conditions and affected species
+   */
+  setLabel(): void {
+    this.filterLabel = `${this.getStringifiedConditions()} in ${this.getSpecies()}`;
+    this.setSimpleTitle();
+  }
+
+  /**
+   * Sets the label for the simple filter menu button
+   */
+  setSimpleTitle(): void {
+    let c = this.conditions[0];
+    if(c.isType()) {
+      this.simpleFilterTitle = `that are ${c.value}s in ${this.getSpecies()}`
+    } else {
+      const filterBy = c.isOntology() ? c.getOntology() + ' term' : c.filterBy;
+      const qual = c.qualifier === 'like' ? 'like' : '';
+      this.simpleFilterTitle = `in ${this.getSpecies()} by ${filterBy} ${qual}`;
+    }
   }
 
 
   // Getter Methods
 
   /**
-   * Returns the list of attributes that should be available to choose for each
-   * condition; if the species selection for the filter is reference only, it's
-   * pointless to allow filtering by chromosome so remove the option
-   */
-  getValidAttrs(): string[] {
-    return this.speciesKey === 'ref' ?
-           this.attributes.filter(a => a !== 'chr') : this.attributes;
-  }
-
-  /**
    * Returns the list of ontologies that are available to choose from for each
    * condition given the selected species for the filter
    */
-  getValidOntologies(): SearchType[] {
-    let refOnts = this.refSpecies.onts;
-    let compOnts = this.compSpecies.onts;
-
-    switch (this.speciesKey) {
-      case 'ref': return refOnts;
-      case 'comp': return compOnts;
-      default: {
-        return refOnts.filter(ro => compOnts.map(co => co.value).indexOf(ro.value) >= 0);
-      }
+  getOntologies(): SearchType[] {
+    if (this.isRefFilter() && this.isCompFilter()) {
+      return this.getMutualOntologies();
+    } else if (this.isRefFilter()) {
+      return this.refSpecies.onts;
+    } else {
+      return this.compSpecies.onts;
     }
   }
 
@@ -92,9 +130,22 @@ export class Filter {
    * Returns the common names of the species that the filter will affect
    */
   getSpecies(): string {
-    return (this.speciesKey === 'ref' ? this.refSpecies.commonName :
-      (this.speciesKey === 'comp' ? this.compSpecies.commonName :
-        this.refSpecies.commonName + ' & ' + this.compSpecies.commonName));
+    let ref = this.isRefFilter();
+    let comp = this.isCompFilter();
+
+    return (ref && !comp ? `${this.refSpecies.commonName} only` :
+      (!ref && comp ? `${this.compSpecies.commonName} only` : 'either species'));
+  }
+
+  /**
+   * Returns a list of option titles for species selection in simple filter mode
+   */
+  getSimpleSpeciesOptions(): any[] {
+    return [
+      'either species',
+      `${this.refSpecies.commonName} only`,
+      `${this.compSpecies.commonName} only`
+    ];
   }
 
   /**
@@ -104,18 +155,12 @@ export class Filter {
   getColor(): string { return this.hides() ? '#F00' : '#2A9FE0'; }
 
   /**
-   * Returns the text that should appear within a label component, including the
-   * filter mode (hiding/highlighting), the conditions and affected species
-   */
-  getLabel(): string {
-    return `${this.mode} [${this.getStringifiedConditions()}] in ${this.getSpecies()}`;
-  }
-
-  /**
    * Returns the label text for the filter based on title (adds formatting)
    */
   getStringifiedConditions(): string {
-    return this.conditions.map(c => this.getCompiledCondition(c)).join(' AND ');
+    return this.conditions.filter(c => c.isComplete())
+                          .map(c => c.getCompleteTitle())
+                          .join(' AND ');
   }
 
   /**
@@ -153,13 +198,7 @@ export class Filter {
    * Returns true if all conditions don't have empty or unselected fields
    */
   allConditionsAreComplete(): boolean {
-    return this.conditions.filter(c => {
-      if(c.filterBy === 'attribute') {
-        return c.attribute === 'type' ? (c.type === null) : (c.value === '');
-      } else {
-        return c.ontology === null && c.value === '';
-      }
-    }).length === 0;
+    return this.conditions.filter(c => !c.isComplete()).length === 0;
   }
 
   /**
@@ -167,38 +206,24 @@ export class Filter {
    * boolean condition takes into consideration if the species selection is both
    * species
    */
-  isRefFilter(): boolean { return this.speciesKey !== 'comp' };
+  isRefFilter(): boolean { return this.species.ref.selected; };
 
   /**
    * Returns true if the filter applies to the comparison features; the
    * boolean condition takes into consideration if the species selection is both
    * species
    */
-  isCompFilter(): boolean { return this.speciesKey !== 'ref'; }
+  isCompFilter(): boolean { return this.species.comp.selected; }
 
   /**
    * Returns true if the filter contains at least one ontology-related condition
    */
   isFilteringByOntologyTerm(): boolean {
-    return this.conditions.filter(c => c.filterBy === 'ontology').length > 0;
+    return this.conditions.filter(c => c.isOntology()).length > 0;
   }
 
 
   // Private Methods
-
-  /**
-   * Returns a stringified version of the specified condition so that the
-   * condition includes the qualifier
-   * @param {FilterCondition} cond - the condition to stringify and make readable
-   */
-  private getCompiledCondition(cond: FilterCondition): string {
-    if(cond.filterBy === 'attribute') {
-      let value = cond.attribute === 'type' ? cond.type : cond.value;
-      return cond.attribute + this.getQualifier(cond) + value;
-    } else {
-      return 'genes assoc w/ ' + cond.value;
-    }
-  }
 
   /**
    * Returns the value of the condition (by default this is the condition's
@@ -207,20 +232,7 @@ export class Filter {
    * @param {FilterCondition} cond - the condition to get the filter by value of
    */
   private getConditionValue(cond: FilterCondition): string {
-    return cond.attribute === 'type' ? cond.type : cond.value;
-  }
-
-  /**
-   * Returns a stringified qualifier to represent the condition's restriction
-   * factor, if applicable (i.e. 'symbol = ufd1' vs 'symbol like ufd1', where
-   * 'symbol like ufd1' could return features with names like ufd11 or ufd12)
-   * @param {FilterCondition} condition - the condition to get the qualifier for
-   */
-  private getQualifier(condition: FilterCondition): string {
-    let qualifier = condition.qualifier;
-    return qualifier.includes('not') ?
-           (qualifier.includes('equal') ? ' &ne ' : ' not like ') :
-           (qualifier.includes('equal') ? ' = ' : ' like ')
+    return cond.value;
   }
 
   /**
@@ -230,7 +242,7 @@ export class Filter {
    *                                 against
    */
   private matchesCondition(gene: Gene, cond: FilterCondition): boolean {
-    let geneValue = gene[cond.attribute].toLowerCase();
+    let geneValue = gene[cond.filterBy].toLowerCase();
     let condValue = this.getConditionValue(cond).toLowerCase();
 
     if(cond.qualifier.includes('not')) {
@@ -240,5 +252,15 @@ export class Filter {
       return cond.qualifier.includes('equal') ?
         geneValue === condValue : geneValue.includes(condValue);
     }
+  }
+
+  /**
+   * Returns list of search ontologies that exist for both species for
+   * filtering by ontology options
+   */
+  private getMutualOntologies(): SearchType[] {
+    return this.refSpecies.onts.filter(ro => {
+      return this.compSpecies.onts.map(co => co.value).indexOf(ro.value) >= 0;
+    })
   }
 }

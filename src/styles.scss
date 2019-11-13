@@ -1,4 +1,4 @@
-@import "~@ng-select/ng-select/themes/material.theme.css";
+@import "~@ng-select/ng-select/themes/default.theme.css";
 
 /* You can add global styles to this file, and also import other style files */
 .top-0 { margin-top: 0 !important; }
@@ -43,12 +43,11 @@
 
 .autocomplete {
   width: 300px !important;
-  margin-top: 0.3rem !important;
+  margin-left: 0.5rem;
+}
 
-  .ng-value-container {
-    border: 0;
-    padding: 0;
-  }
+.simple-autocomplete {
+  width: 200px !important;
 }
 
 // The following styles need to be here; any further up in the chain and they

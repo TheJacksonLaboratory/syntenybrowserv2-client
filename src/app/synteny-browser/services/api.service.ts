@@ -1,16 +1,23 @@
 import { environment } from '../../../environments/environment';
-import { GeneMetadata, OntologyGeneMetadata, OntologyTerm, QTLMetadata, Response } from '../classes/interfaces';
+import {
+  ArrayResponse,
+  GeneMetadata,
+  JSONResponse,
+  OntologyGeneMetadata,
+  OntologyTerm,
+  QTLMetadata,
+} from '../classes/interfaces';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { Feature } from '../classes/feature';
+import { Species } from '../classes/species';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private oldRoot: string = environment.oldRoot;
-  private newRoot: string = environment.newRoot;
+  private root: string = environment.newRoot;
 
   constructor(private http: HttpClient) { }
 
@@ -19,8 +26,7 @@ export class ApiService {
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
   getAllGenes(taxonID: string): Observable<Feature[]> {
-    let url = `${this.newRoot}/genes/metadata/${taxonID}`;
-    return this.http.get<Feature[]>(url)
+    return this.http.get<Feature[]>(`${this.root}/genes/metadata/${taxonID}`)
                     .pipe(map(resp => resp.map(g => new Feature(g))));
   }
 
@@ -29,8 +35,7 @@ export class ApiService {
    * @param {string} taxonID - stringified taxon ID for the reference species
    */
   getAllQTLs(taxonID: string): Observable<Feature[]> {
-    let url = `${this.newRoot}/qtls/${taxonID}`;
-    return this.http.get<Feature[]>(url)
+    return this.http.get<Feature[]>(`${this.root}/qtls/${taxonID}`)
                     .pipe(map(resp => resp.map(q => new Feature(q))));
   }
 
@@ -39,8 +44,7 @@ export class ApiService {
    * @param {string} ontology - ontology ID prefix
    */
   getOntologyTerms(ontology: string): Observable<OntologyTerm[]> {
-    let url = `${this.oldRoot}/ontologies/terms/${ontology}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.terms));
+    return this.http.get<ArrayResponse>(`${this.root}/ontologies/terms/${ontology}`);
   }
 
   /**
@@ -50,81 +54,85 @@ export class ApiService {
    * @param {string} termID - string to search for genes by matching ontologies
    */
   getAssociationsForTerm(taxonID: string, termID: string): Observable<Feature[]> {
-    let url = `${this.oldRoot}/ontologies/associations/${taxonID}/${termID}`;
+    let url = `${this.root}/ontologies/associations/${taxonID}/${termID}`;
 
-    return this.http.get<Response>(url)
-                    .pipe(
-                      map(resp => resp.genes.map(g => new Feature(g, true)))
-                    );
+    return this.http.get<ArrayResponse>(url)
+                    .pipe(map(resp => resp.map(g => new Feature(g, true))));
   }
 
   /**
    * Returns a list of ontology term names and IDs for the specified ontology
    * @param {string} ontology - ontology ID prefix
    */
-  getTermsForAutocomplete(ontology: string): Observable<any[]> {
-    let url = `${this.oldRoot}/ontologies/terms/simple/${ontology}`;
-    return this.http.get<Response>(url).pipe(map(resp => resp.terms));
+  getTermsForAutocomplete(ontology: string): Observable<OntologyTerm[]> {
+    let url = `${this.root}/ontologies/terms/simple/${ontology}`;
+
+    return this.http.get<ArrayResponse>(url);
   }
 
   /**
    * Returns a list of species that are present in the database
    */
-  getSpecies(): Observable<number[]> {
-    return this.http.get<any[]>(`${this.newRoot}/species`)
-                    .pipe(map(resp => resp.map(s => s.organism)));
+  getSpecies(): Observable<Species[]> {
+    return this.http.get<ArrayResponse>(`${this.root}/species`)
+                    .pipe(map(resp => resp.map(s => new Species(s.organism))));
   }
 
   /**
    * Returns a list of syntenic block data that spans all chromosomes (for
    * purposes of the genome view)
-   * @param {string} refTaxonID - stringified taxon ID for reference species
-   * @param {string} compTaxonID - stringified taxon ID for comparison species
+   * @param {string} refID - stringified taxon ID for reference species
+   * @param {string} compID - stringified taxon ID for comparison species
    */
-  getGenomeSynteny(refTaxonID: string, compTaxonID: string)
-                  : Observable<SyntenyBlock[]> {
-    let url = `${this.newRoot}/blocks/${refTaxonID}/${compTaxonID}`;
-    return this.http.get<SyntenyBlock[]>(url)
+  getGenomeSynteny(refID: string, compID: string): Observable<SyntenyBlock[]> {
+    let url = `${this.root}/blocks/${refID}/${compID}`;
+
+    return this.http.get<ArrayResponse>(url)
                     .pipe(map(resp => resp.map(b => new SyntenyBlock(b))));
   }
 
   /**
    * Returns a list of syntenic block data that spans a specified chromosome for
    * the specified reference and comparison species
-   * @param {string} refTaxonID - stringified taxon ID for reference species
-   * @param {string} compTaxonID - stringified taxon ID for comparison species
+   * @param {string} refID - stringified taxon ID for reference species
+   * @param {string} compID - stringified taxon ID for comparison species
    * @param {string} chr - the chromosome to get blocks for
    */
-  getChromosomeSynteny(refTaxonID: string, compTaxonID: string, chr: string)
-                      : Observable<SyntenyBlock[]> {
-    let url = `${this.newRoot}/blocks/${refTaxonID}/${compTaxonID}/${chr}`;
-    return this.http.get<SyntenyBlock[]>(url)
+  getChrSynteny(refID: string, compID: string, chr: string): Observable<SyntenyBlock[]> {
+    let url = `${this.root}/blocks/${refID}/${compID}/${chr}`;
+
+    return this.http.get<ArrayResponse>(url)
                     .pipe(map(resp => resp.map(b => new SyntenyBlock(b, true))));
   }
 
   /**
    * Returns a list of genes for a specified chromosome and reference species
    * with homolog data for the specified comparison species
-   * @param {string} refTaxonID - stringified taxon ID for reference species
+   * @param {string} refID - stringified taxon ID for reference species
    * @param {string} chr - the chromosome to get genes for
    */
-  getGenes(refTaxonID: string, chr: string)
-          : Observable<any[]> {
-    let url = `${this.newRoot}/genes/${refTaxonID}/${chr}`;
-    return this.http.get<any[]>(url);
+  getGenes(refID: string, chr: string): Observable<any[]> {
+    return this.http.get<ArrayResponse>(`${this.root}/genes/${refID}/${chr}`);
   }
 
-  getHomologs(refTaxonID: string, compTaxonID: string, refChr: string)
-             : Observable<any[]> {
-    let url = `${this.newRoot}/homologs/${refTaxonID}/${compTaxonID}/${refChr}`;
-    return this.http.get<Feature[]>(url);
+  /**
+   * Returns a list of genes for a specified reference chromsome and comparison
+   * species that are homologous in the specified reference species
+   * @param {string} refID - stringified taxon ID for reference species
+   * @param {string} compID - stringified taxon ID for comparison species
+   * @param {string} refChr - the reference chromosome to get homologs for
+   */
+  getHomologs(refID: string, compID: string, refChr: string): Observable<any[]> {
+    let url = `${this.root}/homologs/${refID}/${compID}/${refChr}`;
+
+    return this.http.get<ArrayResponse>(url);
   }
 
   /**
    * Returns color hex value dictionary for chromosomes
    */
   getGenomeColorMap(): Observable<any> {
-    return this.http.get<any>(`${this.newRoot}/color-map`);
+    return this.http.get<JSONResponse>(`${this.root}/color-map`);
   }
 
   /**
@@ -133,7 +141,6 @@ export class ApiService {
    * @param {string} chr - the chromosome to get QTLs for
    */
   getQTLsByChr(taxonID: string, chr: string): Observable<any[]> {
-    let url = `${this.newRoot}/chr-qtls/${taxonID}/${chr}`;
-    return this.http.get<any[]>(url).pipe(map(resp => resp));
+    return this.http.get<ArrayResponse>(`${this.root}/chr-qtls/${taxonID}/${chr}`);
   }
 }

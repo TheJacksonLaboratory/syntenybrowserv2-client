@@ -21,7 +21,7 @@
             <span *ngFor="let f of filters" class="label"
                   [ngClass]="{ 'label-info': !f.hides(),
                                'label-danger': f.hides() }">
-              {{ f.getLabel() }}
+              {{ f.filterLabel }}
             </span>
           </div>
         </div>
