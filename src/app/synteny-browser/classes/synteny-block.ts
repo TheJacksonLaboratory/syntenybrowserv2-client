@@ -113,10 +113,6 @@ export class SyntenyBlock {
     return Math.abs(this.refScale(this.refEnd) - this.refScale(this.refStart));
   }
 
-  getBPWidth(): number {
-    return Math.abs(this.refStart - this.refEnd);
-  }
-
   /**
    * Returns the scaled start position of the syntenic block (px)
    */

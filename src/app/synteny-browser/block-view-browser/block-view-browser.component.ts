@@ -70,7 +70,7 @@ export class BlockViewBrowserComponent {
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
-  constructor(public data: DataStorageService,
+  constructor(private data: DataStorageService,
               private http: ApiService,
               private downloader: DownloadService) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };

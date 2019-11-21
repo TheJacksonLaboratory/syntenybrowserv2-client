@@ -41,7 +41,7 @@ export class GenomeViewComponent implements OnInit {
 
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(public data: DataStorageService,
+  constructor(private data: DataStorageService,
               private http: ApiService,
               private downloader: DownloadService) { }
 
@@ -446,6 +446,11 @@ export class GenomeViewComponent implements OnInit {
 
     return Math.abs(x) <= 100 ? 'middle' : (x > 0 ? 'start' : 'end');
   }
+
+  /**
+   * Returns the list of synteny blocks in the reference genome
+   */
+  getGenomeBlocks(): SyntenyBlock[] { return this.data.genomeData; }
 
 
   // Private Methods

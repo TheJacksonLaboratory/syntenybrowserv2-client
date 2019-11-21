@@ -213,7 +213,7 @@
       <g id="genome-band">
         <!-- Synteny blocks for the reference genome -->
         <g id="genome-synteny-blocks">
-          <rect *ngFor="let blk of data.genomeData"
+          <rect *ngFor="let blk of getGenomeBlocks()"
                 [attr.x]="refGMap.getBlockStart(blk)"
                 [attr.width]="refGMap.getBlockWidth(blk)"
                 [attr.height]="20"

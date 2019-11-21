@@ -27,10 +27,10 @@ export class DataStorageService {
   }
 
   /**
-   * Gets the available ontologies for all of the species and for each ontology,
-   * retrieves and stores the terms
+   * Retrieves the available ontologies for all of the species and for each
+   * ontology, retrieves and stores the terms
    */
-  getOntologyTerms() {
+  retrieveOntologyTerms(): void {
     let onts = Array.from(new Set(
       this.refSpecies.onts.map(o => o.value)
         .concat(...this.compSpecies.onts.map(o => o.value))
