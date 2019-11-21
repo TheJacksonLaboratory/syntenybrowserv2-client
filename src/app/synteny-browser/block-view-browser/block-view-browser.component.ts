@@ -45,7 +45,7 @@ export class BlockViewBrowserComponent {
 
   width = 1200;
   height = 430;
-  chromosomeViewOffset = 30;
+  chromosomeViewOffset = 35;
   chromosomeViewHeight = 60;
   browserOffset = 150;
   trackHeight = 80;
@@ -125,7 +125,7 @@ export class BlockViewBrowserComponent {
     let chrViewOverlay = document.querySelector('rect.selection');
     chrViewOverlay.setAttribute('fill', '#DDD');
     chrViewOverlay.setAttribute('stroke', '#000');
-    chrViewOverlay.setAttribute('stroke-width', '0.3');
+    chrViewOverlay.setAttribute('stroke-width', '1px');
 
     let selectors = '#browser-axis line,#browser-axis path,' +
                     '#chr-view-axis line,#chr-view-axis path';
@@ -134,8 +134,6 @@ export class BlockViewBrowserComponent {
 
     document.querySelectorAll('#browser-axis text, #chr-view-axis text')
             .forEach(obj => obj.setAttribute('font-size', '8px'));
-    document.querySelectorAll('line, rect')
-            .forEach(obj => obj.setAttribute('shape-rendering', 'crispEdges'));
   }
 
   /**
@@ -493,18 +491,6 @@ export class BlockViewBrowserComponent {
    */
   getNonMatchedBlocks(): SyntenyBlock[] {
     return this.blocks.filter(block => !block.orientationMatches);
-  }
-
-  /**
-   * Returns the X-like path command for the orientation indicators between the
-   * reference and comparison tracks
-   * @param {SyntenyBlock} block - the block to draw orientation indicators for
-   */
-  getOrientationIndPathCommand(block: SyntenyBlock): string {
-    return `M${block.getPxStart()},${this.trackHeight}
-            L${block.getPxEnd()},${this.trackHeight + 30}
-            M${block.getPxEnd()},${this.trackHeight}
-            L${block.getPxStart()},${this.trackHeight + 30}Z`;
   }
 
   /**

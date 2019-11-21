@@ -210,7 +210,8 @@
     <!-- Content container -->
     <g id="block-view-content-container" [attr.transform]="translate([5, 0])">
       <!-- Genome view -->
-      <g id="genome-band">
+      <g id="genome-band" font-family="Metropolis, sans-serif"
+         [attr.transform]="translate([0, 10])">
         <!-- Synteny blocks for the reference genome -->
         <g id="genome-synteny-blocks">
           <rect *ngFor="let blk of getGenomeBlocks()"
@@ -229,7 +230,6 @@
             <rect [attr.stroke]="chr === refChr ? '#555' : '#AAA'"
                   stroke-width="0.5" fill="#FFF"
                   [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
-
                   [attr.width]="refGMap.getChrPxWidth(chr)"
                   [attr.height]="20">
             </rect>
@@ -249,14 +249,14 @@
                 [attr.x1]="refGMap.bpToPxLocation(refChr, 0)"
                 [attr.y1]="20"
                 [attr.x2]="0"
-                [attr.y2]="chromosomeViewOffset + 12">
+                [attr.y2]="chromosomeViewOffset + 2">
           </line>
 
           <line stroke="#777" stroke-width="0.5"
                 [attr.x1]="refGMap.bpToPxLocation(refChr, getRefChrSize())"
                 [attr.y1]="20"
                 [attr.x2]="width - 1"
-                [attr.y2]="chromosomeViewOffset + 12">
+                [attr.y2]="chromosomeViewOffset + 2">
           </line>
         </g>
       </g>
@@ -444,11 +444,15 @@
         </g>
 
         <!-- Orientation indicators -->
-        <g *ngIf="blocks && !options.trueOrientation" id="orientation-indicators">
-          <path *ngFor="let block of getNonMatchedBlocks()"
-                stroke="#F00" stroke-width="0.5"
-                [attr.d]="getOrientationIndPathCommand(block)" >
-          </path>
+        <g *ngIf="blocks && !options.trueOrientation" id="orientation-indicators"
+           [attr.transform]="translate([0, trackHeight])">
+          <g *ngFor="let blk of getNonMatchedBlocks()"
+             [attr.transform]="translate([refBPToPixels(blk.refStart), 0])"
+             stroke="#F00" stroke-width="0.5">
+            <line [attr.x2]="blk.getPxWidth()" [attr.y2]="30"></line>
+
+            <line [attr.x2]="blk.getPxWidth()" [attr.y1]="30" [attr.y2]="0"></line>
+          </g>
         </g>
 
         <!-- Comparison chromosome track -->
