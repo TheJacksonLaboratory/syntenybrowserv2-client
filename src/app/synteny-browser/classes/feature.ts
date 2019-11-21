@@ -15,10 +15,8 @@ export class Feature {
   constructor(feature: any, assocMode = false) {
     this.id = feature.id;
     this.symbol = feature.symbol;
-    // TODO: this shouldn't be the determining factor for if it is a gene but it
-    //  is until genes get a type attribute from new API
-    this.gene = !feature.type;
-    this.type = this.gene ? '' : feature.type; // TODO: fix this as well
+    this.gene = feature.type.toLowerCase() !== 'qtl';
+    this.type = feature.type;
     this.chr = feature.chr;
     this.start = feature.start;
     this.end = feature.end;

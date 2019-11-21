@@ -27,12 +27,12 @@
     </g>
 
     <!-- Genome plots -->
-    <g *ngIf="genomeData" [attr.transform]="getCenter()">
+    <g *ngIf="data.genomeData" [attr.transform]="getCenter()">
       <!-- Reference ring -->
       <g id="reference-plot">
         <!-- Reference genome synteny blocks -->
         <g id="ref-blocks">
-          <path *ngFor="let blk of genomeData"
+          <path *ngFor="let blk of data.genomeData"
                 [attr.d]="getBlockBandPath(refRadii, refGMap, blk)"
                 [attr.fill]="blk.getColor()"
                 (click)="renderChordMapForChr(blk.refChr)">

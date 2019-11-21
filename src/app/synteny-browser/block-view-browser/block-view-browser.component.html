@@ -204,13 +204,60 @@
   <svg id="browser-svg" preserveAspectRatio="xMinYMin meet"
        [attr.viewBox]="'0 0 ' + (width + 10) + ' ' + (height + 10)">
 
-    <!-- Content Background -->
+    <!-- Content background -->
     <rect [attr.width]="width + 10" [attr.height]="height + 10" fill="#FFF"></rect>
 
     <!-- Content container -->
     <g id="block-view-content-container" [attr.transform]="translate([5, 0])">
+      <!-- Genome view -->
+      <g id="genome-band">
+        <!-- Synteny blocks for the reference genome -->
+        <g id="genome-synteny-blocks">
+          <rect *ngFor="let blk of data.genomeData"
+                [attr.x]="refGMap.getBlockStart(blk)"
+                [attr.width]="refGMap.getBlockWidth(blk)"
+                [attr.height]="20"
+                [attr.fill]="blk.getColor()">
+          </rect>
+        </g>
+
+        <!-- Genome chromosome rectangles -->
+        <g id="genome-chrs">
+          <rect *ngFor="let chr of ref.getChromosomes(); let i=index"
+                [attr.stroke]="chr === refChr ? '#555' : '#AAA'"
+                stroke-width="0.5" fill="#FFF"
+                [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
+                [attr.transform]="translate([refGMap.getChrPxStart(i), 0])"
+                [attr.width]="refGMap.getChrPxWidth(chr)"
+                [attr.height]="20">
+          </rect>
+        </g>
+
+        <!-- Lines mapping the selected chr from genome to chromosome view -->
+        <g id="genome-to-chr-map-lines">
+          <line stroke="#777" stroke-width="0.5"
+                [attr.x1]="refGMap.bpToPxLocation(refChr, 0)"
+                [attr.y1]="20"
+                [attr.x2]="0"
+                [attr.y2]="chromosomeViewOffset + 12">
+          </line>
+
+          <line stroke="#777" stroke-width="0.5"
+                [attr.x1]="refGMap.bpToPxLocation(refChr, getRefChrSize())"
+                [attr.y1]="20"
+                [attr.x2]="width - 1"
+                [attr.y2]="chromosomeViewOffset + 12">
+          </line>
+        </g>
+      </g>
+
       <!-- Chromsome view -->
-      <g id="chromosome-view" font-size="8" font-family="Metropolis, sans-serif">
+      <g id="chromosome-view" font-size="8" font-family="Metropolis, sans-serif"
+         [attr.transform]="translate([0, chromosomeViewOffset])">
+        <rect fill="#FFF" stroke="#777" stroke-width="0.5"
+              [attr.transform]="translate([0, 12])"
+              [attr.width]="width - 1" [attr.height]="chromosomeViewHeight - 19">
+        </rect>
         <!-- Chromosome view syntenic blocks (and background) -->
         <g id="chr-view-blocks">
           <!-- Syntenic blocks -->

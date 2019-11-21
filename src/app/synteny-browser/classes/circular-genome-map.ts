@@ -1,7 +1,7 @@
 import { CartesianCoordinate } from './interfaces';
 import { scaleLinear } from 'd3';
 
-export class GenomeMap {
+export class CircularGenomeMap {
   private scales = {};
   private sizes: number[];
 
@@ -19,11 +19,12 @@ export class GenomeMap {
    */
   constructor(chromosomes: any, rotate: number = 0) {
     this.sizes = Object.values(chromosomes);
+    let chrs = Object.keys(chromosomes);
     // total number of BP of genome
     let totalGenomeLength = this.getSummation(this.sizes);
 
     // number of radians taken by genome
-    let rads = 2 * Math.PI - (this.spacing * Object.keys(chromosomes).length);
+    let rads = 2 * Math.PI - (this.spacing * chrs.length);
 
     // BP/Rad conversions
     this.bpToRads = rads / Number(totalGenomeLength);
@@ -32,7 +33,7 @@ export class GenomeMap {
     // for each chromosomes, create a scale we can use to determine locations
     // and sized of elements within each chromosome section in the plot
     let bp = rotate * this.radsToBP;
-    Object.keys(chromosomes).forEach((chr, i) => {
+    chrs.forEach((chr, i) => {
       // get starting point for the chromosome in radians (clamped at 0 - 2PI)
       // 1.5π starts the genome from the top of the circle rather than the right
       let start = this.clamp((this.spacing * i + bp * this.bpToRads) + 1.5 * Math.PI);

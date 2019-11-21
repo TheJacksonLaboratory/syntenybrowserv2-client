@@ -54,7 +54,7 @@
 // won't override D3's default stylings
 rect.selection {
   fill: #DDD;
-  stroke-width: 0.3px;
+  stroke-width: 1px;
   stroke: #000;
 }
 
@@ -63,8 +63,6 @@ rect.selection {
 
   text { font-size: 8px; }
 }
-
-line, rect { shape-rendering: crispEdges; }
 
 #tt {
   position: absolute;

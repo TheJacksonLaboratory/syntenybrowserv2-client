@@ -2,7 +2,7 @@ import { ApiService } from '../services/api.service';
 import { CartesianCoordinate, RadiiDictionary, ReferenceChr, SelectedFeatures } from '../classes/interfaces';
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
-import { GenomeMap } from '../classes/genome-map';
+import { CircularGenomeMap } from '../classes/circular-genome-map';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { DownloadService } from '../services/download.service';
@@ -16,9 +16,8 @@ import { DataStorageService } from '../services/data-storage.service';
 export class GenomeViewComponent implements OnInit {
   ref: Species;
   comp: Species;
-  genomeData: SyntenyBlock[];
-  refGMap: GenomeMap;
-  compGMap: GenomeMap;
+  refGMap: CircularGenomeMap;
+  compGMap: CircularGenomeMap;
   tempCompGenome: object;
 
   // rendering constants
@@ -42,7 +41,7 @@ export class GenomeViewComponent implements OnInit {
 
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private data: DataStorageService,
+  constructor(public data: DataStorageService,
               private http: ApiService,
               private downloader: DownloadService) { }
 
@@ -64,7 +63,6 @@ export class GenomeViewComponent implements OnInit {
     };
 
     // generate a radii dictionary to help with rendering the comparison plot
-
     this.compRadii = {
       ringInner: compRadius,
       ringOuter: compRadius + this.bandThickness,
@@ -90,12 +88,12 @@ export class GenomeViewComponent implements OnInit {
     // get genome-wide syntenic blocks from API
     this.http.getGenomeSynteny(refID, compID)
              .subscribe(blocks => {
-               this.refGMap = new GenomeMap(this.ref.genome);
-               this.compGMap = new GenomeMap(this.comp.genome);
+               this.refGMap = new CircularGenomeMap(this.ref.genome);
+               this.compGMap = new CircularGenomeMap(this.comp.genome);
 
                // set the color for each block
                blocks.forEach(b => b.setColor(this.data.genomeColorMap[b.compChr]));
-               this.genomeData = blocks;
+               this.data.genomeData = blocks;
              });
   }
 
@@ -116,9 +114,9 @@ export class GenomeViewComponent implements OnInit {
   renderChordMapForChr(chr: string): void {
     // get the blocks that should be shown in the comparison plot's ref chromosome
     let featureBlocks = this.featureBlocks ?
-                        this.featureBlocks.filter(b => b.matchesRefChr(chr)) : [];
+                        this.data.getChrBlocks(chr, this.featureBlocks) : [];
     let blocks = featureBlocks.length > 0 ?
-                 featureBlocks : this.genomeData.filter(b => b.matchesRefChr(chr));
+                 featureBlocks : this.data.getChrBlocks(chr);
 
     // get the index of the selected chromosome
     let chrIndex = this.getChromosomes(this.ref.genome).indexOf(chr);
@@ -127,7 +125,7 @@ export class GenomeViewComponent implements OnInit {
 
     // calculate the number of radians to rotate the new comp genome
     let radsToRotate = this.refGMap.getChrRadianStart(chrIndex + 1);
-    this.compGMap = new GenomeMap(this.tempCompGenome, radsToRotate);
+    this.compGMap = new CircularGenomeMap(this.tempCompGenome, radsToRotate);
 
     // set the reference chromosome
     this.refChr = {
@@ -144,18 +142,9 @@ export class GenomeViewComponent implements OnInit {
   updateFeatures(features: Feature[]): void {
     this.features = features;
 
-    // generate a list of syntenic blocks to highlight; the features.map() is
-    // going to produce an array of arrays (some features may span more than one
-    // block) which needs to be flattened which is done with the [].concat.apply()
-    let blocks = [].concat
-                   .apply([],
-                          features.map(f => {
-                            return this.genomeData.filter(b => b.isAFeatureBlock(f))
-                          }));
+    let blocks = this.data.getFeatureBlocks(features);
 
-    this.featuresNoBlocks = features.filter(f => {
-      return this.genomeData.filter(b => b.isAFeatureBlock(f)).length === 0;
-    });
+    this.featuresNoBlocks = features.filter(f => this.data.isFeatureNonSyntenic(f));
 
     // create a list of distinct blocks (we don't want to render
     // the same block more than once)
@@ -190,12 +179,12 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Returns a path command for a chromosome band
    * @param {any} radiiDict - the radius dictionary of the specified genome
-   * @param {GenomeMap} gMap - the genome map for the specified genome
+   * @param {CircularGenomeMap} gMap - the genome map for the specified genome
  *                             (reference or comparison)
    * @param {string} chr - the chromosome the band is for
    * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
    */
-  getChrBandPath(radiiDict: any, gMap: GenomeMap, chr: string, genome: any): string {
+  getChrBandPath(radiiDict: any, gMap: CircularGenomeMap, chr: string, genome: any): string {
     let end = genome[chr],
         inner = radiiDict.ringInner,
         outer = radiiDict.ringOuter;
@@ -227,12 +216,12 @@ export class GenomeViewComponent implements OnInit {
    * Return the path command for the curved line that the label for the
    * specified genome will be based on
    * @param {any} radiiDict - the radius dictionary of the specified genome
-   * @param {GenomeMap} gMap - the genome map for the specified genome
+   * @param {CircularGenomeMap} gMap - the genome map for the specified genome
    *                             (reference or comparison)
    * @param {any} genome - the genome of the specified species (dictionary
  *                         describing chr sizes)
    */
-  getSpeciesLabelPath(radiiDict: any, gMap: GenomeMap, genome: any): string {
+  getSpeciesLabelPath(radiiDict: any, gMap: CircularGenomeMap, genome: any): string {
     let inner = radiiDict.ringInner,
         start = gMap.bpToCartesian('0', 0, inner),
         end = gMap.bpToCartesian('0', genome['0'], inner);
@@ -251,13 +240,13 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Returns a path command for a syntenic block
    * @param {any} radiiDict - the radius dictionary of the specified genome
-   * @param {GenomeMap} gMap - the genome map for the specified genome
+   * @param {CircularGenomeMap} gMap - the genome map for the specified genome
    *                           (reference or comparison)
    * @param {SyntenyBlock} block - the synteny block to render the band for
    * @param {boolean} comp - the default false flag that indicates if the block
    *                         band is for the inner plot
    */
-  getBlockBandPath(radiiDict: any, gMap: GenomeMap,
+  getBlockBandPath(radiiDict: any, gMap: CircularGenomeMap,
                    block: SyntenyBlock, comp: boolean = false): string {
     // if the block is located in the inner plot and it has a temporary chr
     // (only the reference chr), use the temp chr
@@ -287,12 +276,12 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Returns a path command for the given syntenic mapping region and radius
-   * @param {GenomeMap} gMap - the genome map (NOTE: must be updated with
+   * @param {CircularGenomeMap} gMap - the genome map (NOTE: must be updated with
    *                                the ref chr accessed by 'ref<chr>')
    * @param {SyntenyBlock} block - the syntenic region to render a chord for
    *                               (NOTE: refChr must be in the form 'ref<chr>')
    */
-  getChordPath(gMap: GenomeMap, block: SyntenyBlock) {
+  getChordPath(gMap: CircularGenomeMap, block: SyntenyBlock) {
     // get all 4 points of the chord
     let startRad = this.refRadii.ringInner,
         endRad = this.compRadii.ringInner,
@@ -311,9 +300,9 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Returns the translation string value for the label of a specified chromosome
    * @param {string} chr - the chromosome the label is for
-   * @param {GenomeMap} gMap - the genome map for the specified genome
+   * @param {CircularGenomeMap} gMap - the genome map for the specified genome
    */
-  getRefLabelPos(chr: string, gMap: GenomeMap): string {
+  getRefLabelPos(chr: string, gMap: CircularGenomeMap): string {
     let pos = gMap.bpToCartesian(chr,
                                  this.ref.genome[chr] * 0.5,
                                  this.refRadii.labels);
@@ -327,11 +316,11 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Returns the translation string value for the label of a specified chromosome
    * @param {string} chr - the chromosome the label is for
-   * @param {GenomeMap} gMap - the genome map for the specified genome
+   * @param {CircularGenomeMap} gMap - the genome map for the specified genome
    * @param {boolean} temp - the default false flag indicating whether to use
  *                           the temp genome or the true comp genome dictionary
    */
-  getCompLabelPos(chr: string, gMap: GenomeMap, temp: boolean = false): string {
+  getCompLabelPos(chr: string, gMap: CircularGenomeMap, temp: boolean = false): string {
     let genome = temp ? this.tempCompGenome : this.comp.genome,
         pos = gMap.bpToCartesian(chr,
                                  genome[chr] * 0.5,
@@ -526,7 +515,7 @@ export class GenomeViewComponent implements OnInit {
     this.comp = null;
     this.refGMap = null;
     this.compGMap = null;
-    this.genomeData = null;
+    this.data.genomeData = null;
     this.refChr = null;
     this.tempCompGenome = null;
 
@@ -567,7 +556,7 @@ export class GenomeViewComponent implements OnInit {
     // chromosome to get the genome map's radsToBP conversion value to size the
     // reference chromosome
     tempComp['ref' + chr] = (this.refGMap.getRadiansOfChromosome(chr)) *
-                            new GenomeMap(tempComp).radsToBP;
+                            new CircularGenomeMap(tempComp).radsToBP;
 
     this.tempCompGenome = tempComp;
   }

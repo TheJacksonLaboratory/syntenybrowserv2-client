@@ -3,7 +3,7 @@ export class Legend {
   activeChrs: string[];
   hoverChr: string = null;
 
-  offsetY: number = 350;
+  offsetY: number = 380;
   offsetX: number;
   colors: object;
 

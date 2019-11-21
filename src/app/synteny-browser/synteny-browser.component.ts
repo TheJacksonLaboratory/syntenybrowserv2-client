@@ -24,14 +24,14 @@ export class SyntenyBrowserComponent implements OnInit {
   viewInBrowser: boolean = false;
   filterOpen: boolean = false;
 
-  constructor(public data: DataStorageService, private cdr: ChangeDetectorRef) { }
+  constructor(public data: DataStorageService, private cdr: ChangeDetectorRef, private http: ApiService) { }
 
   ngOnInit() {
-    setTimeout(() => {
-      // have the species selection
-      this.species.getSpecies();
+    this.http.getSpecies().subscribe(species => {
+      this.species.setSpecies(species);
+      this.data.species = species;
       this.updateSpecies();
-    }, 200);
+    });
   }
 
 

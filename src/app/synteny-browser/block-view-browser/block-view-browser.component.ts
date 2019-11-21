@@ -13,6 +13,7 @@ import { SyntenyBlock } from '../classes/synteny-block';
 import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
+import { LinearGenomeMap } from '../classes/linear-genome-map';
 
 @Component({
   selector: 'block-view-browser',
@@ -37,14 +38,15 @@ export class BlockViewBrowserComponent {
 
   filters: Filter[] = [];
 
-  progress: number = 0;
+  progress = 0;
   zoom: ZoomBehavior<any, any>;
   brush: BrushBehavior<any>;
 
-  width: number = 1200;
-  height: number = 400;
+  width = 1200;
+  height = 430;
+  chromosomeViewOffset = 30;
   chromosomeViewHeight = 60;
-  browserOffset = 120;
+  browserOffset = 150;
   trackHeight = 80;
   minimumIntervalSize = 3000;
 
@@ -57,6 +59,7 @@ export class BlockViewBrowserComponent {
   staticRefBPToPixels: ScaleLinear<number, number>;
   staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
+  refGMap: LinearGenomeMap;
 
   tooltip: any = null;
   clicktip: any = null;
@@ -67,7 +70,7 @@ export class BlockViewBrowserComponent {
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
-  constructor(private data: DataStorageService,
+  constructor(public data: DataStorageService,
               private http: ApiService,
               private downloader: DownloadService) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
@@ -93,6 +96,9 @@ export class BlockViewBrowserComponent {
 
     // this one stays the same (to be used for chromosome view)
     this.staticRefBPToPixels = this.getRefScale(this.getRefChrSize());
+
+    // this genome map is used for the genome band above the chromosome view
+    this.refGMap = new LinearGenomeMap(this.ref.genome, this.width);
 
     // get syntenic block data
     this.getSyntenicBlocks(this.data.features.features);
@@ -388,6 +394,11 @@ export class BlockViewBrowserComponent {
 
 
   // Getter Methods
+
+  /**
+   * Returns the list of synteny blocks in the reference genome
+   */
+  getGenomeBlocks(): SyntenyBlock[] { return this.data.genomeData; }
 
   /**
    * Returns a list of reference genes that are in the current browser's view
