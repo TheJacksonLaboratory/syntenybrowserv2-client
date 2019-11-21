@@ -180,7 +180,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns a path command for a chromosome band
    * @param {any} radiiDict - the radius dictionary of the specified genome
    * @param {CircularGenomeMap} gMap - the genome map for the specified genome
- *                                     (reference or comparison)
+   *                                   (reference or comparison)
    * @param {string} chr - the chromosome the band is for
    * @param {any} genome - the genome of the specified species (dictionary
    *                       describing chr sizes)

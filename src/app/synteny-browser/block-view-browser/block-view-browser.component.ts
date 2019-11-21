@@ -14,6 +14,7 @@ import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
 import { LinearGenomeMap } from '../classes/linear-genome-map';
+import { CircularGenomeMap } from '../classes/circular-genome-map';
 
 @Component({
   selector: 'block-view-browser',
@@ -399,6 +400,14 @@ export class BlockViewBrowserComponent {
    * Returns the list of synteny blocks in the reference genome
    */
   getGenomeBlocks(): SyntenyBlock[] { return this.data.genomeData; }
+
+  /**
+   * Returns the translation string value for the label of a specified chromosome
+   * @param {string} chr - the chromosome the label is for
+   */
+  getChrLabelPos(chr: string): string {
+    return this.translate([this.refGMap.getChrPxWidth(chr) * 0.5, 13.5]);
+  }
 
   /**
    * Returns a list of reference genes that are in the current browser's view

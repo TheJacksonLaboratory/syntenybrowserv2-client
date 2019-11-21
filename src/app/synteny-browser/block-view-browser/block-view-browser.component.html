@@ -221,16 +221,26 @@
           </rect>
         </g>
 
-        <!-- Genome chromosome rectangles -->
+        <!-- Genome chromosomes -->
         <g id="genome-chrs">
-          <rect *ngFor="let chr of ref.getChromosomes(); let i=index"
-                [attr.stroke]="chr === refChr ? '#555' : '#AAA'"
-                stroke-width="0.5" fill="#FFF"
-                [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
-                [attr.transform]="translate([refGMap.getChrPxStart(i), 0])"
-                [attr.width]="refGMap.getChrPxWidth(chr)"
-                [attr.height]="20">
-          </rect>
+          <!-- Chromosome overlays -->
+          <g *ngFor="let chr of ref.getChromosomes(); let i=index"
+             [attr.transform]="translate([refGMap.getChrPxStart(i), 0])">
+            <rect [attr.stroke]="chr === refChr ? '#555' : '#AAA'"
+                  stroke-width="0.5" fill="#FFF"
+                  [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
+
+                  [attr.width]="refGMap.getChrPxWidth(chr)"
+                  [attr.height]="20">
+            </rect>
+
+            <!-- Chromosome labels -->
+            <text text-anchor="middle" font-size="10"
+                  [attr.fill-opacity]="chr === refChr ? '0' : '0.5'"
+                  [attr.transform]="getChrLabelPos(chr)">
+              {{ ref.abbrev }} {{ chr }}
+            </text>
+          </g>
         </g>
 
         <!-- Lines mapping the selected chr from genome to chromosome view -->

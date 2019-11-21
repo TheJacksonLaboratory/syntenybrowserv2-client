@@ -64,10 +64,6 @@ export class LinearGenomeMap {
     return this.scales[chr](bp);
   }
 
-  bpSizeToPxWidth(chr: string, bpWidth: number): number {
-    return this.scales[chr](bpWidth);
-  }
-
   /**
    * Returns a pixel x value of a genomic position (in bp) for a syntenic block
    * @param {SyntenyBlock} block - the syntenic block to get the x value for
@@ -76,6 +72,10 @@ export class LinearGenomeMap {
     return this.scales[block.refChr](block.refStart);
   }
 
+  /**
+   * Returns the pixel width for the specified synteny block
+   * @param {SyntenyBlock} block - the syntenic block to get the width for
+   */
   getBlockWidth(block: SyntenyBlock): number {
     let scale = this.scales[block.refChr];
     return scale(block.refEnd) - scale(block.refStart);
@@ -111,9 +111,5 @@ export class LinearGenomeMap {
    */
   private getSummation(array: number[]): number {
     return array.length > 0 ? array.reduce((a, b) => a + b) : 0;
-  }
-
-  getChrIndex(chr: string): number {
-    return Object.keys(this.scales).indexOf(chr);
   }
 }
