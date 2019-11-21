@@ -180,9 +180,10 @@ export class GenomeViewComponent implements OnInit {
    * Returns a path command for a chromosome band
    * @param {any} radiiDict - the radius dictionary of the specified genome
    * @param {CircularGenomeMap} gMap - the genome map for the specified genome
- *                             (reference or comparison)
+ *                                     (reference or comparison)
    * @param {string} chr - the chromosome the band is for
-   * @param {any} genome - the genome of the specified species (dictionary describing chr sizes)
+   * @param {any} genome - the genome of the specified species (dictionary
+   *                       describing chr sizes)
    */
   getChrBandPath(radiiDict: any, gMap: CircularGenomeMap, chr: string, genome: any): string {
     let end = genome[chr],
@@ -217,9 +218,9 @@ export class GenomeViewComponent implements OnInit {
    * specified genome will be based on
    * @param {any} radiiDict - the radius dictionary of the specified genome
    * @param {CircularGenomeMap} gMap - the genome map for the specified genome
-   *                             (reference or comparison)
+   *                            (reference or comparison)
    * @param {any} genome - the genome of the specified species (dictionary
- *                         describing chr sizes)
+   *                       describing chr sizes)
    */
   getSpeciesLabelPath(radiiDict: any, gMap: CircularGenomeMap, genome: any): string {
     let inner = radiiDict.ringInner,
@@ -241,7 +242,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns a path command for a syntenic block
    * @param {any} radiiDict - the radius dictionary of the specified genome
    * @param {CircularGenomeMap} gMap - the genome map for the specified genome
-   *                           (reference or comparison)
+   *                            (reference or comparison)
    * @param {SyntenyBlock} block - the synteny block to render the band for
    * @param {boolean} comp - the default false flag that indicates if the block
    *                         band is for the inner plot
@@ -277,7 +278,7 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Returns a path command for the given syntenic mapping region and radius
    * @param {CircularGenomeMap} gMap - the genome map (NOTE: must be updated with
-   *                                the ref chr accessed by 'ref<chr>')
+   *                                   the ref chr accessed by 'ref<chr>')
    * @param {SyntenyBlock} block - the syntenic region to render a chord for
    *                               (NOTE: refChr must be in the form 'ref<chr>')
    */
@@ -318,7 +319,7 @@ export class GenomeViewComponent implements OnInit {
    * @param {string} chr - the chromosome the label is for
    * @param {CircularGenomeMap} gMap - the genome map for the specified genome
    * @param {boolean} temp - the default false flag indicating whether to use
- *                           the temp genome or the true comp genome dictionary
+   *                         the temp genome or the true comp genome dictionary
    */
   getCompLabelPos(chr: string, gMap: CircularGenomeMap, temp: boolean = false): string {
     let genome = temp ? this.tempCompGenome : this.comp.genome,
