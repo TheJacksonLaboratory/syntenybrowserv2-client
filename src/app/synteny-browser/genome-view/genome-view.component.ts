@@ -99,7 +99,6 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Triggers a download of the current view in the block view browser
-   * TODO: let users choose the name they want to use for the download
    */
   download(): void {
     this.downloader.downloadSVG('genome-view-svg', this.downloadFilename);

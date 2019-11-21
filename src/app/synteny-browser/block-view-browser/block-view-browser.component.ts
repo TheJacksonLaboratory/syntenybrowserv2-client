@@ -14,7 +14,6 @@ import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
 import { LinearGenomeMap } from '../classes/linear-genome-map';
-import { CircularGenomeMap } from '../classes/circular-genome-map';
 
 @Component({
   selector: 'block-view-browser',
@@ -43,11 +42,11 @@ export class BlockViewBrowserComponent {
   zoom: ZoomBehavior<any, any>;
   brush: BrushBehavior<any>;
 
-  width = 1200;
-  height = 430;
-  chromosomeViewOffset = 35;
+  width: number = 1200;
+  height: number = 430;
+  chromosomeViewOffset: number = 35;
   chromosomeViewHeight = 60;
-  browserOffset = 150;
+  browserOffset: number = 150;
   trackHeight = 80;
   minimumIntervalSize = 3000;
 
@@ -107,7 +106,6 @@ export class BlockViewBrowserComponent {
 
   /**
    * Triggers a download of the current view in the block view browser
-   * TODO: let users choose the name they want to use for the download
    */
   download(): void {
     this.setObjectAttributes();
@@ -125,7 +123,7 @@ export class BlockViewBrowserComponent {
     let chrViewOverlay = document.querySelector('rect.selection');
     chrViewOverlay.setAttribute('fill', '#DDD');
     chrViewOverlay.setAttribute('stroke', '#000');
-    chrViewOverlay.setAttribute('stroke-width', '1px');
+    chrViewOverlay.setAttribute('stroke-width', '1');
 
     let selectors = '#browser-axis line,#browser-axis path,' +
                     '#chr-view-axis line,#chr-view-axis path';
