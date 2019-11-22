@@ -705,22 +705,7 @@ export class BlockViewBrowserComponent {
                  return gene
                });
 
-               // Keeping here until QTL arrangement is completely finished
-               /* this.http.getQTLsByChr(this.ref.getID(), this.refChr)
-                           .subscribe(qtls => {
-                             let heightQTLS = this.arrangeQTLs(qtls);
-                             this.selectedQTLs = heightQTLS.map((q, i) => {
-                                 return new QTL(q, i, this.staticRefBPToPixels);
-                               });
-                           });
-               */
-
-               let formattedQTLs = this.arrangeQTLs(features.filter(f => !f.gene));
-               this.selectedQTLs = formattedQTLs.map((q, i) => {
-                                                   return new QTL(q,
-                                                                  i,
-                                                                  this.staticRefBPToPixels);
-                                                 });
+               this.arrangeQTLs(features.filter(f => !f.gene));
 
                // set interval to center around the first reference feature, if
                // features are selected, otherwise set interval to entire chr
@@ -740,173 +725,160 @@ export class BlockViewBrowserComponent {
              });
   }
 
-  /**
-   * Returns the array of QTLs with added data about offset and height
-   * @param {any[]} qtls - an array of QTLs
-   */
-  private arrangeQTLs(qtls: any[]): any[] {
-    let tempQs = JSON.parse(JSON.stringify(qtls));
+  arrangeQTLs(qtls: any[]): void {
+    // list of points of interest for QTLs (e.g. start and end points of QTLs)
+    let points = [];
 
+    // stores what happens at each point; id of QTL involved and type:
+    // 1 (QTL starting) or -1 (QTL ending)
     let pointData = {};
 
-    // log start (and end) point(s) of each QTL
-    tempQs.forEach(q => {
-      if(q.start === q.end) {
-        q['points'] = [q.start];
+    // stores QTL ids that map to their index in the QTL array for quick reference
+    let qtlLookup = {};
 
-        // log point data
-        if(!pointData[q.start]) {
-          pointData[q.start] = [{ id: q.qtl_id, isStart: true, isEnd: true }];
-        } else {
-          pointData[q.start].push({ id: q.qtl_id, isStart: true, isEnd: true });
-        }
+    // function to either create a new point or add a new QTL to an existing point
+    let checkPoint = (loc, q, type) => {
+      if(points.indexOf(loc) < 0) {
+        points.push(loc);
+        pointData[loc] = [{id: q.id, type: type}];
       } else {
-        q['points'] = [q.start, q.end];
-
-        // log start point data
-        if(!pointData[q.start]) {
-          pointData[q.start] = [{ id: q.qtl_id, isStart: true, isEnd: false }];
-        } else {
-          pointData[q.start].push({ id: q.qtl_id, isStart: true, isEnd: false });
-        }
-
-        // log end point data
-        if(!pointData[q.end]) {
-          pointData[q.end] = [{ id: q.qtl_id, isStart: false, isEnd: true }];
-        } else {
-          pointData[q.end].push({ id: q.qtl_id, isStart: false, isEnd: true });
-        }
+        pointData[loc].push({id: q.id, type: type});
       }
-    });
+    };
 
-    // do one more pass of the QTLs to add information to pointData for a QTL
-    // that neither starts or ends and the "point of interests"
-    tempQs.forEach(q => {
-      Object.keys(pointData).forEach(pt => {
-        if(q.start < pt && q.end > pt) {
-          q.points.push(Number(pt));
-          pointData[pt].push({ id: q.qtl_id, isStart: false, isEnd: false });
-        }
+    if(qtls.length > 1) {
+      qtls = qtls.sort((a, b) => a.start - b.start);
+
+      // get start and stop points of each QTL
+      qtls.forEach((q, i) => {
+        qtlLookup[q.id] = i;
+        // check each endpoint of QTL
+        checkPoint(q.start, q, 1);
+        checkPoint(q.end, q, -1);
       });
 
-      q.points.sort(); // sort the points so we do them in order
-    });
+      // sort points so we're processing from left to right
+      points = points.sort((a, b) => a - b);
 
-    // an 1D array representing vertically stacked spaces (lanes) that can be
-    // allotted to a single QTL at a time
-    let lanes = [];
-    // keeps track of smallest height for each QTL
-    let qtlHeights = {};
-    // keeps track of QTLs that need to be referenced to get their height to
-    // affect offsets of other QTLs
-    let qtlOffsets = {};
+      // keeps track of QTLs that have been assigned a lane
+      let arranged = {};
 
-    let points = Object.keys(pointData).map(pt => Number(pt))
-                                       .sort((a, b) => a - b);
+      // represents vertically stacked spaces (lanes) that can be assigned one
+      // QTL at a time; the list must always have at least one element (default
+      // state is one false element to indicate that there is currently one lane
+      // and it's available for assignment)
+      let lanes = [false];
 
-    points.forEach(pt => {
-      let qs = pointData[pt];
-      let starts = qs.filter(q => q.isStart);
-      let ends = qs.filter(q => q.isEnd && !q.isStart);
+      // keeps track of how many lanes are currently in use
+      let activeLanes = 0;
 
-      // assign each starting QTL to a lane
-      if(starts.length > 0) {
-        starts.forEach(s => {
-          // if there are open lanes, use them for starting QTLs
-          if(lanes.filter(lane => !lane).length > 0) {
-            // iterate through the lanes to find the first available one
-            for(let i = 0; i < lanes.length; i++) {
-              if(!lanes[i]) {
-                // store the index of the lane
-                s['lane'] = i;
-                lanes[i] = s;
-                break;
+      // function to check if the lane at the specified index is the last in the array
+      let hasNext = (i) => {
+        // can't check !lanes[i] because a lanes might have a 'false' value
+        // if they're empty and they're between assigned lanes
+        if(typeof lanes[i] === "undefined") {
+          return false;
+        } else if(lanes[i]) {
+          return true;
+        }
+
+        // if lanes[i] = false and that it's not the end of the lanes array
+        return hasNext(i + 1);
+      };
+
+      let qtlsToWatch = [];
+      let maxLanesToWatch = 0;
+
+      // go through each start/end point and assign/free lanes, as appropriate
+      points.forEach(p => {
+        pointData[p].forEach(qtl => {
+          if(qtl.type > 0) {
+            let lane;
+            let assigned = false;
+            lanes.forEach((l, i) => {
+              if(!l && !assigned) {
+                lanes[i] = qtl.id;
+                assigned = true;
+                lane = i;
               }
+            });
+
+            // make a new lane if there wasn't an open lane
+            if(!assigned) {
+              lanes.push(qtl.id);
+              lane = lanes.indexOf(qtl.id);
             }
-          } else { // if there aren't any open lanes, let's add a new one
-            s['lane'] = lanes.length;
-            lanes.push(s);
+
+            // store lane data for the QTL; the height can change after this
+            // point, but the lane (which is used to calculate the y position
+            // of the QTL) won't change
+            arranged[qtl.id] = { lane: lane };
+            qtlsToWatch.push(qtl.id);
+          } else {
+            let laneToClear = arranged[qtl.id].lane;
+            lanes[laneToClear] = false;
+
+            // clear out any trailing ('trailing' is the keyword) empty lanes
+            if(lanes.length > 1) {
+              lanes.forEach((l, i) => {
+                if(!hasNext(i)) {
+                  lanes.splice(i, 1);
+                }
+              });
+            }
+          }
+
+          // if type = -1, this means a QTL is ending and an active lane is
+          // getting freed up. If type = 1, we need to assign a QTL to a lane
+          activeLanes += qtl.type;
+
+          // if all available lanes are used, we need another one
+          if(activeLanes > maxLanesToWatch) {
+            maxLanesToWatch = activeLanes;
+          }
+
+          // if all lanes are available, empty the lanes
+          if(activeLanes === 0) {
+            qtlsToWatch = [];
+            maxLanesToWatch = 0;
+          } else if(qtl.type > 0) {
+            // if we're adding another QTL, we'll need to make sure that all
+            // current QTLs have a numLanes value or if the number of lanes is
+            // increasing, then we need to update the value
+            qtlsToWatch.forEach(q => {
+              if(!arranged[q].numLanes || arranged[q].numLanes < maxLanesToWatch) {
+                arranged[q].numLanes = maxLanesToWatch;
+              }
+            });
           }
         });
-      }
-
-      // load heights and offsets for each QTL
-      lanes.forEach((q, i, all) => {
-        if(q) {
-          // update height
-          qtlHeights[q.id] = qtlHeights[q.id] ?
-                             Math.min(1 / all.length, qtlHeights[q.id]) :
-                             1 / all.length;
-
-          // get QTLs that affect the current QTL's offset
-          let qtlsToRef = [];
-          for(let j = 0; j < i; j++) {
-            if(all[j]) {
-              qtlsToRef.push(all[j].id);
-            }
-          }
-          if(!qtlOffsets[q.id] || i - 1 > qtlOffsets[q.id].length) {
-            qtlOffsets[q.id] = qtlsToRef;
-          }
-        }
       });
 
-      // if there are QTLs that are ending, let's process them first to open up
-      // any lanes that might need to be reassigned
-      if(ends.length > 0) {
-        // free up lanes
-        ends.forEach(e => {
-          // check that the QTL isn't one that starts and ends at the same bp
-          if(!e.isStart) {
-            for(let i = 0; i < lanes.length; i++) {
-              if(lanes[i] && lanes[i].id === e.id) {
-                lanes[i] = null;
-                break;
-              }
-            }
-          }
-        });
-      }
+      // take the calculated values and assign them to the raw QTL dictionary,
+      // make a QTL instance from the result, and store them all
+      this.selectedQTLs = Object.keys(qtlLookup).map(q => {
+        let arrangeData = arranged[q];
+        let index = qtlLookup[q];
+        let laneHeight = this.trackHeight / arrangeData.numLanes;
+        let indLaneHeight = (this.chromosomeViewHeight - 25) / arrangeData.numLanes;
 
-      // remove unused excess appended lanes
-      let lastLane = -1;
-      lanes.forEach((lane, i) => {
-        if(lane) {
-          lastLane = i + 1;
-        }
+        qtls[index].height = laneHeight;
+        qtls[index].offset = laneHeight * arrangeData.lane;
+        qtls[index].indOffset = (indLaneHeight * arrangeData.lane) - 2;
+
+        return new QTL(qtls[index], this.staticRefBPToPixels);
       });
-      // get the index of the last used lane and slice lanes to only contain indices 0 through the last used lane;
-      lanes = lastLane > 0 ? (lastLane === lanes.length ? lanes : lanes.slice(0, lastLane)) : [];
-    });
+    } else {
+      // set the single QTL's height to be the reference track height and offset
+      // the indicator in the chromosome view to be in the center
+      this.selectedQTLs = qtls.map(q => {
+        q.height = this.trackHeight;
+        q.offset = 0;
+        q.indOffset = (this.chromosomeViewHeight - 25) / 2;
 
-    tempQs.forEach(q => {
-      let id = q.qtl_id;
-      let numsOfOverlaps = [];
-      // get the lengths of all the points that the current QTL covers
-      q['lane'] = pointData[q.start].filter(e => e.isStart && e.id === q.qtl_id)
-                                    .map(e => e.lane)[0];
-
-      q.points.forEach(pt => {
-          numsOfOverlaps.push(pointData[pt].length);
+        return new QTL(q, this.staticRefBPToPixels);
       });
-
-      qtlOffsets[id] = qtlOffsets[id].length > 0 ?
-                   qtlOffsets[id].map(i => qtlHeights[i])
-                                 .reduce((tot, val) => tot + val) :
-                   0;
-
-      // calculate the final height of the QTL by dividing the total vertical
-      // space by the maximum value of overlaps
-      q['height'] = this.trackHeight * qtlHeights[id];
-
-    });
-
-    tempQs.forEach(q => {
-      q['offset'] = this.trackHeight * qtlOffsets[q.qtl_id];
-      q['indOffset'] = (this.chromosomeViewHeight - 25) * qtlOffsets[q.qtl_id];
-    });
-
-    return tempQs;
+    }
   }
 
   /**

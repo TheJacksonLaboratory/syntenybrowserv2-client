@@ -16,7 +16,7 @@ export class QTL {
 
   format: Function = format(',');
 
-  constructor(qtl: any, index: number, staticScale: ScaleLinear<number, number>) {
+  constructor(qtl: any, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.id;
     this.symbol = qtl.symbol;
     this.chr = qtl.chr;
