@@ -725,6 +725,11 @@ export class BlockViewBrowserComponent {
              });
   }
 
+  /**
+   * Assigns offset values and heights for all of the selected QTLs so that they
+   * can be viewed without overlapping in both the chromosome view and block view
+   * @param {any[]} qtls - the selected QTLs in the chromosome
+   */
   arrangeQTLs(qtls: any[]): void {
     // list of points of interest for QTLs (e.g. start and end points of QTLs)
     let points = [];
