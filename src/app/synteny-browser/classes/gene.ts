@@ -163,14 +163,15 @@ export class Gene {
   /**
    * Returns the data to be displayed in a tooltip
    */
-  getTooltipData(): object {
+  getTooltipData(): any {
     return {
-      'Gene ID': this.id,
-      'Type': this.type,
-      'Chromosome': this.chr,
-      'Start': `${this.format(this.start)}bp`,
-      'End': `${this.format(this.end)}bp`,
-      'Strand': this.strand
+      symbol: this.symbol,
+      id: this.id,
+      type: this.type,
+      chr: this.chr,
+      start: `${this.format(this.start)}bp`,
+      end: `${this.format(this.end)}bp`,
+      strand: this.strand
     }
   }
 
@@ -343,6 +344,19 @@ export class Gene {
     return !(this.getCompXPos(scale, trueCoords) + this.getWidth(scale) < 0 ||
              this.getCompXPos(scale, trueCoords) > width);
   }
+
+  // These seem stupid but they make determining what the "type" (and by "type"
+  // I mean instance of class) an item is. This is for the purpose of tooltips,
+  // where mouseover tips are used for syntenic blocks, QTLs and genes, which
+  // all have different attributes to show
+
+  isGene(): boolean { return true; }
+
+  isQTL(): boolean { return false; }
+
+  isBlock(): boolean { return false; }
+
+  // End of type check methods
 
 
   // Private Methods

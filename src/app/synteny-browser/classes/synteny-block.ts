@@ -96,12 +96,12 @@ export class SyntenyBlock {
    * @param {boolean} isComp - flag indicating if the block data should be from
  *                             reference or comparison species
    */
-  getTooltipData(isComp: boolean): object {
+  getTooltipData(isComp: boolean): any {
     return {
-      'Chromosome': isComp ? this.compChr : this.refChr,
-      'Start': isComp ? this.getLabel(this.getTrueCompStart()) :
+      chr: isComp ? this.compChr : this.refChr,
+      start: isComp ? this.getLabel(this.getTrueCompStart()) :
                         this.getLabel(this.refStart),
-      'End': isComp ? this.getLabel(this.getTrueCompEnd()) :
+      end: isComp ? this.getLabel(this.getTrueCompEnd()) :
                       this.getLabel(this.refEnd)
     };
   }
@@ -224,6 +224,19 @@ export class SyntenyBlock {
   isAFeatureBlock(feature: any): boolean {
     return this.matchesRefChr(feature.chr) && this.includes(feature);
   }
+
+  // These seem stupid but they make determining what the "type" (and by "type"
+  // I mean instance of class) an item is. This is for the purpose of tooltips,
+  // where mouseover tips are used for syntenic blocks, QTLs and genes, which
+  // all have different attributes to show
+
+  isGene(): boolean { return false; }
+
+  isQTL(): boolean { return false; }
+
+  isBlock(): boolean { return true; }
+
+  // End of type check methods
 
 
   // Private Methods
