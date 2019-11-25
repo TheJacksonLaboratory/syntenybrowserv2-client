@@ -217,7 +217,7 @@
           <rect *ngFor="let blk of getGenomeBlocks()"
                 [attr.x]="refGMap.getBlockStart(blk)"
                 [attr.width]="refGMap.getBlockWidth(blk)"
-                [attr.height]="20"
+                height="20"
                 [attr.fill]="blk.getColor()">
           </rect>
         </g>
@@ -231,7 +231,7 @@
                   stroke-width="0.5" fill="#FFF"
                   [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
                   [attr.width]="refGMap.getChrPxWidth(chr)"
-                  [attr.height]="20">
+                  height="20">
             </rect>
 
             <!-- Chromosome labels -->
@@ -247,14 +247,12 @@
         <g id="genome-to-chr-map-lines">
           <line stroke="#777" stroke-width="0.5"
                 [attr.x1]="refGMap.bpToPxLocation(refChr, 0)"
-                [attr.y1]="20"
-                [attr.x2]="0"
-                [attr.y2]="chromosomeViewOffset + 2">
+                y1="20" x2="0" [attr.y2]="chromosomeViewOffset + 2">
           </line>
 
           <line stroke="#777" stroke-width="0.5"
                 [attr.x1]="refGMap.bpToPxLocation(refChr, getRefChrSize())"
-                [attr.y1]="20"
+                y1="20"
                 [attr.x2]="width - 1"
                 [attr.y2]="chromosomeViewOffset + 2">
           </line>
@@ -265,8 +263,8 @@
       <g id="chromosome-view" font-size="8" font-family="Metropolis, sans-serif"
          [attr.transform]="translate([0, chromosomeViewOffset])">
         <rect fill="#FFF" stroke="#777" stroke-width="0.5"
-              [attr.transform]="translate([0, 12])"
-              [attr.width]="width - 1" [attr.height]="chromosomeViewHeight - 19">
+              [attr.transform]="translate([0, 12])" [attr.width]="width - 1"
+              [attr.height]="chromosomeViewHeight - 19">
         </rect>
         <!-- Chromosome view syntenic blocks (and background) -->
         <g id="chr-view-blocks">
@@ -449,9 +447,9 @@
           <g *ngFor="let blk of getNonMatchedBlocks()"
              [attr.transform]="translate([refBPToPixels(blk.refStart), 0])"
              stroke="#F00" stroke-width="0.5">
-            <line [attr.x2]="blk.getPxWidth()" [attr.y2]="30"></line>
+            <line [attr.x2]="blk.getPxWidth()" y2="30"></line>
 
-            <line [attr.x2]="blk.getPxWidth()" [attr.y1]="30" [attr.y2]="0"></line>
+            <line [attr.x2]="blk.getPxWidth()" y1="30" y2="0"></line>
           </g>
         </g>
 

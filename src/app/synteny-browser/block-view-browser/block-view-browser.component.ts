@@ -402,6 +402,7 @@ export class BlockViewBrowserComponent {
    * @param {string} chr - the chromosome the label is for
    */
   getChrLabelPos(chr: string): string {
+    // y = 13.5 will center the text vertically inside the chromosome
     return this.translate([this.refGMap.getChrPxWidth(chr) * 0.5, 13.5]);
   }
 
@@ -725,6 +726,10 @@ export class BlockViewBrowserComponent {
              });
   }
 
+  /**
+   * Returns the array of QTLs with added data about offset and height
+   * @param {any[]} qtls - an array of QTLs
+   */
   arrangeQTLs(qtls: any[]): void {
     // list of points of interest for QTLs (e.g. start and end points of QTLs)
     let points = [];
