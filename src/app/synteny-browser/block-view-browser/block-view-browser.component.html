@@ -346,14 +346,12 @@
 
           <!-- Reference genes -->
           <g *ngIf="refGenes" id="reference-genes">
-            <g *ngFor="let gene of getRefGenesInView()"
+            <g *ngFor="let gene of getRefGenesInView()" class="ref-gene"
                [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
               <!-- Gene label -->
               <text *ngIf="gene.hasVisibleLabel() || options.symbols"
                     [ngStyle]="{ 'fill': gene.getColor(),
                                  'display': gene.hidden ? 'none' : 'initial' }"
-                    (mouseenter)="highlightRefGene(gene, $event)"
-                    (mouseleave)="unhighlightGene()"
                     (click)="showDataForGene(gene)">
                 {{ gene.symbol }}
               </text>
@@ -378,8 +376,6 @@
               <!-- Gene Overlay -->
               <rect height="5" fill="transparent"
                     [attr.width]="gene.getWidth(refBPToPixels)"
-                    (mouseenter)="highlightRefGene(gene, $event)"
-                    (mouseleave)="unhighlightGene()"
                     (click)="showDataForGene(gene)">
               </rect>
             </g>

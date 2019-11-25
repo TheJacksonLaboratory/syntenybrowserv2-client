@@ -733,6 +733,12 @@ export class BlockViewBrowserComponent {
 
                // set the zoom, brush and dynamic axis behaviors/interactions
                this.bindBrowserBehaviors();
+
+               d3.selectAll('g.ref-gene text, g.ref-gene rect')
+                 .data(this.refGenes)
+                 .on('mouseover', () => {
+                   console.log('hello');
+                 })
              });
   }
 
