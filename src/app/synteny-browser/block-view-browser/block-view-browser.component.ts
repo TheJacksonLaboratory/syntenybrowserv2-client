@@ -1,9 +1,10 @@
 import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
+import d3Tip from 'd3-tip';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { BlockViewBrowserOptions, ComparisonScaling, QTLMetadata } from '../classes/interfaces';
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
 import { Legend } from '../classes/legend';
@@ -64,6 +65,8 @@ export class BlockViewBrowserComponent {
   tooltip: any = null;
   clicktip: any = null;
   clicktipOpen = false;
+  featureTip: any;
+  blockTip: any;
 
   downloadFilename: string = '';
   filenameModalOpen = false;
@@ -72,7 +75,7 @@ export class BlockViewBrowserComponent {
 
   constructor(private data: DataStorageService,
               private http: ApiService,
-              private downloader: DownloadService) {
+              private downloader: DownloadService, private cdr: ChangeDetectorRef) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
@@ -85,6 +88,46 @@ export class BlockViewBrowserComponent {
    * and a list of features to highlight on the current chromosome
    */
   render(): void {
+    this.featureTip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-10, 0])
+      .html((d: Gene | QTL) => {
+        let data = d.getTooltipData();
+
+        if(d.isGene()) {
+          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>Gene ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Type:</b> ${data.type}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>` +
+            `<span><b>Strand:</b> ${data.strand}</span>`;
+        } else {
+          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>`;
+        }
+      });
+
+    this.blockTip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-10, 0])
+      .html((d: SyntenyBlock, species: string) => {
+        let data = d.getTooltipData(species === 'comp');
+        let speciesName = species === 'comp' ?
+          this.comp.commonName : this.ref.commonName;
+
+        return `<span style="font-size: 14px;"><b>${speciesName}</b></span><br/>` +
+          `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+          `<span><b>Start:</b> ${data.start}</span><br/>` +
+          `<span><b>End:</b> ${data.end}</span><br/>`;
+      });
+
+    d3.select('svg').call(this.featureTip);
+    d3.select('svg').call(this.blockTip);
+
     this.reset();
 
     this.ref = this.data.refSpecies;
@@ -272,106 +315,34 @@ export class BlockViewBrowserComponent {
   /**
    * Highlights the specified (reference) gene and all comparison homolog genes
    * @param {Gene} gene - the gene to have its comparison homologs highlighted
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} simple - a default false flag indicating whether the
-   *                                 call is from the overview or browser
    */
-  highlightRefGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
-    this.tooltip = {
-      title: gene.symbol,
-      content: gene.getTooltipData(),
-      x: this.width / 2 - 75
-    };
+  highlightRefGene(gene: Gene): void {
+    gene.highlight();
 
-    if(!simple) {
-      gene.highlight();
-
-      // highlight gene's homologs comparison
-      this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
-
-      this.tooltip.y = 35;
-
-    } else {
-      this.tooltip.y = 100;
-    }
+    // highlight gene's homologs comparison
+    this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
   }
 
   /**
    * Highlights the specified (comparison) gene and all reference homolog genes
    * @param {Gene} gene - the gene to have its reference homologs highlighted
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} simple - a default false flag indicating whether the
-   *                                 call is from the overview or browser
    */
-  highlightCompGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
-    this.tooltip = {
-      title: gene.symbol,
-      content: gene.getTooltipData(),
-      x: this.width / 2 - 75
-    };
+  highlightCompGene(gene: Gene): void {
+    gene.highlight();
 
-    if(!simple) {
-      gene.highlight();
-
-      // highlight gene's homologs in the reference
-      this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
-
-      this.tooltip.y = 350;
-    } else {
-      this.tooltip.y = 100;
-    }
+    // highlight gene's homologs in the reference
+    this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
   }
 
   /**
    * Marks all genes that are currently highlighted as unhighighlighted
-   * @param {boolean} metadataOnly - a default false flag indicating if the call
-   *                                 is from the overview or browser
    */
-  unhighlightGene(metadataOnly: boolean = false): void {
-    if(!metadataOnly) {
-      // remove highlighted status of any genes marked as highlighted
-      this.compGenes.filter(g => g.highlighted)
-                    .forEach(g => g.unhighlight());
-      this.refGenes.filter(g => g.highlighted)
-                   .forEach(g => g.unhighlight());
-    }
-
-    // hide the tooltip
-    this.tooltip = null
-  }
-
-  /**
-   * Shows a tooltip for the specified syntenic block if the block is too small
-   * to show its block coords
-   * @param {SyntenyBlock} block - the syntenic block to potentially highlight
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} isComp - the default false flag indicating if block
-   *                           belongs to comparison species
-   */
-  hoverBlock(block: SyntenyBlock, e: MouseEvent, isComp: boolean = false): void {
-    // if the block too small to not have its block coords shown, show a tooltip
-    if(block.getPxWidth() <= 125) {
-      this.tooltip = {
-        title: this.ref.name,
-        content: block.getTooltipData(isComp),
-        x: this.width / 2 - 75,
-        y: isComp ? 350 : 70
-      };
-    }
-  }
-
-  /**
-   * Shows a tooltip for the specified QTL
-   * @param {QTLMetadata} qtl - the qtl to generate the tooltip for
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   */
-  hoverQTL(qtl: QTL, e: MouseEvent): void {
-    this.tooltip = {
-      title: qtl.symbol,
-      content: qtl.getTooltipData(),
-      x: this.width / 2 - 75,
-      y: 66
-    }
+  unhighlightGene(): void {
+    // remove highlighted status of any genes marked as highlighted
+    this.compGenes.filter(g => g.highlighted)
+                  .forEach(g => g.unhighlight());
+    this.refGenes.filter(g => g.highlighted)
+                 .forEach(g => g.unhighlight());
   }
 
   /**
@@ -723,7 +694,105 @@ export class BlockViewBrowserComponent {
 
                // set the zoom, brush and dynamic axis behaviors/interactions
                this.bindBrowserBehaviors();
+
+               this.cdr.detectChanges();
+               this.bindTooltipBehavior();
              });
+  }
+
+  private bindTooltipBehavior(): void {
+    let bvb = this;
+    let featureTip = bvb.featureTip;
+    let blockTip = bvb.blockTip;
+
+    d3.selectAll('g.ref-gene rect')
+      .data(this.refGenes)
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightRefGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('g.ref-gene text')
+      .data(this.selectedRefGenes)
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightRefGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('g.comp-gene rect')
+      .data(this.compGenes)
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightCompGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('g.comp-gene text')
+      .data(this.selectedCompGenes)
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightCompGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('.ref-selected-ind')
+      .data(this.selectedRefGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.ref-filtered-ind')
+      .data(this.filteredRefGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-selected-ind')
+      .data(this.selectedCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-filtered-ind')
+      .data(this.filteredCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-filtered-ind')
+      .data(this.filteredCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.ref-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) { blockTip.show(d, 'ref', this) })
+      .on('mouseout', function() { blockTip.hide() });
+
+    d3.selectAll('.comp-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) { blockTip.show(d, 'comp', this) })
+      .on('mouseout', function() { blockTip.hide() });
+
+    d3.selectAll('.qtl-ind')
+      .data(this.selectedQTLs)
+      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.qtl')
+      .data(this.selectedQTLs)
+      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
   }
 
   /**
