@@ -117,7 +117,7 @@ export class BlockViewBrowserComponent {
   declareTooltips(): void {
     this.featureTip = d3Tip()
       .attr('class', 'd3-tip')
-      .offset([-10, 0])
+      .offset([-5, 0])
       .html((d: Gene | QTL) => {
         let data = d.getTooltipData();
 
@@ -140,7 +140,7 @@ export class BlockViewBrowserComponent {
 
     this.blockTip = d3Tip()
       .attr('class', 'd3-tip')
-      .offset([-10, 0])
+      .offset([-5, 0])
       .html((d: SyntenyBlock, species: string) => {
         let data = d.getTooltipData(species === 'comp');
         let speciesName = species === 'comp' ?
@@ -709,6 +709,11 @@ export class BlockViewBrowserComponent {
              });
   }
 
+  /**
+   * Sets tooltips for elements that aren't going to change; these include
+   * indicators, QTLs, and synteny blocks sicne they aren't hidden at any point
+   * in time (genes are though, so those are done dynamically)
+   */
   private staticTooltipBehavior(): void {
     let bvb = this;
     let featureTip = bvb.featureTip;
@@ -773,6 +778,15 @@ export class BlockViewBrowserComponent {
       .on('mouseout', function() { blockTip.hide() });
   }
 
+  /**
+   * Sets tooltips for genes; this function needs to be called every time the
+   * block view browser is manipulated to change what's being viewed. Since the
+   * genes rendered are using *ngIf, genes that are not in that array DO NOT
+   * EXIST at a given moment unless they are returned in the array that returns
+   * only genes in view. Thus, the data for genes needs to be passed into the
+   * DOM elements every time the view changes to ensure that elements that
+   * weren't previously in view have data (and the correct data)
+   */
   private dynamicTooltipBehavior(): void {
     let bvb = this;
     let featureTip = bvb.featureTip;
