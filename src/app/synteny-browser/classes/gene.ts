@@ -346,7 +346,7 @@ export class Gene {
   }
 
   // These seem stupid but they make determining what the "type" (and by "type"
-  // I mean instance of class) an item is. This is for the purpose of tooltips,
+  // I mean instance of class) of an item is. This is for the purpose of tooltips,
   // where mouseover tips are used for syntenic blocks, QTLs and genes, which
   // all have different attributes to show
 
