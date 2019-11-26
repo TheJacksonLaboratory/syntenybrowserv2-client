@@ -742,11 +742,6 @@ export class BlockViewBrowserComponent {
       .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
       .on('mouseout', function() { featureTip.hide() });
 
-    d3.selectAll('.comp-filtered-ind')
-      .data(this.filteredCompGenes)
-      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
-
     d3.selectAll('.qtl-ind')
       .data(this.selectedQTLs)
       .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
