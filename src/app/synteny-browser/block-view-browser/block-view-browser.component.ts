@@ -1,9 +1,10 @@
 import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
+import d3Tip from 'd3-tip';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { BlockViewBrowserOptions, ComparisonScaling, QTLMetadata } from '../classes/interfaces';
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
 import { Legend } from '../classes/legend';
@@ -64,6 +65,8 @@ export class BlockViewBrowserComponent {
   tooltip: any = null;
   clicktip: any = null;
   clicktipOpen = false;
+  featureTip: any;
+  blockTip: any;
 
   downloadFilename: string = '';
   filenameModalOpen = false;
@@ -72,7 +75,7 @@ export class BlockViewBrowserComponent {
 
   constructor(private data: DataStorageService,
               private http: ApiService,
-              private downloader: DownloadService) {
+              private downloader: DownloadService, private cdr: ChangeDetectorRef) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
@@ -86,6 +89,8 @@ export class BlockViewBrowserComponent {
    */
   render(): void {
     this.reset();
+
+    this.declareTooltips();
 
     this.ref = this.data.refSpecies;
     this.comp = this.data.compSpecies;
@@ -102,6 +107,53 @@ export class BlockViewBrowserComponent {
 
     // get syntenic block data
     this.getSyntenicBlocks(this.data.features.features);
+  }
+
+  /**
+   * Links a feature tooltip that applies to QTLs and genes and their associated
+   * indicators and a block tooltip that applies to synteny blocks that are too
+   * narrow to display coordinates in the SVG
+   */
+  declareTooltips(): void {
+    this.featureTip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-5, 0])
+      .html((d: Gene | QTL) => {
+        let data = d.getTooltipData();
+
+        if(d.isGene()) {
+          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>Gene ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Type:</b> ${data.type}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>` +
+            `<span><b>Strand:</b> ${data.strand}</span>`;
+        } else {
+          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>`;
+        }
+      });
+
+    this.blockTip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-5, 0])
+      .html((d: SyntenyBlock, species: string) => {
+        let data = d.getTooltipData(species === 'comp');
+        let speciesName = species === 'comp' ?
+          this.comp.commonName : this.ref.commonName;
+
+        return `<span style="font-size: 14px;"><b>${speciesName}</b></span><br/>` +
+          `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+          `<span><b>Start:</b> ${data.start}</span><br/>` +
+          `<span><b>End:</b> ${data.end}</span><br/>`;
+      });
+
+    d3.select('svg').call(this.featureTip);
+    d3.select('svg').call(this.blockTip);
   }
 
   /**
@@ -272,106 +324,34 @@ export class BlockViewBrowserComponent {
   /**
    * Highlights the specified (reference) gene and all comparison homolog genes
    * @param {Gene} gene - the gene to have its comparison homologs highlighted
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} simple - a default false flag indicating whether the
-   *                                 call is from the overview or browser
    */
-  highlightRefGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
-    this.tooltip = {
-      title: gene.symbol,
-      content: gene.getTooltipData(),
-      x: this.width / 2 - 75
-    };
+  highlightRefGene(gene: Gene): void {
+    gene.highlight();
 
-    if(!simple) {
-      gene.highlight();
-
-      // highlight gene's homologs comparison
-      this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
-
-      this.tooltip.y = 35;
-
-    } else {
-      this.tooltip.y = 100;
-    }
+    // highlight gene's homologs comparison
+    this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
   }
 
   /**
    * Highlights the specified (comparison) gene and all reference homolog genes
    * @param {Gene} gene - the gene to have its reference homologs highlighted
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} simple - a default false flag indicating whether the
-   *                                 call is from the overview or browser
    */
-  highlightCompGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
-    this.tooltip = {
-      title: gene.symbol,
-      content: gene.getTooltipData(),
-      x: this.width / 2 - 75
-    };
+  highlightCompGene(gene: Gene): void {
+    gene.highlight();
 
-    if(!simple) {
-      gene.highlight();
-
-      // highlight gene's homologs in the reference
-      this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
-
-      this.tooltip.y = 350;
-    } else {
-      this.tooltip.y = 100;
-    }
+    // highlight gene's homologs in the reference
+    this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
   }
 
   /**
    * Marks all genes that are currently highlighted as unhighighlighted
-   * @param {boolean} metadataOnly - a default false flag indicating if the call
-   *                                 is from the overview or browser
    */
-  unhighlightGene(metadataOnly: boolean = false): void {
-    if(!metadataOnly) {
-      // remove highlighted status of any genes marked as highlighted
-      this.compGenes.filter(g => g.highlighted)
-                    .forEach(g => g.unhighlight());
-      this.refGenes.filter(g => g.highlighted)
-                   .forEach(g => g.unhighlight());
-    }
-
-    // hide the tooltip
-    this.tooltip = null
-  }
-
-  /**
-   * Shows a tooltip for the specified syntenic block if the block is too small
-   * to show its block coords
-   * @param {SyntenyBlock} block - the syntenic block to potentially highlight
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} isComp - the default false flag indicating if block
-   *                           belongs to comparison species
-   */
-  hoverBlock(block: SyntenyBlock, e: MouseEvent, isComp: boolean = false): void {
-    // if the block too small to not have its block coords shown, show a tooltip
-    if(block.getPxWidth() <= 125) {
-      this.tooltip = {
-        title: this.ref.name,
-        content: block.getTooltipData(isComp),
-        x: this.width / 2 - 75,
-        y: isComp ? 350 : 70
-      };
-    }
-  }
-
-  /**
-   * Shows a tooltip for the specified QTL
-   * @param {QTLMetadata} qtl - the qtl to generate the tooltip for
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   */
-  hoverQTL(qtl: QTL, e: MouseEvent): void {
-    this.tooltip = {
-      title: qtl.symbol,
-      content: qtl.getTooltipData(),
-      x: this.width / 2 - 75,
-      y: 66
-    }
+  unhighlightGene(): void {
+    // remove highlighted status of any genes marked as highlighted
+    this.compGenes.filter(g => g.highlighted)
+                  .forEach(g => g.unhighlight());
+    this.refGenes.filter(g => g.highlighted)
+                 .forEach(g => g.unhighlight());
   }
 
   /**
@@ -402,6 +382,7 @@ export class BlockViewBrowserComponent {
    * @param {string} chr - the chromosome the label is for
    */
   getChrLabelPos(chr: string): string {
+    // y = 13.5 will center the text vertically inside the chromosome
     return this.translate([this.refGMap.getChrPxWidth(chr) * 0.5, 13.5]);
   }
 
@@ -707,6 +688,8 @@ export class BlockViewBrowserComponent {
 
                this.arrangeQTLs(features.filter(f => !f.gene));
 
+               this.staticTooltipBehavior();
+
                // set interval to center around the first reference feature, if
                // features are selected, otherwise set interval to entire chr
                if(this.selectedRefGenes.length > 0) {
@@ -722,15 +705,117 @@ export class BlockViewBrowserComponent {
 
                // set the zoom, brush and dynamic axis behaviors/interactions
                this.bindBrowserBehaviors();
+               this.dynamicTooltipBehavior();
              });
   }
 
   /**
-   * Assigns offset values and heights for all of the selected QTLs so that they
-   * can be viewed without overlapping in both the chromosome view and block view
-   * @param {any[]} qtls - the selected QTLs in the chromosome
+   * Sets tooltips for elements that aren't going to change; these include
+   * indicators, QTLs, and synteny blocks sicne they aren't hidden at any point
+   * in time (genes are though, so those are done dynamically)
    */
-  arrangeQTLs(qtls: any[]): void {
+  private staticTooltipBehavior(): void {
+    let bvb = this;
+    let featureTip = bvb.featureTip;
+    let blockTip = bvb.blockTip;
+
+    this.cdr.detectChanges();
+
+    // indicators in chromosome view
+    d3.selectAll('.ref-selected-ind')
+      .data(this.selectedRefGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.ref-filtered-ind')
+      .data(this.filteredRefGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-selected-ind')
+      .data(this.selectedCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-filtered-ind')
+      .data(this.filteredCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.qtl-ind')
+      .data(this.selectedQTLs)
+      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    // QTLs
+    d3.selectAll('.qtl')
+      .data(this.selectedQTLs)
+      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    // syntenic blocks
+    d3.selectAll('.ref-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) {
+        if(d.getPxWidth() <= 125) {
+          blockTip.show(d, 'ref', this);
+        }
+      })
+      .on('mouseout', function() { blockTip.hide() });
+
+    d3.selectAll('.comp-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) {
+        if(d.getPxWidth() <= 125) {
+          blockTip.show(d, 'comp', this)
+        }
+      })
+      .on('mouseout', function() { blockTip.hide() });
+  }
+
+  /**
+   * Sets tooltips for genes; this function needs to be called every time the
+   * block view browser is manipulated to change what's being viewed. Since the
+   * genes rendered are using *ngIf, genes that are not in that array DO NOT
+   * EXIST at a given moment unless they are returned in the array that returns
+   * only genes in view. Thus, the data for genes needs to be passed into the
+   * DOM elements every time the view changes to ensure that elements that
+   * weren't previously in view have data (and the correct data)
+   */
+  private dynamicTooltipBehavior(): void {
+    let bvb = this;
+    let featureTip = bvb.featureTip;
+
+    this.cdr.detectChanges();
+
+    d3.selectAll('.ref-gene')
+      .data(this.getRefGenesInView())
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightRefGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('.comp-gene')
+      .data(this.getCompGenesInView())
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightCompGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+  }
+
+  /**
+   * Returns the array of QTLs with added data about offset and height
+   * @param {any[]} qtls - an array of QTLs
+   */
+  private arrangeQTLs(qtls: any[]): void {
     // list of points of interest for QTLs (e.g. start and end points of QTLs)
     let points = [];
 
@@ -937,6 +1022,8 @@ export class BlockViewBrowserComponent {
                     // update the axis above the reference track
                     d3.select('#browser-axis')
                       .call(browserAxis);
+
+                    this.dynamicTooltipBehavior();
                   });
 
     this.zoom = d3.zoom()
@@ -975,6 +1062,8 @@ export class BlockViewBrowserComponent {
                    // update the axis above the reference track
                    d3.select('#browser-axis')
                      .call(browserAxis);
+
+                   this.dynamicTooltipBehavior();
                  });
 
     // bind the zoom behavior

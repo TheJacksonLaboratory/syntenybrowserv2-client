@@ -29,6 +29,7 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "core-js": "^2.5.4",
     "d3": "^5.8.2",
+    "d3-tip": "^0.9.1",
     "rxjs": "~6.5.2",
     "save-svg-as-png": "^1.4.14",
     "zone.js": "~0.9.1"
