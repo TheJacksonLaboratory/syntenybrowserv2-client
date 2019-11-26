@@ -88,6 +88,33 @@ export class BlockViewBrowserComponent {
    * and a list of features to highlight on the current chromosome
    */
   render(): void {
+    this.reset();
+
+    this.declareTooltips();
+
+    this.ref = this.data.refSpecies;
+    this.comp = this.data.compSpecies;
+    this.refChr = this.data.features.chr;
+
+    // this one is going to get updated with transformations
+    this.refBPToPixels = this.getRefScale(this.getRefChrSize());
+
+    // this one stays the same (to be used for chromosome view)
+    this.staticRefBPToPixels = this.getRefScale(this.getRefChrSize());
+
+    // this genome map is used for the genome band above the chromosome view
+    this.refGMap = new LinearGenomeMap(this.ref.genome, this.width);
+
+    // get syntenic block data
+    this.getSyntenicBlocks(this.data.features.features);
+  }
+
+  /**
+   * Links a feature tooltip that applies to QTLs and genes and their associated
+   * indicators and a block tooltip that applies to synteny blocks that are too
+   * narrow to display coordinates in the SVG
+   */
+  declareTooltips(): void {
     this.featureTip = d3Tip()
       .attr('class', 'd3-tip')
       .offset([-10, 0])
@@ -127,24 +154,6 @@ export class BlockViewBrowserComponent {
 
     d3.select('svg').call(this.featureTip);
     d3.select('svg').call(this.blockTip);
-
-    this.reset();
-
-    this.ref = this.data.refSpecies;
-    this.comp = this.data.compSpecies;
-    this.refChr = this.data.features.chr;
-
-    // this one is going to get updated with transformations
-    this.refBPToPixels = this.getRefScale(this.getRefChrSize());
-
-    // this one stays the same (to be used for chromosome view)
-    this.staticRefBPToPixels = this.getRefScale(this.getRefChrSize());
-
-    // this genome map is used for the genome band above the chromosome view
-    this.refGMap = new LinearGenomeMap(this.ref.genome, this.width);
-
-    // get syntenic block data
-    this.getSyntenicBlocks(this.data.features.features);
   }
 
   /**
@@ -679,6 +688,8 @@ export class BlockViewBrowserComponent {
 
                this.arrangeQTLs(features.filter(f => !f.gene));
 
+               this.staticTooltipBehavior();
+
                // set interval to center around the first reference feature, if
                // features are selected, otherwise set interval to entire chr
                if(this.selectedRefGenes.length > 0) {
@@ -694,61 +705,18 @@ export class BlockViewBrowserComponent {
 
                // set the zoom, brush and dynamic axis behaviors/interactions
                this.bindBrowserBehaviors();
-
-               this.cdr.detectChanges();
-               this.bindTooltipBehavior();
+               this.dynamicTooltipBehavior();
              });
   }
 
-  private bindTooltipBehavior(): void {
+  private staticTooltipBehavior(): void {
     let bvb = this;
     let featureTip = bvb.featureTip;
     let blockTip = bvb.blockTip;
 
-    d3.selectAll('g.ref-gene rect')
-      .data(this.refGenes)
-      .on('mouseover', function(d: Gene) {
-        featureTip.show(d, this);
-        bvb.highlightRefGene(d);
-      })
-      .on('mouseout', function() {
-        featureTip.hide();
-        bvb.unhighlightGene();
-      });
+    this.cdr.detectChanges();
 
-    d3.selectAll('g.ref-gene text')
-      .data(this.selectedRefGenes)
-      .on('mouseover', function(d: Gene) {
-        featureTip.show(d, this);
-        bvb.highlightRefGene(d);
-      })
-      .on('mouseout', function() {
-        featureTip.hide();
-        bvb.unhighlightGene();
-      });
-
-    d3.selectAll('g.comp-gene rect')
-      .data(this.compGenes)
-      .on('mouseover', function(d: Gene) {
-        featureTip.show(d, this);
-        bvb.highlightCompGene(d);
-      })
-      .on('mouseout', function() {
-        featureTip.hide();
-        bvb.unhighlightGene();
-      });
-
-    d3.selectAll('g.comp-gene text')
-      .data(this.selectedCompGenes)
-      .on('mouseover', function(d: Gene) {
-        featureTip.show(d, this);
-        bvb.highlightCompGene(d);
-      })
-      .on('mouseout', function() {
-        featureTip.hide();
-        bvb.unhighlightGene();
-      });
-
+    // indicators in chromosome view
     d3.selectAll('.ref-selected-ind')
       .data(this.selectedRefGenes)
       .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
@@ -774,32 +742,71 @@ export class BlockViewBrowserComponent {
       .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
       .on('mouseout', function() { featureTip.hide() });
 
-    d3.selectAll('.ref-block')
-      .data(this.blocks)
-      .on('mouseover', function(d: SyntenyBlock) { blockTip.show(d, 'ref', this) })
-      .on('mouseout', function() { blockTip.hide() });
-
-    d3.selectAll('.comp-block')
-      .data(this.blocks)
-      .on('mouseover', function(d: SyntenyBlock) { blockTip.show(d, 'comp', this) })
-      .on('mouseout', function() { blockTip.hide() });
-
     d3.selectAll('.qtl-ind')
       .data(this.selectedQTLs)
       .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
       .on('mouseout', function() { featureTip.hide() });
 
+    // QTLs
     d3.selectAll('.qtl')
       .data(this.selectedQTLs)
       .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
       .on('mouseout', function() { featureTip.hide() });
+
+    // syntenic blocks
+    d3.selectAll('.ref-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) {
+        if(d.getPxWidth() <= 125) {
+          blockTip.show(d, 'ref', this);
+        }
+      })
+      .on('mouseout', function() { blockTip.hide() });
+
+    d3.selectAll('.comp-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) {
+        if(d.getPxWidth() <= 125) {
+          blockTip.show(d, 'comp', this)
+        }
+      })
+      .on('mouseout', function() { blockTip.hide() });
+  }
+
+  private dynamicTooltipBehavior(): void {
+    let bvb = this;
+    let featureTip = bvb.featureTip;
+
+    this.cdr.detectChanges();
+
+    d3.selectAll('.ref-gene')
+      .data(this.getRefGenesInView())
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightRefGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('.comp-gene')
+      .data(this.getCompGenesInView())
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightCompGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
   }
 
   /**
    * Returns the array of QTLs with added data about offset and height
    * @param {any[]} qtls - an array of QTLs
    */
-  arrangeQTLs(qtls: any[]): void {
+  private arrangeQTLs(qtls: any[]): void {
     // list of points of interest for QTLs (e.g. start and end points of QTLs)
     let points = [];
 
@@ -1006,6 +1013,8 @@ export class BlockViewBrowserComponent {
                     // update the axis above the reference track
                     d3.select('#browser-axis')
                       .call(browserAxis);
+
+                    this.dynamicTooltipBehavior();
                   });
 
     this.zoom = d3.zoom()
@@ -1044,6 +1053,8 @@ export class BlockViewBrowserComponent {
                    // update the axis above the reference track
                    d3.select('#browser-axis')
                      .call(browserAxis);
+
+                   this.dynamicTooltipBehavior();
                  });
 
     // bind the zoom behavior

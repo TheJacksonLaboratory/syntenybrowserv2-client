@@ -391,7 +391,7 @@
 
           <!-- Reference genes -->
           <g *ngIf="refGenes" id="reference-genes">
-            <g *ngFor="let gene of getRefGenesInView()" class="ref-gene"
+            <g *ngFor="let gene of getRefGenesInView()"
                [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
               <!-- Gene label -->
               <text *ngIf="gene.hasVisibleLabel() || options.symbols"
@@ -419,7 +419,7 @@
               </line>
 
               <!-- Gene Overlay -->
-              <rect height="5" fill="transparent"
+              <rect height="5" fill="transparent" class="ref-gene"
                     [attr.width]="gene.getWidth(refBPToPixels)"
                     (click)="showDataForGene(gene)">
               </rect>
@@ -455,7 +455,7 @@
 
           <!-- Comparison genes -->
           <g *ngIf="compGenes && blocks" id="comparison-genes">
-            <g *ngFor="let gene of getCompGenesInView()" class="comp-gene"
+            <g *ngFor="let gene of getCompGenesInView()"
                [attr.transform]="translate(gene.getCompPxCoords(getScale(gene),
                                          options.trueOrientation))">
               <!-- Gene label -->
@@ -485,7 +485,7 @@
               </line>
 
               <!-- Gene Overlay -->
-              <rect height="5" fill="transparent"
+              <rect height="5" fill="transparent" class="comp-gene"
                     [attr.width]="gene.getWidth(getScale(gene))"
                     (click)="showDataForGene(gene)">
               </rect>
