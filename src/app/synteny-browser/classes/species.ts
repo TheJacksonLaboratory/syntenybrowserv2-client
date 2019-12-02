@@ -23,7 +23,7 @@ export class Species {
     this.resources = species.resources;
     this.genome = species.genome;
     // TODO: species config lists humans as having QTLs; fix this
-    this.hasQTLs = species.id === '10090' ? species.qtls : false;
+    this.hasQTLs = species.id === 10090;
     this.searchTypes = species.searches;
     this.onts = species.ontologies;
   }
@@ -33,5 +33,21 @@ export class Species {
    */
   getID(): string { return this.taxonID.toString(); }
 
+  /**
+   * Returns the chromsome values in the genome
+   */
   getChromosomes(): string[] { return Object.keys(this.genome); }
+
+  /**
+   * Returns the sum of all chromosomes in the genome (total size of the genome)
+   */
+  getGenomeSize(): number {
+    return <number>Object.values(this.genome)
+                         .reduce((a: number, b: number) => a + b);
+  }
+
+  /**
+   * Returns the number of chromosomes in the genome
+   */
+  getNumChrs(): number { return this.getChromosomes().length; }
 }

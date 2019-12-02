@@ -5,6 +5,7 @@ import { OntologyTerm } from '../../classes/interfaces';
 import { Feature } from '../../classes/feature';
 import { ClrLoadingState } from '@clr/angular';
 import { TableData } from '../../classes/table-data';
+import { DataStorageService } from '../../services/data-storage.service';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class OntologySearchComponent {
   @Output() update: EventEmitter<any> = new EventEmitter();
   @Output() switchView: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService) {
+  constructor(private http: ApiService, private data: DataStorageService) {
     this.terms = new TableData(['id', 'name'], ['id', 'name']);
     this.associations = new TableData(['termID', 'term', 'id', 'symbol'],
                                   ['term', 'id', 'symbol']);
@@ -106,7 +107,7 @@ export class OntologySearchComponent {
    */
   getViewAssociationsTitle(term: OntologyTerm): string {
     return 'View gene associations with this term' +
-      (term.count >= 500 ? ' [disabled for being too broad]' : '');
+      (term.descendants.length >= 500 ? ' [disabled for being too broad]' : '');
   }
 
   /**
@@ -116,7 +117,7 @@ export class OntologySearchComponent {
    */
   getSelectAllAssociationsTitle(term: OntologyTerm): string {
     return 'Select all gene associations with this term' +
-      (term.count >= 500 ? ' [disabled for being too broad]' : '');
+      (term.descendants.length >= 500 ? ' [disabled for being too broad]' : '');
   }
 
   /**

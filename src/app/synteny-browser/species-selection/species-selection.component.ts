@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Species } from '../classes/species';
 import { DataStorageService } from '../services/data-storage.service';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'species-selection',
@@ -13,19 +14,20 @@ export class SpeciesSelectionComponent {
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 
-  constructor(private data: DataStorageService) { }
+  constructor() { }
 
 
   // Operational Methods
 
   /**
-   * Sets the reference and comparison species to the the first and
-   * second species available, respectively
+   * Sets the reference and comparison species to the the first and second
+   * species available, respectively
+   * @param {Species[]} species - the list of available species
    */
-  getSpecies(): void {
-    this.species = this.data.species;
-    this.refSpecies = this.species[0].getID();
-    this.compSpecies = this.species[1].getID();
+  setSpecies(species: Species[]): void {
+      this.species = species;
+      this.refSpecies = species[0].getID();
+      this.compSpecies = species[1].getID();
   }
 
   /**

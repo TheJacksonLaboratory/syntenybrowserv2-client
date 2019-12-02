@@ -16,7 +16,7 @@ export class QTL {
 
   format: Function = format(',');
 
-  constructor(qtl: any, index: number, staticScale: ScaleLinear<number, number>) {
+  constructor(qtl: any, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.id;
     this.symbol = qtl.symbol;
     this.chr = qtl.chr;
@@ -70,13 +70,29 @@ export class QTL {
    * Returns the content for a tooltip for the QTL which includes the id, the
    * chromosome it is located in as well and the basepair start and end points
    */
-  getTooltipData(): object {
+  getTooltipData(): any {
     return {
-      'QTL ID': this.id,
-      'Chromosome': this.chr,
-      'Start': `${this.format(this.start)}bp`,
-      'End': `${this.format(this.end)}bp`
+      symbol: this.symbol,
+      id: this.id,
+      chr: this.chr,
+      start: `${this.format(this.start)}bp`,
+      end: `${this.format(this.end)}bp`
     }
   }
 
+
+  // Condition Checks
+
+  // These seem stupid but they make determining what the "type" (and by "type"
+  // I mean instance of class) of an item is. This is for the purpose of tooltips,
+  // where mouseover tips are used for syntenic blocks, QTLs and genes, which
+  // all have different attributes to show
+
+  isGene(): boolean { return false; }
+
+  isQTL(): boolean { return true; }
+
+  isBlock(): boolean { return false; }
+
+  // End of type check methods
 }

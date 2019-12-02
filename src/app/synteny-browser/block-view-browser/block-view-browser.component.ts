@@ -1,9 +1,10 @@
 import { ApiService } from '../services/api.service';
 import { BrowserInterval } from '../classes/browser-interval';
 import * as d3 from 'd3';
+import d3Tip from 'd3-tip';
 import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
 import { BlockViewBrowserOptions, ComparisonScaling, QTLMetadata } from '../classes/interfaces';
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
 import { Legend } from '../classes/legend';
@@ -13,6 +14,7 @@ import { SyntenyBlock } from '../classes/synteny-block';
 import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
+import { LinearGenomeMap } from '../classes/linear-genome-map';
 
 @Component({
   selector: 'block-view-browser',
@@ -37,14 +39,15 @@ export class BlockViewBrowserComponent {
 
   filters: Filter[] = [];
 
-  progress: number = 0;
+  progress = 0;
   zoom: ZoomBehavior<any, any>;
   brush: BrushBehavior<any>;
 
   width: number = 1200;
-  height: number = 400;
+  height: number = 430;
+  chromosomeViewOffset: number = 35;
   chromosomeViewHeight = 60;
-  browserOffset = 120;
+  browserOffset: number = 150;
   trackHeight = 80;
   minimumIntervalSize = 3000;
 
@@ -57,10 +60,13 @@ export class BlockViewBrowserComponent {
   staticRefBPToPixels: ScaleLinear<number, number>;
   staticCompBPToPixels: ComparisonScaling;
   refBPToPixels: ScaleLinear<number, number>;
+  refGMap: LinearGenomeMap;
 
   tooltip: any = null;
   clicktip: any = null;
   clicktipOpen = false;
+  featureTip: any;
+  blockTip: any;
 
   downloadFilename: string = '';
   filenameModalOpen = false;
@@ -69,7 +75,7 @@ export class BlockViewBrowserComponent {
 
   constructor(private data: DataStorageService,
               private http: ApiService,
-              private downloader: DownloadService) {
+              private downloader: DownloadService, private cdr: ChangeDetectorRef) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
@@ -84,6 +90,8 @@ export class BlockViewBrowserComponent {
   render(): void {
     this.reset();
 
+    this.declareTooltips();
+
     this.ref = this.data.refSpecies;
     this.comp = this.data.compSpecies;
     this.refChr = this.data.features.chr;
@@ -94,13 +102,62 @@ export class BlockViewBrowserComponent {
     // this one stays the same (to be used for chromosome view)
     this.staticRefBPToPixels = this.getRefScale(this.getRefChrSize());
 
+    // this genome map is used for the genome band above the chromosome view
+    this.refGMap = new LinearGenomeMap(this.ref.genome, this.width);
+
     // get syntenic block data
     this.getSyntenicBlocks(this.data.features.features);
   }
 
   /**
+   * Links a feature tooltip that applies to QTLs and genes and their associated
+   * indicators and a block tooltip that applies to synteny blocks that are too
+   * narrow to display coordinates in the SVG
+   */
+  declareTooltips(): void {
+    this.featureTip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-5, 0])
+      .html((d: Gene | QTL) => {
+        let data = d.getTooltipData();
+
+        if(d.isGene()) {
+          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>Gene ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Type:</b> ${data.type}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>` +
+            `<span><b>Strand:</b> ${data.strand}</span>`;
+        } else {
+          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>`;
+        }
+      });
+
+    this.blockTip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-5, 0])
+      .html((d: SyntenyBlock, species: string) => {
+        let data = d.getTooltipData(species === 'comp');
+        let speciesName = species === 'comp' ?
+          this.comp.commonName : this.ref.commonName;
+
+        return `<span style="font-size: 14px;"><b>${speciesName}</b></span><br/>` +
+          `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+          `<span><b>Start:</b> ${data.start}</span><br/>` +
+          `<span><b>End:</b> ${data.end}</span><br/>`;
+      });
+
+    d3.select('svg').call(this.featureTip);
+    d3.select('svg').call(this.blockTip);
+  }
+
+  /**
    * Triggers a download of the current view in the block view browser
-   * TODO: let users choose the name they want to use for the download
    */
   download(): void {
     this.setObjectAttributes();
@@ -118,7 +175,7 @@ export class BlockViewBrowserComponent {
     let chrViewOverlay = document.querySelector('rect.selection');
     chrViewOverlay.setAttribute('fill', '#DDD');
     chrViewOverlay.setAttribute('stroke', '#000');
-    chrViewOverlay.setAttribute('stroke-width', '0.3');
+    chrViewOverlay.setAttribute('stroke-width', '1');
 
     let selectors = '#browser-axis line,#browser-axis path,' +
                     '#chr-view-axis line,#chr-view-axis path';
@@ -127,8 +184,6 @@ export class BlockViewBrowserComponent {
 
     document.querySelectorAll('#browser-axis text, #chr-view-axis text')
             .forEach(obj => obj.setAttribute('font-size', '8px'));
-    document.querySelectorAll('line, rect')
-            .forEach(obj => obj.setAttribute('shape-rendering', 'crispEdges'));
   }
 
   /**
@@ -269,106 +324,34 @@ export class BlockViewBrowserComponent {
   /**
    * Highlights the specified (reference) gene and all comparison homolog genes
    * @param {Gene} gene - the gene to have its comparison homologs highlighted
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} simple - a default false flag indicating whether the
-   *                                 call is from the overview or browser
    */
-  highlightRefGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
-    this.tooltip = {
-      title: gene.symbol,
-      content: gene.getTooltipData(),
-      x: this.width / 2 - 75
-    };
+  highlightRefGene(gene: Gene): void {
+    gene.highlight();
 
-    if(!simple) {
-      gene.highlight();
-
-      // highlight gene's homologs comparison
-      this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
-
-      this.tooltip.y = 35;
-
-    } else {
-      this.tooltip.y = 100;
-    }
+    // highlight gene's homologs comparison
+    this.getComparisonHomologs(gene.homologIDs[0]).forEach(g => g.highlight());
   }
 
   /**
    * Highlights the specified (comparison) gene and all reference homolog genes
    * @param {Gene} gene - the gene to have its reference homologs highlighted
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} simple - a default false flag indicating whether the
-   *                                 call is from the overview or browser
    */
-  highlightCompGene(gene: Gene, e: MouseEvent, simple: boolean = false): void {
-    this.tooltip = {
-      title: gene.symbol,
-      content: gene.getTooltipData(),
-      x: this.width / 2 - 75
-    };
+  highlightCompGene(gene: Gene): void {
+    gene.highlight();
 
-    if(!simple) {
-      gene.highlight();
-
-      // highlight gene's homologs in the reference
-      this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
-
-      this.tooltip.y = 350;
-    } else {
-      this.tooltip.y = 100;
-    }
+    // highlight gene's homologs in the reference
+    this.getReferenceHomologs(gene.homologIDs).forEach(g => g.highlight());
   }
 
   /**
    * Marks all genes that are currently highlighted as unhighighlighted
-   * @param {boolean} metadataOnly - a default false flag indicating if the call
-   *                                 is from the overview or browser
    */
-  unhighlightGene(metadataOnly: boolean = false): void {
-    if(!metadataOnly) {
-      // remove highlighted status of any genes marked as highlighted
-      this.compGenes.filter(g => g.highlighted)
-                    .forEach(g => g.unhighlight());
-      this.refGenes.filter(g => g.highlighted)
-                   .forEach(g => g.unhighlight());
-    }
-
-    // hide the tooltip
-    this.tooltip = null
-  }
-
-  /**
-   * Shows a tooltip for the specified syntenic block if the block is too small
-   * to show its block coords
-   * @param {SyntenyBlock} block - the syntenic block to potentially highlight
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   * @param {boolean} isComp - the default false flag indicating if block
-   *                           belongs to comparison species
-   */
-  hoverBlock(block: SyntenyBlock, e: MouseEvent, isComp: boolean = false): void {
-    // if the block too small to not have its block coords shown, show a tooltip
-    if(block.getPxWidth() <= 125) {
-      this.tooltip = {
-        title: this.ref.name,
-        content: block.getTooltipData(isComp),
-        x: this.width / 2 - 75,
-        y: isComp ? 350 : 70
-      };
-    }
-  }
-
-  /**
-   * Shows a tooltip for the specified QTL
-   * @param {QTLMetadata} qtl - the qtl to generate the tooltip for
-   * @param {MouseEvent} e - the mouseover event to get cursor coordinates
-   */
-  hoverQTL(qtl: QTL, e: MouseEvent): void {
-    this.tooltip = {
-      title: qtl.symbol,
-      content: qtl.getTooltipData(),
-      x: this.width / 2 - 75,
-      y: 66
-    }
+  unhighlightGene(): void {
+    // remove highlighted status of any genes marked as highlighted
+    this.compGenes.filter(g => g.highlighted)
+                  .forEach(g => g.unhighlight());
+    this.refGenes.filter(g => g.highlighted)
+                 .forEach(g => g.unhighlight());
   }
 
   /**
@@ -388,6 +371,20 @@ export class BlockViewBrowserComponent {
 
 
   // Getter Methods
+
+  /**
+   * Returns the list of synteny blocks in the reference genome
+   */
+  getGenomeBlocks(): SyntenyBlock[] { return this.data.genomeData; }
+
+  /**
+   * Returns the translation string value for the label of a specified chromosome
+   * @param {string} chr - the chromosome the label is for
+   */
+  getChrLabelPos(chr: string): string {
+    // y = 13.5 will center the text vertically inside the chromosome
+    return this.translate([this.refGMap.getChrPxWidth(chr) * 0.5, 13.5]);
+  }
 
   /**
    * Returns a list of reference genes that are in the current browser's view
@@ -473,18 +470,6 @@ export class BlockViewBrowserComponent {
    */
   getNonMatchedBlocks(): SyntenyBlock[] {
     return this.blocks.filter(block => !block.orientationMatches);
-  }
-
-  /**
-   * Returns the X-like path command for the orientation indicators between the
-   * reference and comparison tracks
-   * @param {SyntenyBlock} block - the block to draw orientation indicators for
-   */
-  getOrientationIndPathCommand(block: SyntenyBlock): string {
-    return `M${block.getPxStart()},${this.trackHeight}
-            L${block.getPxEnd()},${this.trackHeight + 30}
-            M${block.getPxEnd()},${this.trackHeight}
-            L${block.getPxStart()},${this.trackHeight + 30}Z`;
   }
 
   /**
@@ -701,22 +686,9 @@ export class BlockViewBrowserComponent {
                  return gene
                });
 
-               // Keeping here until QTL arrangement is completely finished
-               /* this.http.getQTLsByChr(this.ref.getID(), this.refChr)
-                           .subscribe(qtls => {
-                             let heightQTLS = this.arrangeQTLs(qtls);
-                             this.selectedQTLs = heightQTLS.map((q, i) => {
-                                 return new QTL(q, i, this.staticRefBPToPixels);
-                               });
-                           });
-               */
+               this.arrangeQTLs(features.filter(f => !f.gene));
 
-               let formattedQTLs = this.arrangeQTLs(features.filter(f => !f.gene));
-               this.selectedQTLs = formattedQTLs.map((q, i) => {
-                                                   return new QTL(q,
-                                                                  i,
-                                                                  this.staticRefBPToPixels);
-                                                 });
+               this.staticTooltipBehavior();
 
                // set interval to center around the first reference feature, if
                // features are selected, otherwise set interval to entire chr
@@ -733,176 +705,270 @@ export class BlockViewBrowserComponent {
 
                // set the zoom, brush and dynamic axis behaviors/interactions
                this.bindBrowserBehaviors();
+               this.dynamicTooltipBehavior();
              });
+  }
+
+  /**
+   * Sets tooltips for elements that aren't going to change; these include
+   * indicators, QTLs, and synteny blocks sicne they aren't hidden at any point
+   * in time (genes are though, so those are done dynamically)
+   */
+  private staticTooltipBehavior(): void {
+    let bvb = this;
+    let featureTip = bvb.featureTip;
+    let blockTip = bvb.blockTip;
+
+    this.cdr.detectChanges();
+
+    // indicators in chromosome view
+    d3.selectAll('.ref-selected-ind')
+      .data(this.selectedRefGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.ref-filtered-ind')
+      .data(this.filteredRefGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-selected-ind')
+      .data(this.selectedCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.comp-filtered-ind')
+      .data(this.filteredCompGenes)
+      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    d3.selectAll('.qtl-ind')
+      .data(this.selectedQTLs)
+      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    // QTLs
+    d3.selectAll('.qtl')
+      .data(this.selectedQTLs)
+      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
+      .on('mouseout', function() { featureTip.hide() });
+
+    // syntenic blocks
+    d3.selectAll('.ref-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) {
+        if(d.getPxWidth() <= 125) {
+          blockTip.show(d, 'ref', this);
+        }
+      })
+      .on('mouseout', function() { blockTip.hide() });
+
+    d3.selectAll('.comp-block')
+      .data(this.blocks)
+      .on('mouseover', function(d: SyntenyBlock) {
+        if(d.getPxWidth() <= 125) {
+          blockTip.show(d, 'comp', this)
+        }
+      })
+      .on('mouseout', function() { blockTip.hide() });
+  }
+
+  /**
+   * Sets tooltips for genes; this function needs to be called every time the
+   * block view browser is manipulated to change what's being viewed. Since the
+   * genes rendered are using *ngIf, genes that are not in that array DO NOT
+   * EXIST at a given moment unless they are returned in the array that returns
+   * only genes in view. Thus, the data for genes needs to be passed into the
+   * DOM elements every time the view changes to ensure that elements that
+   * weren't previously in view have data (and the correct data)
+   */
+  private dynamicTooltipBehavior(): void {
+    let bvb = this;
+    let featureTip = bvb.featureTip;
+
+    this.cdr.detectChanges();
+
+    d3.selectAll('.ref-gene')
+      .data(this.getRefGenesInView())
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightRefGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
+
+    d3.selectAll('.comp-gene')
+      .data(this.getCompGenesInView())
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+        bvb.highlightCompGene(d);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+        bvb.unhighlightGene();
+      });
   }
 
   /**
    * Returns the array of QTLs with added data about offset and height
    * @param {any[]} qtls - an array of QTLs
    */
-  private arrangeQTLs(qtls: any[]): any[] {
-    let tempQs = JSON.parse(JSON.stringify(qtls));
+  private arrangeQTLs(qtls: any[]): void {
+    // list of points of interest for QTLs (e.g. start and end points of QTLs)
+    let points = [];
 
+    // stores what happens at each point; id of QTL involved and type:
+    // 1 (QTL starting) or -1 (QTL ending)
     let pointData = {};
 
-    // log start (and end) point(s) of each QTL
-    tempQs.forEach(q => {
-      if(q.start === q.end) {
-        q['points'] = [q.start];
+    // stores QTL ids that map to their index in the QTL array for quick reference
+    let qtlLookup = {};
 
-        // log point data
-        if(!pointData[q.start]) {
-          pointData[q.start] = [{ id: q.qtl_id, isStart: true, isEnd: true }];
-        } else {
-          pointData[q.start].push({ id: q.qtl_id, isStart: true, isEnd: true });
-        }
+    // function to either create a new point or add a new QTL to an existing point
+    let checkPoint = (loc, q, type) => {
+      if(points.indexOf(loc) < 0) {
+        points.push(loc);
+        pointData[loc] = [{id: q.id, type: type}];
       } else {
-        q['points'] = [q.start, q.end];
-
-        // log start point data
-        if(!pointData[q.start]) {
-          pointData[q.start] = [{ id: q.qtl_id, isStart: true, isEnd: false }];
-        } else {
-          pointData[q.start].push({ id: q.qtl_id, isStart: true, isEnd: false });
-        }
-
-        // log end point data
-        if(!pointData[q.end]) {
-          pointData[q.end] = [{ id: q.qtl_id, isStart: false, isEnd: true }];
-        } else {
-          pointData[q.end].push({ id: q.qtl_id, isStart: false, isEnd: true });
-        }
+        pointData[loc].push({id: q.id, type: type});
       }
-    });
+    };
 
-    // do one more pass of the QTLs to add information to pointData for a QTL
-    // that neither starts or ends and the "point of interests"
-    tempQs.forEach(q => {
-      Object.keys(pointData).forEach(pt => {
-        if(q.start < pt && q.end > pt) {
-          q.points.push(Number(pt));
-          pointData[pt].push({ id: q.qtl_id, isStart: false, isEnd: false });
-        }
+    if(qtls.length > 1) {
+      qtls = qtls.sort((a, b) => a.start - b.start);
+
+      // get start and stop points of each QTL
+      qtls.forEach((q, i) => {
+        qtlLookup[q.id] = i;
+        // check each endpoint of QTL
+        checkPoint(q.start, q, 1);
+        checkPoint(q.end, q, -1);
       });
 
-      q.points.sort(); // sort the points so we do them in order
-    });
+      // sort points so we're processing from left to right
+      points = points.sort((a, b) => a - b);
 
-    // an 1D array representing vertically stacked spaces (lanes) that can be
-    // allotted to a single QTL at a time
-    let lanes = [];
-    // keeps track of smallest height for each QTL
-    let qtlHeights = {};
-    // keeps track of QTLs that need to be referenced to get their height to
-    // affect offsets of other QTLs
-    let qtlOffsets = {};
+      // keeps track of QTLs that have been assigned a lane
+      let arranged = {};
 
-    let points = Object.keys(pointData).map(pt => Number(pt))
-                                       .sort((a, b) => a - b);
+      // represents vertically stacked spaces (lanes) that can be assigned one
+      // QTL at a time; the list must always have at least one element (default
+      // state is one false element to indicate that there is currently one lane
+      // and it's available for assignment)
+      let lanes = [false];
 
-    points.forEach(pt => {
-      let qs = pointData[pt];
-      let starts = qs.filter(q => q.isStart);
-      let ends = qs.filter(q => q.isEnd && !q.isStart);
+      // keeps track of how many lanes are currently in use
+      let activeLanes = 0;
 
-      // assign each starting QTL to a lane
-      if(starts.length > 0) {
-        starts.forEach(s => {
-          // if there are open lanes, use them for starting QTLs
-          if(lanes.filter(lane => !lane).length > 0) {
-            // iterate through the lanes to find the first available one
-            for(let i = 0; i < lanes.length; i++) {
-              if(!lanes[i]) {
-                // store the index of the lane
-                s['lane'] = i;
-                lanes[i] = s;
-                break;
+      // function to check if the lane at the specified index is the last in the array
+      let hasNext = (i) => {
+        // can't check !lanes[i] because a lanes might have a 'false' value
+        // if they're empty and they're between assigned lanes
+        if(typeof lanes[i] === "undefined") {
+          return false;
+        } else if(lanes[i]) {
+          return true;
+        }
+
+        // if lanes[i] = false and that it's not the end of the lanes array
+        return hasNext(i + 1);
+      };
+
+      let qtlsToWatch = [];
+      let maxLanesToWatch = 0;
+
+      // go through each start/end point and assign/free lanes, as appropriate
+      points.forEach(p => {
+        pointData[p].forEach(qtl => {
+          if(qtl.type > 0) {
+            let lane;
+            let assigned = false;
+            lanes.forEach((l, i) => {
+              if(!l && !assigned) {
+                lanes[i] = qtl.id;
+                assigned = true;
+                lane = i;
               }
+            });
+
+            // make a new lane if there wasn't an open lane
+            if(!assigned) {
+              lanes.push(qtl.id);
+              lane = lanes.indexOf(qtl.id);
             }
-          } else { // if there aren't any open lanes, let's add a new one
-            s['lane'] = lanes.length;
-            lanes.push(s);
+
+            // store lane data for the QTL; the height can change after this
+            // point, but the lane (which is used to calculate the y position
+            // of the QTL) won't change
+            arranged[qtl.id] = { lane: lane };
+            qtlsToWatch.push(qtl.id);
+          } else {
+            let laneToClear = arranged[qtl.id].lane;
+            lanes[laneToClear] = false;
+
+            // clear out any trailing ('trailing' is the keyword) empty lanes
+            if(lanes.length > 1) {
+              lanes.forEach((l, i) => {
+                if(!hasNext(i)) {
+                  lanes.splice(i, 1);
+                }
+              });
+            }
+          }
+
+          // if type = -1, this means a QTL is ending and an active lane is
+          // getting freed up. If type = 1, we need to assign a QTL to a lane
+          activeLanes += qtl.type;
+
+          // if all available lanes are used, we need another one
+          if(activeLanes > maxLanesToWatch) {
+            maxLanesToWatch = activeLanes;
+          }
+
+          // if all lanes are available, empty the lanes
+          if(activeLanes === 0) {
+            qtlsToWatch = [];
+            maxLanesToWatch = 0;
+          } else if(qtl.type > 0) {
+            // if we're adding another QTL, we'll need to make sure that all
+            // current QTLs have a numLanes value or if the number of lanes is
+            // increasing, then we need to update the value
+            qtlsToWatch.forEach(q => {
+              if(!arranged[q].numLanes || arranged[q].numLanes < maxLanesToWatch) {
+                arranged[q].numLanes = maxLanesToWatch;
+              }
+            });
           }
         });
-      }
-
-      // load heights and offsets for each QTL
-      lanes.forEach((q, i, all) => {
-        if(q) {
-          // update height
-          qtlHeights[q.id] = qtlHeights[q.id] ?
-                             Math.min(1 / all.length, qtlHeights[q.id]) :
-                             1 / all.length;
-
-          // get QTLs that affect the current QTL's offset
-          let qtlsToRef = [];
-          for(let j = 0; j < i; j++) {
-            if(all[j]) {
-              qtlsToRef.push(all[j].id);
-            }
-          }
-          if(!qtlOffsets[q.id] || i - 1 > qtlOffsets[q.id].length) {
-            qtlOffsets[q.id] = qtlsToRef;
-          }
-        }
       });
 
-      // if there are QTLs that are ending, let's process them first to open up
-      // any lanes that might need to be reassigned
-      if(ends.length > 0) {
-        // free up lanes
-        ends.forEach(e => {
-          // check that the QTL isn't one that starts and ends at the same bp
-          if(!e.isStart) {
-            for(let i = 0; i < lanes.length; i++) {
-              if(lanes[i] && lanes[i].id === e.id) {
-                lanes[i] = null;
-                break;
-              }
-            }
-          }
-        });
-      }
+      // take the calculated values and assign them to the raw QTL dictionary,
+      // make a QTL instance from the result, and store them all
+      this.selectedQTLs = Object.keys(qtlLookup).map(q => {
+        let arrangeData = arranged[q];
+        let index = qtlLookup[q];
+        let laneHeight = this.trackHeight / arrangeData.numLanes;
+        let indLaneHeight = (this.chromosomeViewHeight - 25) / arrangeData.numLanes;
 
-      // remove unused excess appended lanes
-      let lastLane = -1;
-      lanes.forEach((lane, i) => {
-        if(lane) {
-          lastLane = i + 1;
-        }
+        qtls[index].height = laneHeight;
+        qtls[index].offset = laneHeight * arrangeData.lane;
+        qtls[index].indOffset = (indLaneHeight * arrangeData.lane) - 2;
+
+        return new QTL(qtls[index], this.staticRefBPToPixels);
       });
-      // get the index of the last used lane and slice lanes to only contain indices 0 through the last used lane;
-      lanes = lastLane > 0 ? (lastLane === lanes.length ? lanes : lanes.slice(0, lastLane)) : [];
-    });
+    } else {
+      // set the single QTL's height to be the reference track height and offset
+      // the indicator in the chromosome view to be in the center
+      this.selectedQTLs = qtls.map(q => {
+        q.height = this.trackHeight;
+        q.offset = 0;
+        q.indOffset = (this.chromosomeViewHeight - 25) / 2;
 
-    tempQs.forEach(q => {
-      let id = q.qtl_id;
-      let numsOfOverlaps = [];
-      // get the lengths of all the points that the current QTL covers
-      q['lane'] = pointData[q.start].filter(e => e.isStart && e.id === q.qtl_id)
-                                    .map(e => e.lane)[0];
-
-      q.points.forEach(pt => {
-          numsOfOverlaps.push(pointData[pt].length);
+        return new QTL(q, this.staticRefBPToPixels);
       });
-
-      qtlOffsets[id] = qtlOffsets[id].length > 0 ?
-                   qtlOffsets[id].map(i => qtlHeights[i])
-                                 .reduce((tot, val) => tot + val) :
-                   0;
-
-      // calculate the final height of the QTL by dividing the total vertical
-      // space by the maximum value of overlaps
-      q['height'] = this.trackHeight * qtlHeights[id];
-
-    });
-
-    tempQs.forEach(q => {
-      q['offset'] = this.trackHeight * qtlOffsets[q.qtl_id];
-      q['indOffset'] = (this.chromosomeViewHeight - 25) * qtlOffsets[q.qtl_id];
-    });
-
-    return tempQs;
+    }
   }
 
   /**
@@ -956,6 +1022,8 @@ export class BlockViewBrowserComponent {
                     // update the axis above the reference track
                     d3.select('#browser-axis')
                       .call(browserAxis);
+
+                    this.dynamicTooltipBehavior();
                   });
 
     this.zoom = d3.zoom()
@@ -994,6 +1062,8 @@ export class BlockViewBrowserComponent {
                    // update the axis above the reference track
                    d3.select('#browser-axis')
                      .call(browserAxis);
+
+                   this.dynamicTooltipBehavior();
                  });
 
     // bind the zoom behavior

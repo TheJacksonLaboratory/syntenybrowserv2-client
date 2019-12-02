@@ -141,6 +141,6 @@ export class ApiService {
    * @param {string} chr - the chromosome to get QTLs for
    */
   getQTLsByChr(taxonID: string, chr: string): Observable<any[]> {
-    return this.http.get<ArrayResponse>(`${this.root}/chr-qtls/${taxonID}/${chr}`);
+    return this.http.get<ArrayResponse>(`${this.root}/qtls/${taxonID}/${chr}`);
   }
 }
