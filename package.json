@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint",
+    "tslint": "ng lint",
+    "lint": "eslint . -f table --ext .ts; exit 0",
     "e2e": "ng e2e"
   },
   "private": true,
@@ -35,7 +36,7 @@
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.800.1",
+    "@angular-devkit/build-angular": "^0.803.22",
     "@angular/cli": "~8.0.1",
     "@angular/compiler-cli": "~8.0.0",
     "@angular/language-service": "~8.0.0",
@@ -44,6 +45,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^10.5.1",
     "codelyzer": "^5.1.0",
+    "eslint-config-jaxcs": "^1.2.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
@@ -56,5 +58,8 @@
     "ts-node": "~7.0.0",
     "tslint": "^5.17.0",
     "typescript": "~3.4.5"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-jaxcs"
   }
 }
