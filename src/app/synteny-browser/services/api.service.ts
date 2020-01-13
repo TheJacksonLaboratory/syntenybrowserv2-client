@@ -17,7 +17,7 @@ import { Species } from '../classes/species';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private root: string = environment.newRoot;
+  private root: string = environment.api;
 
   constructor(private http: HttpClient) { }
 

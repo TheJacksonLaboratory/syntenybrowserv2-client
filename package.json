@@ -8,6 +8,9 @@
     "test": "ng test",
     "tslint": "ng lint",
     "lint": "eslint . -f table --ext .ts; exit 0",
+    "fix-prettier": "prettier --write './src/**/*.{ts,js,css,html}'; exit 0",
+    "fix-eslint": "eslint ./src -f table --ext .ts --fix; exit 0",
+    "fix": "npm run fix-prettier && npm run fix-eslint",
     "e2e": "ng e2e"
   },
   "private": true,
