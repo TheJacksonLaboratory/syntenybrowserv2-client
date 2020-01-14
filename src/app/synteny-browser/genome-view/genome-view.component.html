@@ -83,7 +83,7 @@
         <!-- Reference chromosome bands (transparent containers) -->
         <g id="ref-bands">
           <path
-            *ngFor="let chr of getChromosomes(ref.genome)"
+            *ngFor="let chr of ref.getChromosomes()"
             stroke="#000"
             stroke-width="0.25"
             fill="transparent"
@@ -97,7 +97,7 @@
         <!-- Reference genome labels -->
         <g id="ref-labels">
           <text
-            *ngFor="let chr of getChromosomes(ref.genome)"
+            *ngFor="let chr of ref.getChromosomes()"
             text-anchor="middle"
             [attr.transform]="getRefLabelPos(chr, refGMap)"
             (click)="renderChordMapForChr(chr)"
@@ -122,7 +122,7 @@
         <!-- Comparison genome bands -->
         <g id="comp-bands">
           <path
-            *ngFor="let chr of getChromosomes(comp.genome)"
+            *ngFor="let chr of comp.getChromosomes()"
             stroke="#000"
             stroke-width="0.25"
             [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
@@ -135,7 +135,7 @@
         <!-- Comparison genome labels -->
         <g id="comp-labels">
           <text
-            *ngFor="let chr of getChromosomes(comp.genome)"
+            *ngFor="let chr of comp.getChromosomes()"
             text-anchor="middle"
             [attr.transform]="getCompLabelPos(chr, compGMap)"
           >
@@ -149,7 +149,7 @@
         <!-- Comparison genome bands -->
         <g id="comp-bands">
           <path
-            *ngFor="let chr of getChromosomes(comp.genome)"
+            *ngFor="let chr of comp.getChromosomes()"
             class="inner"
             [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
             [attr.fill]="getChrColor(chr)"
@@ -172,7 +172,7 @@
         <!-- Comparison genome labels -->
         <g id="comp-labels">
           <text
-            *ngFor="let chr of getChromosomes(comp.genome)"
+            *ngFor="let chr of comp.getChromosomes()"
             text-anchor="middle"
             [attr.transform]="getCompLabelPos(chr, compGMap, true)"
           >

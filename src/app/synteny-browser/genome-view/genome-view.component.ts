@@ -126,7 +126,7 @@ export class GenomeViewComponent implements OnInit {
     const blocks = featureBlocks.length > 0 ? featureBlocks : this.data.getChrBlocks(chr);
 
     // get the index of the selected chromosome
-    const chrIndex = this.getChromosomes(this.ref.genome).indexOf(chr);
+    const chrIndex = this.ref.getChromosomes().indexOf(chr);
 
     this.setTempCompGenome(chr);
 
@@ -345,14 +345,6 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Returns array of chromosome for the specified genome
-   * @param {any} genome - the genome dictionary of the specified species
-   */
-  getChromosomes(genome: any): string[] {
-    return Object.keys(genome);
-  }
-
-  /**
    * Returns the color for the specified chromosome
    * @param {string} chr - the chromosome to get the color of
    */
@@ -402,7 +394,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the chromosomes that currently contain selected features
    */
   getChrsWithFeatures(): string[] {
-    return this.getChromosomes(this.ref.genome).filter(c => this.getChrFeatures(c).length > 0);
+    return this.ref.getChromosomes().filter(c => this.getChrFeatures(c).length > 0);
   }
 
   /**

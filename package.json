@@ -65,6 +65,9 @@
     "typescript": "^3.4.5"
   },
   "eslintConfig": {
-    "extends": "eslint-config-jaxcs"
+    "extends": "eslint-config-jaxcs",
+    "rules": {
+      "class-methods-use-this": "off"
+    }
   }
 }
