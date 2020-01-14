@@ -8,9 +8,8 @@ describe('BlockViewBrowserComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BlockViewBrowserComponent ]
-    })
-    .compileComponents();
+      declarations: [BlockViewBrowserComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

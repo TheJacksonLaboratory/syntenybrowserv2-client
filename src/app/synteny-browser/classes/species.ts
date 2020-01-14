@@ -2,13 +2,21 @@ import { ExternalResource, SearchType } from './interfaces';
 
 export class Species {
   taxonID: number;
+
   name: string;
+
   abbrev: string;
+
   commonName: string;
+
   genome: any;
+
   onts: SearchType[];
+
   searchTypes: SearchType[];
+
   hasQTLs: boolean;
+
   resources: ExternalResource[];
 
   /**
@@ -17,7 +25,10 @@ export class Species {
    */
   constructor(species: any) {
     this.name = species.name;
-    this.abbrev = species.name.split(' ').map(w => w[0].toUpperCase()).join('');
+    this.abbrev = species.name
+      .split(' ')
+      .map(w => w[0].toUpperCase())
+      .join('');
     this.commonName = species.alias;
     this.taxonID = species.id;
     this.resources = species.resources;
@@ -31,23 +42,28 @@ export class Species {
   /**
    * Returns the taxon ID in string form
    */
-  getID(): string { return this.taxonID.toString(); }
+  getID(): string {
+    return this.taxonID.toString();
+  }
 
   /**
    * Returns the chromsome values in the genome
    */
-  getChromosomes(): string[] { return Object.keys(this.genome); }
+  getChromosomes(): string[] {
+    return Object.keys(this.genome);
+  }
 
   /**
    * Returns the sum of all chromosomes in the genome (total size of the genome)
    */
   getGenomeSize(): number {
-    return <number>Object.values(this.genome)
-                         .reduce((a: number, b: number) => a + b);
+    return Object.values(this.genome).reduce((a: number, b: number) => a + b) as number;
   }
 
   /**
    * Returns the number of chromosomes in the genome
    */
-  getNumChrs(): number { return this.getChromosomes().length; }
+  getNumChrs(): number {
+    return this.getChromosomes().length;
+  }
 }

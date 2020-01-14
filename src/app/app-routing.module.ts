@@ -27,11 +27,11 @@ const routes: Routes = [
   { path: 'docs-docker', component: DocsDockerComponent },
   { path: 'docs-configs', component: DocsConfigsComponent },
   { path: 'docs-contributors', component: DocsContributorsComponent },
-  { path: 'examples', component: ExamplesComponent }
+  { path: 'examples', component: ExamplesComponent },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

@@ -1,20 +1,33 @@
 import { format, ScaleLinear } from 'd3';
-import { QTLMetadata } from './interfaces';
 
 export class QTL {
   id: string;
+
   symbol: string;
+
   chr: string;
+
   start: number;
+
   end: number;
+
   size: number;
+
   height: number;
+
   offset: number;
 
   indOffset: number;
+
   indScale: ScaleLinear<number, number>;
 
   format: Function = format(',');
+
+  isGene = false;
+
+  isQTL = true;
+
+  isBlock = false;
 
   constructor(qtl: any, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.id;
@@ -29,9 +42,6 @@ export class QTL {
     this.indOffset = qtl.indOffset + 18;
     this.indScale = staticScale;
   }
-
-
-  // Getter Methods
 
   /**
    * Returns the either the actual width of the QTL based on the specified scale
@@ -51,20 +61,23 @@ export class QTL {
    *                               than (i.e. 1 or 2 to make the QTL visible)
    */
   getIndWidth(defaultSize: number): number {
-    return Math.max(defaultSize,
-                    Math.abs(this.indScale(this.end) - this.indScale(this.start)));
+    return Math.max(defaultSize, Math.abs(this.indScale(this.end) - this.indScale(this.start)));
   }
 
   /**
    * Returns the start position (px) of the QTL indicator using the static scale
    */
-  getIndStart(): number { return this.indScale(this.start); }
+  getIndStart(): number {
+    return this.indScale(this.start);
+  }
 
   /**
    * Returns the start position (px) of the QTL based on the specified scale
    * @param {ScaleLinear<number, number>} scale - scale to use to get the position
    */
-  getStart(scale: ScaleLinear<number, number>): number { return scale(this.start); }
+  getStart(scale: ScaleLinear<number, number>): number {
+    return scale(this.start);
+  }
 
   /**
    * Returns the content for a tooltip for the QTL which includes the id, the
@@ -76,23 +89,7 @@ export class QTL {
       id: this.id,
       chr: this.chr,
       start: `${this.format(this.start)}bp`,
-      end: `${this.format(this.end)}bp`
-    }
+      end: `${this.format(this.end)}bp`,
+    };
   }
-
-
-  // Condition Checks
-
-  // These seem stupid but they make determining what the "type" (and by "type"
-  // I mean instance of class) of an item is. This is for the purpose of tooltips,
-  // where mouseover tips are used for syntenic blocks, QTLs and genes, which
-  // all have different attributes to show
-
-  isGene(): boolean { return false; }
-
-  isQTL(): boolean { return true; }
-
-  isBlock(): boolean { return false; }
-
-  // End of type check methods
 }

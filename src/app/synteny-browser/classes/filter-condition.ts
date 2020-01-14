@@ -18,12 +18,18 @@
  *                edit mode or not
  */
 export class FilterCondition {
-  filterBy: string = '';
+  filterBy = '';
+
   qualifier = 'equal';
+
   exact = true;
+
   value: string;
+
   removable: boolean;
+
   id: number;
+
   editing = true;
 
   constructor(id: number) {
@@ -34,21 +40,24 @@ export class FilterCondition {
    * Returns the title of the filter condition
    */
   getCompleteTitle(): string {
-    if(this.filterBy === 'chr') {
-      return 'Chr' + this.value;
-    } else if(this.isType()) {
-      return this.value + 's';
-    } else if(this.isOntology()) {
-      return this.value;
-    } else {
-      return `${this.filterBy} ${this.getQualifierString()} ${this.value}`;
+    if (this.filterBy === 'chr') {
+      return `Chr${this.value}`;
     }
+    if (this.isType()) {
+      return `${this.value}s`;
+    }
+    if (this.isOntology()) {
+      return this.value;
+    }
+    return `${this.filterBy} ${this.getQualifierString()} ${this.value}`;
   }
 
   /**
    * Returns the selected ontology abbreviation from the filter by its value
    */
-  getOntology(): string { return this.filterBy.replace('ont-', ''); }
+  getOntology(): string {
+    return this.filterBy.replace('ont-', '');
+  }
 
   /**
    * Returns true if the filter by is by gene ID or gene symbol
@@ -76,20 +85,26 @@ export class FilterCondition {
   /**
    * Returns true if this condition is related to an ontology
    */
-  isOntology(): boolean { return this.filterBy.includes('ont-'); }
+  isOntology(): boolean {
+    return this.filterBy.includes('ont-');
+  }
 
   /**
    * Returns true if this condition is related to feature type
    */
-  isType(): boolean { return this.filterBy === 'type'; }
+  isType(): boolean {
+    return this.filterBy === 'type';
+  }
 
   /**
    * Returns a converted value from the qualifier select value to a
    * human-readable value for a label
    */
   private getQualifierString(): string {
-    return this.qualifier.includes('not') ?
-      (this.qualifier.includes('equal') ? '&ne' : 'not like') :
-      (this.qualifier.includes('equal') ? '=' : 'like')
+    if (this.qualifier.includes('not')) {
+      return this.qualifier.includes('equal') ? '&ne' : 'not like';
+    }
+
+    return this.qualifier.includes('equal') ? '=' : 'like';
   }
 }

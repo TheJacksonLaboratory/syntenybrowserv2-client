@@ -1,36 +1,39 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { ApiService} from '../../services/api.service';
+import { ClrLoadingState } from '@clr/angular';
+import { ApiService } from '../../services/api.service';
 import { Species } from '../../classes/species';
 import { OntologyTerm } from '../../classes/interfaces';
 import { Feature } from '../../classes/feature';
-import { ClrLoadingState } from '@clr/angular';
 import { TableData } from '../../classes/table-data';
 import { DataStorageService } from '../../services/data-storage.service';
-
 
 @Component({
   selector: 'ontology-search',
   templateUrl: './ontology-search.component.html',
-  styleUrls: ['./ontology-search.component.scss']
+  styleUrls: ['./ontology-search.component.scss'],
 })
 export class OntologySearchComponent {
   refSpecies: Species;
+
   ontology: string;
 
   terms: TableData<OntologyTerm>;
-  termsSearch: string = '';
+
+  termsSearch = '';
+
   currentTerm: OntologyTerm;
 
   associations: TableData<Feature>;
-  associationsSearch: string = '';
+
+  associationsSearch = '';
 
   @Output() update: EventEmitter<any> = new EventEmitter();
+
   @Output() switchView: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: ApiService, private data: DataStorageService) {
     this.terms = new TableData(['id', 'name'], ['id', 'name']);
-    this.associations = new TableData(['termID', 'term', 'id', 'symbol'],
-                                  ['term', 'id', 'symbol']);
+    this.associations = new TableData(['termID', 'term', 'id', 'symbol'], ['term', 'id', 'symbol']);
   }
 
   /**
@@ -47,8 +50,7 @@ export class OntologySearchComponent {
     this.currentTerm = null;
     this.terms.loading = true;
     this.termsSearch = '';
-    this.http.getOntologyTerms(this.ontology)
-             .subscribe(terms => this.terms.setRows(terms, 'id'));
+    this.http.getOntologyTerms(this.ontology).subscribe(terms => this.terms.setRows(terms, 'id'));
   }
 
   /**
@@ -67,29 +69,29 @@ export class OntologySearchComponent {
    * @param {OntologyTerm} term - the term selected
    * @param {boolean} showResults - whether the user wants to see the results
    */
-  loadAssociationsForTerm(term: OntologyTerm, showResults: boolean = true): void {
-    if(!showResults) {
+  loadAssociationsForTerm(term: OntologyTerm, showResults = true): void {
+    if (!showResults) {
       term.selecting = ClrLoadingState.LOADING;
     }
     this.currentTerm = showResults ? term : null;
     this.associations.loading = showResults;
     this.switchView.emit();
 
-    let termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
+    const termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
-    this.http.getAssociationsForTerm(this.refSpecies.getID(),
-                                     encodeURIComponent(termToSearch))
-             .subscribe(genes => {
-               if(showResults) {
-                 this.associations.setRows(genes, 'term')
-               } else {
-                 genes.forEach(g => g.select());
-                 this.associations.rows = genes;
-                 this.associations.selections = genes;
-                 term.selecting = ClrLoadingState.SUCCESS;
-                 this.update.emit();
-               }
-             });
+    this.http
+      .getAssociationsForTerm(this.refSpecies.getID(), encodeURIComponent(termToSearch))
+      .subscribe(genes => {
+        if (showResults) {
+          this.associations.setRows(genes, 'term');
+        } else {
+          genes.forEach(g => g.select());
+          this.associations.rows = genes;
+          this.associations.selections = genes;
+          term.selecting = ClrLoadingState.SUCCESS;
+          this.update.emit();
+        }
+      });
   }
 
   /**
@@ -106,8 +108,9 @@ export class OntologySearchComponent {
    * @param {OntologyTerm} term - the term that the tooltip needs content for
    */
   getViewAssociationsTitle(term: OntologyTerm): string {
-    return 'View gene associations with this term' +
-      (term.descendants.length >= 500 ? ' [disabled for being too broad]' : '');
+    return `View gene associations with this term${
+      term.descendants.length >= 500 ? ' [disabled for being too broad]' : ''
+    }`;
   }
 
   /**
@@ -116,8 +119,9 @@ export class OntologySearchComponent {
    * @param {OntologyTerm} term - the term that the tooltip needs content for
    */
   getSelectAllAssociationsTitle(term: OntologyTerm): string {
-    return 'Select all gene associations with this term' +
-      (term.descendants.length >= 500 ? ' [disabled for being too broad]' : '');
+    return `Select all gene associations with this term${
+      term.descendants.length >= 500 ? ' [disabled for being too broad]' : ''
+    }`;
   }
 
   /**

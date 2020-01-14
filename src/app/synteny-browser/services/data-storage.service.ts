@@ -7,23 +7,29 @@ import { SelectedFeatures } from '../classes/interfaces';
 import { SyntenyBlock } from '../classes/synteny-block';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataStorageService {
   genomeColorMap: any;
+
   genomeData: SyntenyBlock[];
+
   species: Species[];
 
   refSpecies: Species;
+
   compSpecies: Species;
 
   filters: Filter[] = [];
+
   features: SelectedFeatures;
 
   ontologyTerms: any = {};
 
   constructor(private http: ApiService) {
-    this.http.getGenomeColorMap().subscribe(map => this.genomeColorMap = map);
+    this.http.getGenomeColorMap().subscribe(map => {
+      this.genomeColorMap = map;
+    });
   }
 
   /**
@@ -31,14 +37,16 @@ export class DataStorageService {
    * ontology, retrieves and stores the terms
    */
   retrieveOntologyTerms(): void {
-    let onts = Array.from(new Set(
-      this.refSpecies.onts.map(o => o.value)
-        .concat(...this.compSpecies.onts.map(o => o.value))
-    ));
+    const onts = Array.from(
+      new Set(
+        this.refSpecies.onts.map(o => o.value).concat(...this.compSpecies.onts.map(o => o.value)),
+      ),
+    );
 
     onts.forEach(o => {
-      this.http.getTermsForAutocomplete(o)
-        .subscribe(terms => this.ontologyTerms[o] = terms);
+      this.http.getTermsForAutocomplete(o).subscribe(terms => {
+        this.ontologyTerms[o] = terms;
+      });
     });
   }
 
@@ -57,10 +65,10 @@ export class DataStorageService {
    * @param {Feature[]} features - the features to get synteny blocks for
    */
   getFeatureBlocks(features: Feature[]): SyntenyBlock[] {
-    // generate a list of syntenic blocks to highlight; the features.map() is
-    // going to produce an array of arrays (some features may span more than one
-    // block) which needs to be flattened which is done with the [].concat.apply()
-    return [].concat.apply([], features.map(f => this.getBlocksForFeature(f)));
+    // generate a list of syntenic blocks to highlight; the features.map() is going
+    // to produce an array of arrays (some features may span more than one block)
+    // which needs to be flattened which is done with the spread operator ('...')
+    return [].concat(...features.map(f => this.getBlocksForFeature(f)));
   }
 
   /**
@@ -78,5 +86,4 @@ export class DataStorageService {
   private getBlocksForFeature(feature: Feature): SyntenyBlock[] {
     return this.genomeData.filter(b => b.isAFeatureBlock(feature));
   }
-
 }

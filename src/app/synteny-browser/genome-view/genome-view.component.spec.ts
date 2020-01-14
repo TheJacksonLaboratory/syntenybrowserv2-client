@@ -8,9 +8,8 @@ describe('GenomeViewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GenomeViewComponent ]
-    })
-    .compileComponents();
+      declarations: [GenomeViewComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

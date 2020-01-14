@@ -1,10 +1,14 @@
-import { ApiService } from '../services/api.service';
-import { BrowserInterval } from '../classes/browser-interval';
+// d3 mouse events require defining unnamed callback functions (which is flagged by the
+// func-names rule) and if the event referece is used in the callbacks 'this' needs to
+// refer to the event, not the BlockViewBrowser component
+/* eslint-disable func-names, @typescript-eslint/no-this-alias */
+
 import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
-import { BrushBehavior, ScaleLinear, ZoomBehavior } from 'd3';
-import { BlockViewBrowserOptions, ComparisonScaling, QTLMetadata } from '../classes/interfaces';
-import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { BlockViewBrowserOptions, ComparisonScaling } from '../classes/interfaces';
+import { BrowserInterval } from '../classes/browser-interval';
+import { ApiService } from '../services/api.service';
 import { Feature } from '../classes/feature';
 import { Gene } from '../classes/gene';
 import { Legend } from '../classes/legend';
@@ -19,69 +23,98 @@ import { LinearGenomeMap } from '../classes/linear-genome-map';
 @Component({
   selector: 'block-view-browser',
   templateUrl: './block-view-browser.component.html',
-  styleUrls: ['./block-view-browser.component.scss']
+  styleUrls: ['./block-view-browser.component.scss'],
 })
 export class BlockViewBrowserComponent {
   ref: Species;
+
   comp: Species;
+
   legend: Legend;
+
   refChr: string;
-  refInterval: string = '';
+
+  refInterval = '';
 
   options: BlockViewBrowserOptions;
 
   selectedRefGenes: Gene[] = [];
+
   selectedCompGenes: Gene[] = [];
+
   selectedQTLs: QTL[] = [];
 
   filteredRefGenes: Gene[] = [];
+
   filteredCompGenes: Gene[] = [];
 
   filters: Filter[] = [];
 
   progress = 0;
-  zoom: ZoomBehavior<any, any>;
-  brush: BrushBehavior<any>;
 
-  width: number = 1200;
-  height: number = 430;
-  chromosomeViewOffset: number = 35;
+  zoom: d3.ZoomBehavior<any, any>;
+
+  brush: d3.BrushBehavior<any>;
+
+  width = 1200;
+
+  height = 430;
+
+  chromosomeViewOffset = 35;
+
   chromosomeViewHeight = 60;
-  browserOffset: number = 150;
+
+  browserOffset = 150;
+
   trackHeight = 80;
+
   minimumIntervalSize = 3000;
 
   interval: BrowserInterval;
+
   blocks: SyntenyBlock[];
+
   blockLookup: object = {};
+
   refGenes: Gene[];
+
   compGenes: Gene[];
+
   homRefGenes: string[];
-  staticRefBPToPixels: ScaleLinear<number, number>;
+
+  staticRefBPToPixels: d3.ScaleLinear<number, number>;
+
   staticCompBPToPixels: ComparisonScaling;
-  refBPToPixels: ScaleLinear<number, number>;
+
+  refBPToPixels: d3.ScaleLinear<number, number>;
+
   refGMap: LinearGenomeMap;
 
   tooltip: any = null;
+
   clicktip: any = null;
+
   clicktipOpen = false;
+
   featureTip: any;
+
   blockTip: any;
 
-  downloadFilename: string = '';
+  downloadFilename = '';
+
   filenameModalOpen = false;
 
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
-  constructor(private data: DataStorageService,
-              private http: ApiService,
-              private downloader: DownloadService, private cdr: ChangeDetectorRef) {
+  constructor(
+    private data: DataStorageService,
+    private http: ApiService,
+    private downloader: DownloadService,
+    private cdr: ChangeDetectorRef,
+  ) {
     this.options = { symbols: false, anchors: false, trueOrientation: false };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
-
-
-  // Operational Methods
 
   /**
    * Renders the block view with the current reference and comparison species,
@@ -119,37 +152,41 @@ export class BlockViewBrowserComponent {
       .attr('class', 'd3-tip')
       .offset([-5, 0])
       .html((d: Gene | QTL) => {
-        let data = d.getTooltipData();
+        const data = d.getTooltipData();
 
-        if(d.isGene()) {
-          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+        if (d.isGene) {
+          return (
+            `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
             `<span><b>Gene ID:</b> ${data.id}</span><br/>` +
             `<span><b>Type:</b> ${data.type}</span><br/>` +
             `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
             `<span><b>Start:</b> ${data.start}</span><br/>` +
             `<span><b>End:</b> ${data.end}</span><br/>` +
-            `<span><b>Strand:</b> ${data.strand}</span>`;
-        } else {
-          return `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
-            `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
-            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
-            `<span><b>Start:</b> ${data.start}</span><br/>` +
-            `<span><b>End:</b> ${data.end}</span><br/>`;
+            `<span><b>Strand:</b> ${data.strand}</span>`
+          );
         }
+        return (
+          `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+          `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
+          `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+          `<span><b>Start:</b> ${data.start}</span><br/>` +
+          `<span><b>End:</b> ${data.end}</span><br/>`
+        );
       });
 
     this.blockTip = d3Tip()
       .attr('class', 'd3-tip')
       .offset([-5, 0])
       .html((d: SyntenyBlock, species: string) => {
-        let data = d.getTooltipData(species === 'comp');
-        let speciesName = species === 'comp' ?
-          this.comp.commonName : this.ref.commonName;
+        const data = d.getTooltipData(species === 'comp');
+        const speciesName = species === 'comp' ? this.comp.commonName : this.ref.commonName;
 
-        return `<span style="font-size: 14px;"><b>${speciesName}</b></span><br/>` +
+        return (
+          `<span style="font-size: 14px;"><b>${speciesName}</b></span><br/>` +
           `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
           `<span><b>Start:</b> ${data.start}</span><br/>` +
-          `<span><b>End:</b> ${data.end}</span><br/>`;
+          `<span><b>End:</b> ${data.end}</span><br/>`
+        );
       });
 
     d3.select('svg').call(this.featureTip);
@@ -172,18 +209,18 @@ export class BlockViewBrowserComponent {
    * be set in the template beforehand as they don't exist before being created
    */
   setObjectAttributes(): void {
-    let chrViewOverlay = document.querySelector('rect.selection');
+    const chrViewOverlay = document.querySelector('rect.selection');
     chrViewOverlay.setAttribute('fill', '#DDD');
     chrViewOverlay.setAttribute('stroke', '#000');
     chrViewOverlay.setAttribute('stroke-width', '1');
 
-    let selectors = '#browser-axis line,#browser-axis path,' +
-                    '#chr-view-axis line,#chr-view-axis path';
-    document.querySelectorAll(selectors)
-            .forEach(obj => obj.setAttribute('stroke-width', '0.5'));
+    const selectors =
+      '#browser-axis line,#browser-axis path,#chr-view-axis line,#chr-view-axis path';
+    document.querySelectorAll(selectors).forEach(obj => obj.setAttribute('stroke-width', '0.5'));
 
-    document.querySelectorAll('#browser-axis text, #chr-view-axis text')
-            .forEach(obj => obj.setAttribute('font-size', '8px'));
+    document
+      .querySelectorAll('#browser-axis text, #chr-view-axis text')
+      .forEach(obj => obj.setAttribute('font-size', '8px'));
   }
 
   /**
@@ -202,8 +239,10 @@ export class BlockViewBrowserComponent {
    * @param {any} feature - the feature to jump the location to
    */
   jumpToFeature(feature: any): void {
-    this.brushView(Math.max(0, feature.start - 1000000),
-                   Math.min(this.getRefChrSize(), feature.end + 1000000));
+    this.brushView(
+      Math.max(0, feature.start - 1000000),
+      Math.min(this.getRefChrSize(), feature.end + 1000000),
+    );
   }
 
   /**
@@ -215,16 +254,17 @@ export class BlockViewBrowserComponent {
    * reference chromsome to the specified value
    */
   jumpToInterval(): void {
-    if(this.refInterval.length > 0) {
-      let pts = this.refInterval.replace(/\s+/g, '')
-                                .replace(/,/g, '')
-                                .split('-');
+    if (this.refInterval.length > 0) {
+      const pts = this.refInterval
+        .replace(/\s+/g, '')
+        .replace(/,/g, '')
+        .split('-');
 
-      if(pts.length === 2) {
-        let start = pts[0].length > 0 ? pts[0]: 0;
-        let end = pts[1].length > 0 ? pts[1]: this.getRefChrSize();
+      if (pts.length === 2) {
+        const start = pts[0].length > 0 ? pts[0] : 0;
+        const end = pts[1].length > 0 ? pts[1] : this.getRefChrSize();
 
-        if(Number(start) && Number(end)) {
+        if (Number(start) && Number(end)) {
           this.brushView(Number(start), Number(end));
         }
       }
@@ -236,14 +276,14 @@ export class BlockViewBrowserComponent {
    * the minimum interval size; if not, zoom down to the minimum interval size
    */
   zoomIn(): void {
-    let basesZoom = this.interval.width * 0.15;
-    let intStart = this.interval.refStart;
-    let intEnd = this.interval.refEnd;
+    const basesZoom = this.interval.width * 0.15;
+    const intStart = this.interval.refStart;
+    const intEnd = this.interval.refEnd;
 
-    if(this.interval.width * 0.7 >= this.minimumIntervalSize) {
+    if (this.interval.width * 0.7 >= this.minimumIntervalSize) {
       this.brushView(intStart + basesZoom, intEnd - basesZoom);
     } else {
-      let diff = (this.interval.width - this.minimumIntervalSize) / 2;
+      const diff = (this.interval.width - this.minimumIntervalSize) / 2;
       this.brushView(intStart + diff, intEnd - diff);
     }
   }
@@ -253,40 +293,40 @@ export class BlockViewBrowserComponent {
    * if zoom edges would go outside chromosome extents, zoom only to that extent
    */
   zoomOut(): void {
-    let basesZoom = this.interval.width * 0.15;
-    let intStart = this.interval.refStart;
-    let intEnd = this.interval.refEnd;
-    let chrEnd = this.getRefChrSize();
+    const basesZoom = this.interval.width * 0.15;
+    const intStart = this.interval.refStart;
+    const intEnd = this.interval.refEnd;
+    const chrEnd = this.getRefChrSize();
 
     // if the new width would still be a valid width, check for start and end points
-    if(this.interval.width * 1.3 <= chrEnd) {
+    if (this.interval.width * 1.3 <= chrEnd) {
       // if both edges are inside chromosome start or end, zoom out 15% on each end
-      if(intStart - basesZoom >= 0 && intEnd + basesZoom <= chrEnd) {
+      if (intStart - basesZoom >= 0 && intEnd + basesZoom <= chrEnd) {
         this.brushView(intStart - basesZoom, intEnd + basesZoom);
         // if only new start edge of view is a problem,
         // set start to chromosome start and increment end
-      } else if(intStart - basesZoom < 0) {
+      } else if (intStart - basesZoom < 0) {
         this.brushView(0, intEnd + basesZoom);
         // if only new end edge of view is a problem,
         // set end to chromosome end and decrement start
-      } else if(intEnd + basesZoom > chrEnd) {
+      } else if (intEnd + basesZoom > chrEnd) {
         this.brushView(intStart - basesZoom, chrEnd);
       }
     } else {
       // get the difference of widths; divide by 2 to get the number for each edge
-      let diff = (chrEnd - this.interval.width) / 2;
+      const diff = (chrEnd - this.interval.width) / 2;
 
       // if both edges are in chromosome start or end, zoom out by diff on each end
-      if(intStart - diff >= 0 && intEnd + diff <= chrEnd) {
+      if (intStart - diff >= 0 && intEnd + diff <= chrEnd) {
         this.brushView(intStart - diff, intEnd + diff);
         // if only new start edge of view is a problem,
         // set start to chromosome start and increment end by 2 * diff
-      } else if(intStart - diff < 0) {
-        this.brushView(0, intEnd + (2 * diff));
+      } else if (intStart - diff < 0) {
+        this.brushView(0, intEnd + 2 * diff);
         // if only new end edge of view is a problem,
         // set end to chromosome end and decrement start by 2 * diff
-      } else if(intEnd + diff > chrEnd) {
-        this.brushView(intStart - (2 * diff), chrEnd);
+      } else if (intEnd + diff > chrEnd) {
+        this.brushView(intStart - 2 * diff, chrEnd);
       }
     }
   }
@@ -295,10 +335,10 @@ export class BlockViewBrowserComponent {
    * Moves the view 15% of the current width to the left without changing the width
    */
   panLeft(): void {
-    let basesPan = this.interval.width * 0.15;
-    let intStart = this.interval.refStart;
+    const basesPan = this.interval.width * 0.15;
+    const intStart = this.interval.refStart;
 
-    if(intStart - basesPan >= 0) {
+    if (intStart - basesPan >= 0) {
       this.brushView(intStart - basesPan, this.interval.refEnd - basesPan);
     } else {
       this.brushView(0, this.interval.width);
@@ -309,14 +349,14 @@ export class BlockViewBrowserComponent {
    * Moves the view 15% of the current width to the right without changing the width
    */
   panRight(): void {
-    let basesPan = this.interval.width * 0.15;
-    let intStart = this.interval.refStart;
-    let intEnd = this.interval.refEnd;
+    const basesPan = this.interval.width * 0.15;
+    const intStart = this.interval.refStart;
+    const intEnd = this.interval.refEnd;
 
-    if(intEnd + basesPan <= this.getRefChrSize()) {
+    if (intEnd + basesPan <= this.getRefChrSize()) {
       this.brushView(intStart + basesPan, intEnd + basesPan);
     } else {
-      let diff = this.getRefChrSize() - intEnd;
+      const diff = this.getRefChrSize() - intEnd;
       this.brushView(intStart + diff, this.getRefChrSize());
     }
   }
@@ -348,10 +388,8 @@ export class BlockViewBrowserComponent {
    */
   unhighlightGene(): void {
     // remove highlighted status of any genes marked as highlighted
-    this.compGenes.filter(g => g.highlighted)
-                  .forEach(g => g.unhighlight());
-    this.refGenes.filter(g => g.highlighted)
-                 .forEach(g => g.unhighlight());
+    this.compGenes.filter(g => g.highlighted).forEach(g => g.unhighlight());
+    this.refGenes.filter(g => g.highlighted).forEach(g => g.unhighlight());
   }
 
   /**
@@ -363,19 +401,18 @@ export class BlockViewBrowserComponent {
       title: gene.symbol,
       content: gene.getClicktipData(),
       resources: gene.species === 'ref' ? this.ref.resources : this.comp.resources,
-      id: gene.id
+      id: gene.id,
     };
 
     this.clicktipOpen = true;
   }
 
-
-  // Getter Methods
-
   /**
    * Returns the list of synteny blocks in the reference genome
    */
-  getGenomeBlocks(): SyntenyBlock[] { return this.data.genomeData; }
+  getGenomeBlocks(): SyntenyBlock[] {
+    return this.data.genomeData;
+  }
 
   /**
    * Returns the translation string value for the label of a specified chromosome
@@ -390,9 +427,7 @@ export class BlockViewBrowserComponent {
    * Returns a list of reference genes that are in the current browser's view
    */
   getRefGenesInView(): Gene[] {
-    return this.refGenes.filter(g => {
-                           return g.isInRefView(this.refBPToPixels, this.width);
-                         });
+    return this.refGenes.filter(g => g.isInRefView(this.refBPToPixels, this.width));
   }
 
   /**
@@ -407,18 +442,16 @@ export class BlockViewBrowserComponent {
    * Returns a list of comparison genes that are in the current browser's view
    */
   getCompGenesInView(): Gene[] {
-    return this.compGenes.filter(g => {
-      return g.isInCompView(this.getScale(g),
-                            this.width,
-                            this.options.trueOrientation);
-    });
+    return this.compGenes.filter(g =>
+      g.isInCompView(this.getScale(g), this.width, this.options.trueOrientation),
+    );
   }
 
   /**
    * Returns the comparison scale matching the block ID of the specified gene
    * @param {Gene} gene - the gene to get the comp scale for by its blockID
    */
-  getScale(gene: Gene): ScaleLinear<number, number> {
+  getScale(gene: Gene): d3.ScaleLinear<number, number> {
     return this.blockLookup[gene.blockID].getScale(this.options.trueOrientation);
   }
 
@@ -426,15 +459,17 @@ export class BlockViewBrowserComponent {
    * Returns the scale of the syntenic block the specified comp gene is in
    * @param {Gene} gene - the gene to use to a block ID from
    */
-  getStaticCompScale(gene: Gene): ScaleLinear<number, number> {
-    let type = this.options.trueOrientation ? 'true' : 'match';
+  getStaticCompScale(gene: Gene): d3.ScaleLinear<number, number> {
+    const type = this.options.trueOrientation ? 'true' : 'match';
     return this.staticCompBPToPixels[type][gene.blockID];
   }
 
   /**
    * Returns the size of the reference chromosome
    */
-  getRefChrSize(): number { return this.ref.genome[this.refChr]; }
+  getRefChrSize(): number {
+    return this.ref.genome[this.refChr];
+  }
 
   /**
    * Returns a path command for a vertical line, starting at specified x, with
@@ -446,22 +481,22 @@ export class BlockViewBrowserComponent {
    *                         the parent element for the vertical line
    */
   getVLinePath(x: number, length: number, start: number = null): string {
-    return `M${x},${(start) ? start : 0}
-            L${x},${(start) ? length + start : length}Z`;
+    return `M${x},${start || 0}
+            L${x},${start ? length + start : length}Z`;
   }
 
   /**
    * Returns a path command for a horizontal line, starting at specified y, with
    * specified length and optional specified x
    * @param {number} y - the y position, from the origin point of the parent
- *                       element for the horizontal line
+   *                       element for the horizontal line
    * @param {number} length - the desired length of the line
    * @param {number} start - if provided, the x value from the origin point of
    *                         the parent element for the horizontal line
    */
   getHLinePath(y: number, length: number, start: number = null): string {
-    return `M${(start) ? start : 0},${y}
-            L${(start) ? length + start : length},${y}Z`;
+    return `M${start || 0},${y}
+            L${start ? length + start : length},${y}Z`;
   }
 
   /**
@@ -479,14 +514,14 @@ export class BlockViewBrowserComponent {
    */
   getAnchorPathCommand(gene: Gene): string {
     let command = '';
-    let refStart = this.refBPToPixels(gene.start);
-    let refEnd = this.refBPToPixels(gene.end);
-    let homologs = this.getComparisonHomologs(gene.homologIDs[0]);
+    const refStart = this.refBPToPixels(gene.start);
+    const refEnd = this.refBPToPixels(gene.end);
+    const homologs = this.getComparisonHomologs(gene.homologIDs[0]);
 
     homologs.forEach(hom => {
-      let scale = this.getScale(hom);
-      let homStart = scale(hom.getStart(this.options.trueOrientation));
-      let homEnd = scale(hom.getEnd(this.options.trueOrientation));
+      const scale = this.getScale(hom);
+      const homStart = scale(hom.getStart(this.options.trueOrientation));
+      const homEnd = scale(hom.getEnd(this.options.trueOrientation));
 
       command += `M${refStart},${gene.yPos + 2}
                   V${this.trackHeight}
@@ -506,24 +541,26 @@ export class BlockViewBrowserComponent {
    * @param {string} conditionTitle - the title of the condition
    */
   getConditionLabel(conditionTitle: string): string {
-    return conditionTitle.replace(/=/g, ' = ')
-                         .replace(/!/g, '')
-                         .replace(/\+/g, ' ');
+    return conditionTitle
+      .replace(/=/g, ' = ')
+      .replace(/!/g, '')
+      .replace(/\+/g, ' ');
   }
 
   /**
    * Returns the keys of the tooltip's content attribute
    */
-  getTTItems(tooltip: any): string[] { return Object.keys(tooltip.content); }
+  getTTItems(tooltip: any): string[] {
+    return Object.keys(tooltip.content);
+  }
 
   /**
    * Returns the height the tooltip should be based on the number of data items
    * it will contain
    */
-  getTTHeight(): number { return this.getTTItems(this.tooltip).length * 11 + 23; }
-
-
-  // Condition Checks
+  getTTHeight(): number {
+    return this.getTTItems(this.tooltip).length * 11 + 23;
+  }
 
   /**
    * Returns true/false if at least 1 QTL or gene is selected
@@ -531,9 +568,6 @@ export class BlockViewBrowserComponent {
   featuresAreSelected(): boolean {
     return this.selectedQTLs.length > 0 || this.selectedRefGenes.length > 0;
   }
-
-
-  // Private Methods
 
   /**
    * Resets all of the core variables to make room for a new set of data
@@ -560,9 +594,10 @@ export class BlockViewBrowserComponent {
    * @param {number} end - the ending position of the new interval (in bp)
    */
   private brushView(start: number, end: number): void {
-    d3.select('#chr-view-inv-cover')
-      .call(this.brush.move,
-            [this.staticRefBPToPixels(start), this.staticRefBPToPixels(end)]);
+    d3.select('#chr-view-inv-cover').call(this.brush.move, [
+      this.staticRefBPToPixels(start),
+      this.staticRefBPToPixels(end),
+    ]);
   }
 
   /**
@@ -571,54 +606,52 @@ export class BlockViewBrowserComponent {
    * @param {Feature[]} features - list of features for gene coloring
    */
   private getSyntenicBlocks(features: Feature[]): void {
-    let refID = this.ref.getID();
-    let compID = this.comp.getID();
-    let colors = this.data.genomeColorMap;
+    const refID = this.ref.getID();
+    const compID = this.comp.getID();
+    const colors = this.data.genomeColorMap;
 
-    this.http.getChrSynteny(refID, compID, this.refChr)
-             .subscribe(blocks => {
-               let activeChrs = [];
-               // create list of necessary block data dictionaries
-               blocks.forEach(b => {
+    this.http.getChrSynteny(refID, compID, this.refChr).subscribe(blocks => {
+      const activeChrs = [];
+      // create list of necessary block data dictionaries
+      blocks.forEach(b => {
+        // don't worry about repeats
+        activeChrs.push(b.compChr);
 
-                 // don't worry about repeats
-                 activeChrs.push(b.compChr);
+        b.setScales(this.refBPToPixels);
+        b.setColor(colors[b.compChr]);
+        this.blockLookup[b.id] = b;
 
-                 b.setScales(this.refBPToPixels);
-                 b.setColor(colors[b.compChr]);
-                 this.blockLookup[b.id] = b;
+        this.staticCompBPToPixels.match[b.id] = b.compMatchScale;
+        this.staticCompBPToPixels.true[b.id] = b.compTrueScale;
+      });
 
-                 this.staticCompBPToPixels.match[b.id] = b.compMatchScale;
-                 this.staticCompBPToPixels.true[b.id] = b.compTrueScale;
-               });
+      this.blocks = blocks;
+      this.legend = new Legend(this.comp.genome, colors, activeChrs, this.width);
 
-               this.blocks = blocks;
-               this.legend = new Legend(this.comp.genome,
-                                        colors,
-                                        activeChrs,
-                                        this.width);
+      this.interval = new BrowserInterval(
+        this.refChr,
+        this.getRefChrSize(),
+        blocks,
+        this.refBPToPixels,
+        this.options.trueOrientation,
+      );
 
-               this.interval = new BrowserInterval(this.refChr,
-                                                   this.getRefChrSize(),
-                                                   blocks,
-                                                   this.refBPToPixels,
-                                                   this.options.trueOrientation);
+      // only update this once because it won't
+      this.progress += 0.7;
 
-               // only update this once because it won't
-               this.progress += 0.70;
+      // create the chromosome view (static) axis
+      d3.select('#chr-view-axis')
+        .call(
+          d3
+            .axisBottom(this.staticRefBPToPixels)
+            .tickValues(this.getAxisTickValues(0, this.getRefChrSize()))
+            .tickFormat((d: number) => `${Math.round(d / 1000000)} Mb`),
+        )
+        .selectAll('text')
+        .attr('text-anchor', (d, i, x) => this.getLabelPos(i, x.length));
 
-               // create the chromosome view (static) axis
-               d3.select('#chr-view-axis')
-                 .call(d3.axisBottom(this.staticRefBPToPixels)
-                   .tickValues(this.getAxisTickValues(0, this.getRefChrSize()))
-                   .tickFormat((d: number) => Math.round(d / 1000000) + " Mb"))
-                 .selectAll('text')
-                   .attr('text-anchor', (d, i, x) => {
-                     return this.getLabelPos(i, x.length);
-                   });
-
-               this.getGenes(refID, compID, features);
-             });
+      this.getGenes(refID, compID, features);
+    });
   }
 
   /**
@@ -631,82 +664,88 @@ export class BlockViewBrowserComponent {
    */
   private getGenes(refID: string, compID: string, features: Feature[]): void {
     this.homRefGenes = [];
-    let featureIDs = features.map(f => f.id);
+    const featureIDs = features.map(f => f.id);
 
-    this.http.getHomologs(refID, compID, this.refChr)
-             .subscribe(homologs => {
-               this.selectedCompGenes = [];
-               this.compGenes = homologs.map(h => {
-                 h.sel = false;
-                 // reduce the homologs attribute to array of reference gene IDs
-                 h.homologs = h.homologs.map(rh => {
-                   // while we're doing this, check each of the homolog IDs
-                   // against the list of selected features to determine if this
-                   // gene should be marked as selected
-                   if(!h.sel) { h.sel = featureIDs.indexOf(rh.id) > -1; }
-                   return rh.id;
-                 });
+    this.http.getHomologs(refID, compID, this.refChr).subscribe(homologs => {
+      this.selectedCompGenes = [];
+      this.compGenes = homologs
+        .map(h => {
+          h.sel = false;
+          // reduce the homologs attribute to array of reference gene IDs
+          h.homologs = h.homologs.map(rh => {
+            // while we're doing this, check each of the homolog IDs
+            // against the list of selected features to determine if this
+            // gene should be marked as selected
+            if (!h.sel) {
+              h.sel = featureIDs.indexOf(rh.id) > -1;
+            }
+            return rh.id;
+          });
 
-                 return new Gene(h, this.trackHeight, this.ref.taxonID, this.blocks);
-               }).filter(h => {
-                 let syntenic = h.isSyntenic();
+          return new Gene(h, this.trackHeight, this.ref.taxonID, this.blocks);
+        })
+        .filter(h => {
+          const syntenic = h.isSyntenic();
 
-                 // while we're here
-                 if(syntenic) {
-                   // if the gene is syntenic, take note of the homolog ID(s) so
-                   // that we can mark the reference genes accordingly
-                   this.homRefGenes.push(...h.homologIDs);
-                   // if the gene is marked as selected, push it to the selected
-                   // comparison gene array
-                   if(h.selected) { this.selectedCompGenes.push(h); }
-                 }
+          // while we're here
+          if (syntenic) {
+            // if the gene is syntenic, take note of the homolog ID(s) so
+            // that we can mark the reference genes accordingly
+            this.homRefGenes.push(...h.homologIDs);
+            // if the gene is marked as selected, push it to the selected
+            // comparison gene array
+            if (h.selected) {
+              this.selectedCompGenes.push(h);
+            }
+          }
 
-                 return syntenic;
-               });
+          return syntenic;
+        });
 
-               this.homRefGenes = Array.from(new Set(this.homRefGenes));
-             });
+      this.homRefGenes = Array.from(new Set(this.homRefGenes));
+    });
 
-    this.http.getGenes(refID, this.refChr)
-             .subscribe(genes => {
-               this.selectedRefGenes = [];
+    this.http.getGenes(refID, this.refChr).subscribe(genes => {
+      this.selectedRefGenes = [];
 
-               this.refGenes = genes.map(g => {
-                 // if homologous, add a homologID array attribute with its ID
-                 g.homologs = this.homRefGenes.indexOf(g.id) > -1 ? [g.id] : [];
-                 // add selected attribute if it is listed as selected
-                 g.sel = featureIDs.indexOf(g.id) > -1;
+      this.refGenes = genes.map(g => {
+        // if homologous, add a homologID array attribute with its ID
+        g.homologs = this.homRefGenes.indexOf(g.id) > -1 ? [g.id] : [];
+        // add selected attribute if it is listed as selected
+        g.sel = featureIDs.indexOf(g.id) > -1;
 
-                 let gene = new Gene(g, this.trackHeight, this.ref.taxonID);
+        const gene = new Gene(g, this.trackHeight, this.ref.taxonID);
 
-                 // if the gene is selected, push it to the selected reference
-                 // gene array
-                 if(gene.selected) { this.selectedRefGenes.push(gene); }
+        // if the gene is selected, push it to the selected reference
+        // gene array
+        if (gene.selected) {
+          this.selectedRefGenes.push(gene);
+        }
 
-                 return gene
-               });
+        return gene;
+      });
 
-               this.arrangeQTLs(features.filter(f => !f.gene));
+      this.arrangeQTLs(features.filter(f => !f.gene));
 
-               this.staticTooltipBehavior();
+      this.staticTooltipBehavior();
 
-               // set interval to center around the first reference feature, if
-               // features are selected, otherwise set interval to entire chr
-               if(this.selectedRefGenes.length > 0) {
-                 let mb = 2500000;
-                 let firstGene = this.selectedRefGenes[0];
-                 let start = Math.max(0, firstGene.start - mb);
-                 let end = Math.min(this.getRefChrSize(), firstGene.end + mb);
+      // set interval to center around the first reference feature, if
+      // features are selected, otherwise set interval to entire chr
+      if (this.selectedRefGenes.length > 0) {
+        const mb = 2500000;
+        const firstGene = this.selectedRefGenes[0];
+        const start = Math.max(0, firstGene.start - mb);
+        const end = Math.min(this.getRefChrSize(), firstGene.end + mb);
 
-                 this.interval.moveTo(start, end, this.refBPToPixels);
-               } else {
-                 this.interval.moveTo(0, this.getRefChrSize(), this.refBPToPixels);
-               }
+        this.interval.moveTo(start, end, this.refBPToPixels);
+      } else {
+        this.interval.moveTo(0, this.getRefChrSize(), this.refBPToPixels);
+      }
 
-               // set the zoom, brush and dynamic axis behaviors/interactions
-               this.bindBrowserBehaviors();
-               this.dynamicTooltipBehavior();
-             });
+      // set the zoom, brush and dynamic axis behaviors/interactions
+      this.bindBrowserBehaviors();
+      this.dynamicTooltipBehavior();
+    });
   }
 
   /**
@@ -715,62 +754,90 @@ export class BlockViewBrowserComponent {
    * in time (genes are though, so those are done dynamically)
    */
   private staticTooltipBehavior(): void {
-    let bvb = this;
-    let featureTip = bvb.featureTip;
-    let blockTip = bvb.blockTip;
+    const bvb = this;
+    const featureTip = bvb.featureTip;
+    const blockTip = bvb.blockTip;
 
     this.cdr.detectChanges();
 
     // indicators in chromosome view
     d3.selectAll('.ref-selected-ind')
       .data(this.selectedRefGenes)
-      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
 
     d3.selectAll('.ref-filtered-ind')
       .data(this.filteredRefGenes)
-      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
 
     d3.selectAll('.comp-selected-ind')
       .data(this.selectedCompGenes)
-      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
 
     d3.selectAll('.comp-filtered-ind')
       .data(this.filteredCompGenes)
-      .on('mouseover', function(d: Gene) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
 
     d3.selectAll('.qtl-ind')
       .data(this.selectedQTLs)
-      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
+      .on('mouseover', function(d: QTL) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
 
     // QTLs
     d3.selectAll('.qtl')
       .data(this.selectedQTLs)
-      .on('mouseover', function(d: QTL) { featureTip.show(d, this) })
-      .on('mouseout', function() { featureTip.hide() });
+      .on('mouseover', function(d: QTL) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
 
     // syntenic blocks
     d3.selectAll('.ref-block')
       .data(this.blocks)
       .on('mouseover', function(d: SyntenyBlock) {
-        if(d.getPxWidth() <= 125) {
+        if (d.getPxWidth() <= 125) {
           blockTip.show(d, 'ref', this);
         }
       })
-      .on('mouseout', function() { blockTip.hide() });
+      .on('mouseout', function() {
+        blockTip.hide();
+      });
 
     d3.selectAll('.comp-block')
       .data(this.blocks)
       .on('mouseover', function(d: SyntenyBlock) {
-        if(d.getPxWidth() <= 125) {
-          blockTip.show(d, 'comp', this)
+        if (d.getPxWidth() <= 125) {
+          blockTip.show(d, 'comp', this);
         }
       })
-      .on('mouseout', function() { blockTip.hide() });
+      .on('mouseout', function() {
+        blockTip.hide();
+      });
   }
 
   /**
@@ -783,8 +850,8 @@ export class BlockViewBrowserComponent {
    * weren't previously in view have data (and the correct data)
    */
   private dynamicTooltipBehavior(): void {
-    let bvb = this;
-    let featureTip = bvb.featureTip;
+    const bvb = this;
+    const featureTip = bvb.featureTip;
 
     this.cdr.detectChanges();
 
@@ -821,22 +888,22 @@ export class BlockViewBrowserComponent {
 
     // stores what happens at each point; id of QTL involved and type:
     // 1 (QTL starting) or -1 (QTL ending)
-    let pointData = {};
+    const pointData = {};
 
     // stores QTL ids that map to their index in the QTL array for quick reference
-    let qtlLookup = {};
+    const qtlLookup = {};
 
     // function to either create a new point or add a new QTL to an existing point
-    let checkPoint = (loc, q, type) => {
-      if(points.indexOf(loc) < 0) {
+    const checkPoint = (loc, q, type): void => {
+      if (points.indexOf(loc) < 0) {
         points.push(loc);
-        pointData[loc] = [{id: q.id, type: type}];
+        pointData[loc] = [{ id: q.id, type }];
       } else {
-        pointData[loc].push({id: q.id, type: type});
+        pointData[loc].push({ id: q.id, type });
       }
     };
 
-    if(qtls.length > 1) {
+    if (qtls.length > 1) {
       qtls = qtls.sort((a, b) => a.start - b.start);
 
       // get start and stop points of each QTL
@@ -851,24 +918,25 @@ export class BlockViewBrowserComponent {
       points = points.sort((a, b) => a - b);
 
       // keeps track of QTLs that have been assigned a lane
-      let arranged = {};
+      const arranged = {};
 
       // represents vertically stacked spaces (lanes) that can be assigned one
       // QTL at a time; the list must always have at least one element (default
       // state is one false element to indicate that there is currently one lane
       // and it's available for assignment)
-      let lanes = [false];
+      const lanes = [false];
 
       // keeps track of how many lanes are currently in use
       let activeLanes = 0;
 
       // function to check if the lane at the specified index is the last in the array
-      let hasNext = (i) => {
+      const hasNext = (i): boolean => {
         // can't check !lanes[i] because a lanes might have a 'false' value
         // if they're empty and they're between assigned lanes
-        if(typeof lanes[i] === "undefined") {
+        if (typeof lanes[i] === 'undefined') {
           return false;
-        } else if(lanes[i]) {
+        }
+        if (lanes[i]) {
           return true;
         }
 
@@ -882,11 +950,11 @@ export class BlockViewBrowserComponent {
       // go through each start/end point and assign/free lanes, as appropriate
       points.forEach(p => {
         pointData[p].forEach(qtl => {
-          if(qtl.type > 0) {
+          if (qtl.type > 0) {
             let lane;
             let assigned = false;
             lanes.forEach((l, i) => {
-              if(!l && !assigned) {
+              if (!l && !assigned) {
                 lanes[i] = qtl.id;
                 assigned = true;
                 lane = i;
@@ -894,7 +962,7 @@ export class BlockViewBrowserComponent {
             });
 
             // make a new lane if there wasn't an open lane
-            if(!assigned) {
+            if (!assigned) {
               lanes.push(qtl.id);
               lane = lanes.indexOf(qtl.id);
             }
@@ -902,16 +970,16 @@ export class BlockViewBrowserComponent {
             // store lane data for the QTL; the height can change after this
             // point, but the lane (which is used to calculate the y position
             // of the QTL) won't change
-            arranged[qtl.id] = { lane: lane };
+            arranged[qtl.id] = { lane };
             qtlsToWatch.push(qtl.id);
           } else {
-            let laneToClear = arranged[qtl.id].lane;
+            const laneToClear = arranged[qtl.id].lane;
             lanes[laneToClear] = false;
 
             // clear out any trailing ('trailing' is the keyword) empty lanes
-            if(lanes.length > 1) {
+            if (lanes.length > 1) {
               lanes.forEach((l, i) => {
-                if(!hasNext(i)) {
+                if (!hasNext(i)) {
                   lanes.splice(i, 1);
                 }
               });
@@ -923,20 +991,20 @@ export class BlockViewBrowserComponent {
           activeLanes += qtl.type;
 
           // if all available lanes are used, we need another one
-          if(activeLanes > maxLanesToWatch) {
+          if (activeLanes > maxLanesToWatch) {
             maxLanesToWatch = activeLanes;
           }
 
           // if all lanes are available, empty the lanes
-          if(activeLanes === 0) {
+          if (activeLanes === 0) {
             qtlsToWatch = [];
             maxLanesToWatch = 0;
-          } else if(qtl.type > 0) {
+          } else if (qtl.type > 0) {
             // if we're adding another QTL, we'll need to make sure that all
             // current QTLs have a numLanes value or if the number of lanes is
             // increasing, then we need to update the value
             qtlsToWatch.forEach(q => {
-              if(!arranged[q].numLanes || arranged[q].numLanes < maxLanesToWatch) {
+              if (!arranged[q].numLanes || arranged[q].numLanes < maxLanesToWatch) {
                 arranged[q].numLanes = maxLanesToWatch;
               }
             });
@@ -947,14 +1015,14 @@ export class BlockViewBrowserComponent {
       // take the calculated values and assign them to the raw QTL dictionary,
       // make a QTL instance from the result, and store them all
       this.selectedQTLs = Object.keys(qtlLookup).map(q => {
-        let arrangeData = arranged[q];
-        let index = qtlLookup[q];
-        let laneHeight = this.trackHeight / arrangeData.numLanes;
-        let indLaneHeight = (this.chromosomeViewHeight - 25) / arrangeData.numLanes;
+        const arrangeData = arranged[q];
+        const index = qtlLookup[q];
+        const laneHeight = this.trackHeight / arrangeData.numLanes;
+        const indLaneHeight = (this.chromosomeViewHeight - 25) / arrangeData.numLanes;
 
         qtls[index].height = laneHeight;
         qtls[index].offset = laneHeight * arrangeData.lane;
-        qtls[index].indOffset = (indLaneHeight * arrangeData.lane) - 2;
+        qtls[index].indOffset = indLaneHeight * arrangeData.lane - 2;
 
         return new QTL(qtls[index], this.staticRefBPToPixels);
       });
@@ -975,12 +1043,13 @@ export class BlockViewBrowserComponent {
    * Sets the brush and zoom behaviors
    */
   private bindBrowserBehaviors(): void {
-    let chrSize = this.getRefChrSize();
+    const chrSize = this.getRefChrSize();
 
     // create an axis using the dynamic scale with more precise tick labels in Mb
-    let browserAxis = d3.axisTop(this.refBPToPixels)
-                        .tickSizeOuter(0)
-                        .tickFormat((d: number) => `${(d / 1000000)}Mb`);
+    const browserAxis = d3
+      .axisTop(this.refBPToPixels)
+      .tickSizeOuter(0)
+      .tickFormat((d: number) => `${d / 1000000}Mb`);
 
     /*
     CREDIT: I would not have been able to get these behaviors so clean and
@@ -990,93 +1059,98 @@ export class BlockViewBrowserComponent {
 
           ~ A.L.
      */
-    this.brush = d3.brushX()
-                  .extent([[0, 12], [this.width, this.chromosomeViewHeight - 7]])
-                  .on('brush', () => {
-                    let e = d3.event;
+    this.brush = d3
+      .brushX()
+      .extent([
+        [0, 12],
+        [this.width, this.chromosomeViewHeight - 7],
+      ])
+      .on('brush', () => {
+        const e = d3.event;
 
-                    // ignore brush via zoom occurrences
-                    if(e.sourceEvent && e.sourceEvent.type === "zoom") return;
+        // ignore brush via zoom occurrences
+        if (e.sourceEvent && e.sourceEvent.type === 'zoom') return;
 
-                    let s: number[] = e.selection;
+        const s: number[] = e.selection;
 
-                    // adjust refBPToPixels by scaling start, s[0], and end, s[1],
-                    // with static scale (used for chromosome view)
-                    this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert,
-                                              this.staticRefBPToPixels));
+        // adjust refBPToPixels by scaling start, s[0], and end, s[1],
+        // with static scale (used for chromosome view)
+        this.refBPToPixels.domain(s.map(this.staticRefBPToPixels.invert, this.staticRefBPToPixels));
 
-                    // update the comparison scale dictionaries to use new ref scale
-                    this.blocks.forEach(b => b.setScales(this.refBPToPixels));
+        // update the comparison scale dictionaries to use new ref scale
+        this.blocks.forEach(b => b.setScales(this.refBPToPixels));
 
-                    // zoom the browser to same section
-                    d3.select('#browser')
-                      .call(this.zoom.transform,
-                            d3.zoomIdentity.scale(this.width / (s[1] - s[0]))
-                                           .translate(-s[0], 0)
-                            );
+        // zoom the browser to same section
+        d3.select('#browser').call(
+          this.zoom.transform,
+          d3.zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0),
+        );
 
-                    this.interval.moveTo(this.staticRefBPToPixels.invert(s[0]),
-                                         this.staticRefBPToPixels.invert(s[1]),
-                                         this.refBPToPixels);
+        this.interval.moveTo(
+          this.staticRefBPToPixels.invert(s[0]),
+          this.staticRefBPToPixels.invert(s[1]),
+          this.refBPToPixels,
+        );
 
-                    // update the axis above the reference track
-                    d3.select('#browser-axis')
-                      .call(browserAxis);
+        // update the axis above the reference track
+        d3.select('#browser-axis').call(browserAxis);
 
-                    this.dynamicTooltipBehavior();
-                  });
+        this.dynamicTooltipBehavior();
+      });
 
-    this.zoom = d3.zoom()
-                 .scaleExtent([1, (chrSize / this.minimumIntervalSize)])
-                 .translateExtent([[0, 0], [this.width, this.height]])
-                 .extent([[0, 0], [this.width, this.height]])
-                 .on('zoom', () => {
-                   let e = d3.event;
+    this.zoom = d3
+      .zoom()
+      .scaleExtent([1, chrSize / this.minimumIntervalSize])
+      .translateExtent([
+        [0, 0],
+        [this.width, this.height],
+      ])
+      .extent([
+        [0, 0],
+        [this.width, this.height],
+      ])
+      .on('zoom', () => {
+        const e = d3.event;
 
-                   // ignore zoom via brush occurrences
-                   if(e.sourceEvent && e.sourceEvent.type === "brush") return;
+        // ignore zoom via brush occurrences
+        if (e.sourceEvent && e.sourceEvent.type === 'brush') return;
 
-                   let t = e.transform;
+        const t = e.transform;
 
-                   // adjust the refBPToPixels using a t's rescaled x on the
-                   // static scale (used for chromosome view)
-                   this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels)
-                                              .domain());
+        // adjust the refBPToPixels using a t's rescaled x on the
+        // static scale (used for chromosome view)
+        this.refBPToPixels.domain(t.rescaleX(this.staticRefBPToPixels).domain());
 
-                   // update the comparison scale dictionaries to use new ref scale
-                   this.blocks.forEach(b => b.setScales(this.refBPToPixels));
+        // update the comparison scale dictionaries to use new ref scale
+        this.blocks.forEach(b => b.setScales(this.refBPToPixels));
 
-                   // get start and end pixel and bp points of the current interval
-                   let pxExtents = this.refBPToPixels.range().map(t.invertX, t);
-                   let bpExtents = this.refBPToPixels.domain();
+        // get start and end pixel and bp points of the current interval
+        const pxExtents = this.refBPToPixels.range().map(t.invertX, t);
+        const bpExtents = this.refBPToPixels.domain();
 
-                   // move the brush in the chromosome view to match
-                   d3.select('#chr-view-inv-cover')
-                     .call(this.brush.move, pxExtents);
+        // move the brush in the chromosome view to match
+        d3.select('#chr-view-inv-cover').call(this.brush.move, pxExtents);
 
-                   // update the interval values
-                   this.interval.moveTo(bpExtents[0],
-                                        bpExtents[1],
-                                        this.refBPToPixels);
+        // update the interval values
+        this.interval.moveTo(bpExtents[0], bpExtents[1], this.refBPToPixels);
 
-                   // update the axis above the reference track
-                   d3.select('#browser-axis')
-                     .call(browserAxis);
+        // update the axis above the reference track
+        d3.select('#browser-axis').call(browserAxis);
 
-                   this.dynamicTooltipBehavior();
-                 });
+        this.dynamicTooltipBehavior();
+      });
 
     // bind the zoom behavior
-    d3.select('#browser')
-      .call(this.zoom);
+    d3.select('#browser').call(this.zoom);
 
     // bind the brush behavior and set the brush to match the current interval
     // (either the entire chr or the focused section)
     d3.select('#chr-view-inv-cover')
       .call(this.brush)
-      .call(this.brush.move,
-            [this.staticRefBPToPixels(this.interval.refStart),
-             this.staticRefBPToPixels(this.interval.refEnd)]);
+      .call(this.brush.move, [
+        this.staticRefBPToPixels(this.interval.refStart),
+        this.staticRefBPToPixels(this.interval.refEnd),
+      ]);
   }
 
   /**
@@ -1084,12 +1158,13 @@ export class BlockViewBrowserComponent {
    * pixels (or the other way around if inverted)
    * @param {number} BPwidth - the size of the current reference chromosome
    */
-  private getRefScale(BPwidth: number): ScaleLinear<number, number> {
+  private getRefScale(BPwidth: number): d3.ScaleLinear<number, number> {
     // set the range max to 'width - 1' to keep the last tick line of axes
     // from hiding on the right side of the svg
-    return d3.scaleLinear()
-             .domain([0, BPwidth])
-             .range([0, this.width - 1]);
+    return d3
+      .scaleLinear()
+      .domain([0, BPwidth])
+      .range([0, this.width - 1]);
   }
 
   /**
@@ -1100,11 +1175,11 @@ export class BlockViewBrowserComponent {
    * @param {number} end - the ending point to start generating tick values
    */
   private getAxisTickValues(start: number, end: number): number[] {
-    let values = [];
+    const values = [];
 
     // add all but the last interval values to the list
     // total - 2 ensures the final tick isn't added by rounding error
-    for(let i = start; i < end - 2; i += (end - start) / 10) {
+    for (let i = start; i < end - 2; i += (end - start) / 10) {
       values.push(Math.round(i));
     }
 
@@ -1123,13 +1198,13 @@ export class BlockViewBrowserComponent {
    * @param {number} listLength - the length of the list of ticks
    */
   private getLabelPos(index: number, listLength: number): string {
-    if(index === 0) {
+    if (index === 0) {
       return 'start';
-    } else if(index === listLength - 1) {
-      return 'end';
-    } else {
-      return 'middle';
     }
+    if (index === listLength - 1) {
+      return 'end';
+    }
+    return 'middle';
   }
 
   /**
@@ -1142,18 +1217,22 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns a list of reference genes that have a homolog ID that matches
-   * the any of specified homolog IDs of a comparison gene
+   * Returns a list of reference genes that have a homolog ID that matches any of
+   * specified homolog IDs of a comparison gene
    * @param {number[]} homIDs - the homolog IDs to search for reference matches
    */
   private getReferenceHomologs(homIDs: string[]): Gene[] {
     return this.refGenes.filter(g => {
-                           let match = false;
-                           g.homologIDs.forEach(h => {
-                                         homIDs.indexOf(h) >= 0 ?
-                                           match = true : null
-                                        });
-                           return match;
-                         });
+      let match = false;
+
+      for (let h = 0; h < g.homologIDs.length; h += 1) {
+        if (homIDs.indexOf(g.homologIDs[h]) >= 0) {
+          match = true;
+          break;
+        }
+      }
+
+      return match;
+    });
   }
 }

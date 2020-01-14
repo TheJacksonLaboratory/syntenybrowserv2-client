@@ -1,9 +1,9 @@
+import { ClrLoadingState } from '@clr/angular';
 import { Feature } from './feature';
 import { SyntenyBlock } from './synteny-block';
-import { ClrLoadingState } from '@clr/angular';
 
-export interface ArrayResponse extends Array<any> {}
-export interface JSONResponse extends Object {}
+export type ArrayResponse = Array<any>;
+export type JSONResponse = Record<string, any>;
 
 export interface OntologyTerm {
   id: string;
@@ -21,7 +21,7 @@ export interface DescendantTerm {
 }
 
 export interface RawSpecies {
-  ref_taxonid: number
+  ref_taxonid: number;
 }
 
 export interface Chromosome {
@@ -39,9 +39,9 @@ export interface BlockViewBrowserOptions {
   trueOrientation: boolean;
 }
 
-export interface SearchType extends Option { }
+export type SearchType = Option;
 
-export interface NavigationObject extends Option { }
+export type NavigationObject = Option;
 
 export interface ExternalResource {
   name: string;

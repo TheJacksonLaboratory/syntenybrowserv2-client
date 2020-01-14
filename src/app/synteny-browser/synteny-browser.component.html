@@ -1,6 +1,6 @@
 <div class="clr-row clr-col-12">
   <div class="card">
-    <div class="card-header"> FIND FEATURES </div>
+    <div class="card-header">FIND FEATURES</div>
 
     <div class="card-block">
       <div class="clr-row clr-col-12">
@@ -12,7 +12,7 @@
 
           <species-selection (update)="updateSpecies()"></species-selection>
 
-          <hr/>
+          <hr />
 
           <feature-selection (update)="updateFeatures()"></feature-selection>
         </div>
@@ -21,10 +21,10 @@
           <div class="clr-row">
             <p>
               Hovering over any chromosome will show the species and chromosome
-              value of that chromosome. Selecting a reference chromosome will map
-              the synteny of that chromsome to regions the comparison genome and
-              will let you explore the selected chromosome at a more granular
-              level if button below plot is clicked.
+              value of that chromosome. Selecting a reference chromosome will
+              map the synteny of that chromsome to regions the comparison genome
+              and will let you explore the selected chromosome at a more
+              granular level if button below plot is clicked.
             </p>
 
             <clr-signpost>
@@ -42,29 +42,33 @@
             </clr-signpost>
           </div>
 
-          <hr/>
+          <hr />
 
           <!-- Genome view species "legend" -->
           <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row">
             <span style="font-weight: bold">
-              Outer ring (reference genome): {{ data.refSpecies.commonName }}
-            ({{ data.refSpecies.name }})
+              Outer ring (reference genome):
+              {{ data.refSpecies.commonName }} ({{ data.refSpecies.name }})
             </span>
             <span style="font-weight: bold">
-              Inner ring (comparison genome): {{ data.compSpecies.commonName }}
-              ({{ data.compSpecies.name }})
+              Inner ring (comparison genome):
+              {{ data.compSpecies.commonName }} ({{ data.compSpecies.name }})
             </span>
           </div>
 
-          <genome-view (highlightFeatures)="features.highlighted=$event"></genome-view>
+          <genome-view
+            (highlightFeatures)="features.highlighted = $event"
+          ></genome-view>
         </div>
       </div>
     </div>
 
     <div class="card-footer text-right">
-      <button class="btn btn-primary"
-              [disabled]="!genomeView || !genomeView.refChr"
-              (click)="getChromosomeFeatures()">
+      <button
+        class="btn btn-primary"
+        [disabled]="!genomeView || !genomeView.refChr"
+        (click)="getChromosomeFeatures()"
+      >
         <clr-icon shape="check"></clr-icon> See Selection in Block View
       </button>
     </div>
@@ -74,28 +78,33 @@
 <div *ngIf="viewInBrowser" class="clr-row">
   <div class="clr-col-12 bottom-1" id="block-view">
     <div class="card">
-      <div class="card-header"> BLOCK VIEW BROWSER </div>
+      <div class="card-header">BLOCK VIEW BROWSER</div>
 
       <div class="card-block">
-        <block-view-browser (filter)="filterOpen=true"></block-view-browser>
+        <block-view-browser (filter)="filterOpen = true"></block-view-browser>
       </div>
     </div>
   </div>
 </div>
 
-<clr-modal id="block-view-filters" clrModalSize="xl"
-           [(clrModalOpen)]="filterOpen"
-           [clrModalClosable]="true">
-  <h3 class="modal-title"> Filtering the Block View </h3>
+<clr-modal
+  id="block-view-filters"
+  clrModalSize="xl"
+  [(clrModalOpen)]="filterOpen"
+  [clrModalClosable]="true"
+>
+  <h3 class="modal-title">Filtering the Block View</h3>
 
   <div class="modal-body">
-    <block-view-filter *ngIf="blockViewBrowser && blockViewBrowser.refGenes"
-                       [refSpecies]="data.refSpecies"
-                       [compSpecies]="data.compSpecies"
-                       [refGenes]="blockViewBrowser.refGenes"
-                       [compGenes]="blockViewBrowser.compGenes"
-                       [filters]="data.filters"
-                       (userClose)="getFilters()">
+    <block-view-filter
+      *ngIf="blockViewBrowser && blockViewBrowser.refGenes"
+      [refSpecies]="data.refSpecies"
+      [compSpecies]="data.compSpecies"
+      [refGenes]="blockViewBrowser.refGenes"
+      [compGenes]="blockViewBrowser.compGenes"
+      [filters]="data.filters"
+      (userClose)="getFilters()"
+    >
     </block-view-filter>
   </div>
 </clr-modal>

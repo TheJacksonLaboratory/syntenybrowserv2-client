@@ -4,34 +4,47 @@
       <clr-icon shape="undo"></clr-icon> Terms
     </button>
   </div>
-  <clr-datagrid class="clr-col" [hidden]="currentTerm" [clrDgLoading]="terms.loading">
-    <clr-dg-column [clrDgSortBy]="terms.getSorter('id')"
-                   [style.width.px]="200"> ID </clr-dg-column>
+  <clr-datagrid
+    class="clr-col"
+    [hidden]="currentTerm"
+    [clrDgLoading]="terms.loading"
+  >
+    <clr-dg-column [clrDgSortBy]="terms.getSorter('id')" [style.width.px]="200">
+      ID
+    </clr-dg-column>
 
-    <clr-dg-column [clrDgSortBy]="terms.getSorter('name')"> Name </clr-dg-column>
+    <clr-dg-column [clrDgSortBy]="terms.getSorter('name')">
+      Name
+    </clr-dg-column>
 
-    <clr-dg-row *clrDgItems="let row of terms.filteredRows"
-                [ngClass]="{ 'selected': currentTerm && currentTerm.id === row.id }">
+    <clr-dg-row
+      *clrDgItems="let row of terms.filteredRows"
+      [ngClass]="{ selected: currentTerm && currentTerm.id === row.id }"
+    >
       <clr-dg-cell>
         {{ row.id }}
       </clr-dg-cell>
 
       <clr-dg-cell class="less-padding">
         <div class="actions">
-          <div class="term-name"> {{ row.name }} </div>
+          <div class="term-name">{{ row.name }}</div>
 
           <div>
-            <button class="btn btn-sm btn-link"
-                    [title]="getViewAssociationsTitle(row)"
-                    [disabled]="row.descendants.length >= 500"
-                    (click)="loadAssociationsForTerm(row)">
+            <button
+              class="btn btn-sm btn-link"
+              [title]="getViewAssociationsTitle(row)"
+              [disabled]="row.descendants.length >= 500"
+              (click)="loadAssociationsForTerm(row)"
+            >
               <clr-icon shape="view-list"></clr-icon>
             </button>
-            <button class="btn btn-sm btn-link"
-                    [title]="getSelectAllAssociationsTitle(row)"
-                    [disabled]="row.descendants.length >= 500"
-                    [clrLoading]="row.selecting"
-                    (click)="loadAssociationsForTerm(row, false)">
+            <button
+              class="btn btn-sm btn-link"
+              [title]="getSelectAllAssociationsTitle(row)"
+              [disabled]="row.descendants.length >= 500"
+              [clrLoading]="row.selecting"
+              (click)="loadAssociationsForTerm(row, false)"
+            >
               <clr-icon shape="check"></clr-icon>
             </button>
           </div>
@@ -40,9 +53,11 @@
 
       <clr-dg-row-detail *clrIfExpanded>
         <ul class="list">
-          <li *ngIf="row.namespace"> <b>Namespace:</b> {{ row.namespace }} </li>
-          <li *ngIf="row.def"> <b>Definition:</b> {{ row.def }} </li>
-          <li> <b>Descendant Terms:</b> {{ row.descendants.length ? row.descendants.length : 0 }}
+          <li *ngIf="row.namespace"><b>Namespace:</b> {{ row.namespace }}</li>
+          <li *ngIf="row.def"><b>Definition:</b> {{ row.def }}</li>
+          <li>
+            <b>Descendant Terms:</b>
+            {{ row.descendants.length ? row.descendants.length : 0 }}
             <ul *ngIf="row.descendants.length">
               <li *ngFor="let d of terms.getDescendants(row)">
                 <b>{{ d.id }}</b> {{ d.name }}
@@ -65,18 +80,25 @@
     </clr-dg-footer>
   </clr-datagrid>
 
-  <clr-datagrid [hidden]="!currentTerm" class="clr-col"
-                [clrDgLoading]="associations.loading">
-    <clr-dg-column *ngFor="let col of associations.columns"
-                   [clrDgSortBy]="associations.getSorter(col)">
+  <clr-datagrid
+    [hidden]="!currentTerm"
+    class="clr-col"
+    [clrDgLoading]="associations.loading"
+  >
+    <clr-dg-column
+      *ngFor="let col of associations.columns"
+      [clrDgSortBy]="associations.getSorter(col)"
+    >
       {{ col }}
     </clr-dg-column>
 
-    <clr-dg-row *clrDgItems="let row of associations.filteredRows"
-                (mousedown)="associations.dragStart(row)"
-                (mouseenter)="associations.dragOver(row)"
-                (mouseup)="updateAssociationSelections()"
-                [ngClass]="{ 'selected': row.selected }">
+    <clr-dg-row
+      *clrDgItems="let row of associations.filteredRows"
+      (mousedown)="associations.dragStart(row)"
+      (mouseenter)="associations.dragOver(row)"
+      (mouseup)="updateAssociationSelections()"
+      [ngClass]="{ selected: row.selected }"
+    >
       <clr-dg-cell *ngFor="let col of associations.columns">
         {{ associations.getCell(row, col) }}
       </clr-dg-cell>
@@ -94,4 +116,3 @@
     </clr-dg-footer>
   </clr-datagrid>
 </div>
-

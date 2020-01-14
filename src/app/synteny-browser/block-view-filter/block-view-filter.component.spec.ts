@@ -8,9 +8,8 @@ describe('BlockViewFilterComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BlockViewFilterComponent ]
-    })
-    .compileComponents();
+      declarations: [BlockViewFilterComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

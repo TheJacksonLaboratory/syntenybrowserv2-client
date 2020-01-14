@@ -6,21 +6,25 @@
   <div id="block-view-tools" class="clr-row clr-justify-content-center">
     <!-- Block view filters -->
     <div class="clr-col-xl-5 clr-col-12 bottom-1">
-      <h4> Block View Filters </h4>
+      <h4>Block View Filters</h4>
       <div class="clr-row">
         <!-- Filters -->
         <div id="filters" class="label-container clr-col-xl-8 clr-col-10">
           <!-- No filters message -->
-          <div *ngIf="filters.length === 0"
-               class="no-selections filter-labels">
+          <div *ngIf="filters.length === 0" class="no-selections filter-labels">
             No filters have been created yet
           </div>
 
           <!-- Labels -->
           <div *ngIf="filters.length > 0" class="filter-labels">
-            <span *ngFor="let f of filters" class="label"
-                  [ngClass]="{ 'label-info': !f.hides(),
-                               'label-danger': f.hides() }">
+            <span
+              *ngFor="let f of filters"
+              class="label"
+              [ngClass]="{
+                'label-info': !f.hides(),
+                'label-danger': f.hides()
+              }"
+            >
               {{ f.filterLabel }}
             </span>
           </div>
@@ -38,17 +42,19 @@
     <!-- 'Jump to interval' input -->
     <div class="clr-col-xl-3 clr-col-5 bottom-1">
       <div class="clr-row">
-        <h4> Jump to Interval </h4>
+        <h4>Jump to Interval</h4>
 
         <!-- Usage examples -->
         <clr-signpost id="reference-interval-info">
           <clr-icon shape="info" clrSignpostTrigger></clr-icon>
           <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
-            Valid intervals include: <br/>
-            • <b>12345678-23456789</b><br/>
-            • <b>12,345,678-23,456,789</b><br/>
-            • <b>12345678-</b> (will jump to 12,345,678 through end of chromosome)<br/>
-            • <b>-12345678</b> (will jump to start of chromosome through 12,345,678)<br/>
+            Valid intervals include: <br />
+            • <b>12345678-23456789</b><br />
+            • <b>12,345,678-23,456,789</b><br />
+            • <b>12345678-</b> (will jump to 12,345,678 through end of
+            chromosome)<br />
+            • <b>-12345678</b> (will jump to start of chromosome through
+            12,345,678)<br />
           </clr-signpost-content>
         </clr-signpost>
       </div>
@@ -57,40 +63,50 @@
       <clr-input-container>
         <label for="reference-interval"></label>
 
-        <input id="reference-interval" clrInput
-               placeholder="Enter a valid interval"
-               [(ngModel)]="refInterval"
-               (keyup.enter)="jumpToInterval()">
+        <input
+          id="reference-interval"
+          clrInput
+          placeholder="Enter a valid interval"
+          [(ngModel)]="refInterval"
+          (keyup.enter)="jumpToInterval()"
+        />
       </clr-input-container>
     </div>
 
     <!-- Navigation buttons -->
     <div class="clr-col-xl-3 clr-col-5 bottom-1">
-      <h4> Block View Navigation </h4>
+      <h4>Block View Navigation</h4>
       <!-- Navigation buttons -->
       <div class="btn-group btn-icon">
         <!-- Pan left button -->
-        <button class="btn btn-outline"
-                title="Pan left"
-                [disabled]="!interval || interval.refStart === 0"
-                (click)="panLeft()">
+        <button
+          class="btn btn-outline"
+          title="Pan left"
+          [disabled]="!interval || interval.refStart === 0"
+          (click)="panLeft()"
+        >
           <clr-icon shape="rewind"></clr-icon>
         </button>
 
         <!-- Zoom out button -->
-        <button class="btn btn-outline"
-                title="Zoom out"
-                [disabled]="!interval || interval.width === getRefChrSize()"
-                (click)="zoomOut()">
+        <button
+          class="btn btn-outline"
+          title="Zoom out"
+          [disabled]="!interval || interval.width === getRefChrSize()"
+          (click)="zoomOut()"
+        >
           <clr-icon shape="zoom-out"></clr-icon>
         </button>
 
         <!-- Jump to feature button -->
         <clr-dropdown *ngIf="featuresAreSelected()">
           <!-- Button if features are selected -->
-          <button clrDropdownTrigger type="button"
-                  class="btn btn-outline group-dropdown"
-                  [disabled]="!interval">
+          <button
+            clrDropdownTrigger
+            type="button"
+            class="btn btn-outline group-dropdown"
+            [disabled]="!interval"
+          >
             Jump to
             <clr-icon shape="caret down"></clr-icon>
           </button>
@@ -101,25 +117,32 @@
             <div *ngIf="selectedRefGenes.length > 0">
               <label class="dropdown-header">Genes</label>
 
-              <button *ngFor="let gene of selectedRefGenes"
-                      type="button" clrDropdownItem
-                      (click)="jumpToFeature(gene)">
+              <button
+                *ngFor="let gene of selectedRefGenes"
+                type="button"
+                clrDropdownItem
+                (click)="jumpToFeature(gene)"
+              >
                 {{ gene.symbol }}
               </button>
             </div>
 
             <!-- Divider -->
-            <div *ngIf="selectedQTLs.length > 0 && selectedRefGenes.length > 0"
-                 class="dropdown-divider">
-            </div>
+            <div
+              *ngIf="selectedQTLs.length > 0 && selectedRefGenes.length > 0"
+              class="dropdown-divider"
+            ></div>
 
             <!-- QTL selection -->
             <div *ngIf="selectedQTLs.length > 0">
               <label class="dropdown-header">QTLs</label>
 
-              <button *ngFor="let qtl of selectedQTLs"
-                      type="button" clrDropdownItem
-                      (click)="jumpToFeature(qtl)">
+              <button
+                *ngFor="let qtl of selectedQTLs"
+                type="button"
+                clrDropdownItem
+                (click)="jumpToFeature(qtl)"
+              >
                 {{ qtl.symbol }}
               </button>
             </div>
@@ -127,18 +150,22 @@
         </clr-dropdown>
 
         <!-- Zoom in button -->
-        <button class="btn btn-outline"
-                title="Zoom in"
-                [disabled]="!interval || interval.width === minimumIntervalSize"
-                (click)="zoomIn()" >
+        <button
+          class="btn btn-outline"
+          title="Zoom in"
+          [disabled]="!interval || interval.width === minimumIntervalSize"
+          (click)="zoomIn()"
+        >
           <clr-icon shape="zoom-in"></clr-icon>
         </button>
 
         <!-- Pan right button -->
-        <button class="btn btn-outline"
-                title="Pan right"
-                [disabled]="!interval || interval.refEnd === getRefChrSize()"
-                (click)="panRight()" >
+        <button
+          class="btn btn-outline"
+          title="Pan right"
+          [disabled]="!interval || interval.refEnd === getRefChrSize()"
+          (click)="panRight()"
+        >
           <clr-icon shape="fast-forward"></clr-icon>
         </button>
       </div>
@@ -146,14 +173,16 @@
 
     <!-- Block view options -->
     <div class="clr-col-xl-1 clr-col-2 bottom-1">
-      <h4> Options </h4>
+      <h4>Options</h4>
 
       <!-- Button group -->
       <div class="btn-group btn-icon">
         <!-- Download button -->
-        <button class="btn block-view-option"
-                [disabled]="!compGenes"
-                (click)="filenameModalOpen = true">
+        <button
+          class="btn block-view-option"
+          [disabled]="!compGenes"
+          (click)="filenameModalOpen = true"
+        >
           <clr-icon shape="download"></clr-icon>
         </button>
 
@@ -164,35 +193,47 @@
 
           <!-- Menu containing options -->
           <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
-            <h4> Block View Browser Settings </h4>
+            <h4>Block View Browser Settings</h4>
 
             <!-- Show gene symbols checkbox -->
             <clr-checkbox-wrapper>
-              <input type="checkbox" clrCheckbox id="symbols"
-                     [(ngModel)]="options.symbols"/>
+              <input
+                type="checkbox"
+                clrCheckbox
+                id="symbols"
+                [(ngModel)]="options.symbols"
+              />
               <label for="symbols">
-                Show all gene symbols <br/>
+                Show all gene symbols <br />
                 <span> (may affect performance) </span>
               </label>
             </clr-checkbox-wrapper>
 
             <!-- Show anchors checkbox -->
             <clr-checkbox-wrapper>
-              <input type="checkbox" clrCheckbox
-                     id="anchors"
-                     [(ngModel)]="options.anchors"/>
+              <input
+                type="checkbox"
+                clrCheckbox
+                id="anchors"
+                [(ngModel)]="options.anchors"
+              />
               <label for="anchors">
-                Show gene anchors <br/>
+                Show gene anchors <br />
                 <span> (may affect performance) </span>
               </label>
             </clr-checkbox-wrapper>
 
             <!-- True orientation checkbox -->
             <clr-checkbox-wrapper>
-              <input type="checkbox" clrCheckbox
-                     id="orientation"
-                     [(ngModel)]="options.trueOrientation"/>
-              <label for="orientation"> Show synteny in true orientation </label>
+              <input
+                type="checkbox"
+                clrCheckbox
+                id="orientation"
+                [(ngModel)]="options.trueOrientation"
+              />
+              <label for="orientation">
+                Show synteny in true orientation
+              </label>
             </clr-checkbox-wrapper>
           </clr-signpost-content>
         </clr-signpost>
@@ -201,43 +242,60 @@
   </div>
 
   <!-- Block view browser -->
-  <svg id="browser-svg" preserveAspectRatio="xMinYMin meet"
-       [attr.viewBox]="'0 0 ' + (width + 10) + ' ' + (height + 10)">
-
+  <svg
+    id="browser-svg"
+    preserveAspectRatio="xMinYMin meet"
+    [attr.viewBox]="'0 0 ' + (width + 10) + ' ' + (height + 10)"
+  >
     <!-- Content background -->
-    <rect [attr.width]="width + 10" [attr.height]="height + 10" fill="#FFF"></rect>
+    <rect
+      [attr.width]="width + 10"
+      [attr.height]="height + 10"
+      fill="#FFF"
+    ></rect>
 
     <!-- Content container -->
     <g id="block-view-content-container" [attr.transform]="translate([5, 0])">
       <!-- Genome view -->
-      <g id="genome-band" font-family="Metropolis, sans-serif"
-         [attr.transform]="translate([0, 10])">
+      <g
+        id="genome-band"
+        font-family="Metropolis, sans-serif"
+        [attr.transform]="translate([0, 10])"
+      >
         <!-- Synteny blocks for the reference genome -->
         <g id="genome-synteny-blocks">
-          <rect *ngFor="let blk of getGenomeBlocks()"
-                [attr.x]="refGMap.getBlockStart(blk)"
-                [attr.width]="refGMap.getBlockWidth(blk)"
-                height="20"
-                [attr.fill]="blk.getColor()">
-          </rect>
+          <rect
+            *ngFor="let blk of getGenomeBlocks()"
+            [attr.x]="refGMap.getBlockStart(blk)"
+            [attr.width]="refGMap.getBlockWidth(blk)"
+            height="20"
+            [attr.fill]="blk.getColor()"
+          ></rect>
         </g>
 
         <!-- Genome chromosomes -->
         <g id="genome-chrs">
           <!-- Chromosome overlays -->
-          <g *ngFor="let chr of ref.getChromosomes(); let i=index"
-             [attr.transform]="translate([refGMap.getChrPxStart(i), 0])">
-            <rect [attr.stroke]="chr === refChr ? '#555' : '#AAA'"
-                  stroke-width="0.5" fill="#FFF"
-                  [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
-                  [attr.width]="refGMap.getChrPxWidth(chr)"
-                  height="20">
-            </rect>
+          <g
+            *ngFor="let chr of ref.getChromosomes(); let i = index"
+            [attr.transform]="translate([refGMap.getChrPxStart(i), 0])"
+          >
+            <rect
+              [attr.stroke]="chr === refChr ? '#555' : '#AAA'"
+              stroke-width="0.5"
+              fill="#FFF"
+              [attr.fill-opacity]="chr === refChr ? '0.3' : '0.7'"
+              [attr.width]="refGMap.getChrPxWidth(chr)"
+              height="20"
+            ></rect>
 
             <!-- Chromosome labels -->
-            <text text-anchor="middle" font-size="10"
-                  [attr.fill-opacity]="chr === refChr ? '0' : '0.5'"
-                  [attr.transform]="getChrLabelPos(chr)">
+            <text
+              text-anchor="middle"
+              font-size="10"
+              [attr.fill-opacity]="chr === refChr ? '0' : '0.5'"
+              [attr.transform]="getChrLabelPos(chr)"
+            >
               {{ ref.abbrev }} {{ chr }}
             </text>
           </g>
@@ -245,110 +303,165 @@
 
         <!-- Lines mapping the selected chr from genome to chromosome view -->
         <g id="genome-to-chr-map-lines">
-          <line stroke="#777" stroke-width="0.5"
-                [attr.x1]="refGMap.bpToPxLocation(refChr, 0)"
-                y1="20" x2="0" [attr.y2]="chromosomeViewOffset + 2">
-          </line>
+          <line
+            stroke="#777"
+            stroke-width="0.5"
+            [attr.x1]="refGMap.bpToPxLocation(refChr, 0)"
+            y1="20"
+            x2="0"
+            [attr.y2]="chromosomeViewOffset + 2"
+          ></line>
 
-          <line stroke="#777" stroke-width="0.5"
-                [attr.x1]="refGMap.bpToPxLocation(refChr, getRefChrSize())"
-                y1="20"
-                [attr.x2]="width - 1"
-                [attr.y2]="chromosomeViewOffset + 2">
-          </line>
+          <line
+            stroke="#777"
+            stroke-width="0.5"
+            [attr.x1]="refGMap.bpToPxLocation(refChr, getRefChrSize())"
+            y1="20"
+            [attr.x2]="width - 1"
+            [attr.y2]="chromosomeViewOffset + 2"
+          ></line>
         </g>
       </g>
 
       <!-- Chromsome view -->
-      <g id="chromosome-view" font-size="8" font-family="Metropolis, sans-serif"
-         [attr.transform]="translate([0, chromosomeViewOffset])">
-        <rect fill="#FFF" stroke="#777" stroke-width="0.5"
-              [attr.transform]="translate([0, 12])" [attr.width]="width - 1"
-              [attr.height]="chromosomeViewHeight - 19">
-        </rect>
+      <g
+        id="chromosome-view"
+        font-size="8"
+        font-family="Metropolis, sans-serif"
+        [attr.transform]="translate([0, chromosomeViewOffset])"
+      >
+        <rect
+          fill="#FFF"
+          stroke="#777"
+          stroke-width="0.5"
+          [attr.transform]="translate([0, 12])"
+          [attr.width]="width - 1"
+          [attr.height]="chromosomeViewHeight - 19"
+        ></rect>
         <!-- Chromosome view syntenic blocks (and background) -->
         <g id="chr-view-blocks">
           <!-- Syntenic blocks -->
-          <rect *ngFor="let block of blocks" fill-opacity="0.5"
-                [attr.transform]="translate([staticRefBPToPixels(block.refStart), 15])"
-                [attr.width]="staticRefBPToPixels(block.refEnd - block.refStart)"
-                [attr.height]="chromosomeViewHeight - 25"
-                [ngStyle]="{ 'fill': block.getColor(legend.hoverChr),
-                             'stroke': block.getColor(legend.hoverChr) }">
-          </rect>
+          <rect
+            *ngFor="let block of blocks"
+            fill-opacity="0.5"
+            [attr.transform]="
+              translate([staticRefBPToPixels(block.refStart), 15])
+            "
+            [attr.width]="staticRefBPToPixels(block.refEnd - block.refStart)"
+            [attr.height]="chromosomeViewHeight - 25"
+            [ngStyle]="{
+              fill: block.getColor(legend.hoverChr),
+              stroke: block.getColor(legend.hoverChr)
+            }"
+          ></rect>
 
           <!-- Transparent cover for brush (and when rendered, brush elements) -->
           <g id="chr-view-inv-cover"></g>
         </g>
 
         <!-- Indicators for selected genes in the reference chromosome -->
-        <path *ngFor="let gene of selectedRefGenes" stroke="#F00"
-              class="ref-selected-ind"
-              [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
-              (click)="showDataForGene(gene)">
-        </path>
+        <path
+          *ngFor="let gene of selectedRefGenes"
+          stroke="#F00"
+          class="ref-selected-ind"
+          [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
+          (click)="showDataForGene(gene)"
+        ></path>
 
         <!-- Indicators for selected features in the comparison chromosome -->
-        <path *ngFor="let gene of selectedCompGenes" stroke="#F00"
-              class="comp-selected-ind"
-              [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)),
-                                   5,
-                                   chromosomeViewHeight - 8)"
-              (click)="showDataForGene(gene)">
-        </path>
+        <path
+          *ngFor="let gene of selectedCompGenes"
+          stroke="#F00"
+          class="comp-selected-ind"
+          [attr.d]="
+            getVLinePath(
+              gene.getCenterXPos(getStaticCompScale(gene)),
+              5,
+              chromosomeViewHeight - 8
+            )
+          "
+          (click)="showDataForGene(gene)"
+        ></path>
 
         <!-- Indicators for filtered genes in the reference chromosome -->
-        <path *ngFor="let gene of filteredRefGenes" stroke="#00F"
-              class="ref-filtered-ind"
-              [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
-              (click)="showDataForGene(gene)">
-        </path>
+        <path
+          *ngFor="let gene of filteredRefGenes"
+          stroke="#00F"
+          class="ref-filtered-ind"
+          [attr.d]="getVLinePath(gene.getCenterXPos(staticRefBPToPixels), 5, 8)"
+          (click)="showDataForGene(gene)"
+        ></path>
 
         <!-- Indicators for filtered features in the comparison chromosome -->
-        <path *ngFor="let gene of filteredCompGenes" stroke="#00F"
-              class="comp-filtered-ind"
-              [attr.d]="getVLinePath(gene.getCenterXPos(getStaticCompScale(gene)),
-                                   5,
-                                   chromosomeViewHeight - 8)"
-              (click)="showDataForGene(gene)">
-        </path>
+        <path
+          *ngFor="let gene of filteredCompGenes"
+          stroke="#00F"
+          class="comp-filtered-ind"
+          [attr.d]="
+            getVLinePath(
+              gene.getCenterXPos(getStaticCompScale(gene)),
+              5,
+              chromosomeViewHeight - 8
+            )
+          "
+          (click)="showDataForGene(gene)"
+        ></path>
 
         <!-- Indicators for selected QTLs -->
-        <path *ngFor="let qtl of selectedQTLs" class="qtl-ind"
-              stroke="#409" stroke-width="3" stroke-linecap="round"
-              [attr.d]="getHLinePath(qtl.indOffset,
-                                   qtl.getIndWidth(2),
-                                   qtl.getIndStart())">
-        </path>
+        <path
+          *ngFor="let qtl of selectedQTLs"
+          class="qtl-ind"
+          stroke="#409"
+          stroke-width="3"
+          stroke-linecap="round"
+          [attr.d]="
+            getHLinePath(qtl.indOffset, qtl.getIndWidth(2), qtl.getIndStart())
+          "
+        ></path>
 
         <!-- Static axis for chromosome view -->
-        <g id="chr-view-axis"
-           [attr.transform]="translate([0, chromosomeViewHeight])">
-        </g>
+        <g
+          id="chr-view-axis"
+          [attr.transform]="translate([0, chromosomeViewHeight])"
+        ></g>
       </g>
 
       <!-- Synteny browser -->
-      <g id="browser" font-family="Metropolis, sans-serif" font-size="8"
-         [attr.transform]="translate([0, browserOffset])">
+      <g
+        id="browser"
+        font-family="Metropolis, sans-serif"
+        font-size="8"
+        [attr.transform]="translate([0, browserOffset])"
+      >
         <!-- Reference species title -->
-        <text font-size="16" font-weight="bold" fill="#999"
-              [attr.transform]="translate([2, trackHeight + 16])">
+        <text
+          font-size="16"
+          font-weight="bold"
+          fill="#999"
+          [attr.transform]="translate([2, trackHeight + 16])"
+        >
           {{ ref.commonName | uppercase }}
         </text>
 
         <!-- Background -->
-        <rect class="trans-bg bg" [attr.height]="(2 * trackHeight) + 30"></rect>
+        <rect class="trans-bg bg" [attr.height]="2 * trackHeight + 30"></rect>
 
         <!-- Reference chromosome track -->
         <g id="reference-genome">
           <!-- Reference block coordinates -->
           <g *ngIf="blocks" id="reference-block-coordinates">
-            <g *ngFor="let block of blocks"
-               [attr.transform]="translate([refBPToPixels(block.refStart), 0])">
+            <g
+              *ngFor="let block of blocks"
+              [attr.transform]="translate([refBPToPixels(block.refStart), 0])"
+            >
               <g *ngIf="block.getPxWidth() > 125">
                 <!-- Vertical line extending start point of block -->
-                <path stroke="#AAA" stroke-width="1" shape-rendering="crispEdges"
-                      [attr.d]="getVLinePath(0, -8)"></path>
+                <path
+                  stroke="#AAA"
+                  stroke-width="1"
+                  shape-rendering="crispEdges"
+                  [attr.d]="getVLinePath(0, -8)"
+                ></path>
 
                 <!-- Starting block coordinate -->
                 <text [attr.transform]="translate([2, -2])">
@@ -356,83 +469,123 @@
                 </text>
 
                 <!-- Ending block coordinate -->
-                <text text-anchor="end"
-                      [attr.transform]="translate([block.getPxWidth() - 2, -2])">
+                <text
+                  text-anchor="end"
+                  [attr.transform]="translate([block.getPxWidth() - 2, -2])"
+                >
                   {{ block.getBlockRefEndLabel() }}
                 </text>
 
                 <!-- Vertical line extending end point of block -->
-                <path stroke="#AAA" stroke-width="1" shape-rendering="crispEdges"
-                      [attr.d]="getVLinePath(block.getPxWidth(), -8)">
-                </path>
+                <path
+                  stroke="#AAA"
+                  stroke-width="1"
+                  shape-rendering="crispEdges"
+                  [attr.d]="getVLinePath(block.getPxWidth(), -8)"
+                ></path>
               </g>
             </g>
           </g>
 
           <!-- Reference track syntenic blocks -->
           <g id="reference-blocks">
-            <rect *ngFor="let block of blocks" class="ref-block"
-                  fill="#CCC" fill-opacity="0.5" stroke-width="1" stroke="#AAA"
-                  [attr.x]="block.getPxStart()"
-                  [attr.width]="block.getPxWidth()"
-                  [attr.height]="trackHeight">
-            </rect>
+            <rect
+              *ngFor="let block of blocks"
+              class="ref-block"
+              fill="#CCC"
+              fill-opacity="0.5"
+              stroke-width="1"
+              stroke="#AAA"
+              [attr.x]="block.getPxStart()"
+              [attr.width]="block.getPxWidth()"
+              [attr.height]="trackHeight"
+            ></rect>
           </g>
 
           <!-- Selected QTLs -->
           <g id="qtls">
-            <rect *ngFor="let qtl of selectedQTLs" class="qtl"
-                  stroke="#409" fill="#409" fill-opacity="0.1"
-                  [attr.transform]="translate([qtl.getStart(refBPToPixels), qtl.offset])"
-                  [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
-                  [attr.height]="qtl.height">
-            </rect>
+            <rect
+              *ngFor="let qtl of selectedQTLs"
+              class="qtl"
+              stroke="#409"
+              fill="#409"
+              fill-opacity="0.1"
+              [attr.transform]="
+                translate([qtl.getStart(refBPToPixels), qtl.offset])
+              "
+              [attr.width]="qtl.getWidth(refBPToPixels, 0.5)"
+              [attr.height]="qtl.height"
+            ></rect>
           </g>
 
           <!-- Reference genes -->
           <g *ngIf="refGenes" id="reference-genes">
-            <g *ngFor="let gene of getRefGenesInView()"
-               [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))">
+            <g
+              *ngFor="let gene of getRefGenesInView()"
+              [attr.transform]="translate(gene.getRefPxCoords(refBPToPixels))"
+            >
               <!-- Gene label -->
-              <text *ngIf="gene.hasVisibleLabel() || options.symbols"
-                    [ngStyle]="{ 'fill': gene.getColor(),
-                                 'display': gene.hidden ? 'none' : 'initial' }"
-                    (click)="showDataForGene(gene)">
+              <text
+                *ngIf="gene.hasVisibleLabel() || options.symbols"
+                [ngStyle]="{
+                  fill: gene.getColor(),
+                  display: gene.hidden ? 'none' : 'initial'
+                }"
+                (click)="showDataForGene(gene)"
+              >
                 {{ gene.symbol }}
               </text>
 
               <!-- Transcript -->
               <g *ngIf="interval.width <= 5000000">
-                <rect *ngFor="let exon of gene.transcript" height="4"
-                      [attr.x]="gene.getRefExonXPos(exon, refBPToPixels)"
-                      [attr.width]="gene.getExonWidth(exon, refBPToPixels)"
-                      [ngStyle]="{ 'fill': gene.getColor(),
-                                   'display': gene.hidden ? 'none' : 'initial'}">
-                </rect>
+                <rect
+                  *ngFor="let exon of gene.transcript"
+                  height="4"
+                  [attr.x]="gene.getRefExonXPos(exon, refBPToPixels)"
+                  [attr.width]="gene.getExonWidth(exon, refBPToPixels)"
+                  [ngStyle]="{
+                    fill: gene.getColor(),
+                    display: gene.hidden ? 'none' : 'initial'
+                  }"
+                ></rect>
               </g>
 
               <!-- Gene -->
-              <line y1="2" y2="2" stroke-width="1"
-                    [attr.x2]="gene.getWidth(refBPToPixels)"
-                    [ngStyle]="{ 'stroke': gene.getColor(),
-                                 'display': gene.hidden ? 'none' : 'initial' }">
-              </line>
+              <line
+                y1="2"
+                y2="2"
+                stroke-width="1"
+                [attr.x2]="gene.getWidth(refBPToPixels)"
+                [ngStyle]="{
+                  stroke: gene.getColor(),
+                  display: gene.hidden ? 'none' : 'initial'
+                }"
+              ></line>
 
               <!-- Gene Overlay -->
-              <rect height="5" fill="transparent" class="ref-gene"
-                    [attr.width]="gene.getWidth(refBPToPixels)"
-                    (click)="showDataForGene(gene)">
-              </rect>
+              <rect
+                height="5"
+                fill="transparent"
+                class="ref-gene"
+                [attr.width]="gene.getWidth(refBPToPixels)"
+                (click)="showDataForGene(gene)"
+              ></rect>
             </g>
           </g>
         </g>
 
         <!-- Orientation indicators -->
-        <g *ngIf="blocks && !options.trueOrientation" id="orientation-indicators"
-           [attr.transform]="translate([0, trackHeight])">
-          <g *ngFor="let blk of getNonMatchedBlocks()"
-             [attr.transform]="translate([refBPToPixels(blk.refStart), 0])"
-             stroke="#F00" stroke-width="0.5">
+        <g
+          *ngIf="blocks && !options.trueOrientation"
+          id="orientation-indicators"
+          [attr.transform]="translate([0, trackHeight])"
+        >
+          <g
+            *ngFor="let blk of getNonMatchedBlocks()"
+            [attr.transform]="translate([refBPToPixels(blk.refStart), 0])"
+            stroke="#F00"
+            stroke-width="0.5"
+          >
             <line [attr.x2]="blk.getPxWidth()" y2="30"></line>
 
             <line [attr.x2]="blk.getPxWidth()" y1="30" y2="0"></line>
@@ -440,68 +593,108 @@
         </g>
 
         <!-- Comparison chromosome track -->
-        <g id="comparison-genome" [attr.transform]="translate([0, trackHeight + 30])">
+        <g
+          id="comparison-genome"
+          [attr.transform]="translate([0, trackHeight + 30])"
+        >
           <!-- Comparison track syntenic blocks -->
           <g id="comparison-blocks">
-            <rect *ngFor="let block of blocks" class="comp-block"
-                  fill-opacity="0.5" stroke-width="1"
-                  [attr.x]="block.getPxStart()"
-                  [attr.width]="block.getPxWidth()"
-                  [attr.height]="trackHeight"
-                  [ngStyle]="{ 'fill': block.getColor(legend.hoverChr),
-                               'stroke': block.getColor(legend.hoverChr) }">
-            </rect>
+            <rect
+              *ngFor="let block of blocks"
+              class="comp-block"
+              fill-opacity="0.5"
+              stroke-width="1"
+              [attr.x]="block.getPxStart()"
+              [attr.width]="block.getPxWidth()"
+              [attr.height]="trackHeight"
+              [ngStyle]="{
+                fill: block.getColor(legend.hoverChr),
+                stroke: block.getColor(legend.hoverChr)
+              }"
+            ></rect>
           </g>
 
           <!-- Comparison genes -->
           <g *ngIf="compGenes && blocks" id="comparison-genes">
-            <g *ngFor="let gene of getCompGenesInView()"
-               [attr.transform]="translate(gene.getCompPxCoords(getScale(gene),
-                                         options.trueOrientation))">
+            <g
+              *ngFor="let gene of getCompGenesInView()"
+              [attr.transform]="
+                translate(
+                  gene.getCompPxCoords(getScale(gene), options.trueOrientation)
+                )
+              "
+            >
               <!-- Gene label -->
-              <text *ngIf="gene.hasVisibleLabel() || options.symbols"
-                    [ngStyle]="{ 'fill': gene.getColor(),
-                                 'display': gene.hidden ? 'none' : 'initial' }"
-                    (click)="showDataForGene(gene)">
+              <text
+                *ngIf="gene.hasVisibleLabel() || options.symbols"
+                [ngStyle]="{
+                  fill: gene.getColor(),
+                  display: gene.hidden ? 'none' : 'initial'
+                }"
+                (click)="showDataForGene(gene)"
+              >
                 {{ gene.symbol }}
               </text>
 
               <!-- Transcript -->
               <g *ngIf="interval.width <= 5000000">
-                <rect *ngFor="let exon of gene.transcript" height="4"
-                      [attr.x]="gene.getCompExonXPos(exon, getScale(gene),
-                                                   options.trueOrientation)"
-                      [attr.width]="gene.getExonWidth(exon, getScale(gene))"
-                      [ngStyle]="{ 'fill': gene.getColor(),
-                                   'display': gene.hidden ? 'none' : 'initial' }">
-                </rect>
+                <rect
+                  *ngFor="let exon of gene.transcript"
+                  height="4"
+                  [attr.x]="
+                    gene.getCompExonXPos(
+                      exon,
+                      getScale(gene),
+                      options.trueOrientation
+                    )
+                  "
+                  [attr.width]="gene.getExonWidth(exon, getScale(gene))"
+                  [ngStyle]="{
+                    fill: gene.getColor(),
+                    display: gene.hidden ? 'none' : 'initial'
+                  }"
+                ></rect>
               </g>
 
               <!-- Gene -->
-              <line y1="2" y2="2" stroke-width="1"
-                    [attr.x2]="gene.getWidth(getScale(gene))"
-                    [ngStyle]="{ 'stroke': gene.getColor(),
-                                 'display': gene.hidden ? 'none' : 'initial' }">
-              </line>
+              <line
+                y1="2"
+                y2="2"
+                stroke-width="1"
+                [attr.x2]="gene.getWidth(getScale(gene))"
+                [ngStyle]="{
+                  stroke: gene.getColor(),
+                  display: gene.hidden ? 'none' : 'initial'
+                }"
+              ></line>
 
               <!-- Gene Overlay -->
-              <rect height="5" fill="transparent" class="comp-gene"
-                    [attr.width]="gene.getWidth(getScale(gene))"
-                    (click)="showDataForGene(gene)">
-              </rect>
+              <rect
+                height="5"
+                fill="transparent"
+                class="comp-gene"
+                [attr.width]="gene.getWidth(getScale(gene))"
+                (click)="showDataForGene(gene)"
+              ></rect>
             </g>
           </g>
 
           <!-- Comparison block coordinates -->
           <g *ngIf="blocks" id="comparison-block-coordinates">
-            <g *ngFor="let block of blocks" font-size="8"
-               [attr.transform]="translate([refBPToPixels(block.refStart),
-                                          trackHeight + 9])">
+            <g
+              *ngFor="let block of blocks"
+              font-size="8"
+              [attr.transform]="
+                translate([refBPToPixels(block.refStart), trackHeight + 9])
+              "
+            >
               <g *ngIf="block.getPxWidth() > 125">
                 <!-- Vertical line extending start point of block -->
-                <path shape-rendering="crispEdges" [attr.d]="getVLinePath(0, -10)"
-                      [attr.stroke]="block.getColor(legend.hoverChr)">
-                </path>
+                <path
+                  shape-rendering="crispEdges"
+                  [attr.d]="getVLinePath(0, -10)"
+                  [attr.stroke]="block.getColor(legend.hoverChr)"
+                ></path>
 
                 <!-- Starting block coordinate -->
                 <text [attr.transform]="translate([2, -1])">
@@ -509,16 +702,19 @@
                 </text>
 
                 <!-- Ending block coordinate -->
-                <text text-anchor="end"
-                      [attr.transform]="translate([block.getPxWidth() - 2, -1])">
+                <text
+                  text-anchor="end"
+                  [attr.transform]="translate([block.getPxWidth() - 2, -1])"
+                >
                   {{ block.getBlockCompEndLabel(options.trueOrientation) }}
                 </text>
 
                 <!-- Vertical line extending end point of block -->
-                <path shape-rendering="crispEdges"
-                      [attr.d]="getVLinePath(block.getPxWidth(), -10)"
-                      [attr.stroke]="block.getColor(legend.hoverChr)">
-                </path>
+                <path
+                  shape-rendering="crispEdges"
+                  [attr.d]="getVLinePath(block.getPxWidth(), -10)"
+                  [attr.stroke]="block.getColor(legend.hoverChr)"
+                ></path>
               </g>
             </g>
           </g>
@@ -526,19 +722,29 @@
 
         <!-- Gene anchors -->
         <g *ngIf="options.anchors && refGenes" id="gene-anchors">
-          <path *ngFor="let gene of getHomologousRefGenes()"
-                stroke="#777" stroke-width="0.5" stroke-dasharray="2" fill="none"
-                [attr.d]="getAnchorPathCommand(gene)">
-          </path>
+          <path
+            *ngFor="let gene of getHomologousRefGenes()"
+            stroke="#777"
+            stroke-width="0.5"
+            stroke-dasharray="2"
+            fill="none"
+            [attr.d]="getAnchorPathCommand(gene)"
+          ></path>
         </g>
 
         <!-- Interval coordinates for current view extents in reference positions -->
-        <g *ngIf="interval" id="reference-interval-coordinates" font-size="10"
-           [attr.transform]="translate([0, -15])">
+        <g
+          *ngIf="interval"
+          id="reference-interval-coordinates"
+          font-size="10"
+          [attr.transform]="translate([0, -15])"
+        >
           <!-- Vertical line extending start point of reference interval -->
-          <path stroke="#000" stroke-width="1.5"
-                [attr.d]="getVLinePath(0, trackHeight + 23, -8)">
-          </path>
+          <path
+            stroke="#000"
+            stroke-width="1.5"
+            [attr.d]="getVLinePath(0, trackHeight + 23, -8)"
+          ></path>
 
           <!-- Start position -->
           <text [attr.transform]="translate([2, 0])">
@@ -551,24 +757,36 @@
           </text>
 
           <!-- Vertical line extending end point of reference interval -->
-          <path stroke="#000" stroke-width="1.5"
-                [attr.d]="getVLinePath(width, trackHeight + 23, -8)">
-          </path>
+          <path
+            stroke="#000"
+            stroke-width="1.5"
+            [attr.d]="getVLinePath(width, trackHeight + 23, -8)"
+          ></path>
         </g>
 
         <!-- Comparison species title -->
-        <text font-weight="bold" fill="#999" font-size="16"
-              [attr.transform]="translate([2, 2*trackHeight + 54])">
+        <text
+          font-weight="bold"
+          fill="#999"
+          font-size="16"
+          [attr.transform]="translate([2, 2 * trackHeight + 54])"
+        >
           {{ comp.commonName | uppercase }}
         </text>
 
         <!-- Interval coordinates for current view extents in comparison positions -->
-        <g *ngIf="interval" id="comparison-interval-coordinates" font-size="10"
-           [attr.transform]="translate([0, 2*trackHeight + 65])">
+        <g
+          *ngIf="interval"
+          id="comparison-interval-coordinates"
+          font-size="10"
+          [attr.transform]="translate([0, 2 * trackHeight + 65])"
+        >
           <!-- Vertical line extending start point of comparison interval -->
-          <path stroke="#000" stroke-width="1.5"
-                [attr.d]="getVLinePath(0, -(trackHeight + 36), 1)">
-          </path>
+          <path
+            stroke="#000"
+            stroke-width="1.5"
+            [attr.d]="getVLinePath(0, -(trackHeight + 36), 1)"
+          ></path>
 
           <!-- Start position -->
           <text [attr.transform]="translate([2, 0])">
@@ -581,15 +799,21 @@
           </text>
 
           <!-- Vertical line extending end point of comparison interval -->
-          <path stroke="#000" stroke-width="1.5"
-                [attr.d]="getVLinePath(width, -(trackHeight + 36), 1)">
-          </path>
+          <path
+            stroke="#000"
+            stroke-width="1.5"
+            [attr.d]="getVLinePath(width, -(trackHeight + 36), 1)"
+          ></path>
         </g>
       </g>
 
       <!-- Comparison genome legend -->
-      <g *ngIf="legend" id="legend-container" font-family="Metropolis, sans-serif"
-         [attr.transform]="translate([0, legend.offsetY])">
+      <g
+        *ngIf="legend"
+        id="legend-container"
+        font-family="Metropolis, sans-serif"
+        [attr.transform]="translate([0, legend.offsetY])"
+      >
         <!-- Title -->
         <text text-anchor="middle" [attr.transform]="translate([width / 2, 0])">
           {{ comp.commonName }} Genome Key
@@ -597,20 +821,26 @@
 
         <!-- Legend -->
         <g id="legend" [attr.transform]="translate([legend.offsetX, 20])">
-          <g *ngFor="let chr of legend.allChrs" font-size="12"
-             [attr.transform]="translate([legend.getXPos(chr), 0])"
-             (mouseenter)="legend.isActive(chr) ? legend.hover(chr) : null"
-             (mouseleave)="legend.hover()">
+          <g
+            *ngFor="let chr of legend.allChrs"
+            font-size="12"
+            [attr.transform]="translate([legend.getXPos(chr), 0])"
+            (mouseenter)="legend.isActive(chr) ? legend.hover(chr) : null"
+            (mouseleave)="legend.hover()"
+          >
             <!-- Colored circles -->
-            <circle r="10"
-                    [attr.fill]="legend.getColor(chr)"
-                    [attr.fill-opacity]="legend.getOpacity(chr)">
-            </circle>
+            <circle
+              r="10"
+              [attr.fill]="legend.getColor(chr)"
+              [attr.fill-opacity]="legend.getOpacity(chr)"
+            ></circle>
 
             <!-- Chromosome label -->
-            <text text-anchor="middle"
-                  [attr.transform]="translate([0, 25])"
-                  [attr.fill-opacity]="legend.getOpacity(chr)">
+            <text
+              text-anchor="middle"
+              [attr.transform]="translate([0, 25])"
+              [attr.fill-opacity]="legend.getOpacity(chr)"
+            >
               {{ chr }}
             </text>
           </g>
@@ -618,12 +848,18 @@
       </g>
 
       <!-- Margins (visually blocks overflow from container) -->
-      <rect [attr.height]="height + 10" width="4" fill="#FFF"
-            [attr.transform]="translate([-5, 0])">
-      </rect>
-      <rect [attr.height]="height + 10" width="4" fill="#FFF"
-            [attr.transform]="translate([width + 1, 0])">
-      </rect>
+      <rect
+        [attr.height]="height + 10"
+        width="4"
+        fill="#FFF"
+        [attr.transform]="translate([-5, 0])"
+      ></rect>
+      <rect
+        [attr.height]="height + 10"
+        width="4"
+        fill="#FFF"
+        [attr.transform]="translate([width + 1, 0])"
+      ></rect>
     </g>
 
     <!-- Loading overlay -->
@@ -640,10 +876,12 @@
     <p *ngFor="let key of getTTItems(c)">
       <span style="font-weight: bold">{{ key }}:</span> {{ c.content[key] }}
     </p>
-    <br/>
+    <br />
     <h4>Resources</h4>
     <p *ngFor="let r of c.resources">
-      <a [href]="r.url + c.id" target="_blank">See information on {{ r.name }}</a>
+      <a [href]="r.url + c.id" target="_blank"
+        >See information on {{ r.name }}</a
+      >
     </p>
   </div>
 </clr-modal>
@@ -658,13 +896,20 @@
         <clr-input-container style="margin-top: 0.4rem;">
           <label for="filename-input"></label>
 
-          <input id="filename-input" clrInput placeholder="Name the file (.png)"
-                 [(ngModel)]="downloadFilename">
+          <input
+            id="filename-input"
+            clrInput
+            placeholder="Name the file (.png)"
+            [(ngModel)]="downloadFilename"
+          />
         </clr-input-container>
       </div>
       <div class="clr-col">
-        <button class="btn" [disabled]="downloadFilename === ''"
-                (click)="download()">
+        <button
+          class="btn"
+          [disabled]="downloadFilename === ''"
+          (click)="download()"
+        >
           OK
         </button>
       </div>

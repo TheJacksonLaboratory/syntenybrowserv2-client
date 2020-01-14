@@ -1,16 +1,23 @@
 export class Feature {
   id: string;
+
   symbol: string;
+
   chr: string;
+
   start: number;
+
   end: number;
+
   type: string;
+
   gene: boolean;
 
   term: string;
+
   termID: string;
 
-  selected: boolean = false;
+  selected = false;
 
   constructor(feature: any, assocMode = false) {
     this.id = feature.id;
@@ -21,27 +28,25 @@ export class Feature {
     this.start = feature.start;
     this.end = feature.end;
 
-    if(assocMode) {
+    if (assocMode) {
       this.term = feature.term_name;
       this.termID = feature.term_id;
     }
   }
 
-
-  //Operational Methods
-
   /**
    * Sets the selected flag to false (deselects the current feature)
    */
-  deselect(): void { this.selected = false; }
+  deselect(): void {
+    this.selected = false;
+  }
 
   /**
    * Sets the selected flag to true (selects the current feature)
    */
-  select(): void { this.selected = true; }
-
-
-  // Condition Checks
+  select(): void {
+    this.selected = true;
+  }
 
   /**
    * Returns true if the feature's symbol *is the same as* the

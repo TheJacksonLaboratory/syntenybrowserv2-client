@@ -1,22 +1,26 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SpeciesSelectionComponent } from './species-selection.component';
 import { FormsModule } from '@angular/forms';
-import { ClrFormsNextModule } from '@clr/angular';
-import { Species } from '../classes/species';
 import { By } from '@angular/platform-browser';
-
-const DUAL_SPECIES: Species[] = [ new Species(9606), new Species(10090) ];
-const MULTI_SPECIES: Species[] = [ new Species(9606), new Species(10090), new Species(0) ];
+import { Species } from '../classes/species';
+import { SpeciesSelectionComponent } from './species-selection.component';
 
 describe('SpeciesSelectionComponent', () => {
   let component: SpeciesSelectionComponent;
   let fixture: ComponentFixture<SpeciesSelectionComponent>;
 
+  let dualSpecies: Species[];
+  let multiSpecies: Species[];
+
+  beforeAll(() => {
+    dualSpecies = [new Species(9606), new Species(10090)];
+    multiSpecies = [new Species(9606), new Species(10090), new Species(0)];
+  });
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SpeciesSelectionComponent ],
-      imports: [ FormsModule, ClrFormsNextModule ]
+      declarations: [SpeciesSelectionComponent],
+      imports: [FormsModule],
     }).compileComponents();
   }));
 
@@ -36,27 +40,27 @@ describe('SpeciesSelectionComponent', () => {
 
   describe('Dual Species Selection', () => {
     it('should create reference and comparison species for only two species total', () => {
-      component.setSpecies(DUAL_SPECIES);
+      component.setSpecies(dualSpecies);
 
       expect(component.refSpecies).toEqual('9606');
-      expect(component.getReferenceSelection()).toEqual(DUAL_SPECIES[0]);
+      expect(component.getReferenceSelection()).toEqual(dualSpecies[0]);
 
       expect(component.compSpecies).toEqual('10090');
-      expect(component.getComparisonSelection()).toEqual(DUAL_SPECIES[1]);
+      expect(component.getComparisonSelection()).toEqual(dualSpecies[1]);
     });
 
     it('should select first reference and non-reference comparison with reference disabled in comparison', () => {
-      component.setSpecies(DUAL_SPECIES);
+      component.setSpecies(dualSpecies);
 
       fixture.detectChanges();
       // wait until select elements stabilize (i.e. pick up their selection values)
       fixture.whenStable().then(() => {
         // test that first option is selected as reference by default
-        let refSelect = fixture.debugElement.query(By.css('#ref')).nativeElement;
+        const refSelect = fixture.debugElement.query(By.css('#ref')).nativeElement;
         expect(refSelect.value).toBe('9606');
 
         // test reference options are in the correct order and all are enabled
-        let refOptions = fixture.debugElement.queryAll(By.css('#ref option'));
+        const refOptions = fixture.debugElement.queryAll(By.css('#ref option'));
         expect(refOptions.length).toBe(2);
         expect(refOptions[0].nativeElement.value).toBe('9606');
         expect(refOptions[0].nativeElement.disabled).toBeFalsy();
@@ -64,11 +68,12 @@ describe('SpeciesSelectionComponent', () => {
         expect(refOptions[1].nativeElement.disabled).toBeFalsy();
 
         // test that second option is selected as comparison by default
-        let compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
+        const compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
         expect(compSelect.value).toBe('10090');
 
-        // test comparison options are in the correct order and species selected as reference is disabled
-        let compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
+        // test comp options are in the correct order and species selected as
+        // reference is disabled
+        const compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
         expect(compOptions.length).toBe(2);
         expect(compOptions[0].nativeElement.value).toBe('9606');
         expect(compOptions[0].nativeElement.disabled).toBeTruthy();
@@ -78,13 +83,13 @@ describe('SpeciesSelectionComponent', () => {
     });
 
     it('should select the non-reference species for comparison when reference is changed', () => {
-      component.setSpecies(DUAL_SPECIES);
+      component.setSpecies(dualSpecies);
 
       fixture.detectChanges();
 
       // wait until select elements stabilize (i.e. pick up their selection values)
       fixture.whenStable().then(() => {
-        let refSelect = fixture.debugElement.query(By.css('#ref'));
+        const refSelect = fixture.debugElement.query(By.css('#ref'));
 
         // simulate a change to the selected reference species
         component.refSpecies = component.species[1].getID();
@@ -98,12 +103,12 @@ describe('SpeciesSelectionComponent', () => {
           expect(refSelect.nativeElement.value).toBe('10090');
 
           // test that comparison has been updated accordingly
-          let compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
+          const compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
           expect(compSelect.value).toBe('9606');
 
           // test comparison options remain in the same order and new reference
           // species is disabled and the old reference is now enabled and selected
-          let compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
+          const compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
           expect(compOptions.length).toBe(2);
           expect(compOptions[0].nativeElement.value).toBe('9606');
           expect(compOptions[0].nativeElement.disabled).toBeFalsy();
@@ -111,10 +116,10 @@ describe('SpeciesSelectionComponent', () => {
           expect(compOptions[1].nativeElement.disabled).toBeTruthy();
 
           expect(component.refSpecies).toEqual('10090');
-          expect(component.getReferenceSelection()).toEqual(MULTI_SPECIES[1]);
+          expect(component.getReferenceSelection()).toEqual(multiSpecies[1]);
 
           expect(component.compSpecies).toEqual('9606');
-          expect(component.getComparisonSelection()).toEqual(MULTI_SPECIES[0]);
+          expect(component.getComparisonSelection()).toEqual(multiSpecies[0]);
         });
       });
     });
@@ -122,30 +127,30 @@ describe('SpeciesSelectionComponent', () => {
 
   describe('Multiple Species Selection', () => {
     it('should create reference and comparison species for more than two species', () => {
-      component.setSpecies(MULTI_SPECIES);
+      component.setSpecies(multiSpecies);
 
       expect(component.species.length).toEqual(3);
       expect(component.species[2].getID()).toBe('0');
 
       expect(component.refSpecies).toEqual('9606');
-      expect(component.getReferenceSelection()).toEqual(MULTI_SPECIES[0]);
+      expect(component.getReferenceSelection()).toEqual(multiSpecies[0]);
 
       expect(component.compSpecies).toEqual('10090');
-      expect(component.getComparisonSelection()).toEqual(MULTI_SPECIES[1]);
+      expect(component.getComparisonSelection()).toEqual(multiSpecies[1]);
     });
 
     it('should select first reference and second comparison with reference disabled in comparison', () => {
-      component.setSpecies(MULTI_SPECIES);
+      component.setSpecies(multiSpecies);
 
       fixture.detectChanges();
       // wait until select elements stabilize (i.e. pick up their selection values)
       fixture.whenStable().then(() => {
         // test that first option is selected as reference by default
-        let refSelect = fixture.debugElement.query(By.css('#ref')).nativeElement;
+        const refSelect = fixture.debugElement.query(By.css('#ref')).nativeElement;
         expect(refSelect.value).toBe('9606');
 
         // test reference options are in the correct order and all are enabled
-        let refOptions = fixture.debugElement.queryAll(By.css('#ref option'));
+        const refOptions = fixture.debugElement.queryAll(By.css('#ref option'));
         expect(refOptions.length).toBe(3);
         expect(refOptions[0].nativeElement.value).toBe('9606');
         expect(refOptions[0].nativeElement.disabled).toBeFalsy();
@@ -155,11 +160,12 @@ describe('SpeciesSelectionComponent', () => {
         expect(refOptions[2].nativeElement.disabled).toBeFalsy();
 
         // test that second option is selected as comparison by default
-        let compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
+        const compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
         expect(compSelect.value).toBe('10090');
 
-        // test comparison options are in the correct order and species selected as reference is disabled
-        let compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
+        // test comparison options are in the correct order and species
+        // selected as reference is disabled
+        const compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
         expect(compOptions.length).toBe(3);
         expect(compOptions[0].nativeElement.value).toBe('9606');
         expect(compOptions[0].nativeElement.disabled).toBeTruthy();
@@ -171,13 +177,13 @@ describe('SpeciesSelectionComponent', () => {
     });
 
     it('should change comparison to first non-reference species if reference is changed to current comparison', () => {
-      component.setSpecies(MULTI_SPECIES);
+      component.setSpecies(multiSpecies);
 
       fixture.detectChanges();
 
       // wait until select elements stabilize (i.e. pick up their selection values)
       fixture.whenStable().then(() => {
-        let refSelect = fixture.debugElement.query(By.css('#ref'));
+        const refSelect = fixture.debugElement.query(By.css('#ref'));
 
         // simulate a change to the selected reference species
         component.refSpecies = component.species[1].getID();
@@ -191,12 +197,12 @@ describe('SpeciesSelectionComponent', () => {
           expect(refSelect.nativeElement.value).toBe('10090');
 
           // test that comparison has been updated accordingly
-          let compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
+          const compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
           expect(compSelect.value).toBe('9606');
 
           // test comparison options remain in the same order and new reference
           // species is disabled and the old reference is now enabled and selected
-          let compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
+          const compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
           expect(compOptions.length).toBe(3);
           expect(compOptions[0].nativeElement.value).toBe('9606');
           expect(compOptions[0].nativeElement.disabled).toBeFalsy();
@@ -209,13 +215,13 @@ describe('SpeciesSelectionComponent', () => {
     });
 
     it('should not change comparison if reference is changed to non-current comparison', () => {
-      component.setSpecies(MULTI_SPECIES);
+      component.setSpecies(multiSpecies);
 
       fixture.detectChanges();
 
       // wait until select elements stabilize (i.e. pick up their selection values)
       fixture.whenStable().then(() => {
-        let refSelect = fixture.debugElement.query(By.css('#ref'));
+        const refSelect = fixture.debugElement.query(By.css('#ref'));
 
         // simulate a change to the selected reference species
         component.refSpecies = component.species[2].getID();
@@ -229,12 +235,12 @@ describe('SpeciesSelectionComponent', () => {
           expect(refSelect.nativeElement.value).toBe('0');
 
           // test that comparison hasn't been changed
-          let compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
+          const compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
           expect(compSelect.value).toBe('10090');
 
           // test comparison options remain in the same order and new reference
           // species is disabled and the old reference is now enabled
-          let compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
+          const compOptions = fixture.debugElement.queryAll(By.css('#comp option'));
           expect(compOptions[0].nativeElement.value).toBe('9606');
           expect(compOptions[0].nativeElement.disabled).toBeFalsy();
           expect(compOptions[1].nativeElement.value).toBe('10090');

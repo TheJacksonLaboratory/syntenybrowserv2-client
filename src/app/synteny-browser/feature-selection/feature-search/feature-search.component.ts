@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Species } from '../../classes/species';
 import { ApiService } from '../../services/api.service';
 import { TableData } from '../../classes/table-data';
@@ -7,19 +7,22 @@ import { Feature } from '../../classes/feature';
 @Component({
   selector: 'feature-search',
   templateUrl: './feature-search.component.html',
-  styleUrls: ['./feature-search.component.scss']
+  styleUrls: ['./feature-search.component.scss'],
 })
 export class FeatureSearchComponent {
   refSpecies: Species;
 
   features: TableData<Feature>;
-  featuresSearch: string = '';
+
+  featuresSearch = '';
 
   @Output() update: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: ApiService) {
-    this.features = new TableData(['id', 'symbol', 'chr', 'start', 'end', 'type'],
-                                  ['id', 'symbol', 'type']);
+    this.features = new TableData(
+      ['id', 'symbol', 'chr', 'start', 'end', 'type'],
+      ['id', 'symbol', 'type'],
+    );
   }
 
   /**
@@ -31,15 +34,15 @@ export class FeatureSearchComponent {
   loadFeatures(refSpecies: Species): void {
     this.refSpecies = refSpecies;
     this.features.loading = true;
-    this.http.getAllGenes(this.refSpecies.getID())
-             .subscribe(genes => {
-               this.features.setRows(genes);
+    this.http.getAllGenes(this.refSpecies.getID()).subscribe(genes => {
+      this.features.setRows(genes);
 
-               if(this.refSpecies.hasQTLs) {
-                 this.http.getAllQTLs(this.refSpecies.getID())
-                   .subscribe(qtls => this.features.rows.push(...qtls));
-               }
-             });
+      if (this.refSpecies.hasQTLs) {
+        this.http
+          .getAllQTLs(this.refSpecies.getID())
+          .subscribe(qtls => this.features.rows.push(...qtls));
+      }
+    });
   }
 
   /**
@@ -54,6 +57,7 @@ export class FeatureSearchComponent {
    * Removes the gene association with the specified symbol from the selections
    * @param {string} symbol - the symbol of the gene association to remove
    */
-  removeFeature(symbol: string): void { this.features.removeSelection(symbol); }
-
+  removeFeature(symbol: string): void {
+    this.features.removeSelection(symbol);
+  }
 }
