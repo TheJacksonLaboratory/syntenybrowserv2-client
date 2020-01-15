@@ -11,24 +11,34 @@ import { DataStorageService } from '../services/data-storage.service';
   styleUrls: ['./feature-selection.component.scss'],
 })
 export class FeatureSelectionComponent {
+  // ontology search table child component
   @ViewChild(OntologySearchComponent, { static: true })
   ontologySearch: OntologySearchComponent;
 
+  // feature search table child component
   @ViewChild(FeatureSearchComponent, { static: true })
   featureSearch: FeatureSearchComponent;
 
+  // currently selected reference species
   refSpecies: Species;
 
+  // controls which table is visible ('symbol' shows feature search and
+  // 'ontology' shows ontology search)
   searchType = 'symbol';
 
+  // prefix of the currently selected ontology to search
   ontology: string;
 
+  // search term to filter the datagrid content
   search = '';
 
+  // list of currently selected features
   selections: Feature[] = [];
 
+  // feature symbols that should get highlighted tags in the selections field
   highlighted: string[];
 
+  // emits when the selections list changes
   @Output() update: EventEmitter<any> = new EventEmitter();
 
   constructor(private data: DataStorageService) {}

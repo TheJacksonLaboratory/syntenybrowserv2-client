@@ -12,34 +12,48 @@ import { Feature } from './feature';
 import { DescendantTerm, OntologyTerm } from './interfaces';
 
 export class TableData<T> {
+  // indicates if the table is still waiting for data to load into the datagrid
   loading: boolean;
 
+  // list of all features or ontology terms
   rows: T[] = [];
 
+  // list of all visible features (responds to filtering/searching)
   filteredRows: T[] = [];
 
+  // columns needed to display in the datagrid
   columns: string[];
 
+  // subset of columns that should be searched for filter matches
   searchableColumns: string[];
 
+  // indicates if the user is utilizing dragging to select rows in the table
   dragging = false;
 
+  // while dragging, controls if the user is selecting or deselecting rows
   dragMode: string = null;
 
-  // only features are stored in the selections array
+  // selected features (only features are stored in the selections array; while users can
+  // "select" an ontology term, by doing so, they are selecting all genes associated
+  // with that term)
   selections: Feature[] = [];
 
-  // sorting classes
+  // sorts features or ontology terms by ID
   idComp = new IDComparator();
 
+  // sorts features by symbol
   symbolComp = new SymbolComparator();
 
+  // sorts features by type
   typeComp = new TypeComparator();
 
+  // sorts features by chromosome it's located on
   chrComp = new ChrComparator();
 
+  // sorts ontology terms by the number of descendant terms it has
   descComp = new DescendantsComparator();
 
+  // sorts ontology terms by term name
   nameComp = new NameComparator();
 
   constructor(columns: string[], searchable: string[]) {

@@ -1,35 +1,29 @@
 /**
  * This class is to be used within a Filter class as a single filter can have
  * multiple conditions
- * @var filterBy - string attribute to filter genes by
- * @var qualifier - string value equivalent of how matches should be found
- *                  (options are equal, like, not equal, not like)
- * @var exact - boolean that will be used for ontology conditions (exact = true,
- *              match genes that are associated with term selected; exact =
- *              false, match genes that are associated with terms that match the
- *              input value
- * @var value - the actual string value to match genes against
- * @var removable - a boolean describing whether the condition is removable from
- *                  the list of conditions (within the filter) which is true
- *                  unless the condition is the ONLY one
- * @var id - the numeric id of the condition for identification purposes within
- *           a filter's condition list
- * @var editing - a boolean describing whether the condition is currently in
- *                edit mode or not
  */
 export class FilterCondition {
+  // attribute to filter features by (ontology term, symbol, id, type, etc.)
   filterBy = '';
 
+  // qualifier to change how matches are found (equal, not equal, like, not like)
   qualifier = 'equal';
 
+  // boolean that will be used for ontology conditions (exact = true, match genes that
+  // are associated with term selected; exact = false, match genes that are associated
+  // with terms that match the input value
   exact = true;
 
+  // value to match features against when searching utilizing user input
   value: string;
 
+  // controls if the condition can be removed (true unless it's the only condition in a filter)
   removable: boolean;
 
+  // ID to identify it from other conditions in the filter
   id: number;
 
+  // indicates if the condition is currently being edited
   editing = true;
 
   constructor(id: number) {

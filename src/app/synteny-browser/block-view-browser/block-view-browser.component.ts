@@ -26,84 +26,121 @@ import { LinearGenomeMap } from '../classes/linear-genome-map';
   styleUrls: ['./block-view-browser.component.scss'],
 })
 export class BlockViewBrowserComponent {
+  // currently selected reference species
   ref: Species;
 
+  // currently selected comparison species
   comp: Species;
 
+  // legend class that generates the comparison chr legend below browser
   legend: Legend;
 
+  // currently selected reference chromosome
   refChr: string;
 
+  // specified interval that a user would enter to view
   refInterval = '';
 
+  // settings for the block view including element visibility and orientation
   options: BlockViewBrowserOptions;
 
+  // reference genes on the current reference chr that were selected in the feature search
   selectedRefGenes: Gene[] = [];
 
+  // comparison genes syntenic to selected reference genes that were selected in the feature search
   selectedCompGenes: Gene[] = [];
 
+  // (mouse ref only) QTLs that were selected in the feature search in the current reference chr
   selectedQTLs: QTL[] = [];
 
+  // reference genes on the current reference chr that are affected by the block view filters
   filteredRefGenes: Gene[] = [];
 
+  // comparison genes that are affected by the block view filters
   filteredCompGenes: Gene[] = [];
 
+  // all currently active filters
   filters: Filter[] = [];
 
+  // block view browser loading progress
   progress = 0;
 
+  // d3 zooming handler
   zoom: d3.ZoomBehavior<any, any>;
 
+  // d3 brushing handler
   brush: d3.BrushBehavior<any>;
 
+  // width of the block view browser container
   width = 1200;
 
+  // height of the blocke view browser container
   height = 430;
 
+  // distance from top of SVG to the top of the chromosome view
   chromosomeViewOffset = 35;
 
+  // height of the syntenic blocks in the chromosome view
   chromosomeViewHeight = 60;
 
+  // distance from the top of the SVG to the top of the browser
   browserOffset = 150;
 
+  // height of the syntenic blocks in the browser
   trackHeight = 80;
 
+  // minimum genomic interval (in bp) that the user can zoom into
   minimumIntervalSize = 3000;
 
+  // current visible interval in the browser
   interval: BrowserInterval;
 
+  // list of all syntenic blocks in the current reference chr
   blocks: SyntenyBlock[];
 
+  // dictionary of all syntenic blocks accessible by block ID
   blockLookup: object = {};
 
+  // all genes in the reference chromosome
   refGenes: Gene[];
 
+  // all genes in the comparison syntenic regions
   compGenes: Gene[];
 
+  // gene IDs of reference genes that are homologous
   homRefGenes: string[];
 
+  // scale used in chr view to draw reference indicators and syntenic blocks
   staticRefBPToPixels: d3.ScaleLinear<number, number>;
 
+  // set of scales used in chr to draw comparison indicators
   staticCompBPToPixels: ComparisonScaling;
 
+  // scale used to calculate pixel value from a base pair value
   refBPToPixels: d3.ScaleLinear<number, number>;
 
+  // genome map used to generate the linear genome view above the chromosome view
   refGMap: LinearGenomeMap;
 
-  tooltip: any = null;
-
+  // data for the currently "clicked" feature that should display in the dialog
   clicktip: any = null;
 
+  // controls if the dialog containing feature metadata is visible
   clicktipOpen = false;
 
+  // tooltip for genes and QTLs
   featureTip: any;
 
+  // tooltip for syntenic blocks
   blockTip: any;
 
+  // user-entered name they want their downloaded image saved as
   downloadFilename = '';
 
+  // controls if the download dialog for the user to enter a filename is visible
   filenameModalOpen = false;
 
+  // emits when the user wants to open the block view filters
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
   constructor(
@@ -555,14 +592,6 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns the height the tooltip should be based on the number of data items
-   * it will contain
-   */
-  getTTHeight(): number {
-    return this.getTTItems(this.tooltip).length * 11 + 23;
-  }
-
-  /**
    * Returns true/false if at least 1 QTL or gene is selected
    */
   featuresAreSelected(): boolean {
@@ -636,8 +665,7 @@ export class BlockViewBrowserComponent {
         this.options.trueOrientation,
       );
 
-      // only update this once because it won't
-      this.progress += 0.7;
+      this.progress += 0.4;
 
       // create the chromosome view (static) axis
       d3.select('#chr-view-axis')
@@ -668,6 +696,9 @@ export class BlockViewBrowserComponent {
 
     this.http.getHomologs(refID, compID, this.refChr).subscribe(homologs => {
       this.selectedCompGenes = [];
+
+      this.progress += 0.3;
+
       this.compGenes = homologs
         .map(h => {
           h.sel = false;
@@ -708,6 +739,8 @@ export class BlockViewBrowserComponent {
     this.http.getGenes(refID, this.refChr).subscribe(genes => {
       this.selectedRefGenes = [];
 
+      this.progress += 0.3;
+
       this.refGenes = genes.map(g => {
         // if homologous, add a homologID array attribute with its ID
         g.homologs = this.homRefGenes.indexOf(g.id) > -1 ? [g.id] : [];
@@ -725,7 +758,7 @@ export class BlockViewBrowserComponent {
         return gene;
       });
 
-      this.arrangeQTLs(features.filter(f => !f.gene));
+      this.arrangeQTLs(features.filter(f => !f.isGene));
 
       this.staticTooltipBehavior();
 

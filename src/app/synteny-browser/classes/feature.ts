@@ -1,28 +1,38 @@
 export class Feature {
+  // ID for the feature
   id: string;
 
+  // feature symbol
   symbol: string;
 
+  // chromosome where the feature is located on
   chr: string;
 
+  // genomic starting location of the feature
   start: number;
 
+  // genomic end location of the feature
   end: number;
 
+  // gene type or 'QTL'
   type: string;
 
-  gene: boolean;
+  // used when app queries list of features which contain a mix of genes and QTLs
+  isGene: boolean;
 
+  // ontology term name the feature is associated with
   term: string;
 
+  // ontology term ID the feature is associated with
   termID: string;
 
+  // indicates if the feature has been selected
   selected = false;
 
   constructor(feature: any, assocMode = false) {
     this.id = feature.id;
     this.symbol = feature.symbol;
-    this.gene = feature.type.toLowerCase() !== 'qtl';
+    this.isGene = feature.type.toLowerCase() !== 'qtl';
     this.type = feature.type;
     this.chr = feature.chr;
     this.start = feature.start;

@@ -3,48 +3,68 @@ import { Exon } from './interfaces';
 import { SyntenyBlock } from './synteny-block';
 
 export class Gene {
+  // genomic starting location for the gene
   start: number;
 
+  // genomic end location for the gene
   end: number;
 
+  // genomic size of the gene
   size: number;
 
+  // gene symbol
   symbol: string;
 
+  // gene ID
   id: string;
 
+  // chromosome the gene is located in
   chr: string;
 
+  // list of gene symbols of genes in the "other" species' genome (ref or comp)
   homologIDs: string[];
 
+  // strand the gene is located on
   strand: string;
 
+  // gene type
   type: string;
 
+  // ID of the syntenic block the gene is located in
   blockID: string;
 
+  // taxon ID for the species the gene is associated with
   species: string;
 
+  // indicates if the gene is located in a syntenic region that is oriented on a
+  // different strand from the "other" genome
   orientationMatches: boolean;
 
+  // y position in the track, used to draw the gene
   yPos: number;
 
+  // list of all exons located in the gene
   transcript: Exon[];
 
+  // indicates if the gene is being hovered over and is colored green
   highlighted = false;
 
+  // indicates if the gene was selected in the feature search/genome view
+  // and is colored red
   selected = false;
 
+  // indicates if the gene is affected by at least one highlighting filter
+  // and is colored blue
   filtered = false;
 
+  // indicates if the gene is affected by at least one hiding filter (and
+  // no highlighting filters) and is hidden from the SVG
   hidden = false;
 
+  // used when app queries list of features which contain a mix of genes and QTLs
   isGene = true;
 
-  isQTL = false;
-
-  isBlock = false;
-
+  // formatting function from d3 that adds commas to large numbers to help with readability
   format: Function = format(',');
 
   constructor(gene: any, vHeight: number, refTaxonID: number, blocks: SyntenyBlock[] = null) {

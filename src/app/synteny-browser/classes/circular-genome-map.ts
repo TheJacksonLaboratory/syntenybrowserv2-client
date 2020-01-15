@@ -2,14 +2,19 @@ import { scaleLinear } from 'd3';
 import { CartesianCoordinate } from './interfaces';
 
 export class CircularGenomeMap {
-  spacing = 0.035; // approximately 2° in radians
+  // approximately 2° in radians between chromosomes
+  spacing = 0.035;
 
+  // scaling factor when converting genomic locations to radians
   bpToRads: number;
 
+  // scaling factor when converting radians to genomic locations
   radsToBP: number;
 
+  // dictionary of scales for the genome
   private scales = {};
 
+  // list of genomic sizes of chromosome
   private sizes: number[];
 
   /**

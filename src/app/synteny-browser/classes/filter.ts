@@ -4,30 +4,41 @@ import { Gene } from './gene';
 import { FilterCondition } from './filter-condition';
 
 export class Filter {
+  // data for species a filter could apply to
   species: any;
 
+  // filter mode ('Highlight' or 'Hide')
   mode = 'Highlight';
 
+  // currently selected reference species
   refSpecies: Species;
 
+  // currently selected comparison species
   compSpecies: Species;
 
+  // list of conditions the filter should use to find matches
   conditions: FilterCondition[] = [];
 
+  // ID for the filter to identify it from other possible filters
   id: number;
 
+  // title that is generated from using the simple creation interface
   simpleFilterTitle: string;
 
+  // value to display in the tag to identify the filter to the user
   filterLabel: string;
 
+  // controls whether the simple or advanced filter creation interface is displayed
   advancedFilter = false;
 
+  // controls whether an input is needed for the user to enter a value as a result of
+  // their selection(s) from the simple creation interface
   simpleUserInputNeeded = false;
 
-  selected = true;
-
+  // indicates if the filter has been created and is displayed in the list of filters
   created = false;
 
+  // indicates if the filter is currently being edited
   editing = true;
 
   constructor(ref: Species, comp: Species, id: number, advanced: boolean) {

@@ -12,23 +12,32 @@ import { DataStorageService } from './services/data-storage.service';
   templateUrl: './synteny-browser.component.html',
 })
 export class SyntenyBrowserComponent implements OnInit {
+  // species selection child component
   @ViewChild(SpeciesSelectionComponent, { static: true })
   species: SpeciesSelectionComponent;
 
+  // feature selection child component
   @ViewChild(FeatureSelectionComponent, { static: true })
   features: FeatureSelectionComponent;
 
+  // genome view child component
   @ViewChild(GenomeViewComponent, { static: true })
   genomeView: GenomeViewComponent;
 
+  // block view browser child component
+  // ('static: false' since it doesn't need to load when the app bootstraps)
   @ViewChild(BlockViewBrowserComponent, { static: false })
   blockViewBrowser: BlockViewBrowserComponent;
 
+  // block view filter child component
+  // ('static: false' since it doesn't need to load when the app bootstraps)
   @ViewChild(BlockViewFilterComponent, { static: false })
   blockViewFilters: BlockViewFilterComponent;
 
+  // controls if the block view browser panel is visible
   viewInBrowser = false;
 
+  // controls if the block view filter dialog is open
   filterOpen = false;
 
   constructor(

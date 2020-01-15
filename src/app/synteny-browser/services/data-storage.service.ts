@@ -10,20 +10,28 @@ import { SyntenyBlock } from '../classes/synteny-block';
   providedIn: 'root',
 })
 export class DataStorageService {
+  // lookup object mapping chromosome values to their associated color
   genomeColorMap: any;
 
+  // list of genome-wide synteny for the reference species
   genomeData: SyntenyBlock[];
 
+  // all of the species available to be reference or comparison
   species: Species[];
 
+  // currently selected reference species
   refSpecies: Species;
 
+  // currently selected comparison species
   compSpecies: Species;
 
+  // list of all current active filters
   filters: Filter[] = [];
 
+  // data on all selected features to see in the block view browser
   features: SelectedFeatures;
 
+  // ontology terms gathered for all available ontologies
   ontologyTerms: any = {};
 
   constructor(private http: ApiService) {

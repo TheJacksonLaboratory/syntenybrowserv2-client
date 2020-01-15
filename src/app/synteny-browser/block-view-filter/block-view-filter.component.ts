@@ -15,34 +15,44 @@ import { FilterCondition } from '../classes/filter-condition';
   styleUrls: ['./block-view-filter.component.scss'],
 })
 export class BlockViewFilterComponent implements OnInit {
+  // currently selected reference species
   @Input() refSpecies: Species;
 
+  // currently selected comparison species
   @Input() compSpecies: Species;
 
+  // currently active filters
   @Input() filters: Filter[];
 
+  // all genes in the reference chromosome in the block view browser
   @Input() refGenes: Gene[];
 
+  // all genes in the comparison regions in the block view browser
   @Input() compGenes: Gene[];
 
+  // 'navigation' links to show in the sidebar of the dialog
   navigation: NavigationObject[];
 
+  // 'page' in the dialog navigation is currently visible
   activePage = 'edit';
 
+  // current filter being edited
   currentFilter: Filter;
 
+  // error message for current filter, if issues present
   filterErrorState: string = null;
 
-  attributes: string[];
-
+  // 'add' or 'edit' describing if the current filter already exists (being edited)
+  // or if it's new (it needs to be added when finished)
   filterMode = 'add';
 
-  editingFilter: Filter = null;
-
+  // concatenation of refGenes and compGenes for filters applied to both species
   allGenes: Gene[];
 
+  // all genes affected by one or more filters
   filteredGenes: Gene[];
 
+  // emits when the user wants to close the dialog
   @Output() userClose: EventEmitter<any> = new EventEmitter();
 
   constructor(

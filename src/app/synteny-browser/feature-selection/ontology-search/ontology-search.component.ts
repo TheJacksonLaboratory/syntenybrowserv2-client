@@ -13,22 +13,31 @@ import { DataStorageService } from '../../services/data-storage.service';
   styleUrls: ['./ontology-search.component.scss'],
 })
 export class OntologySearchComponent {
+  // currently selected reference species
   refSpecies: Species;
 
+  // prefix for currently selected ontology
   ontology: string;
 
+  // table data containing all of the terms to display in the terms datagrid
   terms: TableData<OntologyTerm>;
 
+  // current search string that filters the terms datagrid
   termsSearch = '';
 
+  // currently selected term to show associations for
   currentTerm: OntologyTerm;
 
+  // table data containing all of the associations to display in the associations datagrid
   associations: TableData<Feature>;
 
+  // current search string that filters the terms datagrid
   associationsSearch = '';
 
+  // emits whenever association (de)selections are made
   @Output() update: EventEmitter<any> = new EventEmitter();
 
+  // emits whenever user wants to see associations for a term or go back to see all terms
   @Output() switchView: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: ApiService, private data: DataStorageService) {

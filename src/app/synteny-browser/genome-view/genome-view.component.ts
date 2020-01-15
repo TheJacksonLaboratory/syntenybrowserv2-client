@@ -14,43 +14,58 @@ import { DataStorageService } from '../services/data-storage.service';
   styleUrls: ['./genome-view.component.scss'],
 })
 export class GenomeViewComponent implements OnInit {
+  // currently selected reference species
   ref: Species;
 
+  // currently selected comparison species
   comp: Species;
 
+  // genome map used to draw the outer ring of the plot
   refGMap: CircularGenomeMap;
 
+  // genome map used to draw the inner ring of the plot
   compGMap: CircularGenomeMap;
 
+  // dictionary that adds an extra spot for a selected reference chromosome
   tempCompGenome: object;
 
-  // rendering constants
+  // width (and height) of the SVG
   width = 500;
 
-  radius: number = this.width * 0.5;
-
+  // height of the circular bands
   bandThickness = 18;
 
+  // radius data for reference band inner and outer edges and labels
   refRadii: RadiiDictionary;
 
+  // radius data for comparison band inner and outer edges and labels
   compRadii: RadiiDictionary;
 
+  // radius data for blocks containing selected features sticking out from ref band
   featureRadii: RadiiDictionary;
 
+  // currently selected reference chromosome (if any)
   refChr: ReferenceChr;
 
+  // list of all currently selected features to view in the plot
   features: Feature[];
 
+  // list of currently selected features that do no occur in a syntenic region
   featuresNoBlocks: Feature[];
 
+  // list of syntenic blocks that contain at least one selected feature
   featureBlocks: SyntenyBlock[];
 
+  // data to display in a tooltip
   tooltipContent: any = null;
 
+  // user-entered name they want their downloaded image saved as
   downloadFilename = '';
 
+  // controls if the download dialog for the user to enter a filename is visible
   filenameModalOpen = false;
 
+  // emits when user overs over a reference chromosome that contains selected features to highlight
   @Output() highlightFeatures: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(
@@ -61,8 +76,8 @@ export class GenomeViewComponent implements OnInit {
 
   ngOnInit(): void {
     // generate a radii dictionary to help with rendering the reference plot
-    const refRadius = Math.round(this.radius * 0.62);
-    const compRadius = this.radius * 0.4;
+    const refRadius = Math.round(this.width * 0.5 * 0.62);
+    const compRadius = this.width * 0.5 * 0.4;
 
     this.refRadii = {
       ringInner: refRadius,
@@ -341,7 +356,8 @@ export class GenomeViewComponent implements OnInit {
    * Returns the translation to the center of the plot
    */
   getCenter(): string {
-    return this.translate(this.radius, this.radius);
+    const radius = this.width * 0.5;
+    return this.translate(radius, radius);
   }
 
   /**
@@ -369,8 +385,8 @@ export class GenomeViewComponent implements OnInit {
     // if tooltip is for reference species and there are features, display
     // the feature symbols in the tooltip
     if (species.taxonID === this.ref.taxonID && hasFeatures) {
-      const genes = chrFeatures.filter(f => f.gene).map(g => g.id);
-      const qtls = chrFeatures.filter(f => !f.gene).map(qtl => qtl.id);
+      const genes = chrFeatures.filter(f => f.isGene).map(g => g.id);
+      const qtls = chrFeatures.filter(f => !f.isGene).map(qtl => qtl.id);
       const features = [];
 
       if (genes.length > 0) features.push(...genes);

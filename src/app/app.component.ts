@@ -6,9 +6,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  // currently active page (should be the browser by default)
   active = 'browser';
 
-  pages: object = {
+  // all of the pages the user can navigate to with their route names
+  pages = {
     browser: [''],
     about: ['/about'],
     examples: ['/examples'],

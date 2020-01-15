@@ -6,12 +6,16 @@ import { Species } from '../classes/species';
   templateUrl: './species-selection.component.html',
 })
 export class SpeciesSelectionComponent {
+  // all of the species available to be reference or comparison
   species: Species[];
 
+  // currently selected reference species
   refSpecies: string;
 
+  // currently selected comparison species
   compSpecies: string;
 
+  // emits when the user changes the selected reference or comparison species
   @Output() update: EventEmitter<any> = new EventEmitter();
 
   /**

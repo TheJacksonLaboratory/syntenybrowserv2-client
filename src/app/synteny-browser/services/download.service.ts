@@ -5,8 +5,10 @@ import { saveSvgAsPng } from 'save-svg-as-png';
   providedIn: 'root',
 })
 export class DownloadService {
+  // the type header sent when creating a new block to download
   blobType = 'data:text/plain;charset=utf-8,';
 
+  // function to remove the margin on SVGs before getting downloaded
   modifyCSS = (): string => 'margin-top: 0';
 
   /**

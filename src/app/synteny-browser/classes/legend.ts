@@ -1,14 +1,22 @@
 export class Legend {
+  // list of all comparison chromosomes
   allChrs: string[];
 
+  // list of all comparison chromosomes that are represented in the block view
   activeChrs: string[];
 
+  // current "hovered over" chromosome that causes all regions not belonging to that
+  // chromosome to become grey to highlight the "hovered over" chromosome regions
   hoverChr: string = null;
 
+  // distance from the top of the SVG to the top of the legend
   offsetY = 380;
 
+  // distance from right side of the SVG to the start of the legend (is determined by
+  // how many chromosomes there are as the legend should be centered)
   offsetX: number;
 
+  // color dictionary for the comparison genome
   colors: object;
 
   constructor(genome: object, colors: object, chrs: string[], width: number) {

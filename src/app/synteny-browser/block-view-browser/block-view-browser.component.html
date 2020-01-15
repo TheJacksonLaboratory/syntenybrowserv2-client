@@ -865,6 +865,17 @@
     <!-- Loading overlay -->
     <g *ngIf="!(blocks && refGenes && compGenes)" id="loading-overlay">
       <rect [attr.width]="width + 10" [attr.height]="height + 10"></rect>
+
+      <g id="progress-bar" [attr.transform]="translate([width * 0.05, height / 2])">
+        <rect height="5" rx="2" ry="2" fill-opacity="0.4"
+              [attr.width]="width * 0.9">
+        </rect>
+
+        <rect [attr.width]="progress * (width * 0.9)" height="5"
+              rx="2" ry="2"
+              fill-opacity="0.7">
+        </rect>
+      </g>
     </g>
   </svg>
 </div>

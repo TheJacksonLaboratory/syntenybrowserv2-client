@@ -10,12 +10,16 @@ import { Feature } from '../../classes/feature';
   styleUrls: ['./feature-search.component.scss'],
 })
 export class FeatureSearchComponent {
+  // currently selected reference species
   refSpecies: Species;
 
+  // table data containing all of the features to display in the datagrid
   features: TableData<Feature>;
 
+  // current search string that filters the datagrid
   featuresSearch = '';
 
+  // emits whenever (de)selections are made in the table
   @Output() update: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: ApiService) {

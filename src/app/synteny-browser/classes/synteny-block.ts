@@ -3,45 +3,62 @@ import { ComparisonBlockCoordinates } from './interfaces';
 import { Gene } from './gene';
 
 export class SyntenyBlock {
+  // ID for the block
   id: string;
 
+  // reference chromosome the block is located in
   refChr: string;
 
+  // comparison chromosome the block is located in
   compChr: string;
 
+  // starting genomic location of the block in the reference chromosome
   refStart: number;
 
+  // ending genomic location of the block in the reference chromosome
   refEnd: number;
 
+  // hex color value used when drawing based on the comparison chr it's located in
   color: string;
 
-  // for use in the genome view
+  // if the reference chr the block is located in is selected, tempChr will be
+  // assigned to indicate that it's been selected (used in the genome view only)
   tempChr: string;
 
+  // starting genomic location of the block to be drawn (may not be the true start
+  // depending on visualization settings)
   compStart: number;
 
+  // ending genomic location of the block to be drawn (may not be the true end depending
+  // on visualization settings)
   compEnd: number;
 
-  // for use in the block view
+  // indicates whether the block's "true" start/end is synonymous with "matching"
+  // start/end (used in block view only)
   orientationMatches: boolean;
 
+  // stores "true" start and end genomic locations where the start value will always be less
+  // than the end value (used in block view only)
   trueCoords: ComparisonBlockCoordinates;
 
+  // stores "matching" start and end genomic locations where the values may be reversed from
+  // the syntenic features are located on opposite strands and thus, when visualizing the
+  // block, genes line up better when displayed in reverse (used in block view only)
   matchCoords: ComparisonBlockCoordinates;
 
+  // scale used to control drawing the block, features within it, and coordinates in the ref track
   refScale: ScaleLinear<number, number>;
 
+  // scale used to control drawing the block, features within it, and coordinates in the
+  // comp track when the matching orientation option is selected (used in block view only)
   compMatchScale: ScaleLinear<number, number>;
 
+  // scale used to control drawing the block, features within it, and coordinates in the
+  // comp track when the matching orientation option is NOT selected (used in block view only)
   compTrueScale: ScaleLinear<number, number>;
 
+  // formatting function from d3 that adds commas to large numbers to help with readability
   format: Function = format(',');
-
-  isGene = false;
-
-  isQTL = false;
-
-  isBlock = true;
 
   constructor(block: any, moreInfo = false) {
     this.id = block.id;

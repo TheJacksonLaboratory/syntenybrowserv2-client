@@ -2,30 +2,47 @@ import { format, ScaleLinear } from 'd3';
 import { SyntenyBlock } from './synteny-block';
 
 export class BrowserInterval {
+  // starting genomic location in the reference chromosome
   refStart: number;
 
+  // ending genomic location in the reference chromosome
   refEnd: number;
 
+  // reference chromosome in the block view
   refChr: string;
 
+  // scale used to convert genomic locations and pixel values
   refScale: ScaleLinear<number, number>;
 
+  // genomic size of the currently interval
   width: number;
 
+  // the genomic location in the comparison genome that maps to the starting
+  // location in the reference chromosome
   compStart: number;
 
+  // comparison chromosome where the interval starting position is located in
   compStartChr: string;
 
+  // the genomic location in the comparison genome that maps to the end location
+  // in the reference chromosome
   compEnd: number;
 
+  // comparison chromosome where the interval end position is located in
   compEndChr: string;
 
+  // indicates if the user wants to see syntenic regions in their true orientation
   trueOrientation: boolean;
 
+  // dictionary of reference genomic locations where a syntenic block starts
+  // mapped to the block that is starting
   blockStarts: object = {};
 
+  // dictionary of reference genomic locations where a syntenic block ends
+  // mapped to the block that is ending
   blockEnds: object = {};
 
+  // formatting function from d3 that adds commas to large numbers to help with readability
   format: Function = format(',');
 
   constructor(

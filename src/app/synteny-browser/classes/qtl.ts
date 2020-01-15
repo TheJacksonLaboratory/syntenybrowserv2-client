@@ -1,33 +1,41 @@
 import { format, ScaleLinear } from 'd3';
 
 export class QTL {
+  // QTL ID
   id: string;
 
+  // QTL symbol
   symbol: string;
 
+  // reference chromosome the QTL is located in
   chr: string;
 
+  // genomic start position of the QTL
   start: number;
 
+  // genomic end position of the QTL
   end: number;
 
+  // genomic size of the QTL
   size: number;
 
+  // height of the QTL when drawn
   height: number;
 
+  // distance from top of reference track to top of the QTL when drawn
   offset: number;
 
+  // distance from top of chromosome view to QTL indicator line when drawn
   indOffset: number;
 
+  // scale to used when drawing indicators in the chromosome view
   indScale: ScaleLinear<number, number>;
 
+  // formatting function from d3 that adds commas to large numbers to help with readability
   format: Function = format(',');
 
+  // used when app queries list of features which contain a mix of genes and QTLs
   isGene = false;
-
-  isQTL = true;
-
-  isBlock = false;
 
   constructor(qtl: any, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.id;

@@ -2,14 +2,19 @@ import { scaleLinear } from 'd3-scale';
 import { SyntenyBlock } from './synteny-block';
 
 export class LinearGenomeMap {
-  spacing = 8; // spacing in px between chromosomes
+  // spacing in px between chromosomes
+  spacing = 8;
 
+  // scaling factor when converting genomic locations to pixels
   bpToPx: number;
 
+  // scaling factor when converting pixels to genomic locations
   pxToBP: number;
 
+  // dictionary of scales for the genome
   private scales = {};
 
+  // list of genomic sizes of chromosome
   private sizes: number[];
 
   /**

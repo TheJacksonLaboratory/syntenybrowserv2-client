@@ -1,22 +1,31 @@
 import { ExternalResource, SearchType } from './interfaces';
 
 export class Species {
+  // taxon ID for the species
   taxonID: number;
 
+  // latin species name
   name: string;
 
+  // two-letter value abbreviating the latin species name
   abbrev: string;
 
+  // non-latin English species name
   commonName: string;
 
+  // dictionary of chromosomes in the species' genome
   genome: any;
 
+  // list of available ontologies to search for features
   onts: SearchType[];
 
+  // list of available ways to search for features
   searchTypes: SearchType[];
 
+  // indicates if the species has QTLs stored in the database to query
   hasQTLs: boolean;
 
+  // url data for features where external links can be generated for more information
   resources: ExternalResource[];
 
   /**
