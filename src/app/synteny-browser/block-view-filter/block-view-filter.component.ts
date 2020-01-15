@@ -138,14 +138,6 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Applies the current selections in the preview checklist by making the
-   * current filter list reflecting the selected filters
-   */
-  applyFilterSelections(): void {
-    this.filters = this.filters.filter(f => f.selected);
-  }
-
-  /**
    * Removes the specified filter from the list of filters
    * @param {Filter} filter - the title of the filter to remove
    */
@@ -170,17 +162,6 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Updates the specified filter condition selected flag based on the event
-   * value and apply the selected filters to the feature table
-   * @param {FilterCondition} changedFilter - filter that's being (de)selected
-   * @param {number} event - event code; 0 (deselected) or 1 (selected)
-   */
-  runFilters(changedFilter: Filter, event: number): void {
-    changedFilter.selected = event === 1;
-    this.filteredGenes = this.applyFilters();
-  }
-
-  /**
    * Formats all of the selected filters' metadata as well as all of the
    * resulting genes in the table into a TSV-like file
    */
@@ -190,7 +171,6 @@ export class BlockViewFilterComponent implements OnInit {
     const rows = this.filteredGenes.map(g => g.getFilterMetadata(ref, comp));
 
     const lines = `[FILTER DATA]\nfilter type\tspecies\tcondition(s)\n${this.getCreatedFilters()
-      .filter(f => f.selected)
       .map(f => f.getTSVRowForFilter())
       .join('\n')}\n\n[RESULTS DATA]\n${Object.keys(rows[0]).join('\t')}\n${rows
       .map(r => Object.values(r).join('\t'))
@@ -327,15 +307,6 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Returns true/false if all of the filters are currently selected
-   */
-  allFiltersSelected(): boolean {
-    return (
-      this.getCreatedFilters().length === this.getCreatedFilters().filter(f => f.selected).length
-    );
-  }
-
-  /**
    * Creates a new filter and returns it
    */
   private getNewFilter(advancedMode: boolean): Filter {
@@ -361,19 +332,19 @@ export class BlockViewFilterComponent implements OnInit {
 
     if (this.anyFiltersSelected()) {
       const filters = this.getCreatedFilters();
-      const hidingFilters = filters.filter(f => f.hides() && f.selected);
-      const highlightFilters = filters.filter(f => !f.hides() && f.selected);
+      const hidingFilters = filters.filter(f => f.hides());
+      const highlightFilters = filters.filter(f => !f.hides());
 
       // order matters here because if a gene satisfies an 'exclude' criteria AND
       // an 'include' criteria, the include should take precendence over the
       // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
       // should be filtered
       if (hidingFilters.length > 0) {
-        this.hideGenes(filters.filter(f => f.hides() && f.selected));
+        this.hideGenes(filters.filter(f => f.hides()));
       }
 
       if (highlightFilters.length > 0) {
-        this.filterGenes(filters.filter(f => !f.hides() && f.selected));
+        this.filterGenes(filters.filter(f => !f.hides()));
       }
 
       return this.refGenes.concat(...this.compGenes).filter(g => g.filtered || g.hidden);
@@ -383,10 +354,10 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Returns true/false if at least one filter is selected in the checklist
+   * Returns true/false if there is at least one filter
    */
   private anyFiltersSelected(): boolean {
-    return this.getCreatedFilters().filter(f => f.selected).length > 0;
+    return this.getCreatedFilters().length > 0;
   }
 
   /**
