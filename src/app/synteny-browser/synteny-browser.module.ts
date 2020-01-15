@@ -1,11 +1,8 @@
-import { NgModule } from '@angular/core'
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { NgSelectModule} from '@ng-select/ng-select';
-
+import { NgSelectModule } from '@ng-select/ng-select';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-import { ClarityModule, ClrSelectModule} from '@clr/angular';
+import { ClarityModule, ClrSelectModule } from '@clr/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // components
@@ -21,7 +18,6 @@ import { FeatureSearchComponent } from './feature-selection/feature-search/featu
 // services
 import { ApiService } from './services/api.service';
 
-
 @NgModule({
   imports: [
     ClarityModule,
@@ -30,7 +26,7 @@ import { ApiService } from './services/api.service';
     NgSelectModule,
     FormsModule,
     HttpClientModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   declarations: [
     SyntenyBrowserComponent,
@@ -42,10 +38,6 @@ import { ApiService } from './services/api.service';
     OntologySearchComponent,
     FeatureSearchComponent,
   ],
-  providers: [
-    ApiService,
-    HttpClient
-  ]
+  providers: [ApiService, HttpClient],
 })
-
-export class SyntenyBrowserModule { }
+export class SyntenyBrowserModule {}

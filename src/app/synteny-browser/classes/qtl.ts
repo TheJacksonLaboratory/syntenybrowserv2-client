@@ -1,20 +1,41 @@
 import { format, ScaleLinear } from 'd3';
-import { QTLMetadata } from './interfaces';
 
 export class QTL {
+  // QTL ID
   id: string;
+
+  // QTL symbol
   symbol: string;
+
+  // reference chromosome the QTL is located in
   chr: string;
+
+  // genomic start position of the QTL
   start: number;
+
+  // genomic end position of the QTL
   end: number;
+
+  // genomic size of the QTL
   size: number;
+
+  // height of the QTL when drawn
   height: number;
+
+  // distance from top of reference track to top of the QTL when drawn
   offset: number;
 
+  // distance from top of chromosome view to QTL indicator line when drawn
   indOffset: number;
+
+  // scale to used when drawing indicators in the chromosome view
   indScale: ScaleLinear<number, number>;
 
+  // formatting function from d3 that adds commas to large numbers to help with readability
   format: Function = format(',');
+
+  // used when app queries list of features which contain a mix of genes and QTLs
+  isGene = false;
 
   constructor(qtl: any, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.id;
@@ -29,9 +50,6 @@ export class QTL {
     this.indOffset = qtl.indOffset + 18;
     this.indScale = staticScale;
   }
-
-
-  // Getter Methods
 
   /**
    * Returns the either the actual width of the QTL based on the specified scale
@@ -51,20 +69,23 @@ export class QTL {
    *                               than (i.e. 1 or 2 to make the QTL visible)
    */
   getIndWidth(defaultSize: number): number {
-    return Math.max(defaultSize,
-                    Math.abs(this.indScale(this.end) - this.indScale(this.start)));
+    return Math.max(defaultSize, Math.abs(this.indScale(this.end) - this.indScale(this.start)));
   }
 
   /**
    * Returns the start position (px) of the QTL indicator using the static scale
    */
-  getIndStart(): number { return this.indScale(this.start); }
+  getIndStart(): number {
+    return this.indScale(this.start);
+  }
 
   /**
    * Returns the start position (px) of the QTL based on the specified scale
    * @param {ScaleLinear<number, number>} scale - scale to use to get the position
    */
-  getStart(scale: ScaleLinear<number, number>): number { return scale(this.start); }
+  getStart(scale: ScaleLinear<number, number>): number {
+    return scale(this.start);
+  }
 
   /**
    * Returns the content for a tooltip for the QTL which includes the id, the
@@ -76,23 +97,7 @@ export class QTL {
       id: this.id,
       chr: this.chr,
       start: `${this.format(this.start)}bp`,
-      end: `${this.format(this.end)}bp`
-    }
+      end: `${this.format(this.end)}bp`,
+    };
   }
-
-
-  // Condition Checks
-
-  // These seem stupid but they make determining what the "type" (and by "type"
-  // I mean instance of class) of an item is. This is for the purpose of tooltips,
-  // where mouseover tips are used for syntenic blocks, QTLs and genes, which
-  // all have different attributes to show
-
-  isGene(): boolean { return false; }
-
-  isQTL(): boolean { return true; }
-
-  isBlock(): boolean { return false; }
-
-  // End of type check methods
 }

@@ -1,14 +1,21 @@
 import { scaleLinear } from 'd3-scale';
-import { CartesianCoordinate } from './interfaces';
 import { SyntenyBlock } from './synteny-block';
 
 export class LinearGenomeMap {
-  private scales = {};
-  private sizes: number[];
+  // spacing in px between chromosomes
+  spacing = 8;
 
-  spacing: number = 8; // spacing in px between chromosomes
+  // scaling factor when converting genomic locations to pixels
   bpToPx: number;
+
+  // scaling factor when converting pixels to genomic locations
   pxToBP: number;
+
+  // dictionary of scales for the genome
+  private scales = {};
+
+  // list of genomic sizes of chromosome
+  private sizes: number[];
 
   /**
    * Creates a genome map object that stores scaling functions for each
@@ -19,13 +26,13 @@ export class LinearGenomeMap {
    */
   constructor(chromosomes: any, width: number) {
     this.sizes = Object.values(chromosomes);
-    let chrs = Object.keys(chromosomes);
+    const chrs = Object.keys(chromosomes);
 
     // total number of BP of genome
-    let totalGenomeLength = this.getSummation(this.sizes);
+    const totalGenomeLength = this.getSummation(this.sizes);
 
     // number of px taken by genome
-    let pxGenome = width - (this.spacing * (chrs.length - 1));
+    const pxGenome = width - this.spacing * (chrs.length - 1);
 
     // Px/Rad conversions
     this.bpToPx = pxGenome / Number(totalGenomeLength);
@@ -37,23 +44,21 @@ export class LinearGenomeMap {
 
     chrs.forEach((chr, i) => {
       // get starting point for the chromosome in px
-      let start = this.spacing * i + bp * this.bpToPx;
+      const start = this.spacing * i + bp * this.bpToPx;
 
       // get the end point by calculating the width and adding to the start
-      let end = start + (this.bpToPx * chromosomes[chr]);
+      const end = start + this.bpToPx * chromosomes[chr];
 
       // assign the scale of the result (domain: genomic bp, range: radians)
-      this.scales[chr] = scaleLinear().domain([0, chromosomes[chr]])
-                                      .range([start, end]);
+      this.scales[chr] = scaleLinear()
+        .domain([0, chromosomes[chr]])
+        .range([start, end]);
 
       // increment bp so that we know where to start calculating radians
       // for the next chromosome
       bp += chromosomes[chr];
     });
   }
-
-
-  // Getter Methods
 
   /**
    * Returns a pixel x value of a genomic position (in bp)
@@ -77,7 +82,7 @@ export class LinearGenomeMap {
    * @param {SyntenyBlock} block - the syntenic block to get the width for
    */
   getBlockWidth(block: SyntenyBlock): number {
-    let scale = this.scales[block.refChr];
+    const scale = this.scales[block.refChr];
     return scale(block.refEnd) - scale(block.refStart);
   }
 
@@ -86,7 +91,7 @@ export class LinearGenomeMap {
    * @param {string} chr - the chromosome to get pixel size for
    */
   getChrPxWidth(chr: string): number {
-    let range = this.scales[chr].range();
+    const range = this.scales[chr].range();
     return range[1] - range[0];
   }
 
@@ -97,13 +102,10 @@ export class LinearGenomeMap {
    * @param {number} i - the index of the chromosome to get the pixel start for
    */
   getChrPxStart(i: number): number {
-    let chrPx = this.getSummation(this.sizes.slice(0, i)) * this.bpToPx,
-        spacingPx = this.spacing * i;
+    const chrPx = this.getSummation(this.sizes.slice(0, i)) * this.bpToPx;
+    const spacingPx = this.spacing * i;
     return chrPx + spacingPx;
   }
-
-
-  // Private Methods
 
   /**
    * Reduce the array to a summation of the numeric elements

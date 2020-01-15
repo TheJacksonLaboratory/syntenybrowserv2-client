@@ -1,12 +1,6 @@
-import { ApiService } from '../services/api.service';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
-import { Metadata, OntologyTerm, SearchType } from '../classes/interfaces';
 import { Species } from '../classes/species';
 import { Feature } from '../classes/feature';
-import { format } from 'd3';
-import { ChrComparator, DescendantsComparator, IDComparator, NameComparator,
-         SymbolComparator, TypeComparator } from '../classes/comparators';
 import { OntologySearchComponent } from './ontology-search/ontology-search.component';
 import { FeatureSearchComponent } from './feature-search/feature-search.component';
 import { DataStorageService } from '../services/data-storage.service';
@@ -14,27 +8,40 @@ import { DataStorageService } from '../services/data-storage.service';
 @Component({
   selector: 'feature-selection',
   templateUrl: './feature-selection.component.html',
-  styleUrls: ['./feature-selection.component.scss']
+  styleUrls: ['./feature-selection.component.scss'],
 })
 export class FeatureSelectionComponent {
-  @ViewChild(OntologySearchComponent, {static: true}) ontologySearch: OntologySearchComponent;
-  @ViewChild(FeatureSearchComponent, {static: true}) featureSearch: FeatureSearchComponent;
+  // ontology search table child component
+  @ViewChild(OntologySearchComponent, { static: true })
+  ontologySearch: OntologySearchComponent;
 
+  // feature search table child component
+  @ViewChild(FeatureSearchComponent, { static: true })
+  featureSearch: FeatureSearchComponent;
+
+  // currently selected reference species
   refSpecies: Species;
 
-  searchType: string = 'symbol';
-  ontology: string;
-  search: string = '';
+  // controls which table is visible ('symbol' shows feature search and
+  // 'ontology' shows ontology search)
+  searchType = 'symbol';
 
+  // prefix of the currently selected ontology to search
+  ontology: string;
+
+  // search term to filter the datagrid content
+  search = '';
+
+  // list of currently selected features
   selections: Feature[] = [];
+
+  // feature symbols that should get highlighted tags in the selections field
   highlighted: string[];
 
+  // emits when the selections list changes
   @Output() update: EventEmitter<any> = new EventEmitter();
 
-  constructor(private data: DataStorageService) { }
-
-
-  // Operational Methods
+  constructor(private data: DataStorageService) {}
 
   /**
    * Initializes the component based on the current reference species
@@ -56,11 +63,11 @@ export class FeatureSelectionComponent {
    * Filters rows and only shows matches to search value
    */
   searchForFeatures(): void {
-    if(this.searchType === 'symbol') {
+    if (this.searchType === 'symbol') {
       this.featureSearch.featuresSearch = this.search;
       this.featureSearch.features.searchFor(this.search);
     } else {
-      if(this.ontologySearch.currentTerm) {
+      if (this.ontologySearch.currentTerm) {
         this.ontologySearch.associationsSearch = this.search;
         this.ontologySearch.associations.searchFor(this.search);
       } else {
@@ -77,25 +84,30 @@ export class FeatureSelectionComponent {
   setTypeDependentElements(): void {
     this.search = '';
 
-    this.searchType === 'symbol' ?
-      this.featureSearch.loadFeatures(this.refSpecies) : this.loadOntologyTerms();
+    this.searchType === 'symbol'
+      ? this.featureSearch.loadFeatures(this.refSpecies)
+      : this.loadOntologyTerms();
   }
 
   /**
    * Returns the text that should appear in the search input
    */
   getSearchPlaceholder(): string {
-    let term = this.ontologySearch.currentTerm;
-    return this.searchType === 'symbol' ? 'Filter features by symbol, ID or type' :
-      (term ? 'Filter features assoc w/ ' + term.id : 'Filter terms by name or ID');
+    const term = this.ontologySearch.currentTerm;
+
+    if (this.searchType !== 'symbol') {
+      return term ? `Filter features assoc w/ ${term.id}` : 'Filter terms by name or ID';
+    }
+    return 'Filter features by symbol, ID or type';
   }
 
   /**
    * Returns the text that should appear as the label to the search input
    */
   getSearchLabel(): string {
-    return this.searchType === 'symbol' || this.ontologySearch.currentTerm ?
-      'search features': 'search terms ';
+    return this.searchType === 'symbol' || this.ontologySearch.currentTerm
+      ? 'search features'
+      : 'search terms ';
   }
 
   /**
@@ -104,7 +116,7 @@ export class FeatureSelectionComponent {
    * they are (depends on which ontology table is currently visible)
    */
   setSearch(): void {
-    let os = this.ontologySearch;
+    const os = this.ontologySearch;
     this.search = os.currentTerm ? os.associationsSearch : os.termsSearch;
   }
 
@@ -122,9 +134,9 @@ export class FeatureSelectionComponent {
    * unique list from them and emits
    */
   updateSelections(): void {
-    let selsFromFeatureSearch = this.featureSearch.features.selections;
-    let selsFromOntologySearch = this.ontologySearch.associations.selections;
-    let allSelections = selsFromFeatureSearch.concat(...selsFromOntologySearch);
+    const selsFromFeatureSearch = this.featureSearch.features.selections;
+    const selsFromOntologySearch = this.ontologySearch.associations.selections;
+    const allSelections = selsFromFeatureSearch.concat(...selsFromOntologySearch);
 
     // get rid of duplicates
     this.selections = Array.from(new Set(allSelections));

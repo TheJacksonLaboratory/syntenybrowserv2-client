@@ -4,21 +4,42 @@ import { Gene } from './gene';
 import { FilterCondition } from './filter-condition';
 
 export class Filter {
+  // data for species a filter could apply to
   species: any;
 
-  mode: string = 'Highlight';
-  refSpecies: Species;
-  compSpecies: Species;
-  conditions: FilterCondition[] = [];
-  id: number;
-  simpleFilterTitle: string;
-  filterLabel: string;
-  advancedFilter: boolean = false;
-  simpleUserInputNeeded: boolean = false;
+  // filter mode ('Highlight' or 'Hide')
+  mode = 'Highlight';
 
-  selected: boolean = true;
-  created: boolean = false;
-  editing: boolean = true;
+  // currently selected reference species
+  refSpecies: Species;
+
+  // currently selected comparison species
+  compSpecies: Species;
+
+  // list of conditions the filter should use to find matches
+  conditions: FilterCondition[] = [];
+
+  // ID for the filter to identify it from other possible filters
+  id: number;
+
+  // title that is generated from using the simple creation interface
+  simpleFilterTitle: string;
+
+  // value to display in the tag to identify the filter to the user
+  filterLabel: string;
+
+  // controls whether the simple or advanced filter creation interface is displayed
+  advancedFilter = false;
+
+  // controls whether an input is needed for the user to enter a value as a result of
+  // their selection(s) from the simple creation interface
+  simpleUserInputNeeded = false;
+
+  // indicates if the filter has been created and is displayed in the list of filters
+  created = false;
+
+  // indicates if the filter is currently being edited
+  editing = true;
 
   constructor(ref: Species, comp: Species, id: number, advanced: boolean) {
     this.refSpecies = ref;
@@ -26,27 +47,28 @@ export class Filter {
     this.id = id;
     this.advancedFilter = advanced;
     this.species = {
-      ref: {name: this.refSpecies.commonName, value: 'ref', selected: true},
-      comp: {name: this.compSpecies.commonName, value: 'comp', selected: true}
+      ref: { name: this.refSpecies.commonName, value: 'ref', selected: true },
+      comp: { name: this.compSpecies.commonName, value: 'comp', selected: true },
     };
 
     // make a new default condition
     this.addNewCondition();
   }
 
-
-  // Operational Methods
-
   /**
    * Creates a new condition for the filter (will cause the template to render a
    * condition constructor component for each condition in the filter
    */
   addNewCondition(): void {
-    let numConditions = this.conditions.length;
+    const numConditions = this.conditions.length;
 
-    this.conditions.forEach(c => c.editing = false);
+    this.conditions.forEach(c => {
+      c.editing = false;
+    });
     this.conditions.push(new FilterCondition(numConditions));
-    this.conditions.forEach(c => c.removable = numConditions > 0);
+    this.conditions.forEach(c => {
+      c.removable = numConditions > 0;
+    });
   }
 
   /**
@@ -63,8 +85,7 @@ export class Filter {
       c.removable = arr.length > 1;
     });
 
-    if(this.conditions.length < 2) {
-
+    if (this.conditions.length < 2) {
     }
     this.setLabel();
   }
@@ -74,10 +95,10 @@ export class Filter {
    * @param {string} speciesKey - the value associated with the selected species
    */
   selectSimpleSpecies(speciesKey: string): void {
-    if(speciesKey.includes('either')) {
+    if (speciesKey.includes('either')) {
       this.species.ref.selected = true;
       this.species.comp.selected = true;
-    } else if(speciesKey.includes(this.refSpecies.commonName)) {
+    } else if (speciesKey.includes(this.refSpecies.commonName)) {
       this.species.ref.selected = true;
       this.species.comp.selected = false;
     } else {
@@ -99,18 +120,15 @@ export class Filter {
    * Sets the label for the simple filter menu button
    */
   setSimpleTitle(): void {
-    let c = this.conditions[0];
-    if(c.isType()) {
-      this.simpleFilterTitle = `that are ${c.value}s in ${this.getSpecies()}`
+    const c = this.conditions[0];
+    if (c.isType()) {
+      this.simpleFilterTitle = `that are ${c.value}s in ${this.getSpecies()}`;
     } else {
-      const filterBy = c.isOntology() ? c.getOntology() + ' term' : c.filterBy;
+      const filterBy = c.isOntology() ? `${c.getOntology()} term` : c.filterBy;
       const qual = c.qualifier === 'like' ? 'like' : '';
       this.simpleFilterTitle = `in ${this.getSpecies()} by ${filterBy} ${qual}`;
     }
   }
-
-
-  // Getter Methods
 
   /**
    * Returns the list of ontologies that are available to choose from for each
@@ -119,22 +137,32 @@ export class Filter {
   getOntologies(): SearchType[] {
     if (this.isRefFilter() && this.isCompFilter()) {
       return this.getMutualOntologies();
-    } else if (this.isRefFilter()) {
-      return this.refSpecies.onts;
-    } else {
-      return this.compSpecies.onts;
     }
+    if (this.isRefFilter()) {
+      return this.refSpecies.onts;
+    }
+    return this.compSpecies.onts;
   }
 
   /**
    * Returns the common names of the species that the filter will affect
    */
   getSpecies(): string {
-    let ref = this.isRefFilter();
-    let comp = this.isCompFilter();
+    const ref = this.isRefFilter();
+    const comp = this.isCompFilter();
 
-    return (ref && !comp ? `${this.refSpecies.commonName} only` :
-      (!ref && comp ? `${this.compSpecies.commonName} only` : 'either species'));
+    if (ref && comp) {
+      return 'either species';
+    }
+    if (ref && !comp) {
+      return `${this.refSpecies.commonName} only`;
+    }
+
+    if (!ref && comp) {
+      return `${this.compSpecies.commonName} only`;
+    }
+
+    return null;
   }
 
   /**
@@ -144,7 +172,7 @@ export class Filter {
     return [
       'either species',
       `${this.refSpecies.commonName} only`,
-      `${this.compSpecies.commonName} only`
+      `${this.compSpecies.commonName} only`,
     ];
   }
 
@@ -152,15 +180,18 @@ export class Filter {
    * Returns the color that text related to this filter should be based on the
    * type of filter it is (hiding/highlighting)
    */
-  getColor(): string { return this.hides() ? '#F00' : '#2A9FE0'; }
+  getColor(): string {
+    return this.hides() ? '#F00' : '#2A9FE0';
+  }
 
   /**
    * Returns the label text for the filter based on title (adds formatting)
    */
   getStringifiedConditions(): string {
-    return this.conditions.filter(c => c.isComplete())
-                          .map(c => c.getCompleteTitle())
-                          .join(' AND ');
+    return this.conditions
+      .filter(c => c.isComplete())
+      .map(c => c.getCompleteTitle())
+      .join(' AND ');
   }
 
   /**
@@ -169,26 +200,25 @@ export class Filter {
    * table
    */
   getTSVRowForFilter(): string {
-    let conds = this.getStringifiedConditions();
-    return [ this.mode, this.getSpecies(), conds ].join('\t');
+    const conds = this.getStringifiedConditions();
+    return [this.mode, this.getSpecies(), conds].join('\t');
   }
-
-
-  // Condition Checks
 
   /**
    * Returns true if the filter is set to hide matching features
    */
-  hides(): boolean { return this.mode === 'Hide'; }
+  hides(): boolean {
+    return this.mode === 'Hide';
+  }
 
   /**
    * Returns true if the specified gene matches ALL of the filter's conditions
    * @param {Gene} gene - the gene to check against all conditions
    */
   matchesFilter(gene: Gene): boolean {
-    for(let i = 0; i < this.conditions.length; i++) {
+    for (let i = 0; i < this.conditions.length; i += 1) {
       // as soon as we find a condition the gene doesn't match, return false
-      if(!this.matchesCondition(gene, this.conditions[i])) return false;
+      if (!this.matchesCondition(gene, this.conditions[i])) return false;
     }
 
     return true;
@@ -206,14 +236,18 @@ export class Filter {
    * boolean condition takes into consideration if the species selection is both
    * species
    */
-  isRefFilter(): boolean { return this.species.ref.selected; };
+  isRefFilter(): boolean {
+    return this.species.ref.selected;
+  }
 
   /**
    * Returns true if the filter applies to the comparison features; the
    * boolean condition takes into consideration if the species selection is both
    * species
    */
-  isCompFilter(): boolean { return this.species.comp.selected; }
+  isCompFilter(): boolean {
+    return this.species.comp.selected;
+  }
 
   /**
    * Returns true if the filter contains at least one ontology-related condition
@@ -221,9 +255,6 @@ export class Filter {
   isFilteringByOntologyTerm(): boolean {
     return this.conditions.filter(c => c.isOntology()).length > 0;
   }
-
-
-  // Private Methods
 
   /**
    * Returns the value of the condition (by default this is the condition's
@@ -242,16 +273,17 @@ export class Filter {
    *                                 against
    */
   private matchesCondition(gene: Gene, cond: FilterCondition): boolean {
-    let geneValue = gene[cond.filterBy].toLowerCase();
-    let condValue = this.getConditionValue(cond).toLowerCase();
+    const geneValue = gene[cond.filterBy].toLowerCase();
+    const condValue = this.getConditionValue(cond).toLowerCase();
 
-    if(cond.qualifier.includes('not')) {
-      return cond.qualifier.includes('equal') ?
-        geneValue !== condValue : !geneValue.includes(condValue);
-    } else {
-      return cond.qualifier.includes('equal') ?
-        geneValue === condValue : geneValue.includes(condValue);
+    if (cond.qualifier.includes('not')) {
+      return cond.qualifier.includes('equal')
+        ? geneValue !== condValue
+        : !geneValue.includes(condValue);
     }
+    return cond.qualifier.includes('equal')
+      ? geneValue === condValue
+      : geneValue.includes(condValue);
   }
 
   /**
@@ -259,8 +291,8 @@ export class Filter {
    * filtering by ontology options
    */
   private getMutualOntologies(): SearchType[] {
-    return this.refSpecies.onts.filter(ro => {
-      return this.compSpecies.onts.map(co => co.value).indexOf(ro.value) >= 0;
-    })
+    return this.refSpecies.onts.filter(
+      ro => this.compSpecies.onts.map(co => co.value).indexOf(ro.value) >= 0,
+    );
   }
 }

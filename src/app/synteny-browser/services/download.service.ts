@@ -2,11 +2,14 @@ import { Injectable } from '@angular/core';
 import { saveSvgAsPng } from 'save-svg-as-png';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DownloadService {
+  // the type header sent when creating a new block to download
+  blobType = 'data:text/plain;charset=utf-8,';
 
-  constructor() { }
+  // function to remove the margin on SVGs before getting downloaded
+  modifyCSS = (): string => 'margin-top: 0';
 
   /**
    * Initiates a download of the specified text with the specified filename
@@ -14,15 +17,16 @@ export class DownloadService {
    * @param {string} filename - the name of the file to save the SVG as
    */
   downloadText(text: string, filename: string): void {
-    let blob = new Blob([text], { type: 'data:text/plain;charset=utf-8,' });
+    const blob = new Blob([text], { type: this.blobType });
 
-    if(navigator.msSaveBlob) { // IE 10+
+    if (navigator.msSaveBlob) {
+      // IE 10+
       navigator.msSaveBlob(blob, filename);
     } else {
-      let link = document.createElement('a');
+      const link = document.createElement('a');
 
-      if(link.download !== undefined) {
-        let url = URL.createObjectURL(blob);
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
         link.setAttribute('download', filename);
         document.body.appendChild(link);
@@ -39,7 +43,9 @@ export class DownloadService {
    * @param {string} filename - the name of the file to save the SVG as
    */
   downloadSVG(svgSelector: string, filename: string): void {
-    let options = { modifyCss: () => { return "margin-top: 0;" } };
+    const options = {
+      modifyCss: this.modifyCSS(),
+    };
     saveSvgAsPng(document.getElementById(svgSelector), filename, options);
   }
 }

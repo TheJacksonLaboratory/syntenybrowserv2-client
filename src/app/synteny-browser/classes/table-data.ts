@@ -1,35 +1,59 @@
+import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
+import { format } from 'd3-format';
 import {
   ChrComparator,
   DescendantsComparator,
   IDComparator,
   NameComparator,
   SymbolComparator,
-  TypeComparator } from './comparators';
-import { ClrDatagridComparatorInterface, ClrDatagridPagination } from '@clr/angular';
+  TypeComparator,
+} from './comparators';
 import { Feature } from './feature';
-import { DescendantTerm, ExternalResource, OntologyTerm } from './interfaces';
-import { format } from 'd3-format';
-import { EventEmitter, Output } from '@angular/core';
+import { DescendantTerm, OntologyTerm } from './interfaces';
 
 export class TableData<T> {
+  // indicates if the table is still waiting for data to load into the datagrid
   loading: boolean;
-  rows: T[] =[];
+
+  // list of all features or ontology terms
+  rows: T[] = [];
+
+  // list of all visible features (responds to filtering/searching)
   filteredRows: T[] = [];
+
+  // columns needed to display in the datagrid
   columns: string[];
+
+  // subset of columns that should be searched for filter matches
   searchableColumns: string[];
 
-  dragging: boolean = false;
+  // indicates if the user is utilizing dragging to select rows in the table
+  dragging = false;
+
+  // while dragging, controls if the user is selecting or deselecting rows
   dragMode: string = null;
 
-  // only features are stored in the selections array
+  // selected features (only features are stored in the selections array; while users can
+  // "select" an ontology term, by doing so, they are selecting all genes associated
+  // with that term)
   selections: Feature[] = [];
 
-  // sorting classes
+  // sorts features or ontology terms by ID
   idComp = new IDComparator();
+
+  // sorts features by symbol
   symbolComp = new SymbolComparator();
+
+  // sorts features by type
   typeComp = new TypeComparator();
+
+  // sorts features by chromosome it's located on
   chrComp = new ChrComparator();
+
+  // sorts ontology terms by the number of descendant terms it has
   descComp = new DescendantsComparator();
+
+  // sorts ontology terms by term name
   nameComp = new NameComparator();
 
   constructor(columns: string[], searchable: string[]) {
@@ -42,11 +66,11 @@ export class TableData<T> {
    * Sets the rows (and filtered rows) of the table and sorts the rows if a
    * sortOn parameter is specified, and stops the loading
    * @param {OntologyTerm[]|Feature[]} rows - rows for the table which may be
-*                              ontology terms or features depending on the table
+   *                              ontology terms or features depending on the table
    * @param {string} sortOn - a key that exists in the row objects that can be
    *                          used to sort the rows
    */
-  setRows(rows: T[], sortOn: string = ''): void {
+  setRows(rows: T[], sortOn = ''): void {
     this.rows = sortOn ? rows.sort((a, b) => this.compare(a, b, sortOn)) : rows;
 
     this.filteredRows = this.rows;
@@ -59,13 +83,15 @@ export class TableData<T> {
    * @param {string} search - the search string to use to filter the table rows
    */
   searchFor(search: string): void {
-    if(search === '') {
+    if (search === '') {
       this.filteredRows = this.rows;
     } else {
       this.filteredRows = this.rows.filter(r => {
-        for(let i = 0; i < this.searchableColumns.length; i++) {
-          let column = r[this.searchableColumns[i]].toString().toLowerCase();
-          if(column.includes(search.toLowerCase())) { return true; }
+        for (let i = 0; i < this.searchableColumns.length; i += 1) {
+          const column = r[this.searchableColumns[i]].toString().toLowerCase();
+          if (column.includes(search.toLowerCase())) {
+            return true;
+          }
         }
 
         return false;
@@ -79,13 +105,20 @@ export class TableData<T> {
    */
   getSorter(columnName: string): ClrDatagridComparatorInterface<T> {
     switch (columnName) {
-      case 'id': return this.idComp;
-      case 'symbol': return this.symbolComp;
-      case 'name': return this.nameComp;
-      case 'type': return this.typeComp;
-      case 'chr': return this.chrComp;
-      case 'descendants': return this.descComp;
-      default: break;
+      case 'id':
+        return this.idComp;
+      case 'symbol':
+        return this.symbolComp;
+      case 'name':
+        return this.nameComp;
+      case 'type':
+        return this.typeComp;
+      case 'chr':
+        return this.chrComp;
+      case 'descendants':
+        return this.descComp;
+      default:
+        return null;
     }
   }
 
@@ -94,13 +127,13 @@ export class TableData<T> {
    * @param {OntologyTerm} term - the term to get descendant terms for
    */
   getDescendants(term: OntologyTerm): DescendantTerm[] {
-    if(term.descendants.length > 10) {
-      let descs = term.descendants.slice(0, 10);
-      let numRemain = term.descendants.length - 10;
+    if (term.descendants.length > 10) {
+      const descs = term.descendants.slice(0, 10);
+      const numRemain = term.descendants.length - 10;
 
       descs.push({
         id: '',
-        name: `and ${numRemain} other terms`
+        name: `and ${numRemain} other terms`,
       });
 
       return descs;
@@ -128,10 +161,10 @@ export class TableData<T> {
    * @param {Feature} row - the feature row that is being hovered over
    */
   dragOver(row: Feature): void {
-    if(this.dragging) {
-      if(this.dragMode === 'select') {
+    if (this.dragging) {
+      if (this.dragMode === 'select') {
         row.select();
-        if(this.selections.filter(s => s.is(row.symbol)).length === 0) {
+        if (this.selections.filter(s => s.is(row.symbol)).length === 0) {
           this.selections.push(row);
         }
       } else {
@@ -155,8 +188,11 @@ export class TableData<T> {
    */
   removeSelection(symbol: string): void {
     this.selections = this.selections.filter(s => !s.is(symbol));
-    // @ts-ignore Ignore type errors here because selection interaction is only
-    //            available on tables containing features
+
+    // Ignore the TS property inspection here since selections are only possible
+    // on tables where this.rows contain features, which all have symbols
+    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+    // @ts-ignore
     this.rows.filter(r => r.symbol === symbol).forEach(r => r.deselect());
   }
 
@@ -167,11 +203,10 @@ export class TableData<T> {
    * @param {string} col - the key to use to look up the value in the feature
    */
   getCell(row: T, col: string): string {
-    if(row instanceof Feature) {
-      return (col === 'start' || col === 'end') ? format(',')(row[col]) : row[col];
-    } else {
-      return row[col];
+    if (row instanceof Feature) {
+      return col === 'start' || col === 'end' ? format(',')(row[col]) : row[col];
     }
+    return row[col];
   }
 
   /**
@@ -180,9 +215,10 @@ export class TableData<T> {
    * @param {ClrDatagridPagination} pagination - the paginator data structure
    */
   getPaginatorLabel(pagination: ClrDatagridPagination): string {
-    return (this.filteredRows && this.filteredRows.length > pagination.pageSize) ?
-      `${pagination.firstItem + 1} - ${pagination.lastItem + 1} 
-       of ${pagination.totalItems}` : this.getSinglePagePaginatorLabel();
+    return this.filteredRows && this.filteredRows.length > pagination.pageSize
+      ? `${pagination.firstItem + 1} - ${pagination.lastItem + 1}
+       of ${pagination.totalItems}`
+      : this.getSinglePagePaginatorLabel();
   }
 
   /**
@@ -190,7 +226,7 @@ export class TableData<T> {
    * need a proper paginator (10 or fewer)
    */
   private getSinglePagePaginatorLabel(): string {
-    let numRows = this.filteredRows.length;
+    const numRows = this.filteredRows.length;
     return numRows > 0 ? `1 - ${numRows} of ${numRows}` : '0 of 0';
   }
 
@@ -202,9 +238,11 @@ export class TableData<T> {
    * @param {string} sortBy - the key to use for comparing the objects
    */
   private compare(a: T, b: T, sortBy: string): number {
-    if(typeof a[sortBy] !== 'undefined' && typeof b[sortBy] !== 'undefined') {
-      let comp = this.getSorter(sortBy);
-      if(comp) return comp.compare(a, b);
+    if (typeof a[sortBy] !== 'undefined' && typeof b[sortBy] !== 'undefined') {
+      const comp = this.getSorter(sortBy);
+      if (comp) return comp.compare(a, b);
     }
+
+    return 0;
   }
 }

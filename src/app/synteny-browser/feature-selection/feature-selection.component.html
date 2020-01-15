@@ -2,11 +2,14 @@
   <clr-select-container class="clr-col-4">
     <label for="search-type"> Search features by </label>
 
-    <select clrSelect id="search-type"
-            [(ngModel)]="searchType"
-            (ngModelChange)="setTypeDependentElements()">
+    <select
+      clrSelect
+      id="search-type"
+      [(ngModel)]="searchType"
+      (ngModelChange)="setTypeDependentElements()"
+    >
       <option *ngFor="let type of refSpecies.searchTypes" [value]="type.value">
-        {{ refSpecies.commonName + ': ' + type.name }}
+        {{ refSpecies.commonName + ": " + type.name }}
       </option>
     </select>
   </clr-select-container>
@@ -14,9 +17,12 @@
   <clr-select-container *ngIf="searchType === 'ontology'" class="clr-col-4">
     <label for="ontology"> Ontology </label>
 
-    <select clrSelect id="ontology"
-            [(ngModel)]="ontology"
-            (ngModelChange)="loadOntologyTerms()">
+    <select
+      clrSelect
+      id="ontology"
+      [(ngModel)]="ontology"
+      (ngModelChange)="loadOntologyTerms()"
+    >
       <option *ngFor="let ont of refSpecies.onts" [value]="ont.value">
         {{ ont.name }}
       </option>
@@ -26,39 +32,52 @@
   <clr-input-container class="clr-col-4">
     <label for="search-term"> {{ getSearchLabel() }} </label>
 
-    <input id="search-term" clrInput
-           [(ngModel)]="search"
-           [placeholder]="getSearchPlaceholder()"
-           (keyup)="searchForFeatures()">
+    <input
+      id="search-term"
+      clrInput
+      [(ngModel)]="search"
+      [placeholder]="getSearchPlaceholder()"
+      (keyup)="searchForFeatures()"
+    />
   </clr-input-container>
 </div>
 
 <div class="clr-row">
-  <feature-search class="clr-col-12 no-padding"
-                      [hidden]="searchType !== 'symbol'"
-                      (update)="updateSelections()">
+  <feature-search
+    class="clr-col-12 no-padding"
+    [hidden]="searchType !== 'symbol'"
+    (update)="updateSelections()"
+  >
   </feature-search>
 
-  <ontology-search class="clr-col-12 no-padding"
-                       [hidden]="searchType !== 'ontology'"
-                       (update)="updateSelections()"
-                       (switchView)="setSearch()">
+  <ontology-search
+    class="clr-col-12 no-padding"
+    [hidden]="searchType !== 'ontology'"
+    (update)="updateSelections()"
+    (switchView)="setSearch()"
+  >
   </ontology-search>
 </div>
 
 <div class="clr-row">
   <h4>Current selections</h4>
-  <br/>
+  <br />
   <div class="clr-col-lg-12 label-container">
     <div *ngIf="selections.length === 0" class="no-selections">
       No selections have been made yet
     </div>
 
     <div *ngIf="selections.length > 0">
-      <span *ngFor="let sel of selections" class="label label-light-blue"
-            [ngClass]="{'highlighted': isHighlighted(sel.id)}">
+      <span
+        *ngFor="let sel of selections"
+        class="label label-light-blue"
+        [ngClass]="{ highlighted: isHighlighted(sel.id) }"
+      >
         {{ sel.symbol }}
-        <clr-icon shape="close" (click)="removeSelection(sel.symbol)"></clr-icon>
+        <clr-icon
+          shape="close"
+          (click)="removeSelection(sel.symbol)"
+        ></clr-icon>
       </span>
     </div>
   </div>

@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core'
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ClarityModule, ClrSelectModule } from '@clr/angular';
 import { AppRoutingModule } from '../app-routing.module';
-
-import { ClarityModule, ClrSelectModule} from '@clr/angular';
 
 import { DocsComponent } from './docs.component';
 
@@ -17,12 +16,7 @@ import { DocsServiceAPIComponent } from './sections/docs-python-api.component';
 import { DocsTutorialComponent } from './sections/docs-tutorial.component';
 
 @NgModule({
-  imports: [
-    AppRoutingModule,
-    ClarityModule,
-    ClrSelectModule,
-    CommonModule
-  ],
+  imports: [AppRoutingModule, ClarityModule, ClrSelectModule, CommonModule],
   declarations: [
     DocsComponent,
     DocsClientAPIComponent,
@@ -33,11 +27,8 @@ import { DocsTutorialComponent } from './sections/docs-tutorial.component';
     DocsFeaturesComponent,
     DocsMenuComponent,
     DocsServiceAPIComponent,
-    DocsTutorialComponent
-  ], 
-  exports: [
-    DocsMenuComponent
-  ]
+    DocsTutorialComponent,
+  ],
+  exports: [DocsMenuComponent],
 })
-
-export class DocsModule { }
+export class DocsModule {}

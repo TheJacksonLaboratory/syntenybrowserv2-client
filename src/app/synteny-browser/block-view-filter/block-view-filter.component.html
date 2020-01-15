@@ -1,9 +1,12 @@
 <div id="filter-modal-container" class="clr-row">
   <!-- Side navigation -->
   <clr-vertical-nav class="clr-col-2">
-    <a *ngFor="let page of navigation" clrVerticalNavLink
-       (click)="activePage=page.value"
-       [ngStyle]="getNavItemStyle(page.value)">
+    <a
+      *ngFor="let page of navigation"
+      clrVerticalNavLink
+      (click)="activePage = page.value"
+      [ngStyle]="getNavItemStyle(page.value)"
+    >
       {{ page.name | titlecase }}
     </a>
   </clr-vertical-nav>
@@ -20,9 +23,12 @@
 
         <!-- Labels -->
         <div *ngIf="getCreatedFilters().length > 0">
-          <span *ngFor="let f of getCreatedFilters()" class="label"
-                (click)="editFilter(f)"
-                [ngClass]="{ 'label-info': !f.hides(), 'label-danger': f.hides() }">
+          <span
+            *ngFor="let f of getCreatedFilters()"
+            class="label"
+            (click)="editFilter(f)"
+            [ngClass]="{ 'label-info': !f.hides(), 'label-danger': f.hides() }"
+          >
             {{ f.filterLabel }}
             <clr-icon shape="close" (click)="removeFilter(f)"></clr-icon>
           </span>
@@ -39,100 +45,137 @@
         </div>
 
         <!-- Current simple filter -->
-        <div *ngIf="!currentFilter.advancedFilter" class="clr-row clr-col-12 top-1">
+        <div
+          *ngIf="!currentFilter.advancedFilter"
+          class="clr-row clr-col-12 top-1"
+        >
           <div class="clr-row clr-col-12">
             <!-- Mode select -->
             <clr-select-container class="right-1">
               <label for="simple-mode"> Mode </label>
 
-              <select clrSelect id="simple-mode" [(ngModel)]="currentFilter.mode">
+              <select
+                clrSelect
+                id="simple-mode"
+                [(ngModel)]="currentFilter.mode"
+              >
                 <option value="Highlight"> Highlight </option>
                 <option value="Hide"> Hide </option>
               </select>
             </clr-select-container>
 
-            <h6 class="right-1"> features </h6>
+            <h6 class="right-1">features</h6>
 
             <!-- Dropdown menu system -->
             <clr-dropdown class="right-1">
               <button class="btn" clrDropdownTrigger>
-                {{ currentFilter.simpleFilterTitle || 'Select filter condition' }}
+                {{
+                  currentFilter.simpleFilterTitle || "Select filter condition"
+                }}
                 <clr-icon shape="caret down"></clr-icon>
               </button>
               <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
                 <!-- Select species -->
-                <clr-dropdown *ngFor="let s of currentFilter.getSimpleSpeciesOptions()">
-                  <button clrDropdownTrigger (click)="currentFilter.selectSimpleSpecies(s)">
+                <clr-dropdown
+                  *ngFor="let s of currentFilter.getSimpleSpeciesOptions()"
+                >
+                  <button
+                    clrDropdownTrigger
+                    (click)="currentFilter.selectSimpleSpecies(s)"
+                  >
                     In {{ s }}
                   </button>
 
                   <!-- Select aspect to filter by -->
                   <clr-dropdown-menu>
                     <clr-dropdown>
-                      <button clrDropdownTrigger (click)="simpleFilterByAttribute('type')">
+                      <button
+                        clrDropdownTrigger
+                        (click)="simpleFilterByAttribute('type')"
+                      >
                         by type
                       </button>
 
                       <!-- Select type -->
                       <clr-dropdown-menu id="type-menu" clrPosition="left-top">
-                        <button *ngFor="let t of getFeatureTypes(currentFilter)"
-                                (click)="simpleFilterByType(t)"
-                                clrDropdownItem>
+                        <button
+                          *ngFor="let t of getFeatureTypes(currentFilter)"
+                          (click)="simpleFilterByType(t)"
+                          clrDropdownItem
+                        >
                           {{ t }}
                         </button>
                       </clr-dropdown-menu>
                     </clr-dropdown>
 
                     <clr-dropdown>
-                      <button clrDropdownTrigger
-                              (click)="simpleFilterByAttribute('id')">
+                      <button
+                        clrDropdownTrigger
+                        (click)="simpleFilterByAttribute('id')"
+                      >
                         by ID
                       </button>
 
                       <!-- Select ID qualifier -->
                       <clr-dropdown-menu>
-                        <button clrDropdownItem
-                                (click)="simpleFilterQualifier('equal')">
+                        <button
+                          clrDropdownItem
+                          (click)="simpleFilterQualifier('equal')"
+                        >
                           that equals...
                         </button>
-                        <button clrDropdownItem
-                                (click)="simpleFilterQualifier('like')">
+                        <button
+                          clrDropdownItem
+                          (click)="simpleFilterQualifier('like')"
+                        >
                           that is like...
                         </button>
                       </clr-dropdown-menu>
                     </clr-dropdown>
 
                     <clr-dropdown>
-                      <button clrDropdownTrigger
-                              (click)="simpleFilterByAttribute('symbol')">
+                      <button
+                        clrDropdownTrigger
+                        (click)="simpleFilterByAttribute('symbol')"
+                      >
                         by symbol
                       </button>
 
                       <!-- Select symbol qualifier -->
                       <clr-dropdown-menu>
-                        <button clrDropdownItem
-                                (click)="simpleFilterQualifier('equal')">
+                        <button
+                          clrDropdownItem
+                          (click)="simpleFilterQualifier('equal')"
+                        >
                           that equals...
                         </button>
-                        <button clrDropdownItem
-                                (click)="simpleFilterQualifier('like')">
+                        <button
+                          clrDropdownItem
+                          (click)="simpleFilterQualifier('like')"
+                        >
                           that is like...
                         </button>
                       </clr-dropdown-menu>
                     </clr-dropdown>
 
-                    <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                    <div
+                      class="dropdown-divider"
+                      role="separator"
+                      aria-hidden="true"
+                    ></div>
 
                     <clr-dropdown>
                       <button clrDropdownTrigger>by ontology term</button>
 
                       <!-- Select ontology -->
                       <clr-dropdown-menu clrPosition="left-top">
-                          <button *ngFor="let o of currentFilter.getOntologies()"
-                                  (click)="simpleFilterByOntology(o.value)"
-                                  clrDropdownItem>
-                            from {{ o.name }}
-                          </button>
+                        <button
+                          *ngFor="let o of currentFilter.getOntologies()"
+                          (click)="simpleFilterByOntology(o.value)"
+                          clrDropdownItem
+                        >
+                          from {{ o.name }}
+                        </button>
                       </clr-dropdown-menu>
                     </clr-dropdown>
                   </clr-dropdown-menu>
@@ -141,41 +184,65 @@
             </clr-dropdown>
 
             <!-- Input for ID or symbol -->
-            <clr-input-container *ngIf="currentFilter.simpleUserInputNeeded &&
-                                        !currentFilter.isFilteringByOntologyTerm()"
-                                 class="right-1">
+            <clr-input-container
+              *ngIf="
+                currentFilter.simpleUserInputNeeded &&
+                !currentFilter.isFilteringByOntologyTerm()
+              "
+              class="right-1"
+            >
               <label for="simple-value"> Value </label>
 
-              <input id="simple-value" clrInput placeholder="Enter a value here"
-                     [(ngModel)]="currentFilter.conditions[0].value">
+              <input
+                id="simple-value"
+                clrInput
+                placeholder="Enter a value here"
+                [(ngModel)]="currentFilter.conditions[0].value"
+              />
             </clr-input-container>
 
             <!-- Autocomplete for ontology term -->
-            <ng-select *ngIf="currentFilter.simpleUserInputNeeded &&
-                              currentFilter.isFilteringByOntologyTerm()"
-                       class="simple-autocomplete right-1" bindLabel="name" bindValue="id"
-                       [items]="data.ontologyTerms[currentFilter.conditions[0].getOntology()]"
-                       [virtualScroll]="true"
-                       placeholder="Enter a term"
-                       [(ngModel)]="currentFilter.conditions[0].value"
-                       (change)="checkTermChildren()">
+            <ng-select
+              *ngIf="
+                currentFilter.simpleUserInputNeeded &&
+                currentFilter.isFilteringByOntologyTerm()
+              "
+              class="simple-autocomplete right-1"
+              bindLabel="name"
+              bindValue="id"
+              [items]="
+                data.ontologyTerms[currentFilter.conditions[0].getOntology()]
+              "
+              [virtualScroll]="true"
+              placeholder="Enter a term"
+              [(ngModel)]="currentFilter.conditions[0].value"
+              (change)="checkTermChildren()"
+            >
             </ng-select>
 
             <!-- Finish filter button -->
-            <button type="button" *ngIf="currentFilter.simpleUserInputNeeded"
-                    class="btn btn-success-outline top-0"
-                    title="Finish the filter"
-                    [disabled]="!currentFilter.conditions[0].value"
-                    (click)="finishFilter()">
+            <button
+              type="button"
+              *ngIf="currentFilter.simpleUserInputNeeded"
+              class="btn btn-success-outline top-0"
+              title="Finish the filter"
+              [disabled]="!currentFilter.conditions[0].value"
+              (click)="finishFilter()"
+            >
               <clr-icon shape="check"></clr-icon> Done
             </button>
           </div>
 
           <!-- Mode toggle to advanced filter -->
-          <div class="clr-row clr-col-12 top-1 mode-toggle clr-justify-content-center">
+          <div
+            class="clr-row clr-col-12 top-1 mode-toggle clr-justify-content-center"
+          >
             <p>Need something a little more specific?</p>
-            <button type="button" class="btn btn-sm btn-link"
-                    (click)="currentFilter.advancedFilter=true">
+            <button
+              type="button"
+              class="btn btn-sm btn-link"
+              (click)="currentFilter.advancedFilter = true"
+            >
               Create an Advanced Filter
             </button>
           </div>
@@ -190,13 +257,23 @@
             <clr-radio-container class="right-1">
               <label>Mode</label>
               <clr-radio-wrapper>
-                <input type="radio" clrRadio id="highlight-radio" value="Highlight"
-                       [(ngModel)]="currentFilter.mode" />
+                <input
+                  type="radio"
+                  clrRadio
+                  id="highlight-radio"
+                  value="Highlight"
+                  [(ngModel)]="currentFilter.mode"
+                />
                 <label for="highlight-radio">Highlight matches</label>
               </clr-radio-wrapper>
               <clr-radio-wrapper>
-                <input type="radio" clrRadio id="hide-radio" value="Hide"
-                       [(ngModel)]="currentFilter.mode" />
+                <input
+                  type="radio"
+                  clrRadio
+                  id="hide-radio"
+                  value="Hide"
+                  [(ngModel)]="currentFilter.mode"
+                />
                 <label for="hide-radio">Hide matches</label>
               </clr-radio-wrapper>
             </clr-radio-container>
@@ -205,17 +282,25 @@
             <clr-checkbox-container>
               <label>Search species</label>
               <clr-checkbox-wrapper>
-                <input type="checkbox" clrCheckbox id="ref-checkbox"
-                       [value]="currentFilter.species.ref.value"
-                       [(ngModel)]="currentFilter.species.ref.selected" />
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  id="ref-checkbox"
+                  [value]="currentFilter.species.ref.value"
+                  [(ngModel)]="currentFilter.species.ref.selected"
+                />
                 <label for="ref-checkbox">
                   Reference ({{ currentFilter.species.ref.name }})
                 </label>
               </clr-checkbox-wrapper>
               <clr-checkbox-wrapper>
-                <input type="checkbox" clrCheckbox id="comp-checkbox"
-                       [value]="currentFilter.species.comp.value"
-                       [(ngModel)]="currentFilter.species.comp.selected" />
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  id="comp-checkbox"
+                  [value]="currentFilter.species.comp.value"
+                  [(ngModel)]="currentFilter.species.comp.selected"
+                />
                 <label for="comp-checkbox">
                   Comparison ({{ currentFilter.species.comp.name }})
                 </label>
@@ -226,23 +311,35 @@
           <h6 class="clr-col-12 top-1">Conditions</h6>
           <!-- Condition caption -->
           <p class="clr-col-12">
-            <b>Any filtered feature for this filter must meet <i>all</i> of the
-              following criteria:</b>
+            <b
+              >Any filtered feature for this filter must meet <i>all</i> of the
+              following criteria:</b
+            >
           </p>
 
           <!-- Conditions -->
-          <div *ngFor="let c of currentFilter.conditions" class="clr-row clr-col-12">
+          <div
+            *ngFor="let c of currentFilter.conditions"
+            class="clr-row clr-col-12"
+          >
             <!-- Formatted condition description -->
             <div *ngIf="!c.editing" class="clr-row clr-col-12">
               <h5 class="clr-col-8">{{ c.getCompleteTitle() }}</h5>
 
-              <button class="btn btn-icon btn-info-outline" title="Edit condition"
-                      (click)="c.editing=true">
+              <button
+                class="btn btn-icon btn-info-outline"
+                title="Edit condition"
+                (click)="c.editing = true"
+              >
                 <clr-icon shape="pencil"></clr-icon>
               </button>
 
-              <button *ngIf="c.removable" class="btn btn-icon btn-danger-outline"
-                      title="Remove condition" (click)="removeCondition(c)">
+              <button
+                *ngIf="c.removable"
+                class="btn btn-icon btn-danger-outline"
+                title="Remove condition"
+                (click)="removeCondition(c)"
+              >
                 <clr-icon shape="trash"></clr-icon>
               </button>
             </div>
@@ -253,8 +350,12 @@
               <clr-select-container class="clr-col-12 bottom-1">
                 <label for="filter-by"> Match a feature if it </label>
 
-                <select clrSelect id="filter-by" [(ngModel)]="c.filterBy"
-                        (ngModelChange)="c.value=null">
+                <select
+                  clrSelect
+                  id="filter-by"
+                  [(ngModel)]="c.filterBy"
+                  (ngModelChange)="c.value = null"
+                >
                   <option value="" disabled>
                     -- Select a condition criteria --
                   </option>
@@ -264,8 +365,10 @@
                   <option *ngIf="!currentFilter.isRefFilter()" value="chr">
                     is located on chromosome...
                   </option>
-                  <option *ngFor="let o of currentFilter.getOntologies()"
-                          value="ont-{{o.value}}">
+                  <option
+                    *ngFor="let o of currentFilter.getOntologies()"
+                    value="ont-{{ o.value }}"
+                  >
                     is associated with a {{ o.name }} term...
                   </option>
                 </select>
@@ -277,24 +380,40 @@
                 <clr-select-container *ngIf="c.isType()" class="clr-col-12">
                   <label for="type"> Type </label>
 
-                  <select clrSelect id="type" [(ngModel)]="c.value"
-                          (ngModelChange)="currentFilter.setLabel()">
+                  <select
+                    clrSelect
+                    id="type"
+                    [(ngModel)]="c.value"
+                    (ngModelChange)="currentFilter.setLabel()"
+                  >
                     <option value="" disabled> -- Select a type -- </option>
-                    <option *ngFor="let t of getFeatureTypes(currentFilter)"
-                            [value]="t">
+                    <option
+                      *ngFor="let t of getFeatureTypes(currentFilter)"
+                      [value]="t"
+                    >
                       {{ t }}
                     </option>
                   </select>
                 </clr-select-container>
 
                 <!-- Chromosome selection -->
-                <clr-select-container *ngIf="c.filterBy === 'chr'" class="clr-col-12">
+                <clr-select-container
+                  *ngIf="c.filterBy === 'chr'"
+                  class="clr-col-12"
+                >
                   <label for="chr"> Chromosome </label>
 
-                  <select clrSelect id="chr" [(ngModel)]="c.value"
-                          (ngModelChange)="currentFilter.setLabel()">
+                  <select
+                    clrSelect
+                    id="chr"
+                    [(ngModel)]="c.value"
+                    (ngModelChange)="currentFilter.setLabel()"
+                  >
                     <option value="" disabled> -- Select a chr -- </option>
-                    <option *ngFor="let t of compSpecies.getChromosomes()" [value]="t">
+                    <option
+                      *ngFor="let t of compSpecies.getChromosomes()"
+                      [value]="t"
+                    >
                       {{ t }}
                     </option>
                   </select>
@@ -317,27 +436,44 @@
                   <clr-input-container>
                     <label for="value"> Value </label>
 
-                    <input id="value" clrInput placeholder="Enter a value here"
-                           [(ngModel)]="c.value" (ngModelChange)="currentFilter.setLabel()">
+                    <input
+                      id="value"
+                      clrInput
+                      placeholder="Enter a value here"
+                      [(ngModel)]="c.value"
+                      (ngModelChange)="currentFilter.setLabel()"
+                    />
                   </clr-input-container>
                 </div>
 
                 <!-- Ontology term autocomplete selection -->
-                <ng-select *ngIf="c.isOntology()" class="autocomplete"
-                           bindLabel="name" bindValue="id"
-                           [items]="data.ontologyTerms[c.getOntology()]"
-                           [virtualScroll]="true" placeholder="Enter a term"
-                           [(ngModel)]="c.value" (change)="checkTermChildren(c)">
+                <ng-select
+                  *ngIf="c.isOntology()"
+                  class="autocomplete"
+                  bindLabel="name"
+                  bindValue="id"
+                  [items]="data.ontologyTerms[c.getOntology()]"
+                  [virtualScroll]="true"
+                  placeholder="Enter a term"
+                  [(ngModel)]="c.value"
+                  (change)="checkTermChildren(c)"
+                >
                 </ng-select>
               </div>
             </div>
           </div>
 
           <!-- Add a new condition button -->
-          <div *ngIf="currentFilter.allConditionsAreComplete()" class="clr-col-12 text-center">
-            <button type="button" class="btn btn-sm btn-info-outline"
-                    title="Add another condition to this filter"
-                    (click)="currentFilter.addNewCondition()">
+          <div
+            *ngIf="currentFilter.allConditionsAreComplete()"
+            class="clr-col-12 text-center"
+          >
+            <button
+              type="button"
+              class="btn btn-sm btn-info-outline"
+              title="Add another condition to this filter"
+              (click)="currentFilter.addNewCondition()"
+            >
               <clr-icon shape="add"></clr-icon> Add a condition
             </button>
           </div>
@@ -348,16 +484,24 @@
             <clr-input-container class="right-1">
               <label for="filter-name"> Name the filter </label>
 
-              <input id="filter-name" clrInput
-                     [disabled]="!currentFilter.filterLabel"
-                     [(ngModel)]="currentFilter.filterLabel">
+              <input
+                id="filter-name"
+                clrInput
+                [disabled]="!currentFilter.filterLabel"
+                [(ngModel)]="currentFilter.filterLabel"
+              />
             </clr-input-container>
 
             <!-- Finish filter button -->
-            <button type="button" class="btn btn-success-outline right-1"
-                    title="Finish filter"
-                    [disabled]="filterErrorState || !currentFilter.allConditionsAreComplete()"
-                    (click)="finishFilter()">
+            <button
+              type="button"
+              class="btn btn-success-outline right-1"
+              title="Finish filter"
+              [disabled]="
+                filterErrorState || !currentFilter.allConditionsAreComplete()
+              "
+              (click)="finishFilter()"
+            >
               <clr-icon shape="check"></clr-icon> Done
             </button>
 
@@ -371,10 +515,15 @@
           </div>
 
           <!-- Mode toggle to simple filter -->
-          <div class="clr-row clr-col-12 top-1 mode-toggle clr-justify-content-center">
+          <div
+            class="clr-row clr-col-12 top-1 mode-toggle clr-justify-content-center"
+          >
             <p>Don't need this many options?</p>
-            <button type="button" class="btn btn-sm btn-link"
-                    (click)="currentFilter.advancedFilter=false">
+            <button
+              type="button"
+              class="btn btn-sm btn-link"
+              (click)="currentFilter.advancedFilter = false"
+            >
               Create a Simple Filter
             </button>
           </div>
@@ -383,14 +532,22 @@
 
       <!-- Done button -->
       <div class="clr-row clr-justify-content-end top-1 bottom-1">
-        <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="userClose.emit()"
+        >
           Close
         </button>
       </div>
     </div>
 
     <!-- Filter results preview page/tab -->
-    <div *ngIf="activePage === 'preview'" id="preview-filters" class="clr-col-12">
+    <div
+      *ngIf="activePage === 'preview'"
+      id="preview-filters"
+      class="clr-col-12"
+    >
       <!-- Content -->
       <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
         <!-- Filter results table -->
@@ -417,8 +574,10 @@
 
             <clr-dg-placeholder> No genes to show! </clr-dg-placeholder>
 
-            <clr-dg-row *clrDgItems="let row of filteredGenes"
-                        [ngClass]="{ 'hidden-row': row.hidden }">
+            <clr-dg-row
+              *clrDgItems="let row of filteredGenes"
+              [ngClass]="{ 'hidden-row': row.hidden }"
+            >
               <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
                 {{ row[attr] }}
               </clr-dg-cell>
@@ -431,7 +590,9 @@
                 <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
                   Features per page
                 </clr-dg-page-size>
-                {{ filteredGenes.length > 0 ? getPaginatorLabel(pag) : '0 of 0' }}
+                {{
+                  filteredGenes.length > 0 ? getPaginatorLabel(pag) : "0 of 0"
+                }}
               </clr-dg-pagination>
             </clr-dg-footer>
           </clr-datagrid>
@@ -446,7 +607,11 @@
         </button>
 
         <!-- Done button -->
-        <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="userClose.emit()"
+        >
           Done
         </button>
       </div>
@@ -476,27 +641,29 @@
             <clr-stack-block>
               <clr-stack-label> Anatomy of a Filter </clr-stack-label>
               <clr-stack-block class="block-body">
-                <p>There are two ways to create filters. The default method is
+                <p>
+                  There are two ways to create filters. The default method is
                   creating a simple filter. Using the dropdown menu, you are
                   provided options to construct the filter instructions. If the
                   condition you select requires an input value, a field to enter
                   that input will become available. Simple filters are the
                   quickest to create but they have some limitations. A simple
-                  filter is made up of only a single condition and in some cases,
-                  doesn't support as many qualifier options. If you need more
-                  control or customization, you may need to create an advanced
-                  filter, which can be found under the form.
+                  filter is made up of only a single condition and in some
+                  cases, doesn't support as many qualifier options. If you need
+                  more control or customization, you may need to create an
+                  advanced filter, which can be found under the form.
                 </p>
                 <ul class="list">
                   <li>
                     <b>Species:</b> identifies the species that the filter will
-                    look for matches in. If the selected species is the reference,
-                    the current reference chromosome will be searched for matches.
-                    If the selected species is the comparison, the regions in
-                    the comparison genome that are syntenic to the reference on
-                    the current reference chromosome will be searched for matches.
-                    If the selected species is ‘Both’, both of the aforementioned
-                    regions will be included in the search.
+                    look for matches in. If the selected species is the
+                    reference, the current reference chromosome will be searched
+                    for matches. If the selected species is the comparison, the
+                    regions in the comparison genome that are syntenic to the
+                    reference on the current reference chromosome will be
+                    searched for matches. If the selected species is ‘Both’,
+                    both of the aforementioned regions will be included in the
+                    search.
                   </li>
                   <li>
                     <b>Mode:</b> filters can operate in one of two modes: hide
@@ -517,8 +684,8 @@
                     condition can be removed.
                     <ul class="list">
                       <li>
-                        <b>Filtering by Type:</b> offered as 'is categorized
-                        as a...' in the dropdown, provides you with a select
+                        <b>Filtering by Type:</b> offered as 'is categorized as
+                        a...' in the dropdown, provides you with a select
                         dropdown with the available types available based on the
                         selected species.
                       </li>
@@ -526,65 +693,75 @@
                         <b>Filtering by ID:</b> offered as 'Has an ID that...'
                         in the dropdown, provides you with an input where you
                         could enter a gene ID select and a dropdown allowing you
-                        to choose whether you're looking for exact matches, "like"
-                        matches or features that <i>don't</i> match the input value.
+                        to choose whether you're looking for exact matches,
+                        "like" matches or features that <i>don't</i> match the
+                        input value.
                       </li>
                       <li>
                         <b>Filtering by Symbol:</b> offered as 'Has a symbol
-                        that...' in the dropdown, provides you with an input where
-                        you could enter a gene symbol or a prefix and a select
-                        dropdown allowing you to choose whether you're looking
-                        for exact matches, "like" matches or features that
-                        <i>don't</i> match the input value.
+                        that...' in the dropdown, provides you with an input
+                        where you could enter a gene symbol or a prefix and a
+                        select dropdown allowing you to choose whether you're
+                        looking for exact matches, "like" matches or features
+                        that <i>don't</i> match the input value.
                       </li>
                       <li>
-                        <b>Filtering by Chromosome: (available only for a
-                        comparison filter)</b> offered as 'Is located on
-                        chromosome...' in the dropdown, provides you with a
-                        select dropdown allowing you to choose a comparison
-                        species chromosome.
+                        <b
+                          >Filtering by Chromosome: (available only for a
+                          comparison filter)</b
+                        >
+                        offered as 'Is located on chromosome...' in the
+                        dropdown, provides you with a select dropdown allowing
+                        you to choose a comparison species chromosome.
                       </li>
                       <li>
                         <b>Ontology Term:</b> offered as 'Is associated with a
-                        <i>ontology abbrev</i> term...' in the dropdown, provides
-                        you an input where you can scroll through the selected
-                        ontology terms and select from the options or start
-                        typing a term to filter options.
+                        <i>ontology abbrev</i> term...' in the dropdown,
+                        provides you an input where you can scroll through the
+                        selected ontology terms and select from the options or
+                        start typing a term to filter options.
                       </li>
                       <li>
                         <b>Qualifiers:</b> filtering by symbol/ID attribute will
                         provide you with a qualifier select. By default, the
-                        qualifier will be ‘is equal to’ which will check that the
-                        search for features  whose attribute is an exact match
-                        for the value entered. You can choose ‘not equal to’
-                        which will search for features whose attribute is NOT
-                        the entered value. Additionally you have ‘is like’ and
-                        ‘is not like’ which will search for features whose
-                        attribute contains (or not) the entered value. <i>For
-                        example, if you were viewing Mouse as the reference
-                        species, chromosome 14, and wanted to highlight a series
-                        of genes whose symbol starts with ‘traj’ (for which there
-                        are several), you’d be able to highlight all of them no
-                        matter what numeric suffix they have. On the other hand,
-                        if you wanted to highlight all BUT that series of genes,
-                        you could use the ‘is not like’ qualifier.</i>
+                        qualifier will be ‘is equal to’ which will check that
+                        the search for features whose attribute is an exact
+                        match for the value entered. You can choose ‘not equal
+                        to’ which will search for features whose attribute is
+                        NOT the entered value. Additionally you have ‘is like’
+                        and ‘is not like’ which will search for features whose
+                        attribute contains (or not) the entered value.
+                        <i
+                          >For example, if you were viewing Mouse as the
+                          reference species, chromosome 14, and wanted to
+                          highlight a series of genes whose symbol starts with
+                          ‘traj’ (for which there are several), you’d be able to
+                          highlight all of them no matter what numeric suffix
+                          they have. On the other hand, if you wanted to
+                          highlight all BUT that series of genes, you could use
+                          the ‘is not like’ qualifier.</i
+                        >
                       </li>
                     </ul>
                   </li>
                   <li>
                     If you want to want more than one condition in a filter, you
-                    can press the ‘new condition’ button to add another condition
-                    to the filter. It’s important to note that when applying a
-                    single filter, matches must match all conditions in the
-                    filter. <i>For example, if you wanted to highlight rRNA genes
-                    and tRNA genes (which translates to ‘type = rRNA gene’ OR
-                    ‘type = tRNA gene’), you will want to create two separate
-                    filters, each with a single condition to filter on the types
-                    you want. You would <b>NOT</b> want to create a single filter
-                    with two type filters (which would translate to ‘type = rRNA
-                    gene’ AND ‘type = tRNA’) as the filter would be looking for
-                    features that are both rRNA genes AND tRNA genes, producing
-                    a result of 0 matching features for the filter.</i>
+                    can press the ‘new condition’ button to add another
+                    condition to the filter. It’s important to note that when
+                    applying a single filter, matches must match all conditions
+                    in the filter.
+                    <i
+                      >For example, if you wanted to highlight rRNA genes and
+                      tRNA genes (which translates to ‘type = rRNA gene’ OR
+                      ‘type = tRNA gene’), you will want to create two separate
+                      filters, each with a single condition to filter on the
+                      types you want. You would <b>NOT</b> want to create a
+                      single filter with two type filters (which would translate
+                      to ‘type = rRNA gene’ AND ‘type = tRNA’) as the filter
+                      would be looking for features that are both rRNA genes AND
+                      tRNA genes, producing a result of 0 matching features for
+                      the filter.</i
+                    >
                   </li>
                   <li>
                     As you fill out the fields in the conditions, a filter name
@@ -603,24 +780,24 @@
                     the associated filter is configured.
                   </li>
                   <li>
-                    A blue filter label indicates the associated filter highlights
-                    matching features and a red filter label indicates the
-                    associated filter hides matching features. If a feature
-                    matches a hiding filter and a highlighting filter, the feature
-                    will be highlighted as highlighting filters always take
-                    precedence over hiding filters.
+                    A blue filter label indicates the associated filter
+                    highlights matching features and a red filter label
+                    indicates the associated filter hides matching features. If
+                    a feature matches a hiding filter and a highlighting filter,
+                    the feature will be highlighted as highlighting filters
+                    always take precedence over hiding filters.
                   </li>
                   <li>
-                    The first word in the filter label also indicates the mode of
-                    the filter.
+                    The first word in the filter label also indicates the mode
+                    of the filter.
                   </li>
                   <li>
-                    The content within square brackets in the filter
-                    label summarize the conditions of the filter.
+                    The content within square brackets in the filter label
+                    summarize the conditions of the filter.
                   </li>
                   <li>
-                    The last part of the filter label identifies the common names
-                    of species the filter will search for matches.
+                    The last part of the filter label identifies the common
+                    names of species the filter will search for matches.
                   </li>
                   <li>
                     Clicking on the ‘X’ in a filter label will delete the
@@ -632,7 +809,11 @@
                   </li>
                 </ul>
                 <div class="clr-col-6">
-                  <img id="diagram" src="../../../assets/filter-label-diagram.png" alt="">
+                  <img
+                    id="diagram"
+                    src="../../../assets/filter-label-diagram.png"
+                    alt=""
+                  />
                 </div>
               </clr-stack-block>
             </clr-stack-block>
@@ -646,10 +827,11 @@
                     fields to create a new filter.
                   </li>
                   <li>
-                    Once finished with a filter, click the ‘finish editing filter’
-                    button and you will see a colored label appear in the field
-                    towards the top of the modal. A blue label indicates a
-                    ‘highlight’ filter and a red label indicates a ‘hide’ filter.
+                    Once finished with a filter, click the ‘finish editing
+                    filter’ button and you will see a colored label appear in
+                    the field towards the top of the modal. A blue label
+                    indicates a ‘highlight’ filter and a red label indicates a
+                    ‘hide’ filter.
                   </li>
                   <li>
                     If you’re editing a filter and navigate to a different tab
@@ -658,10 +840,11 @@
                     continue editing, or throw out.
                   </li>
                   <li>
-                    If you’re editing a filter and click on a label of a different
-                    filter, the changes to the current filter WILL BE LOST as
-                    clicking on the label of a filter will open that filter in
-                    editing mode and will overwrite your current filter.
+                    If you’re editing a filter and click on a label of a
+                    different filter, the changes to the current filter WILL BE
+                    LOST as clicking on the label of a filter will open that
+                    filter in editing mode and will overwrite your current
+                    filter.
                   </li>
                 </ul>
               </clr-stack-block>
@@ -691,32 +874,32 @@
             <clr-stack-block class="block-body">
               <ul class="list">
                 <li>
-                  If you have created filters, you can utilize the preview filters
-                  page. If you haven’t created any filters, you can see the preview
-                  filters page but it won’t be helpful at all.
+                  If you have created filters, you can utilize the preview
+                  filters page. If you haven’t created any filters, you can see
+                  the preview filters page but it won’t be helpful at all.
                 </li>
                 <li>
                   The filter results table will show the features that will be
-                  affected by the current combination of filters selected in
-                  the checklist.
+                  affected by the current combination of filters selected in the
+                  checklist.
                 </li>
                 <li>
                   Features that will be hidden by the set of filters will be
-                  represented by a red row containing the feature’s metadata
-                  and those that will be highlighted will be represented by a
-                  blue row. A feature is only listed once in the table and
-                  since highlighting filters take precedence over hiding filters,
-                  if a feature matches a highlighting filter AND a hiding filter,
-                  it will appear blue in the table as it will be highlighted
-                  rather than hidden.
+                  represented by a red row containing the feature’s metadata and
+                  those that will be highlighted will be represented by a blue
+                  row. A feature is only listed once in the table and since
+                  highlighting filters take precedence over hiding filters, if a
+                  feature matches a highlighting filter AND a hiding filter, it
+                  will appear blue in the table as it will be highlighted rather
+                  than hidden.
                 </li>
                 <li>
-                  If you would like to download the contents of the table,
-                  click the ‘download table’ button at the bottom of the modal
-                  to trigger a .txt file containing the metadata for all of the
+                  If you would like to download the contents of the table, click
+                  the ‘download table’ button at the bottom of the modal to
+                  trigger a .txt file containing the metadata for all of the
                   features listed in the table including whether they will be
-                  highlighted or hidden and data on the filters that produce
-                  the list of filters.
+                  highlighted or hidden and data on the filters that produce the
+                  list of filters.
                 </li>
               </ul>
             </clr-stack-block>
@@ -726,7 +909,11 @@
 
       <!-- Done button -->
       <div class="clr-row clr-justify-content-end top-1 bottom-1">
-        <button type="button" class="btn btn-primary" (click)="userClose.emit()">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="userClose.emit()"
+        >
           Done
         </button>
       </div>

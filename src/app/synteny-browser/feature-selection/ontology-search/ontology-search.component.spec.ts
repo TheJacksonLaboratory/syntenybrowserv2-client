@@ -8,9 +8,8 @@ describe('OntologySearchComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ OntologySearchComponent ]
-    })
-    .compileComponents();
+      declarations: [OntologySearchComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

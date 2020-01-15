@@ -1,43 +1,58 @@
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { ApiService } from './services/api.service';
 import { BlockViewBrowserComponent } from './block-view-browser/block-view-browser.component';
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FeatureSelectionComponent } from './feature-selection/feature-selection.component';
 import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.component';
 import { GenomeViewComponent } from './genome-view/genome-view.component';
-import { Species } from './classes/species';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
-import { Filter } from './classes/filter';
 import { DataStorageService } from './services/data-storage.service';
 
 @Component({
   selector: 'app-synteny-browser',
-  templateUrl: './synteny-browser.component.html'
+  templateUrl: './synteny-browser.component.html',
 })
-
 export class SyntenyBrowserComponent implements OnInit {
-  @ViewChild(SpeciesSelectionComponent, {static: true}) species: SpeciesSelectionComponent;
-  @ViewChild(FeatureSelectionComponent, {static: true}) features: FeatureSelectionComponent;
-  @ViewChild(GenomeViewComponent, {static: true}) genomeView: GenomeViewComponent;
-  @ViewChild(BlockViewBrowserComponent, {static: false}) blockViewBrowser: BlockViewBrowserComponent;
-  @ViewChild(BlockViewFilterComponent, {static: false}) blockViewFilters: BlockViewFilterComponent;
+  // species selection child component
+  @ViewChild(SpeciesSelectionComponent, { static: true })
+  species: SpeciesSelectionComponent;
 
-  viewInBrowser: boolean = false;
-  filterOpen: boolean = false;
+  // feature selection child component
+  @ViewChild(FeatureSelectionComponent, { static: true })
+  features: FeatureSelectionComponent;
 
-  constructor(public data: DataStorageService,
-              private cdr: ChangeDetectorRef,
-              private http: ApiService) { }
+  // genome view child component
+  @ViewChild(GenomeViewComponent, { static: true })
+  genomeView: GenomeViewComponent;
 
-  ngOnInit() {
+  // block view browser child component
+  // ('static: false' since it doesn't need to load when the app bootstraps)
+  @ViewChild(BlockViewBrowserComponent, { static: false })
+  blockViewBrowser: BlockViewBrowserComponent;
+
+  // block view filter child component
+  // ('static: false' since it doesn't need to load when the app bootstraps)
+  @ViewChild(BlockViewFilterComponent, { static: false })
+  blockViewFilters: BlockViewFilterComponent;
+
+  // controls if the block view browser panel is visible
+  viewInBrowser = false;
+
+  // controls if the block view filter dialog is open
+  filterOpen = false;
+
+  constructor(
+    public data: DataStorageService,
+    private cdr: ChangeDetectorRef,
+    private http: ApiService,
+  ) {}
+
+  ngOnInit(): void {
     this.http.getSpecies().subscribe(species => {
       this.species.setSpecies(species);
       this.data.species = species;
       this.updateSpecies();
     });
   }
-
-
-  // Operational Methods
 
   /**
    * Updates reference and comparison species with the most recent selections,
@@ -73,15 +88,12 @@ export class SyntenyBrowserComponent implements OnInit {
     this.genomeView.updateFeatures(this.features.selections);
   }
 
-
-  // Getter Methods
-
   /**
    * Show the block view browser and pass the reference and comparison species,
    * color dictionary, selected chromosome, and the features in the selected
    * chromosome (if any) to the block view browser
    */
-  getChromosomeFeatures() {
+  getChromosomeFeatures(): void {
     // show block view synteny-browser
     this.viewInBrowser = true;
 
@@ -95,8 +107,7 @@ export class SyntenyBrowserComponent implements OnInit {
 
     setTimeout(() => {
       // TODO: this currently only will work in Firefox and Chrome
-      document.getElementById('block-view')
-              .scrollIntoView({ behavior: 'smooth', block: 'end' });
+      document.getElementById('block-view').scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 100);
   }
 
@@ -104,8 +115,8 @@ export class SyntenyBrowserComponent implements OnInit {
    * Updates the block view with the most recent filter conditions
    */
   getFilters(): void {
-    let bvb = this.blockViewBrowser;
-    let bvf = this.blockViewFilters;
+    const bvb = this.blockViewBrowser;
+    const bvf = this.blockViewFilters;
 
     this.data.filters = bvf.getCreatedFilters();
     bvb.filters = this.data.filters;

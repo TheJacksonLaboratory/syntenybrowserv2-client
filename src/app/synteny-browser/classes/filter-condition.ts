@@ -1,29 +1,29 @@
 /**
  * This class is to be used within a Filter class as a single filter can have
  * multiple conditions
- * @var filterBy - string attribute to filter genes by
- * @var qualifier - string value equivalent of how matches should be found
- *                  (options are equal, like, not equal, not like)
- * @var exact - boolean that will be used for ontology conditions (exact = true,
- *              match genes that are associated with term selected; exact =
- *              false, match genes that are associated with terms that match the
- *              input value
- * @var value - the actual string value to match genes against
- * @var removable - a boolean describing whether the condition is removable from
- *                  the list of conditions (within the filter) which is true
- *                  unless the condition is the ONLY one
- * @var id - the numeric id of the condition for identification purposes within
- *           a filter's condition list
- * @var editing - a boolean describing whether the condition is currently in
- *                edit mode or not
  */
 export class FilterCondition {
-  filterBy: string = '';
+  // attribute to filter features by (ontology term, symbol, id, type, etc.)
+  filterBy = '';
+
+  // qualifier to change how matches are found (equal, not equal, like, not like)
   qualifier = 'equal';
+
+  // boolean that will be used for ontology conditions (exact = true, match genes that
+  // are associated with term selected; exact = false, match genes that are associated
+  // with terms that match the input value
   exact = true;
+
+  // value to match features against when searching utilizing user input
   value: string;
+
+  // controls if the condition can be removed (true unless it's the only condition in a filter)
   removable: boolean;
+
+  // ID to identify it from other conditions in the filter
   id: number;
+
+  // indicates if the condition is currently being edited
   editing = true;
 
   constructor(id: number) {
@@ -34,21 +34,24 @@ export class FilterCondition {
    * Returns the title of the filter condition
    */
   getCompleteTitle(): string {
-    if(this.filterBy === 'chr') {
-      return 'Chr' + this.value;
-    } else if(this.isType()) {
-      return this.value + 's';
-    } else if(this.isOntology()) {
-      return this.value;
-    } else {
-      return `${this.filterBy} ${this.getQualifierString()} ${this.value}`;
+    if (this.filterBy === 'chr') {
+      return `Chr${this.value}`;
     }
+    if (this.isType()) {
+      return `${this.value}s`;
+    }
+    if (this.isOntology()) {
+      return this.value;
+    }
+    return `${this.filterBy} ${this.getQualifierString()} ${this.value}`;
   }
 
   /**
    * Returns the selected ontology abbreviation from the filter by its value
    */
-  getOntology(): string { return this.filterBy.replace('ont-', ''); }
+  getOntology(): string {
+    return this.filterBy.replace('ont-', '');
+  }
 
   /**
    * Returns true if the filter by is by gene ID or gene symbol
@@ -76,20 +79,26 @@ export class FilterCondition {
   /**
    * Returns true if this condition is related to an ontology
    */
-  isOntology(): boolean { return this.filterBy.includes('ont-'); }
+  isOntology(): boolean {
+    return this.filterBy.includes('ont-');
+  }
 
   /**
    * Returns true if this condition is related to feature type
    */
-  isType(): boolean { return this.filterBy === 'type'; }
+  isType(): boolean {
+    return this.filterBy === 'type';
+  }
 
   /**
    * Returns a converted value from the qualifier select value to a
    * human-readable value for a label
    */
   private getQualifierString(): string {
-    return this.qualifier.includes('not') ?
-      (this.qualifier.includes('equal') ? '&ne' : 'not like') :
-      (this.qualifier.includes('equal') ? '=' : 'like')
+    if (this.qualifier.includes('not')) {
+      return this.qualifier.includes('equal') ? '&ne' : 'not like';
+    }
+
+    return this.qualifier.includes('equal') ? '=' : 'like';
   }
 }
