@@ -267,7 +267,7 @@ export class Filter {
   }
 
   /**
-   * Returns true/false if the specified gene matches the specified condition
+   * Returns true if the specified gene matches the specified condition
    * @param {Gene} gene - the gene to check against the specified condition
    * @param {FilterCondition} cond - the condition to check the specified gene
    *                                 against

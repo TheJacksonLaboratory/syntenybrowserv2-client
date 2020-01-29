@@ -592,7 +592,7 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns true/false if at least 1 QTL or gene is selected
+   * Returns true if at least 1 QTL or gene is selected
    */
   featuresAreSelected(): boolean {
     return this.selectedQTLs.length > 0 || this.selectedRefGenes.length > 0;

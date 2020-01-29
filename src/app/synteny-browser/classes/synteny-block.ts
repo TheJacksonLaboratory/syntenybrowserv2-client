@@ -221,7 +221,7 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns true/false if the reference chromosome matches the specified chromosome
+   * Returns true if the reference chromosome matches the specified chromosome
    * @param {string} chr - the chromosome to compare to the reference chromosome
    */
   matchesRefChr(chr: string): boolean {
@@ -229,7 +229,7 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns true/false if the comparison chromosome matches the specified chromosome
+   * Returns true if the comparison chromosome matches the specified chromosome
    * @param {string} chr - the chromosome to compare to the comparison chromosome
    */
   matchesCompChr(chr: string): boolean {
@@ -237,7 +237,7 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns true/false if the specified gene is *contained* by the block; this
+   * Returns true if the specified gene is *contained* by the block; this
    * is different from includes() as it is used to filter out non-syntenic
    * comparison homologs in the block view browser
    * @param {Gene} gene - the gene to check the location of
@@ -252,7 +252,7 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns true/false if the block is in the specified chromosome (extracted
+   * Returns true if the block is in the specified chromosome (extracted
    * as feature.chr) and if specified feature occurs in the block in any capacity
    * @param {any} feature - the feature (gene or QTL) to compare to the block
    */
@@ -261,7 +261,7 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns true/false if the specified feature occurs in the block (takes into
+   * Returns true if the specified feature occurs in the block (takes into
    * consideration orientation) in any capacity
    * @param {any} feature - the feature to check for its location in the block
    */

@@ -62,7 +62,7 @@ export class Legend {
   }
 
   /**
-   * Returns true/false if the specified chromosome is in the list of active
+   * Returns true if the specified chromosome is in the list of active
    * chromosomes (is represented in block view)
    * @param {string} chr - the chromosome to search for
    */

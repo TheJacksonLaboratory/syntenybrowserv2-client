@@ -354,7 +354,7 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Returns true/false if there is at least one filter
+   * Returns true if there is at least one filter
    */
   private anyFiltersSelected(): boolean {
     return this.getCreatedFilters().length > 0;
