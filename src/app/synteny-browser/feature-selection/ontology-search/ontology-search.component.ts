@@ -62,12 +62,12 @@ export class OntologySearchComponent {
 
     this.terms.clear();
 
-    const terms = this.data.ontologyTerms[ontology];
+    const ontTerms = this.data.ontologyTerms[ontology];
 
     // as a precaution, if the ontology terms have already been loaded into the
     // data storage service, use them but if not, go get them; it would be better
     // to take an extra 1-3 seconds instead of erroring in the interface
-    if (!terms) {
+    if (!ontTerms) {
       this.http.getTermsForAutocomplete(ontology).subscribe(terms => {
         this.terms.setRows(terms);
       });

@@ -1,11 +1,8 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { fromWorker } from 'observable-webworker';
-import { forkJoin, timer, zip } from 'rxjs';
 import { Species } from '../../classes/species';
 import { ApiService } from '../../services/api.service';
 import { TableData } from '../../classes/table-data';
 import { Feature } from '../../classes/feature';
-import { Gene } from '../../classes/gene';
 
 @Component({
   selector: 'feature-search',
