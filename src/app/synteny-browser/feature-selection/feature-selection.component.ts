@@ -84,6 +84,8 @@ export class FeatureSelectionComponent {
   setTypeDependentElements(): void {
     this.search = '';
 
+    this.ontologySearch.clear();
+
     this.searchType === 'symbol'
       ? this.featureSearch.loadFeatures(this.refSpecies)
       : this.loadOntologyTerms();

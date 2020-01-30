@@ -67,14 +67,17 @@ export class TableData<T> {
    * sortOn parameter is specified, and stops the loading
    * @param {OntologyTerm[]|Feature[]} rows - rows for the table which may be
    *                              ontology terms or features depending on the table
-   * @param {string} sortOn - a key that exists in the row objects that can be
-   *                          used to sort the rows
    */
-  setRows(rows: T[], sortOn = ''): void {
-    this.rows = sortOn ? rows.sort((a, b) => this.compare(a, b, sortOn)) : rows;
+  setRows(rows: T[]): void {
+    this.rows.push(...rows);
+    this.filteredRows.push(...rows);
 
-    this.filteredRows = this.rows;
     this.loading = false;
+  }
+
+  clear(): void {
+    this.rows = [];
+    this.filteredRows = [];
   }
 
   /**

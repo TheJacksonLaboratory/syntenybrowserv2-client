@@ -1,8 +1,11 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { fromWorker } from 'observable-webworker';
+import { forkJoin, timer, zip } from 'rxjs';
 import { Species } from '../../classes/species';
 import { ApiService } from '../../services/api.service';
 import { TableData } from '../../classes/table-data';
 import { Feature } from '../../classes/feature';
+import { Gene } from '../../classes/gene';
 
 @Component({
   selector: 'feature-search',
@@ -36,17 +39,30 @@ export class FeatureSearchComponent {
    * @param {Species} refSpecies - the current reference species
    */
   loadFeatures(refSpecies: Species): void {
-    this.refSpecies = refSpecies;
-    this.features.loading = true;
-    this.http.getAllGenes(this.refSpecies.getID()).subscribe(genes => {
-      this.features.setRows(genes);
+    // only get the gene (and QTL) data if changes have been made to what the
+    // user wants to see; otherwise it's just another 6-7 wasted seconds
+    if (this.refSpecies !== refSpecies || this.features.rows.length === 0) {
+      this.features.clear();
+      this.features.loading = true;
+
+      this.refSpecies = refSpecies;
+
+      this.refSpecies.getChromosomes().forEach(chr => {
+        this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
+          this.features.setRows(genes);
+        });
+      });
 
       if (this.refSpecies.hasQTLs) {
-        this.http
-          .getAllQTLs(this.refSpecies.getID())
-          .subscribe(qtls => this.features.rows.push(...qtls));
+        this.http.getAllQTLs(this.refSpecies.getID()).subscribe(qtls => {
+          this.features.setRows(qtls);
+        });
       }
-    });
+    }
+  }
+
+  clear(): void {
+    this.features.clear();
   }
 
   /**

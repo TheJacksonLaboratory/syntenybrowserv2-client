@@ -112,6 +112,17 @@ export class ApiService {
   }
 
   /**
+   * Returns a list of genes for a specified chromosome and reference species
+   * @param {string} refID - stringified taxon ID for reference species
+   * @param {string} chr - the chromosome to get genes for
+   */
+  getGeneMetadata(refID: string, chr: string): Observable<any[]> {
+    return this.http
+      .get<ArrayResponse>(`${this.root}/genes/metadata/${refID}/${chr}`)
+      .pipe(map(resp => resp.map(g => new Feature(g))));
+  }
+
+  /**
    * Returns a list of genes for a specified reference chromsome and comparison
    * species that are homologous in the specified reference species
    * @param {string} refID - stringified taxon ID for reference species

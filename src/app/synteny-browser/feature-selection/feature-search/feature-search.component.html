@@ -22,8 +22,8 @@
     <clr-dg-footer>
       <!-- Clarity doesn't really handle non-paginated results very well so if
       proper pagination is required, show that, otherwise, use custom label -->
-      <clr-dg-pagination #pagination>
-        <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
+      <clr-dg-pagination #pagination [clrDgPageSize]="25">
+        <clr-dg-page-size [clrPageSizeOptions]="[25, 50, 75, 100]">
           Features per page
         </clr-dg-page-size>
         {{ features.getPaginatorLabel(pagination) }}
