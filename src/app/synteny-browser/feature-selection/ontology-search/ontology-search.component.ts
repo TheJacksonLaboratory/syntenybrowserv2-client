@@ -76,10 +76,6 @@ export class OntologySearchComponent {
     } else {
       this.terms.setRows(this.data.ontologyTerms[ontology]);
       this.terms.loading = false;
-
-      console.log(this.terms.rows.filter(r => r.count > 200).sort((a, b) => {
-        return a.count - b.count;
-      }));
     }
   }
 
@@ -127,9 +123,8 @@ export class OntologySearchComponent {
 
     const termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
-    this.http
-      .getTermAssociations(this.refSpecies.getID(), termToSearch)
-      .subscribe(genes => {
+    this.http.getTermAssociations(this.refSpecies.getID(), termToSearch).subscribe(
+      genes => {
         if (showResults) {
           this.associations.setRows(genes);
           this.associations.loading = false;
@@ -140,10 +135,12 @@ export class OntologySearchComponent {
           term.selecting = ClrLoadingState.SUCCESS;
           this.update.emit();
         }
-      }, error => {
+      },
+      error => {
         this.associations.loading = false;
         this.error = error.message;
-      });
+      },
+    );
   }
 
   /**
