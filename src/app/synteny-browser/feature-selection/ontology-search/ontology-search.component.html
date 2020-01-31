@@ -32,7 +32,7 @@
           <div>
             <button
               class="btn btn-sm btn-link"
-              [disabled]="row.count >= 100"
+              [disabled]="row.count >= 200"
               [title]="getViewAssociationsTitle(row)"
               (click)="loadAssociationsForTerm(row)"
             >
@@ -40,7 +40,7 @@
             </button>
             <button
               class="btn btn-sm btn-link"
-              [disabled]="row.count >= 100"
+              [disabled]="row.count >= 200"
               [title]="getSelectAllAssociationsTitle(row)"
               [clrLoading]="row.selecting"
               (click)="loadAssociationsForTerm(row, false)"
@@ -76,6 +76,7 @@
     class="clr-col"
     [clrDgLoading]="associations.loading"
   >
+    <clr-dg-placeholder *ngIf="error">{{ error }}</clr-dg-placeholder>
     <clr-dg-column
       *ngFor="let col of associations.columns"
       [clrDgSortBy]="associations.getSorter(col)"

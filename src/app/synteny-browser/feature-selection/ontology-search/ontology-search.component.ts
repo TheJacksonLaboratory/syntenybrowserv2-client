@@ -31,6 +31,9 @@ export class OntologySearchComponent {
   // table data containing all of the associations to display in the associations datagrid
   associations: TableData<Feature>;
 
+  // the resulting error message if an API call fails
+  error: string;
+
   // current search string that filters the terms datagrid
   associationsSearch = '';
 
@@ -73,6 +76,10 @@ export class OntologySearchComponent {
     } else {
       this.terms.setRows(this.data.ontologyTerms[ontology]);
       this.terms.loading = false;
+
+      console.log(this.terms.rows.filter(r => r.count > 200).sort((a, b) => {
+        return a.count - b.count;
+      }));
     }
   }
 
@@ -121,10 +128,11 @@ export class OntologySearchComponent {
     const termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
     this.http
-      .getTermAssociations(this.refSpecies.getID(), encodeURIComponent(termToSearch))
+      .getTermAssociations(this.refSpecies.getID(), termToSearch)
       .subscribe(genes => {
         if (showResults) {
           this.associations.setRows(genes);
+          this.associations.loading = false;
         } else {
           genes.forEach(g => g.select());
           this.associations.rows = genes;
@@ -132,6 +140,9 @@ export class OntologySearchComponent {
           term.selecting = ClrLoadingState.SUCCESS;
           this.update.emit();
         }
+      }, error => {
+        this.associations.loading = false;
+        this.error = error.message;
       });
   }
 
@@ -150,7 +161,7 @@ export class OntologySearchComponent {
    */
   getViewAssociationsTitle(term: OntologyTerm): string {
     return `View gene associations with this term${
-      term.count >= 100 ? ' [disabled for being too broad]' : ''
+      term.count >= 200 ? ' [disabled for being too broad]' : ''
     }`;
   }
 
@@ -161,7 +172,7 @@ export class OntologySearchComponent {
    */
   getSelectAllAssociationsTitle(term: OntologyTerm): string {
     return `Select all gene associations with this term${
-      term.count >= 500 ? ' [disabled for being too broad]' : ''
+      term.count >= 200 ? ' [disabled for being too broad]' : ''
     }`;
   }
 
