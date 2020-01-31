@@ -97,9 +97,14 @@ export class FeatureSelectionComponent {
   getSearchPlaceholder(): string {
     const term = this.ontologySearch.currentTerm;
 
+    if (this.featureSearch.isLoading() || this.ontologySearch.isLoading()) {
+      return 'Results are loading...';
+    }
+
     if (this.searchType !== 'symbol') {
       return term ? `Filter features assoc w/ ${term.id}` : 'Filter terms by name or ID';
     }
+
     return 'Filter features by symbol, ID or type';
   }
 

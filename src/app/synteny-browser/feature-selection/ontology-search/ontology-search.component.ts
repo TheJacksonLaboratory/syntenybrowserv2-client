@@ -40,7 +40,7 @@ export class OntologySearchComponent {
   // emits whenever user wants to see associations for a term or go back to see all terms
   @Output() switchView: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService, public data: DataStorageService) {
+  constructor(private http: ApiService, private data: DataStorageService) {
     this.terms = new TableData(['id', 'name'], ['id', 'name']);
     this.associations = new TableData(['termID', 'term', 'id', 'symbol'], ['term', 'id', 'symbol']);
   }
@@ -62,20 +62,31 @@ export class OntologySearchComponent {
 
     this.terms.clear();
 
-    const ontTerms = this.data.ontologyTerms[ontology];
-
     // as a precaution, if the ontology terms have already been loaded into the
     // data storage service, use them but if not, go get them; it would be better
     // to take an extra 1-3 seconds instead of erroring in the interface
-    if (!ontTerms) {
-      this.http.getTermsForAutocomplete(ontology).subscribe(terms => {
+    if (!this.data.ontologyTerms[ontology]) {
+      this.http.getOntologyTerms(ontology).subscribe(terms => {
         this.terms.setRows(terms);
+        this.terms.loading = false;
       });
     } else {
       this.terms.setRows(this.data.ontologyTerms[ontology]);
+      this.terms.loading = false;
     }
   }
 
+  /**
+   * Returns true if either the terms grid or association grid is still
+   * actively loading
+   */
+  isLoading(): boolean {
+    return this.terms.loading || this.associations.loading;
+  }
+
+  /**
+   * Clears the terms and associations grid
+   */
   clear(): void {
     this.terms.clear();
     this.associations.clear();
@@ -110,7 +121,7 @@ export class OntologySearchComponent {
     const termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
     this.http
-      .getAssociationsForTerm(this.refSpecies.getID(), encodeURIComponent(termToSearch))
+      .getTermAssociations(this.refSpecies.getID(), encodeURIComponent(termToSearch))
       .subscribe(genes => {
         if (showResults) {
           this.associations.setRows(genes);
@@ -138,7 +149,9 @@ export class OntologySearchComponent {
    * @param {OntologyTerm} term - the term that the tooltip needs content for
    */
   getViewAssociationsTitle(term: OntologyTerm): string {
-    return `View gene associations with this term`;
+    return `View gene associations with this term${
+      term.count >= 100 ? ' [disabled for being too broad]' : ''
+    }`;
   }
 
   /**
@@ -147,7 +160,9 @@ export class OntologySearchComponent {
    * @param {OntologyTerm} term - the term that the tooltip needs content for
    */
   getSelectAllAssociationsTitle(term: OntologyTerm): string {
-    return `Select all gene associations with this term`;
+    return `Select all gene associations with this term${
+      term.count >= 500 ? ' [disabled for being too broad]' : ''
+    }`;
   }
 
   /**

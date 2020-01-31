@@ -44,20 +44,38 @@ export class FeatureSearchComponent {
 
       this.refSpecies = refSpecies;
 
+      // get genes by chromosome
+      let returnedChrs = 0;
       this.refSpecies.getChromosomes().forEach(chr => {
         this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
           this.features.setRows(genes);
+          returnedChrs += 1;
+
+          if (returnedChrs === this.refSpecies.getNumChrs()) {
+            this.features.loading = false;
+          }
         });
       });
 
+      // get QTLs if the reference species has them
       if (this.refSpecies.hasQTLs) {
-        this.http.getAllQTLs(this.refSpecies.getID()).subscribe(qtls => {
+        this.http.getQTLs(this.refSpecies.getID()).subscribe(qtls => {
           this.features.setRows(qtls);
         });
       }
     }
   }
 
+  /**
+   * Returns true if either the feature grid is still actively loading
+   */
+  isLoading(): boolean {
+    return this.features.loading;
+  }
+
+  /**
+   * Clears the feature grid
+   */
   clear(): void {
     this.features.clear();
   }

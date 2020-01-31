@@ -35,6 +35,7 @@
     <input
       id="search-term"
       clrInput
+      [disabled]="featureSearch.isLoading() || ontologySearch.isLoading()"
       [(ngModel)]="search"
       [placeholder]="getSearchPlaceholder()"
       (keyup)="searchForFeatures()"

@@ -52,7 +52,7 @@ export class DataStorageService {
     );
 
     onts.forEach(o => {
-      this.http.getTermsForAutocomplete(o).subscribe(terms => {
+      this.http.getOntologyTerms(o).subscribe(terms => {
         this.ontologyTerms[o] = terms;
       });
     });

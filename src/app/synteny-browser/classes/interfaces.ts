@@ -9,9 +9,6 @@ export interface OntologyTerm {
   id: string;
   name: string;
   count?: number;
-  namespace?: string;
-  descendants?: DescendantTerm[];
-  def?: string;
   selecting?: ClrLoadingState;
 }
 

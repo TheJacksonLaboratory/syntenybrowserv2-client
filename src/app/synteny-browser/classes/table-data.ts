@@ -9,7 +9,6 @@ import {
   TypeComparator,
 } from './comparators';
 import { Feature } from './feature';
-import { DescendantTerm, OntologyTerm } from './interfaces';
 
 export class TableData<T> {
   // indicates if the table is still waiting for data to load into the datagrid
@@ -71,10 +70,11 @@ export class TableData<T> {
   setRows(rows: T[]): void {
     this.rows.push(...rows);
     this.filteredRows.push(...rows);
-
-    this.loading = false;
   }
 
+  /**
+   * Clears the table data completely
+   */
   clear(): void {
     this.rows = [];
     this.filteredRows = [];
@@ -123,26 +123,6 @@ export class TableData<T> {
       default:
         return null;
     }
-  }
-
-  /**
-   * Returns the list of descendent term names and IDs
-   * @param {OntologyTerm} term - the term to get descendant terms for
-   */
-  getDescendants(term: OntologyTerm): DescendantTerm[] {
-    if (term.descendants.length > 10) {
-      const descs = term.descendants.slice(0, 10);
-      const numRemain = term.descendants.length - 10;
-
-      descs.push({
-        id: '',
-        name: `and ${numRemain} other terms`,
-      });
-
-      return descs;
-    }
-
-    return term.descendants;
   }
 
   /**

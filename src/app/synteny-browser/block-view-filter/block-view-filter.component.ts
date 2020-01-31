@@ -378,7 +378,7 @@ export class BlockViewFilterComponent implements OnInit {
     if (ontologyFilters.length > 0) {
       ontologyFilters.forEach(f => {
         f.conditions.forEach(c => {
-          this.http.getAssociationsForTerm(species.getID(), c.value).subscribe(assoc => {
+          this.http.getTermAssociations(species.getID(), c.value).subscribe(assoc => {
             const assocIDs = assoc.map(a => a.id);
             const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
 
