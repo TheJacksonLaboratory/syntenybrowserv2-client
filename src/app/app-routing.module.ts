@@ -16,7 +16,7 @@ import { DocsConfigsComponent } from './docs/sections/docs-configs.component';
 import { DocsContributorsComponent } from './docs/sections/docs-contributors.component';
 
 const routes: Routes = [
-  { path: '', component: SyntenyBrowserComponent },
+  { path: 'browser', component: SyntenyBrowserComponent },
   { path: 'about', component: AboutComponent },
   { path: 'docs', component: DocsComponent },
   { path: 'docs-tutorial', component: DocsTutorialComponent },
@@ -28,6 +28,7 @@ const routes: Routes = [
   { path: 'docs-configs', component: DocsConfigsComponent },
   { path: 'docs-contributors', component: DocsContributorsComponent },
   { path: 'examples', component: ExamplesComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'browser' },
 ];
 
 @NgModule({
