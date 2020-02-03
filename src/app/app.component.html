@@ -14,8 +14,8 @@
 
   <nav class="subnav">
     <ul class="nav">
-      <li *ngFor="let p of getPages()" class="nav-item">
-        <a class="nav-link" [routerLink]="pages[p]" routerLinkActive="active">
+      <li *ngFor="let p of pages" class="nav-item">
+        <a class="nav-link" routerLink="/{{p}}" routerLinkActive="active">
           {{ p }}
         </a>
       </li>
