@@ -1,5 +1,4 @@
 import { format, ScaleLinear } from 'd3';
-import { Exon } from './interfaces';
 import { SyntenyBlock } from './synteny-block';
 
 export class Gene {
@@ -413,4 +412,9 @@ export class Gene {
     // if an ID was just assigned, it's important to note the orientation
     if (this.blockID) this.orientationMatches = b[0].orientationMatches;
   }
+}
+
+export interface Exon {
+  start: number;
+  end: number;
 }

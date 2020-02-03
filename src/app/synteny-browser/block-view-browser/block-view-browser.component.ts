@@ -6,7 +6,6 @@
 import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
-import { BlockViewBrowserOptions, ComparisonScaling } from '../classes/interfaces';
 import { BrowserInterval } from '../classes/browser-interval';
 import { ApiService } from '../services/api.service';
 import { Feature } from '../classes/feature';
@@ -1268,4 +1267,15 @@ export class BlockViewBrowserComponent {
       return match;
     });
   }
+}
+
+export interface ComparisonScaling {
+  match: object;
+  true: object;
+}
+
+export interface BlockViewBrowserOptions {
+  symbols: boolean;
+  anchors: boolean;
+  trueOrientation: boolean;
 }

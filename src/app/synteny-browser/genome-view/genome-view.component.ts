@@ -1,8 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { ApiService } from '../services/api.service';
-import { CartesianCoordinate, RadiiDictionary, ReferenceChr } from '../classes/interfaces';
 import { Feature } from '../classes/feature';
-import { CircularGenomeMap } from '../classes/circular-genome-map';
+import { CartesianCoordinate, CircularGenomeMap } from '../classes/circular-genome-map';
 import { Species } from '../classes/species';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { DownloadService } from '../services/download.service';
@@ -595,4 +594,16 @@ export class GenomeViewComponent implements OnInit {
 
     this.tempCompGenome = tempComp;
   }
+}
+
+export interface ReferenceChr {
+  chr: string;
+  size: number;
+  blocks: SyntenyBlock[];
+}
+
+export interface RadiiDictionary {
+  ringInner: number;
+  ringOuter: number;
+  labels?: number;
 }

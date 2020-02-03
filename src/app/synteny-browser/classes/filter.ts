@@ -1,5 +1,4 @@
-import { Species } from './species';
-import { SearchType } from './interfaces';
+import { SearchType, Species } from './species';
 import { Gene } from './gene';
 import { FilterCondition } from './filter-condition';
 

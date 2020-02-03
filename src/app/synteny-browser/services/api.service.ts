@@ -2,12 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { ArrayResponse, JSONResponse, OntologyTerm } from '../classes/interfaces';
 import { environment } from '../../../environments/environment';
 import { SyntenyBlock } from '../classes/synteny-block';
 import { Feature } from '../classes/feature';
 import { Species } from '../classes/species';
 import { TermMetadata } from '../feature-selection/ontology-search/row-detail.component';
+import { OntologyTerm } from '../feature-selection/ontology-search/ontology-search.component';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -130,3 +130,7 @@ export class ApiService {
     return this.http.get<ArrayResponse>(`${this.root}/ontologies/terms/simple/${ontology}`);
   }
 }
+
+export type ArrayResponse = Array<any>;
+
+export type JSONResponse = Record<string, any>;

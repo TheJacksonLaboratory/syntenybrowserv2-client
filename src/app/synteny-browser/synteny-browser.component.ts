@@ -140,3 +140,8 @@ export class SyntenyBrowserComponent implements OnInit {
     }, 300);
   }
 }
+
+export interface Option {
+  name: string;
+  value: string;
+}

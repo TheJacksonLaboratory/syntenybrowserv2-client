@@ -1,5 +1,4 @@
 import { format, scaleLinear, ScaleLinear } from 'd3';
-import { ComparisonBlockCoordinates } from './interfaces';
 import { Gene } from './gene';
 
 export class SyntenyBlock {
@@ -306,4 +305,9 @@ export class SyntenyBlock {
   private getLabel(coord: number, chr: string = null): string {
     return chr ? `${chr}:${this.format(coord)}bp` : `${this.format(coord)}bp`;
   }
+}
+
+export interface ComparisonBlockCoordinates {
+  compStart: number;
+  compEnd: number;
 }

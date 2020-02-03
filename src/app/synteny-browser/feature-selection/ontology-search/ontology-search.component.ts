@@ -2,7 +2,6 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { ClrLoadingState } from '@clr/angular';
 import { ApiService } from '../../services/api.service';
 import { Species } from '../../classes/species';
-import { OntologyTerm } from '../../classes/interfaces';
 import { Feature } from '../../classes/feature';
 import { TableData } from '../../classes/table-data';
 import { DataStorageService } from '../../services/data-storage.service';
@@ -180,4 +179,11 @@ export class OntologySearchComponent {
   removeAssociation(symbol: string): void {
     this.associations.removeSelection(symbol);
   }
+}
+
+export interface OntologyTerm {
+  id: string;
+  name: string;
+  count?: number;
+  selecting?: ClrLoadingState;
 }

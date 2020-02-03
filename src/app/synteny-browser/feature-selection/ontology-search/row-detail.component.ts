@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
-import { DescendantTerm, OntologyTerm } from '../../classes/interfaces';
+import { OntologyTerm } from './ontology-search.component';
 
 @Component({
   selector: 'row-detail',
@@ -67,4 +67,9 @@ export interface TermMetadata {
   namespace: string;
   def: string;
   descendants: OntologyTerm[];
+}
+
+export interface DescendantTerm {
+  id: string;
+  name: string;
 }
