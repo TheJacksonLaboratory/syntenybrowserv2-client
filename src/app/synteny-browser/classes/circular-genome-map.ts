@@ -1,5 +1,4 @@
 import { scaleLinear } from 'd3';
-import { CartesianCoordinate } from './interfaces';
 
 export class CircularGenomeMap {
   // approximately 2° in radians between chromosomes
@@ -119,4 +118,9 @@ export class CircularGenomeMap {
       y: Math.sin(radians) * radius,
     };
   }
+}
+
+export interface CartesianCoordinate {
+  x: number;
+  y: number;
 }

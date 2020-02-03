@@ -32,16 +32,16 @@
           <div>
             <button
               class="btn btn-sm btn-link"
+              [disabled]="row.count >= 200"
               [title]="getViewAssociationsTitle(row)"
-              [disabled]="row.descendants.length >= 500"
               (click)="loadAssociationsForTerm(row)"
             >
               <clr-icon shape="view-list"></clr-icon>
             </button>
             <button
               class="btn btn-sm btn-link"
+              [disabled]="row.count >= 200"
               [title]="getSelectAllAssociationsTitle(row)"
-              [disabled]="row.descendants.length >= 500"
               [clrLoading]="row.selecting"
               (click)="loadAssociationsForTerm(row, false)"
             >
@@ -51,21 +51,12 @@
         </div>
       </clr-dg-cell>
 
-      <clr-dg-row-detail *clrIfExpanded>
-        <ul class="list">
-          <li *ngIf="row.namespace"><b>Namespace:</b> {{ row.namespace }}</li>
-          <li *ngIf="row.def"><b>Definition:</b> {{ row.def }}</li>
-          <li>
-            <b>Descendant Terms:</b>
-            {{ row.descendants.length ? row.descendants.length : 0 }}
-            <ul *ngIf="row.descendants.length">
-              <li *ngFor="let d of terms.getDescendants(row)">
-                <b>{{ d.id }}</b> {{ d.name }}
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </clr-dg-row-detail>
+      <row-detail
+        *clrIfExpanded
+        class="datagrid-row-flex datagrid-row-detail datagrid-container"
+        ngProjectAs="clr-dg-row-detail"
+        [termID]="row.id"
+      ></row-detail>
     </clr-dg-row>
 
     <clr-dg-footer>
@@ -85,6 +76,7 @@
     class="clr-col"
     [clrDgLoading]="associations.loading"
   >
+    <clr-dg-placeholder *ngIf="error">{{ error }}</clr-dg-placeholder>
     <clr-dg-column
       *ngFor="let col of associations.columns"
       [clrDgSortBy]="associations.getSorter(col)"

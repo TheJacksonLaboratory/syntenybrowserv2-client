@@ -1,7 +1,7 @@
 <div class="main-container">
   <header class="header-4">
     <div class="branding">
-      <a [routerLink]="['']" class="nav-link">
+      <a routerLink="">
         <img
           id="logo"
           src="../assets/jax-logo.png"
@@ -14,14 +14,9 @@
 
   <nav class="subnav">
     <ul class="nav">
-      <li *ngFor="let page of getPages()" class="nav-item">
-        <a
-          class="nav-link"
-          [ngClass]="{ active: isActive(page) }"
-          (click)="setActive(page)"
-          [routerLink]="pages[page]"
-        >
-          {{ page }}
+      <li *ngFor="let p of pages" class="nav-item">
+        <a class="nav-link" routerLink="/{{p}}" routerLinkActive="active">
+          {{ p }}
         </a>
       </li>
     </ul>
@@ -30,8 +25,8 @@
   <router-outlet></router-outlet>
 
   <div class="footer">
-    <a href="https://www.jax.org/"
-      ><span>&copy; 2019 The Jackson Laboratory</span></a
-    >
+    <a href="https://www.jax.org/">
+      <span>&copy; 2020 The Jackson Laboratory</span>
+    </a>
   </div>
 </div>

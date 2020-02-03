@@ -36,17 +36,48 @@ export class FeatureSearchComponent {
    * @param {Species} refSpecies - the current reference species
    */
   loadFeatures(refSpecies: Species): void {
-    this.refSpecies = refSpecies;
-    this.features.loading = true;
-    this.http.getAllGenes(this.refSpecies.getID()).subscribe(genes => {
-      this.features.setRows(genes);
+    // only get the gene (and QTL) data if changes have been made to what the
+    // user wants to see; otherwise it's just another 6-7 wasted seconds
+    if (this.refSpecies !== refSpecies || this.features.rows.length === 0) {
+      this.features.clear();
+      this.features.loading = true;
 
+      this.refSpecies = refSpecies;
+
+      // get genes by chromosome
+      let returnedChrs = 0;
+      this.refSpecies.getChromosomes().forEach(chr => {
+        this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
+          this.features.setRows(genes);
+          returnedChrs += 1;
+
+          if (returnedChrs === this.refSpecies.getNumChrs()) {
+            this.features.loading = false;
+          }
+        });
+      });
+
+      // get QTLs if the reference species has them
       if (this.refSpecies.hasQTLs) {
-        this.http
-          .getAllQTLs(this.refSpecies.getID())
-          .subscribe(qtls => this.features.rows.push(...qtls));
+        this.http.getQTLs(this.refSpecies.getID()).subscribe(qtls => {
+          this.features.setRows(qtls);
+        });
       }
-    });
+    }
+  }
+
+  /**
+   * Returns true if either the feature grid is still actively loading
+   */
+  isLoading(): boolean {
+    return this.features.loading;
+  }
+
+  /**
+   * Clears the feature grid
+   */
+  clear(): void {
+    this.features.clear();
   }
 
   /**

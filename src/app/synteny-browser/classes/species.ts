@@ -1,4 +1,4 @@
-import { ExternalResource, SearchType } from './interfaces';
+import { Option } from '../synteny-browser.component';
 
 export class Species {
   // taxon ID for the species
@@ -75,4 +75,11 @@ export class Species {
   getNumChrs(): number {
     return this.getChromosomes().length;
   }
+}
+
+export type SearchType = Option;
+
+export interface ExternalResource {
+  name: string;
+  url: string;
 }

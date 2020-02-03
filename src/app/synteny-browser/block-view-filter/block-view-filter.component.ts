@@ -1,13 +1,14 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ClrDatagridPagination } from '@clr/angular';
 import { Species } from '../classes/species';
-import { NavigationObject } from '../classes/interfaces';
+
 import { Gene } from '../classes/gene';
 import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
 import { FilterCondition } from '../classes/filter-condition';
+import { Option } from '../synteny-browser.component';
 
 @Component({
   selector: 'block-view-filter',
@@ -354,7 +355,7 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Returns true/false if there is at least one filter
+   * Returns true if there is at least one filter
    */
   private anyFiltersSelected(): boolean {
     return this.getCreatedFilters().length > 0;
@@ -378,7 +379,7 @@ export class BlockViewFilterComponent implements OnInit {
     if (ontologyFilters.length > 0) {
       ontologyFilters.forEach(f => {
         f.conditions.forEach(c => {
-          this.http.getAssociationsForTerm(species.getID(), c.value).subscribe(assoc => {
+          this.http.getTermAssociations(species.getID(), c.value).subscribe(assoc => {
             const assocIDs = assoc.map(a => a.id);
             const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
 
@@ -442,3 +443,5 @@ export class BlockViewFilterComponent implements OnInit {
     }
   }
 }
+
+export type NavigationObject = Option;

@@ -2,7 +2,6 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { ClrLoadingState } from '@clr/angular';
 import { ApiService } from '../../services/api.service';
 import { Species } from '../../classes/species';
-import { OntologyTerm } from '../../classes/interfaces';
 import { Feature } from '../../classes/feature';
 import { TableData } from '../../classes/table-data';
 import { DataStorageService } from '../../services/data-storage.service';
@@ -30,6 +29,9 @@ export class OntologySearchComponent {
 
   // table data containing all of the associations to display in the associations datagrid
   associations: TableData<Feature>;
+
+  // the resulting error message if an API call fails
+  error: string;
 
   // current search string that filters the terms datagrid
   associationsSearch = '';
@@ -59,7 +61,37 @@ export class OntologySearchComponent {
     this.currentTerm = null;
     this.terms.loading = true;
     this.termsSearch = '';
-    this.http.getOntologyTerms(this.ontology).subscribe(terms => this.terms.setRows(terms, 'id'));
+
+    this.terms.clear();
+
+    // as a precaution, if the ontology terms have already been loaded into the
+    // data storage service, use them but if not, go get them; it would be better
+    // to take an extra 1-3 seconds instead of erroring in the interface
+    if (!this.data.ontologyTerms[ontology]) {
+      this.http.getOntologyTerms(ontology).subscribe(terms => {
+        this.terms.setRows(terms);
+        this.terms.loading = false;
+      });
+    } else {
+      this.terms.setRows(this.data.ontologyTerms[ontology]);
+      this.terms.loading = false;
+    }
+  }
+
+  /**
+   * Returns true if either the terms grid or association grid is still
+   * actively loading
+   */
+  isLoading(): boolean {
+    return this.terms.loading || this.associations.loading;
+  }
+
+  /**
+   * Clears the terms and associations grid
+   */
+  clear(): void {
+    this.terms.clear();
+    this.associations.clear();
   }
 
   /**
@@ -79,6 +111,8 @@ export class OntologySearchComponent {
    * @param {boolean} showResults - whether the user wants to see the results
    */
   loadAssociationsForTerm(term: OntologyTerm, showResults = true): void {
+    this.associations.clear();
+
     if (!showResults) {
       term.selecting = ClrLoadingState.LOADING;
     }
@@ -88,11 +122,11 @@ export class OntologySearchComponent {
 
     const termToSearch = this.currentTerm ? this.currentTerm.id : term.id;
 
-    this.http
-      .getAssociationsForTerm(this.refSpecies.getID(), encodeURIComponent(termToSearch))
-      .subscribe(genes => {
+    this.http.getTermAssociations(this.refSpecies.getID(), termToSearch).subscribe(
+      genes => {
         if (showResults) {
-          this.associations.setRows(genes, 'term');
+          this.associations.setRows(genes);
+          this.associations.loading = false;
         } else {
           genes.forEach(g => g.select());
           this.associations.rows = genes;
@@ -100,7 +134,12 @@ export class OntologySearchComponent {
           term.selecting = ClrLoadingState.SUCCESS;
           this.update.emit();
         }
-      });
+      },
+      error => {
+        this.associations.loading = false;
+        this.error = error.message;
+      },
+    );
   }
 
   /**
@@ -118,7 +157,7 @@ export class OntologySearchComponent {
    */
   getViewAssociationsTitle(term: OntologyTerm): string {
     return `View gene associations with this term${
-      term.descendants.length >= 500 ? ' [disabled for being too broad]' : ''
+      term.count >= 200 ? ' [disabled for being too broad]' : ''
     }`;
   }
 
@@ -129,7 +168,7 @@ export class OntologySearchComponent {
    */
   getSelectAllAssociationsTitle(term: OntologyTerm): string {
     return `Select all gene associations with this term${
-      term.descendants.length >= 500 ? ' [disabled for being too broad]' : ''
+      term.count >= 200 ? ' [disabled for being too broad]' : ''
     }`;
   }
 
@@ -140,4 +179,11 @@ export class OntologySearchComponent {
   removeAssociation(symbol: string): void {
     this.associations.removeSelection(symbol);
   }
+}
+
+export interface OntologyTerm {
+  id: string;
+  name: string;
+  count?: number;
+  selecting?: ClrLoadingState;
 }

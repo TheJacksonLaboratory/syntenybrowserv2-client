@@ -14,6 +14,7 @@ import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { OntologySearchComponent } from './feature-selection/ontology-search/ontology-search.component';
 import { FeatureSearchComponent } from './feature-selection/feature-search/feature-search.component';
+import { RowDetailComponent } from './feature-selection/ontology-search/row-detail.component';
 
 // services
 import { ApiService } from './services/api.service';
@@ -37,6 +38,7 @@ import { ApiService } from './services/api.service';
     BlockViewFilterComponent,
     OntologySearchComponent,
     FeatureSearchComponent,
+    RowDetailComponent,
   ],
   providers: [ApiService, HttpClient],
 })

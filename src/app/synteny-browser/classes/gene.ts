@@ -1,5 +1,4 @@
 import { format, ScaleLinear } from 'd3';
-import { Exon } from './interfaces';
 import { SyntenyBlock } from './synteny-block';
 
 export class Gene {
@@ -351,21 +350,21 @@ export class Gene {
   }
 
   /**
-   * Returns true/false if the gene is located in a syntenic region
+   * Returns true if the gene is located in a syntenic region
    */
   isSyntenic(): boolean {
     return !!this.blockID;
   }
 
   /**
-   * Returns true/false if the gene has at least one homolog
+   * Returns true if the gene has at least one homolog
    */
   isHomologous(): boolean {
     return this.homologIDs.length > 0;
   }
 
   /**
-   * Returns true/false if any of the status flags are true; essentially, if the
+   * Returns true if any of the status flags are true; essentially, if the
    * gene has a color, it should have a label
    */
   hasVisibleLabel(): boolean {
@@ -373,7 +372,7 @@ export class Gene {
   }
 
   /**
-   * Returns true/false if the gene (ref) is in the current browser view (px)
+   * Returns true if the gene (ref) is in the current browser view (px)
    * @param {ScaleLinear<number, number>} scale - scale to use to get gene's
    *                                              edge positions
    * @param {number} width - the width of the browser
@@ -383,7 +382,7 @@ export class Gene {
   }
 
   /**
-   * Returns true/false if the gene (comp) is in the current browser view (px)
+   * Returns true if the gene (comp) is in the current browser view (px)
    * @param {ScaleLinear<number, number>} scale - scale to use to get gene's
    *                                              edge positions
    * @param {number} width - the width of the browser
@@ -413,4 +412,9 @@ export class Gene {
     // if an ID was just assigned, it's important to note the orientation
     if (this.blockID) this.orientationMatches = b[0].orientationMatches;
   }
+}
+
+export interface Exon {
+  start: number;
+  end: number;
 }

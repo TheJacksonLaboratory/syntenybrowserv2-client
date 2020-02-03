@@ -3,7 +3,6 @@ import { ApiService } from './api.service';
 import { Species } from '../classes/species';
 import { Filter } from '../classes/filter';
 import { Feature } from '../classes/feature';
-import { SelectedFeatures } from '../classes/interfaces';
 import { SyntenyBlock } from '../classes/synteny-block';
 
 @Injectable({
@@ -52,7 +51,7 @@ export class DataStorageService {
     );
 
     onts.forEach(o => {
-      this.http.getTermsForAutocomplete(o).subscribe(terms => {
+      this.http.getOntologyTerms(o).subscribe(terms => {
         this.ontologyTerms[o] = terms;
       });
     });
@@ -94,4 +93,9 @@ export class DataStorageService {
   private getBlocksForFeature(feature: Feature): SyntenyBlock[] {
     return this.genomeData.filter(b => b.isAFeatureBlock(feature));
   }
+}
+
+export interface SelectedFeatures {
+  chr: string;
+  features: Feature[];
 }
