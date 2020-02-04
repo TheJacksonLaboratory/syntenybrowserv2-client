@@ -30,3 +30,27 @@
     </a>
   </div>
 </div>
+
+<clr-modal [(clrModalOpen)]="browserIssue" [clrModalClosable]="false">
+  <h3 class="modal-title text-center">
+    <clr-icon shape="warning" size="36" class="is-warning"></clr-icon>
+    Synteny Browser and Internet Explorer
+  </h3>
+
+  <div class="modal-body">
+    <p class="text-center">
+      Synteny Browser does not currently support Internet Explorer; continue
+      using at your own risk as some features and functionalities may not work
+      properly. We recommend using Firefox or Chrome, though Synteny Browser
+      should run on Edge and Safari as well.
+    </p>
+
+    <div class="clr-row clr-justify-content-center top-1">
+      <button class="btn btn-warning-outline" (click)="browserIssue = false">
+        I understand
+      </button>
+    </div>
+  </div>
+
+
+</clr-modal>

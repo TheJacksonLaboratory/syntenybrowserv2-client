@@ -9,6 +9,8 @@ import { AboutModule } from './about/about.module';
 import { DocsModule } from './docs/docs.module';
 import { ExamplesModule } from './examples/examples.module';
 import { SyntenyBrowserModule } from './synteny-browser/synteny-browser.module';
+import { DeviceDetectorModule } from 'ngx-device-detector';
+import { ClarityModule } from '@clr/angular';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,6 +22,8 @@ import { SyntenyBrowserModule } from './synteny-browser/synteny-browser.module';
     DocsModule,
     ExamplesModule,
     SyntenyBrowserModule,
+    DeviceDetectorModule.forRoot(),
+    ClarityModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
