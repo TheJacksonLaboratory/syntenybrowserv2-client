@@ -15,6 +15,10 @@ import { SpeciesSelectionComponent } from './species-selection/species-selection
 import { OntologySearchComponent } from './feature-selection/ontology-search/ontology-search.component';
 import { FeatureSearchComponent } from './feature-selection/feature-search/feature-search.component';
 import { RowDetailComponent } from './feature-selection/ontology-search/row-detail.component';
+import { SpeciesSelectionHelpComponent } from './species-selection/species-selection-help.component';
+import { FeatureSelectionHelpComponent } from './feature-selection/feature-selection-help.component';
+import { GenomeViewHelpComponent } from './genome-view/genome-view-help.component';
+import { BlockViewBrowserHelpComponent } from './block-view-browser/block-view-browser-help.component';
 
 // services
 import { ApiService } from './services/api.service';
@@ -39,6 +43,10 @@ import { ApiService } from './services/api.service';
     OntologySearchComponent,
     FeatureSearchComponent,
     RowDetailComponent,
+    SpeciesSelectionHelpComponent,
+    FeatureSelectionHelpComponent,
+    GenomeViewHelpComponent,
+    BlockViewBrowserHelpComponent,
   ],
   providers: [ApiService, HttpClient],
 })
