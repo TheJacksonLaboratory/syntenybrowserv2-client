@@ -7,11 +7,12 @@
         <div class="clr-col-xl-7 clr-col-lg-12">
           <div class="clr-row">
             <h6>
-              1. Select the species that you wish to use as reference and comparison
-              (or destination).
+              1. Select the species that you wish to use as reference and
+              comparison (or destination).
 
-              <span style="color: #006A91;cursor: pointer"
-                    (click)="speciesSelectionHelp.open = true"
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="speciesSelectionHelp.open = true"
               >
                 <clr-icon shape="info" size="21"></clr-icon> More Info
               </span>
@@ -26,11 +27,12 @@
             <h6 *ngIf="features.searchType === 'symbol'">
               2. (Optional) Select genes and/or QTLs, if there are any, in the
               reference genome that you want to view by clicking rows in the
-              table. You can search the table by entering a chromosome or feature
-              ID, symbol, or type.
+              table. You can search the table by entering a chromosome or
+              feature ID, symbol, or type.
 
-              <span style="color: #006A91;cursor: pointer"
-                    (click)="featureSelectionHelp.open = true"
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="featureSelectionHelp.open = true"
               >
                 <clr-icon shape="info" size="21"></clr-icon> More Info
               </span>
@@ -40,12 +42,13 @@
               associated select menu below (only ontologies available for the
               reference species will be listed). As long as the term is not too
               broad, you can either select all reference genes associated with
-              that term by clicking the checkmark icon, or click the list icon to
-              view all of the associated genes (and select features individually
-              from there).
+              that term by clicking the checkmark icon, or click the list icon
+              to view all of the associated genes (and select features
+              individually from there).
 
-              <span style="color: #006A91;cursor: pointer"
-                    (click)="featureSelectionHelp.open = true"
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="featureSelectionHelp.open = true"
               >
                 <clr-icon shape="info" size="21"></clr-icon> More Info
               </span>
@@ -63,8 +66,9 @@
               selection in block view' button to render the selected chromosome
               in the block view.
 
-              <span style="color: #006A91;cursor: pointer"
-                    (click)="genomeViewHelp.open = true"
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="genomeViewHelp.open = true"
               >
                 <clr-icon shape="info" size="21"></clr-icon> More Info
               </span>
@@ -74,17 +78,18 @@
           <hr />
 
           <!-- Genome view species "legend" -->
-          <div *ngIf="data.refSpecies && data.compSpecies"
-               class="clr-row clr-justify-content-between top-1"
+          <div
+            *ngIf="data.refSpecies && data.compSpecies"
+            class="clr-row clr-justify-content-between top-1"
           >
             <div class="clr-row clr-col-9">
               <span class="clr-col-12" style="font-weight: bold">
                 Outer ring (reference genome):
-                  {{ data.refSpecies.commonName }} ({{ data.refSpecies.name }})
+                {{ data.refSpecies.commonName }} ({{ data.refSpecies.name }})
               </span>
               <span class="clr-col-12" style="font-weight: bold">
                 Inner ring (comparison genome):
-                  {{ data.compSpecies.commonName }} ({{ data.compSpecies.name }})
+                {{ data.compSpecies.commonName }} ({{ data.compSpecies.name }})
               </span>
             </div>
 
