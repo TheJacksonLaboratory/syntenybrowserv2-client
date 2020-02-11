@@ -142,6 +142,9 @@ export class BlockViewBrowserComponent {
   // emits when the user wants to open the block view filters
   @Output() filter: EventEmitter<any> = new EventEmitter();
 
+  // emits when the user wants to open the help dialog
+  @Output() getHelp: EventEmitter<any> = new EventEmitter();
+
   constructor(
     private data: DataStorageService,
     private http: ApiService,

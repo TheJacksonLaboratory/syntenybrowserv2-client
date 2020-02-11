@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DeviceDetectorModule } from 'ngx-device-detector';
+import { ClarityModule } from '@clr/angular';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -20,6 +22,8 @@ import { SyntenyBrowserModule } from './synteny-browser/synteny-browser.module';
     DocsModule,
     ExamplesModule,
     SyntenyBrowserModule,
+    DeviceDetectorModule.forRoot(),
+    ClarityModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

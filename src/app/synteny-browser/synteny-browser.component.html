@@ -6,71 +6,115 @@
       <div class="clr-row clr-col-12">
         <div class="clr-col-xl-7 clr-col-lg-12">
           <div class="clr-row">
-            Select the species that you wish to use as reference and comparison
-            (or destination).
+            <h6>
+              1. Select the species that you wish to use as reference and
+              comparison (or destination).
+
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="speciesSelectionHelp.open = true"
+              >
+                <clr-icon shape="info" size="21"></clr-icon> More Info
+              </span>
+            </h6>
           </div>
 
           <species-selection (update)="updateSpecies()"></species-selection>
 
           <hr />
 
+          <div class="clr-row">
+            <h6 *ngIf="features.searchType === 'symbol'">
+              2. (Optional) Select genes and/or QTLs, if there are any, in the
+              reference genome that you want to view by clicking rows in the
+              table. You can search the table by entering a chromosome or
+              feature ID, symbol, or type.
+
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="featureSelectionHelp.open = true"
+              >
+                <clr-icon shape="info" size="21"></clr-icon> More Info
+              </span>
+            </h6>
+            <h6 *ngIf="features.searchType === 'ontology'">
+              2. (Optional) Select the ontology you want to see terms for in the
+              associated select menu below (only ontologies available for the
+              reference species will be listed). As long as the term is not too
+              broad, you can either select all reference genes associated with
+              that term by clicking the checkmark icon, or click the list icon
+              to view all of the associated genes (and select features
+              individually from there).
+
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="featureSelectionHelp.open = true"
+              >
+                <clr-icon shape="info" size="21"></clr-icon> More Info
+              </span>
+            </h6>
+          </div>
+
           <feature-selection (update)="updateFeatures()"></feature-selection>
         </div>
 
         <div class="clr-col-xl-5 clr-col-lg-12">
           <div class="clr-row">
-            <p>
-              Hovering over any chromosome will show the species and chromosome
-              value of that chromosome. Selecting a reference chromosome will
-              map the synteny of that chromsome to regions the comparison genome
-              and will let you explore the selected chromosome at a more
-              granular level if button below plot is clicked.
-            </p>
+            <h6>
+              3. Interact with the genome view and select a reference chromosome
+              (outer ring) that you'd like to explore and then click the 'See
+              selection in block view' button to render the selected chromosome
+              in the block view.
 
-            <clr-signpost>
-              <button class="btn btn-link" clrSignpostTrigger>
-                More info
-              </button>
-              <clr-signpost-content clrPosition="bottom-middle" *clrIfOpen>
-                Searching and selecting features from the table(s) will show the
-                features in the plot. Clicking on a chromosome without features
-                will show the mapping of the entire chromosome in reference to
-                the comparison genome. Clicking on a chromosome with at least
-                one selected feature will show the mapping of any syntenic
-                regions within that chromosome that contain a selected feature.
-              </clr-signpost-content>
-            </clr-signpost>
+              <span
+                style="color: #006A91;cursor: pointer"
+                (click)="genomeViewHelp.open = true"
+              >
+                <clr-icon shape="info" size="21"></clr-icon> More Info
+              </span>
+            </h6>
           </div>
 
           <hr />
 
           <!-- Genome view species "legend" -->
-          <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row">
-            <span style="font-weight: bold">
-              Outer ring (reference genome):
-              {{ data.refSpecies.commonName }} ({{ data.refSpecies.name }})
-            </span>
-            <span style="font-weight: bold">
-              Inner ring (comparison genome):
-              {{ data.compSpecies.commonName }} ({{ data.compSpecies.name }})
-            </span>
+          <div
+            *ngIf="data.refSpecies && data.compSpecies"
+            class="clr-row clr-justify-content-between top-1"
+          >
+            <div class="clr-row clr-col-9">
+              <span class="clr-col-12" style="font-weight: bold">
+                Outer ring (reference genome):
+                {{ data.refSpecies.commonName }} ({{ data.refSpecies.name }})
+              </span>
+              <span class="clr-col-12" style="font-weight: bold">
+                Inner ring (comparison genome):
+                {{ data.compSpecies.commonName }} ({{ data.compSpecies.name }})
+              </span>
+            </div>
+
+            <div class="clr-col-3">
+              <button class="btn" (click)="genomeView.filenameModalOpen = true">
+                <clr-icon shape="download"></clr-icon> Download
+              </button>
+            </div>
           </div>
 
           <genome-view
             (highlightFeatures)="features.highlighted = $event"
           ></genome-view>
+
+          <div class="clr-row clr-justify-content-end">
+            <button
+              class="btn btn-primary"
+              [disabled]="!genomeView || !genomeView.refChr"
+              (click)="getChromosomeFeatures()"
+            >
+              <clr-icon shape="check"></clr-icon> See Selection in Block View
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="card-footer text-right">
-      <button
-        class="btn btn-primary"
-        [disabled]="!genomeView || !genomeView.refChr"
-        (click)="getChromosomeFeatures()"
-      >
-        <clr-icon shape="check"></clr-icon> See Selection in Block View
-      </button>
     </div>
   </div>
 </div>
@@ -81,7 +125,11 @@
       <div class="card-header">BLOCK VIEW BROWSER</div>
 
       <div class="card-block">
-        <block-view-browser (filter)="filterOpen = true"></block-view-browser>
+        <block-view-browser
+          (filter)="filterOpen = true"
+          (getHelp)="blockViewBrowserHelp.open = true"
+        >
+        </block-view-browser>
       </div>
     </div>
   </div>
@@ -108,3 +156,8 @@
     </block-view-filter>
   </div>
 </clr-modal>
+
+<species-selection-help></species-selection-help>
+<feature-selection-help></feature-selection-help>
+<genome-view-help></genome-view-help>
+<block-view-browser-help></block-view-browser-help>

@@ -6,6 +6,10 @@ import { BlockViewFilterComponent } from './block-view-filter/block-view-filter.
 import { GenomeViewComponent } from './genome-view/genome-view.component';
 import { SpeciesSelectionComponent } from './species-selection/species-selection.component';
 import { DataStorageService } from './services/data-storage.service';
+import { SpeciesSelectionHelpComponent } from './species-selection/species-selection-help.component';
+import { FeatureSelectionHelpComponent } from './feature-selection/feature-selection-help.component';
+import { GenomeViewHelpComponent } from './genome-view/genome-view-help.component';
+import { BlockViewBrowserHelpComponent } from './block-view-browser/block-view-browser-help.component';
 
 @Component({
   selector: 'app-synteny-browser',
@@ -33,6 +37,18 @@ export class SyntenyBrowserComponent implements OnInit {
   // ('static: false' since it doesn't need to load when the app bootstraps)
   @ViewChild(BlockViewFilterComponent, { static: false })
   blockViewFilters: BlockViewFilterComponent;
+
+  @ViewChild(SpeciesSelectionHelpComponent, { static: false })
+  speciesSelectionHelp: SpeciesSelectionHelpComponent;
+
+  @ViewChild(FeatureSelectionHelpComponent, { static: false })
+  featureSelectionHelp: FeatureSelectionHelpComponent;
+
+  @ViewChild(GenomeViewHelpComponent, { static: false })
+  genomeViewHelp: GenomeViewHelpComponent;
+
+  @ViewChild(BlockViewBrowserHelpComponent, { static: false })
+  blockViewBrowserHelp: BlockViewBrowserHelpComponent;
 
   // controls if the block view browser panel is visible
   viewInBrowser = false;
