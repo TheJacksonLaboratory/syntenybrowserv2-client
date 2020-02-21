@@ -103,3 +103,17 @@ clr-signpost-content {
   margin-top: 0.2rem;
   margin-left: 0.75rem;
 }
+
+#reference-interval-input {
+  p {
+    padding-top: 0.25rem;
+    border-bottom: 1px solid #9a9a9a !important;
+    cursor: default;
+    text-decoration: none;
+  }
+
+  .signpost-content {
+    max-width: 17rem !important;
+  }
+}
+

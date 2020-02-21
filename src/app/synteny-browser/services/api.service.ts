@@ -129,6 +129,16 @@ export class ApiService {
   getOntologyTerms(ontology: string): Observable<OntologyTerm[]> {
     return this.http.get<ArrayResponse>(`${this.root}/ontologies/terms/simple/${ontology}`);
   }
+
+  /**
+   * Returns a list of cytogenetic band objects for the specified species and
+   * chromosome
+   * @param {string} taxonID - stringified taxon ID for the desired species
+   * @param {string} chr - the chromosome to get bands for
+   */
+  getChrCytoBands(taxonID: string, chr: string): Observable<any[]> {
+    return this.http.get<ArrayResponse>(`${this.root}/bands/${taxonID}/${chr}`);
+  }
 }
 
 export type ArrayResponse = Array<any>;

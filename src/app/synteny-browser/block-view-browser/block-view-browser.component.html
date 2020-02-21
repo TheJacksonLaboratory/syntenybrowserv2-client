@@ -61,34 +61,19 @@
     <div class="clr-col-xl-3 clr-col-5 bottom-1">
       <div class="clr-row">
         <h4>Jump to Interval</h4>
-
-        <!-- Usage examples -->
-        <clr-signpost id="reference-interval-info">
-          <clr-icon shape="info" clrSignpostTrigger></clr-icon>
-          <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
-            Valid intervals include: <br />
-            • <b>12345678-23456789</b><br />
-            • <b>12,345,678-23,456,789</b><br />
-            • <b>12345678-</b> (will jump to 12,345,678 through end of
-            chromosome)<br />
-            • <b>-12345678</b> (will jump to start of chromosome through
-            12,345,678)<br />
-          </clr-signpost-content>
-        </clr-signpost>
       </div>
 
-      <!-- Interval input -->
-      <clr-input-container>
-        <label for="reference-interval"></label>
-
-        <input
-          id="reference-interval"
-          clrInput
-          placeholder="Enter a valid interval"
-          [(ngModel)]="refInterval"
-          (keyup.enter)="jumpToInterval()"
-        />
-      </clr-input-container>
+      <!-- Interval "input" (it's just a glorified button) -->
+      <clr-signpost *ngIf="interval" id="reference-interval-input">
+        <p clrSignpostTrigger>{{ interval.getRefInterval() }}</p>
+        <clr-signpost-content [clrPosition]="'bottom-middle'">
+          <quick-navigation
+            [interval]="interval"
+            [cytobands]="cytoBands"
+            (intervalChange)="jumpToInterval($event)"
+          ></quick-navigation>
+        </clr-signpost-content>
+      </clr-signpost>
     </div>
 
     <!-- Navigation buttons -->
