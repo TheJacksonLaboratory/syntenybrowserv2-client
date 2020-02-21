@@ -297,8 +297,8 @@ export class BlockViewBrowserComponent {
    * end isn't past the reference chromosome's size
    */
   jumpToInterval(interval: number[]): void {
-    let start = Math.max(interval[0], 0);
-    let end = Math.min(interval[1], this.interval.refChrSize);
+    const start = Math.max(interval[0], 0);
+    const end = Math.min(interval[1], this.interval.refChrSize);
     this.brushView(start, end);
   }
 

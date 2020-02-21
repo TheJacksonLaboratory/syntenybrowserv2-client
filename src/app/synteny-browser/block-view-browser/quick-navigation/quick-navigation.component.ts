@@ -4,7 +4,7 @@ import { BrowserInterval } from '../../classes/browser-interval';
 @Component({
   selector: 'quick-navigation',
   templateUrl: './quick-navigation.component.html',
-  styleUrls: ['./quick-navigation.component.scss']
+  styleUrls: ['./quick-navigation.component.scss'],
 })
 export class QuickNavigationComponent {
   // interval class to get current start and end values
@@ -37,8 +37,7 @@ export class QuickNavigationComponent {
    * @param {Event} event - change event from the genomic interval start input
    */
   handleStartChange(event: any = null): void {
-    console.log(event);
-    if(this.isGenomicInterval()) {
+    if (this.isGenomicInterval()) {
       // get the value entered into the input and assign it to interval start;
       // this way we have a temporary start point to validate before overriding
       // the interval.refStart which could be messy if we screw that up
@@ -50,7 +49,7 @@ export class QuickNavigationComponent {
     } else {
       // if there isn't an end band, make it the same as the start so that it's
       // easy for the user to select a single band
-      if(this.cytoEnd === null) {
+      if (this.cytoEnd === null) {
         this.cytoEnd = this.cytoStart;
       }
 
@@ -61,8 +60,8 @@ export class QuickNavigationComponent {
 
     // if the interval is valid, emit it to have the interval class navigate to
     // that interval
-    let interval = this.getInterval();
-    if(interval) {
+    const interval = this.getInterval();
+    if (interval) {
       this.intervalChange.emit(interval);
     }
   }
@@ -72,8 +71,8 @@ export class QuickNavigationComponent {
    * emits it for updating the interval in the browser
    * @param {Event} event - change event from the genomic interval end input
    */
-  handleEndChange(event: any = null) {
-    if(this.isGenomicInterval()) {
+  handleEndChange(event: any = null): void {
+    if (this.isGenomicInterval()) {
       // get the value entered into the input and assign it to interval end;
       // this way we have a temporary end point to validate before overriding
       // the interval.refEnd which could be messy if we screw that up
@@ -90,8 +89,8 @@ export class QuickNavigationComponent {
 
     // if the interval is valid, emit it to have the interval class navigate to
     // that interval
-    let interval = this.getInterval();
-    if(interval) {
+    const interval = this.getInterval();
+    if (interval) {
       this.intervalChange.emit(interval);
     }
   }
@@ -103,9 +102,8 @@ export class QuickNavigationComponent {
   getInterval(): number[] {
     if (this.isGenomicInterval()) {
       return this.getGenomicInterval();
-    } else {
-      return this.getCytogenticInterval();
     }
+    return this.getCytogenticInterval();
   }
 
   /**
@@ -115,14 +113,15 @@ export class QuickNavigationComponent {
    * null
    */
   private getCytogenticInterval(): number[] {
-    let band1 = this.cytoStart ? this.findBandByLoc(this.cytoStart): null;
-    let band2 = this.cytoEnd ? this.findBandByLoc(this.cytoEnd) : null;
+    const band1 = this.cytoStart ? this.findBandByLoc(this.cytoStart) : null;
+    const band2 = this.cytoEnd ? this.findBandByLoc(this.cytoEnd) : null;
 
-    if(band1 && band2) {
-      return band1.start < band2.start ? [band1.start, band2.end] : [band2.start, band1.end];
-    } else {
-      return null;
+    if (band1 && band2) {
+      return band1.start < band2.start
+        ? [band1.start, band2.end]
+        : [band2.start, band1.end];
     }
+    return null;
   }
 
   /**
@@ -131,14 +130,13 @@ export class QuickNavigationComponent {
    * value; if there's a missing value, it returns null
    */
   private getGenomicInterval(): number[] {
-    let start = this.getGenomicStart();
-    let end = this.getGenomicEnd();
+    const start = this.getGenomicStart();
+    const end = this.getGenomicEnd();
 
-    if(start && end) {
+    if (start && end) {
       return start > end ? [end, start] : [start, end];
-    } else {
-      return null;
     }
+    return null;
   }
 
   /**

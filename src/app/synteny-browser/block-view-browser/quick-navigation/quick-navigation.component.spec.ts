@@ -8,9 +8,8 @@ describe('QuickNavigationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ QuickNavigationComponent ]
-    })
-    .compileComponents();
+      declarations: [QuickNavigationComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

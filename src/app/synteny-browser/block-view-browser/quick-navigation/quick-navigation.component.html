@@ -2,30 +2,20 @@
 <clr-radio-container clrInline class="bottom-1">
   <label>Navigation Type</label>
   <clr-radio-wrapper>
-    <input
-      type="radio"
-      clrRadio
-      value="genomic"
-      [(ngModel)]="navType"
-    />
+    <input type="radio" clrRadio value="genomic" [(ngModel)]="navType" />
     <label>Genomic Interval</label>
   </clr-radio-wrapper>
   <clr-radio-wrapper>
-    <input
-      type="radio"
-      clrRadio
-      value="cytoband"
-      [(ngModel)]="navType"
-    />
+    <input type="radio" clrRadio value="cytoband" [(ngModel)]="navType" />
     <label>Cytogenetic Band(s)</label>
   </clr-radio-wrapper>
   <clr-control-helper>How do you want to find a location?</clr-control-helper>
 </clr-radio-container>
-<hr>
+<hr />
 
 <!-- Genomic navigation -->
 <div *ngIf="isGenomicInterval()" class="clr-row">
-  <h6>Chr{{interval.refChr}}:</h6>
+  <h6>Chr{{ interval.refChr }}:</h6>
   <clr-input-container>
     <label for="ref-interval-start">Start</label>
 
@@ -52,7 +42,10 @@
 </div>
 
 <!-- Cytogenetic band navigation -->
-<div *ngIf="!isGenomicInterval()" class="clr-row top-1 clr-justify-content-center">
+<div
+  *ngIf="!isGenomicInterval()"
+  class="clr-row top-1 clr-justify-content-center"
+>
   <ng-select
     bindLabel="location"
     bindValue="location"
