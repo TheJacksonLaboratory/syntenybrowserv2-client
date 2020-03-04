@@ -177,8 +177,26 @@ export class BlockViewBrowserComponent {
     // this genome map is used for the genome band above the chromosome view
     this.refGMap = new LinearGenomeMap(this.ref.genome, this.width);
 
+    this.getGWASHits();
+
     // get syntenic block data
     this.getSyntenicBlocks(this.data.features.features);
+  }
+
+  getGWASHits(): void {
+    // if the reference is human, get GWAS hits for the whole chromosome,
+    // otherwise, we'll need the entire genome to filter through
+    if(this.ref.getID() === '9606') {
+      this.http.getChrGWASHits(this.ref.getID(), this.refChr, '0001360')
+        .subscribe(hits => {
+          console.log(hits);
+        });
+    } else if(this.comp.getID() === '9606') {
+      this.http.getGenomeGWASHits(this.comp.getID(), '0001360')
+        .subscribe(hits => {
+          console.log(hits);
+        });
+    }
   }
 
   /**
