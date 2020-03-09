@@ -37,6 +37,10 @@ export class QTL {
   // used when app queries list of features which contain a mix of genes and QTLs
   isGene = false;
 
+  // used when app queries list of features which contain a mix of genes and
+  // QTLs and GWASLocations
+  isQTL = true;
+
   constructor(qtl: any, staticScale: ScaleLinear<number, number>) {
     this.id = qtl.id;
     this.symbol = qtl.symbol;

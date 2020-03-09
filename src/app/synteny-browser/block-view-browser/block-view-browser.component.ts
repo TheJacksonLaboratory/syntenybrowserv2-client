@@ -18,6 +18,7 @@ import { Filter } from '../classes/filter';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
 import { LinearGenomeMap } from '../classes/linear-genome-map';
+import { GWASHit, GWASLocation } from '../classes/gwas-location';
 
 @Component({
   selector: 'block-view-browser',
@@ -109,6 +110,8 @@ export class BlockViewBrowserComponent {
   // gene IDs of reference genes that are homologous
   homRefGenes: string[];
 
+  humanGWAS: GWASLocation[] = [];
+
   // scale used in chr view to draw reference indicators and syntenic blocks
   staticRefBPToPixels: d3.ScaleLinear<number, number>;
 
@@ -177,26 +180,8 @@ export class BlockViewBrowserComponent {
     // this genome map is used for the genome band above the chromosome view
     this.refGMap = new LinearGenomeMap(this.ref.genome, this.width);
 
-    this.getGWASHits();
-
     // get syntenic block data
     this.getSyntenicBlocks(this.data.features.features);
-  }
-
-  getGWASHits(): void {
-    // if the reference is human, get GWAS hits for the whole chromosome,
-    // otherwise, we'll need the entire genome to filter through
-    if(this.ref.getID() === '9606') {
-      this.http.getChrGWASHits(this.ref.getID(), this.refChr, '0001360')
-        .subscribe(hits => {
-          console.log(hits);
-        });
-    } else if(this.comp.getID() === '9606') {
-      this.http.getGenomeGWASHits(this.comp.getID(), '0001360')
-        .subscribe(hits => {
-          console.log(hits);
-        });
-    }
   }
 
   /**
@@ -208,7 +193,7 @@ export class BlockViewBrowserComponent {
     this.featureTip = d3Tip()
       .attr('class', 'd3-tip')
       .offset([-5, 0])
-      .html((d: Gene | QTL) => {
+      .html((d: Gene|QTL|GWASLocation) => {
         const data = d.getTooltipData();
 
         if (d.isGene) {
@@ -221,14 +206,34 @@ export class BlockViewBrowserComponent {
             `<span><b>End:</b> ${data.end}</span><br/>` +
             `<span><b>Strand:</b> ${data.strand}</span>`
           );
+        } else if(d.isQTL) {
+          return (
+            `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
+            `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
+            `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
+            `<span><b>Start:</b> ${data.start}</span><br/>` +
+            `<span><b>End:</b> ${data.end}</span><br/>`
+          );
+        } else {
+          // TODO: some information is commented out here because it is not yet
+          //  available from the database; once the data is present and returned
+          //  by the API, we can include this information
+          let hitsData = data.hits.map(h => {
+            return (
+              `<hr>` +
+              //`<span><b>ID:</b> ${h.id}</span><br/>` +
+              `<span><b>Gene:</b> ${h.gene}</span><br/>` +
+              `<span><b>Frequency:</b> ${h.frequency}</span><br/>` //+
+              //`<span><b>Quality:</b> ${h.quality}</span><br/>`
+            );
+          }).join('');
+
+          return (
+            `<span style="font-size: 14px;"><b>${data.chr}:${data.loc}</b></span><br/>` +
+            `<span><b>Num Hits:</b> ${data.numHits}</span><br/>` +
+            hitsData
+          );
         }
-        return (
-          `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
-          `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
-          `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
-          `<span><b>Start:</b> ${data.start}</span><br/>` +
-          `<span><b>End:</b> ${data.end}</span><br/>`
-        );
       });
 
     this.blockTip = d3Tip()
@@ -505,11 +510,12 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns the comparison scale matching the block ID of the specified gene
-   * @param {Gene} gene - the gene to get the comp scale for by its blockID
+   * Returns the comparison scale matching the block ID of the specified feature
+   * @param {Gene|GWASLocation} feature - the feature to get the comp scale for
+   *                                     by its blockID
    */
-  getScale(gene: Gene): d3.ScaleLinear<number, number> {
-    return this.blockLookup[gene.blockID].getScale(this.options.trueOrientation);
+  getScale(feature: Gene|GWASLocation): d3.ScaleLinear<number, number> {
+    return this.blockLookup[feature.blockID].getScale(this.options.trueOrientation);
   }
 
   /**
@@ -631,6 +637,7 @@ export class BlockViewBrowserComponent {
     this.selectedRefGenes = [];
     this.selectedCompGenes = [];
     this.selectedQTLs = [];
+    this.humanGWAS = [];
     this.staticCompBPToPixels.match = {};
     this.staticCompBPToPixels.true = {};
     this.legend = null;
@@ -698,6 +705,7 @@ export class BlockViewBrowserComponent {
         .selectAll('text')
         .attr('text-anchor', (d, i, x) => this.getLabelPos(i, x.length));
 
+      this.getGWASLocations();
       this.getGenes(refID, compID, features);
     });
   }
@@ -733,7 +741,11 @@ export class BlockViewBrowserComponent {
             return rh.id;
           });
 
-          return new Gene(h, this.trackHeight, this.ref.taxonID, this.blocks);
+          const blockInfo = this.getGeneBlock(h);
+          h.blockID = blockInfo.blockID;
+          h.orientationMatches = blockInfo.orientationMatches;
+
+          return new Gene(h, this.trackHeight, this.ref.taxonID);
         })
         .filter(h => {
           const syntenic = h.isSyntenic();
@@ -758,7 +770,6 @@ export class BlockViewBrowserComponent {
 
     this.http.getGenes(refID, this.refChr).subscribe(genes => {
       this.selectedRefGenes = [];
-
       this.progress += 0.3;
 
       this.refGenes = genes.map(g => {
@@ -767,10 +778,11 @@ export class BlockViewBrowserComponent {
         // add selected attribute if it is listed as selected
         g.sel = featureIDs.indexOf(g.id) > -1;
 
+        g.orientationMatches = null;
+
         const gene = new Gene(g, this.trackHeight, this.ref.taxonID);
 
-        // if the gene is selected, push it to the selected reference
-        // gene array
+        // if the gene is selected, push it to the selected reference gene array
         if (gene.selected) {
           this.selectedRefGenes.push(gene);
         }
@@ -801,9 +813,54 @@ export class BlockViewBrowserComponent {
     });
   }
 
+  private getGWASLocations(): void {
+    // if the reference is human, get GWAS hits for the whole chromosome,
+    // otherwise, we'll need the entire genome to filter through
+    if(this.ref.getID() === '9606') {
+      this.http.getChrGWASHits(this.ref.getID(), this.refChr, '0001360')
+        .subscribe(hits => {
+          let locations = {};
+
+          hits.forEach(h => {
+            const locationID = `${h.chr}_${h.position}`;
+            if(locations[locationID]) {
+              locations[locationID].push(h);
+            } else {
+              locations[locationID] = [h];
+            }
+          });
+
+          this.humanGWAS = (<GWASHit[][]>Object.values(locations))
+            .map(hits => new GWASLocation(hits));
+        });
+    } else if(this.comp.getID() === '9606') {
+      this.http.getGenomeGWASHits(this.comp.getID(), '0001360')
+        .subscribe(hits => {
+          let locations = {};
+
+          hits.forEach(h => {
+            const blockID = this.getGWASBlock(h);
+
+            if(blockID) {
+              const locationID = `${h.chr}_${h.position}`;
+              h.blockID = blockID;
+              if(locations[locationID]) {
+                locations[locationID].push(h);
+              } else {
+                locations[locationID] = [h];
+              }
+            }
+          });
+
+          this.humanGWAS = (<GWASHit[][]>Object.values(locations))
+            .map(hits => new GWASLocation(hits));
+        });
+    }
+  }
+
   /**
    * Sets tooltips for elements that aren't going to change; these include
-   * indicators, QTLs, and synteny blocks sicne they aren't hidden at any point
+   * indicators, QTLs, and synteny blocks since they aren't hidden at any point
    * in time (genes are though, so those are done dynamically)
    */
   private staticTooltipBehavior(): void {
@@ -863,6 +920,25 @@ export class BlockViewBrowserComponent {
     d3.selectAll('.qtl')
       .data(this.selectedQTLs)
       .on('mouseover', function(d: QTL) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
+
+    // GWAS locations
+    d3.selectAll('.human-gwas')
+      .data(this.humanGWAS)
+      .on('mouseover', function(d: GWASLocation) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
+
+    d3.selectAll('.human-gwas-handle')
+      .data(this.humanGWAS)
+      .on('mouseover', function(d: GWASLocation) {
         featureTip.show(d, this);
       })
       .on('mouseout', function() {
@@ -1288,6 +1364,35 @@ export class BlockViewBrowserComponent {
       return match;
     });
   }
+
+  /**
+   * Return the block ID and orientation boolean for the syntenic block the gene
+   * is located in; if the block doesn't fully contain the gene, the returned
+   * blockID and orientation value will both be null
+   * @param {gene: Gene} gene - the gene to get block info for
+   */
+  private getGeneBlock(gene: Gene): BlockInfo {
+    const blk = this.blocks.filter(b => b.matchesCompChr(gene.chr) && b.contains(gene));
+
+    let blockID = blk.length ? blk[0].id : null;
+    let orientationMatches = blockID ? blk[0].orientationMatches : null;
+
+    return { blockID, orientationMatches };
+  }
+
+  /**
+   * Returns the ID of the syntenic block that contains the GWAS location; if the
+   * block doesn't contain the gene, the returned value will be null
+   * @param {GWASHit} hit - the hit to get the block location for
+   */
+  private getGWASBlock(hit: GWASHit): string {
+    const blk = this.blocks.filter(b => {
+      return b.matchesCompChr(hit.chr) && hit.position >= b.getStart() &&
+        hit.position <= b.getEnd();
+    });
+
+    return blk.length ? blk[0].id : null;
+  }
 }
 
 export interface ComparisonScaling {
@@ -1299,4 +1404,9 @@ export interface BlockViewBrowserOptions {
   symbols: boolean;
   anchors: boolean;
   trueOrientation: boolean;
+}
+
+export interface BlockInfo {
+  blockID: string;
+  orientationMatches: boolean;
 }
