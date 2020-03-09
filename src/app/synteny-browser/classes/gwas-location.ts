@@ -78,7 +78,7 @@ export class GWASLocation {
    *                             available info (default false)
    */
   private getHitDataForTooltip(hit: GWASHit, detailed = false): any {
-    let data = {
+    const data = {
       id: hit.id,
       quality: hit.quality,
       frequency: hit.frequency,

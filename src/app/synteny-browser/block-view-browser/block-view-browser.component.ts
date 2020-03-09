@@ -161,7 +161,7 @@ export class BlockViewBrowserComponent {
       symbols: false,
       anchors: false,
       trueOrientation: false,
-      GWAS: true
+      GWAS: true,
     };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
