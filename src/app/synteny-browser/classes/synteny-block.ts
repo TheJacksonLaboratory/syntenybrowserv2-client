@@ -203,7 +203,7 @@ export class SyntenyBlock {
    * @param {boolean} trueScale - whether the true or matching scale is needed
    *                              (default true)
    */
-  getScale(trueScale: boolean = true): ScaleLinear<number, number> {
+  getScale(trueScale = true): ScaleLinear<number, number> {
     return trueScale ? this.compTrueScale : this.compMatchScale;
   }
 
@@ -213,7 +213,7 @@ export class SyntenyBlock {
    * @param {boolean} trueCoords - whether the true or matching start is needed
    *                               (default true)
    */
-  getStart(trueCoords: boolean = true): number {
+  getStart(trueCoords = true): number {
     return trueCoords ? this.getTrueCompStart() : this.matchCoords.compStart;
   }
 
@@ -223,7 +223,7 @@ export class SyntenyBlock {
    * @param {boolean} trueCoords - whether the true or matching start is needed
    *                               (default true)
    */
-  getEnd(trueCoords: boolean = true): number {
+  getEnd(trueCoords = true): number {
     return trueCoords ? this.getTrueCompEnd() : this.matchCoords.compEnd;
   }
 

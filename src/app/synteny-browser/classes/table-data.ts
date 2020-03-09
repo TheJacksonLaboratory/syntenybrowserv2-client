@@ -147,7 +147,7 @@ export class TableData<T> {
     if (this.dragging) {
       if (this.dragMode === 'select') {
         row.select();
-        if (this.selections.filter(s => s.is(row.symbol)).length === 0) {
+        if (!this.selections.filter(s => s.is(row.symbol)).length) {
           this.selections.push(row);
         }
       } else {

@@ -340,11 +340,11 @@ export class BlockViewFilterComponent implements OnInit {
       // an 'include' criteria, the include should take precendence over the
       // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
       // should be filtered
-      if (hidingFilters.length > 0) {
+      if (hidingFilters.length) {
         this.hideGenes(filters.filter(f => f.hides()));
       }
 
-      if (highlightFilters.length > 0) {
+      if (highlightFilters.length) {
         this.filterGenes(filters.filter(f => !f.hides()));
       }
 
@@ -358,7 +358,7 @@ export class BlockViewFilterComponent implements OnInit {
    * Returns true if there is at least one filter
    */
   private anyFiltersSelected(): boolean {
-    return this.getCreatedFilters().length > 0;
+    return !!this.getCreatedFilters().length;
   }
 
   /**
@@ -376,7 +376,7 @@ export class BlockViewFilterComponent implements OnInit {
     const attributeFilters = filters.filter(f => !f.isFilteringByOntologyTerm());
 
     // check ontology filters first since they will take the longest
-    if (ontologyFilters.length > 0) {
+    if (ontologyFilters.length) {
       ontologyFilters.forEach(f => {
         f.conditions.forEach(c => {
           this.http.getTermAssociations(species.getID(), c.value).subscribe(assoc => {
@@ -391,7 +391,7 @@ export class BlockViewFilterComponent implements OnInit {
     }
 
     // check attribute filters
-    if (attributeFilters.length > 0) {
+    if (attributeFilters.length) {
       const matches = genes.filter(g => {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
@@ -416,11 +416,11 @@ export class BlockViewFilterComponent implements OnInit {
     const refFilters = filters.filter(f => f.isRefFilter());
     const compFilters = filters.filter(f => f.isCompFilter());
 
-    if (refFilters.length > 0) {
+    if (refFilters.length) {
       this.getMatches(this.refGenes, refFilters, this.refSpecies);
     }
 
-    if (compFilters.length > 0) {
+    if (compFilters.length) {
       this.getMatches(this.compGenes, compFilters, this.compSpecies);
     }
   }
@@ -434,11 +434,11 @@ export class BlockViewFilterComponent implements OnInit {
     const refFilters = filters.filter(f => f.isRefFilter());
     const compFilters = filters.filter(f => f.isCompFilter());
 
-    if (refFilters.length > 0) {
+    if (refFilters.length) {
       this.getMatches(this.refGenes, refFilters, this.refSpecies);
     }
 
-    if (compFilters.length > 0) {
+    if (compFilters.length) {
       this.getMatches(this.compGenes, compFilters, this.compSpecies);
     }
   }

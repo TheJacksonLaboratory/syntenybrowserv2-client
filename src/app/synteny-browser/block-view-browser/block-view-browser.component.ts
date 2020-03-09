@@ -110,6 +110,9 @@ export class BlockViewBrowserComponent {
   // gene IDs of reference genes that are homologous
   homRefGenes: string[];
 
+  // human GWAS locations either in the reference or comparison species
+  // if reference, only locations in the reference chr, if comparison, only
+  // locations in the syntenic regions from the comparison genome
   humanGWAS: GWASLocation[] = [];
 
   // scale used in chr view to draw reference indicators and syntenic blocks
@@ -193,7 +196,7 @@ export class BlockViewBrowserComponent {
     this.featureTip = d3Tip()
       .attr('class', 'd3-tip')
       .offset([-5, 0])
-      .html((d: Gene|QTL|GWASLocation) => {
+      .html((d: Gene | QTL | GWASLocation) => {
         const data = d.getTooltipData();
 
         if (d.isGene) {
@@ -206,7 +209,8 @@ export class BlockViewBrowserComponent {
             `<span><b>End:</b> ${data.end}</span><br/>` +
             `<span><b>Strand:</b> ${data.strand}</span>`
           );
-        } else if(d.isQTL) {
+        }
+        if (d.isQTL) {
           return (
             `<span style="font-size: 14px;"><b>${data.symbol}</b></span><br/>` +
             `<span><b>QTL ID:</b> ${data.id}</span><br/>` +
@@ -214,26 +218,19 @@ export class BlockViewBrowserComponent {
             `<span><b>Start:</b> ${data.start}</span><br/>` +
             `<span><b>End:</b> ${data.end}</span><br/>`
           );
-        } else {
-          // TODO: some information is commented out here because it is not yet
-          //  available from the database; once the data is present and returned
-          //  by the API, we can include this information
-          let hitsData = data.hits.map(h => {
-            return (
-              `<hr>` +
-              //`<span><b>ID:</b> ${h.id}</span><br/>` +
-              `<span><b>Gene:</b> ${h.gene}</span><br/>` +
-              `<span><b>Frequency:</b> ${h.frequency}</span><br/>` //+
-              //`<span><b>Quality:</b> ${h.quality}</span><br/>`
-            );
-          }).join('');
-
-          return (
-            `<span style="font-size: 14px;"><b>${data.chr}:${data.loc}</b></span><br/>` +
-            `<span><b>Num Hits:</b> ${data.numHits}</span><br/>` +
-            hitsData
-          );
         }
+        // TODO: add ID and quality when those are filled fields from the API
+        const hitsData = data.hits
+          .map(
+            h =>
+              '<hr>' +
+              `<span><b>Gene:</b> ${h.gene}</span><br/>` +
+              `<span><b>Frequency:</b> ${h.frequency}</span><br/>`,
+          )
+          .join('');
+
+        return `${`<span style="font-size: 14px;"><b>${data.chr}:${data.loc}</b></span><br/>` +
+          `<span><b>Num Hits:</b> ${data.numHits}</span><br/>`}${hitsData}`;
       });
 
     this.blockTip = d3Tip()
@@ -316,15 +313,15 @@ export class BlockViewBrowserComponent {
    * reference chromsome to the specified value
    */
   jumpToInterval(): void {
-    if (this.refInterval.length > 0) {
+    if (this.refInterval.length) {
       const pts = this.refInterval
         .replace(/\s+/g, '')
         .replace(/,/g, '')
         .split('-');
 
       if (pts.length === 2) {
-        const start = pts[0].length > 0 ? pts[0] : 0;
-        const end = pts[1].length > 0 ? pts[1] : this.getRefChrSize();
+        const start = pts[0].length ? pts[0] : 0;
+        const end = pts[1].length ? pts[1] : this.getRefChrSize();
 
         if (Number(start) && Number(end)) {
           this.brushView(Number(start), Number(end));
@@ -514,7 +511,7 @@ export class BlockViewBrowserComponent {
    * @param {Gene|GWASLocation} feature - the feature to get the comp scale for
    *                                     by its blockID
    */
-  getScale(feature: Gene|GWASLocation): d3.ScaleLinear<number, number> {
+  getScale(feature: Gene | GWASLocation): d3.ScaleLinear<number, number> {
     return this.blockLookup[feature.blockID].getScale(this.options.trueOrientation);
   }
 
@@ -621,7 +618,7 @@ export class BlockViewBrowserComponent {
    * Returns true if at least 1 QTL or gene is selected
    */
   featuresAreSelected(): boolean {
-    return this.selectedQTLs.length > 0 || this.selectedRefGenes.length > 0;
+    return !!this.selectedQTLs.length || !!this.selectedRefGenes.length;
   }
 
   /**
@@ -796,7 +793,7 @@ export class BlockViewBrowserComponent {
 
       // set interval to center around the first reference feature, if
       // features are selected, otherwise set interval to entire chr
-      if (this.selectedRefGenes.length > 0) {
+      if (this.selectedRefGenes.length) {
         const mb = 2500000;
         const firstGene = this.selectedRefGenes[0];
         const start = Math.max(0, firstGene.start - mb);
@@ -813,48 +810,54 @@ export class BlockViewBrowserComponent {
     });
   }
 
+  /**
+   * Gets any GWAS hits for human depending on if the human is reference or
+   * comparison; if human is neither, then it won't get any data
+   */
   private getGWASLocations(): void {
+    const refID = this.ref.getID();
+    const compID = this.comp.getID();
     // if the reference is human, get GWAS hits for the whole chromosome,
     // otherwise, we'll need the entire genome to filter through
-    if(this.ref.getID() === '9606') {
-      this.http.getChrGWASHits(this.ref.getID(), this.refChr, '0001360')
-        .subscribe(hits => {
-          let locations = {};
+    if (refID === '9606') {
+      this.http.getChrGWASHits(refID, this.refChr, '0001360').subscribe(gwas => {
+        const locations = {};
 
-          hits.forEach(h => {
+        gwas.forEach(h => {
+          const locationID = `${h.chr}_${h.position}`;
+          if (locations[locationID]) {
+            locations[locationID].push(h);
+          } else {
+            locations[locationID] = [h];
+          }
+        });
+
+        this.humanGWAS = (Object.values(locations) as GWASHit[][]).map(
+          hits => new GWASLocation(hits),
+        );
+      });
+    } else if (compID === '9606') {
+      this.http.getGenomeGWASHits(compID, '0001360').subscribe(gwas => {
+        const locations = {};
+
+        gwas.forEach(h => {
+          const blockID = this.getGWASBlock(h);
+
+          if (blockID) {
             const locationID = `${h.chr}_${h.position}`;
-            if(locations[locationID]) {
+            h.blockID = blockID;
+            if (locations[locationID]) {
               locations[locationID].push(h);
             } else {
               locations[locationID] = [h];
             }
-          });
-
-          this.humanGWAS = (<GWASHit[][]>Object.values(locations))
-            .map(hits => new GWASLocation(hits));
+          }
         });
-    } else if(this.comp.getID() === '9606') {
-      this.http.getGenomeGWASHits(this.comp.getID(), '0001360')
-        .subscribe(hits => {
-          let locations = {};
 
-          hits.forEach(h => {
-            const blockID = this.getGWASBlock(h);
-
-            if(blockID) {
-              const locationID = `${h.chr}_${h.position}`;
-              h.blockID = blockID;
-              if(locations[locationID]) {
-                locations[locationID].push(h);
-              } else {
-                locations[locationID] = [h];
-              }
-            }
-          });
-
-          this.humanGWAS = (<GWASHit[][]>Object.values(locations))
-            .map(hits => new GWASLocation(hits));
-        });
+        this.humanGWAS = (Object.values(locations) as GWASHit[][]).map(
+          hits => new GWASLocation(hits),
+        );
+      });
     }
   }
 
@@ -1374,8 +1377,8 @@ export class BlockViewBrowserComponent {
   private getGeneBlock(gene: Gene): BlockInfo {
     const blk = this.blocks.filter(b => b.matchesCompChr(gene.chr) && b.contains(gene));
 
-    let blockID = blk.length ? blk[0].id : null;
-    let orientationMatches = blockID ? blk[0].orientationMatches : null;
+    const blockID = blk.length ? blk[0].id : null;
+    const orientationMatches = blockID ? blk[0].orientationMatches : null;
 
     return { blockID, orientationMatches };
   }
@@ -1386,10 +1389,9 @@ export class BlockViewBrowserComponent {
    * @param {GWASHit} hit - the hit to get the block location for
    */
   private getGWASBlock(hit: GWASHit): string {
-    const blk = this.blocks.filter(b => {
-      return b.matchesCompChr(hit.chr) && hit.position >= b.getStart() &&
-        hit.position <= b.getEnd();
-    });
+    const blk = this.blocks.filter(
+      b => b.matchesCompChr(hit.chr) && hit.position >= b.getStart() && hit.position <= b.getEnd(),
+    );
 
     return blk.length ? blk[0].id : null;
   }

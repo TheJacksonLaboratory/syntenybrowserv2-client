@@ -1,5 +1,4 @@
 import { format, ScaleLinear } from 'd3';
-import { SyntenyBlock } from './synteny-block';
 
 export class GWASLocation {
   // genomic location
@@ -47,19 +46,19 @@ export class GWASLocation {
       chr: this.chr,
       loc: this.format(this.location),
       numHits: this.hits.length,
-      hits: this.hits.map(h => this.getHitDataForTooltip(h))
+      hits: this.hits.map(h => this.getHitDataForTooltip(h)),
     };
   }
 
   /**
    * Returns the content for a click tooltip for the location
    */
-  getClicktipData(): object {
+  getClicktipData(): any {
     return {
       chr: this.chr,
       loc: this.format(this.location),
       numHits: this.hits.length,
-      hits: this.hits.map(h => this.getHitDataForTooltip(h, true))
+      hits: this.hits.map(h => this.getHitDataForTooltip(h, true)),
     };
   }
 
@@ -71,7 +70,14 @@ export class GWASLocation {
     return scale(this.location);
   }
 
-  private getHitDataForTooltip(hit: GWASHit, detailed: boolean = false): any {
+  /**
+   * Returns data for the specified GWAS hit; if detailed is true, then it will
+   * return more info on the hit (this is for the case of a clicktip/dialog popup)
+   * @param {GWASHit} hit - the hit to get data for
+   * @param {boolean} detailed - if the returned object should contain all
+   *                             available info (default false)
+   */
+  private getHitDataForTooltip(hit: GWASHit, detailed = false): any {
     let data = {
       id: hit.id,
       quality: hit.quality,
@@ -79,9 +85,9 @@ export class GWASLocation {
       gene: hit.gene,
     };
 
-    if(detailed) {
-      data['ref_base'] = hit.ref_base;
-      data['alt_allele'] = hit.alt_allele;
+    if (detailed) {
+      data['refBase'] = hit.ref_base;
+      data['altAllele'] = hit.alt_allele;
       data['filter'] = hit.filter;
     }
     return data;

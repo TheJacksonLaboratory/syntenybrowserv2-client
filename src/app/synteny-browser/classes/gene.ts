@@ -234,7 +234,7 @@ export class Gene {
    * Returns the content for a click tooltip for the gene which includes ID,
    * symbol and genomic location, type and strand
    */
-  getClicktipData(): object {
+  getClicktipData(): any {
     return {
       'Gene Symbol': this.symbol,
       'Gene ID': this.id,
@@ -250,7 +250,7 @@ export class Gene {
    * @param {string} refSpeciesName - common name of the current ref species
    * @param {string} compSpeciesName - common name of the current comp species
    */
-  getFilterMetadata(refSpeciesName: string, compSpeciesName: string): object {
+  getFilterMetadata(refSpeciesName: string, compSpeciesName: string): any {
     return {
       id: this.id,
       symbol: this.symbol,
@@ -359,7 +359,7 @@ export class Gene {
    * Returns true if the gene has at least one homolog
    */
   isHomologous(): boolean {
-    return this.homologIDs.length > 0;
+    return !!this.homologIDs.length;
   }
 
   /**

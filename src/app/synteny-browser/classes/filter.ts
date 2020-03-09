@@ -227,7 +227,7 @@ export class Filter {
    * Returns true if all conditions don't have empty or unselected fields
    */
   allConditionsAreComplete(): boolean {
-    return this.conditions.filter(c => !c.isComplete()).length === 0;
+    return !this.conditions.filter(c => !c.isComplete()).length;
   }
 
   /**
@@ -252,7 +252,7 @@ export class Filter {
    * Returns true if the filter contains at least one ontology-related condition
    */
   isFilteringByOntologyTerm(): boolean {
-    return this.conditions.filter(c => c.isOntology()).length > 0;
+    return !!this.conditions.filter(c => c.isOntology()).length;
   }
 
   /**

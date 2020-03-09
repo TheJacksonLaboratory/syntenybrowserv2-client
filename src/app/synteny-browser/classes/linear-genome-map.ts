@@ -112,6 +112,6 @@ export class LinearGenomeMap {
    * @param {number[]} array - the list of numbers to sum
    */
   private getSummation(array: number[]): number {
-    return array.length > 0 ? array.reduce((a, b) => a + b) : 0;
+    return array.length ? array.reduce((a, b) => a + b) : 0;
   }
 }

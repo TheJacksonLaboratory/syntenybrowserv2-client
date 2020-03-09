@@ -537,7 +537,10 @@
           </g>
 
           <!-- Reference human GWAS locations -->
-          <g *ngIf="humanGWAS.length && ref.getID() === '9606'" id="human-ref-gwas">
+          <g
+            *ngIf="humanGWAS.length && ref.getID() === '9606'"
+            id="human-ref-gwas"
+          >
             <g
               *ngFor="let hit of humanGWAS"
               [attr.transform]="translate([hit.getXPos(refBPToPixels), 0])"
@@ -655,7 +658,10 @@
           </g>
 
           <!-- Comparison human GWAS locations -->
-          <g *ngIf="humanGWAS.length && comp.getID() === '9606'" id="human-comp-gwas">
+          <g
+            *ngIf="humanGWAS.length && comp.getID() === '9606'"
+            id="human-comp-gwas"
+          >
             <g
               *ngFor="let hit of humanGWAS"
               [attr.transform]="translate([hit.getXPos(getScale(hit)), 0])"

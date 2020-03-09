@@ -83,7 +83,7 @@ export class DataStorageService {
    * @param {Feature} feature - the feature to check
    */
   isFeatureNonSyntenic(feature: Feature): boolean {
-    return this.getBlocksForFeature(feature).length === 0;
+    return !this.getBlocksForFeature(feature).length;
   }
 
   /**
