@@ -11,10 +11,13 @@ export class BrowserInterval {
   // reference chromosome in the block view
   refChr: string;
 
+  // size of the reference chromosome
+  refChrSize: number;
+
   // scale used to convert genomic locations and pixel values
   refScale: ScaleLinear<number, number>;
 
-  // genomic size of the currently interval
+  // genomic size of the current interval
   width: number;
 
   // the genomic location in the comparison genome that maps to the starting
@@ -53,6 +56,7 @@ export class BrowserInterval {
     trueOrientation: boolean,
   ) {
     this.refChr = refChr;
+    this.refChrSize = refChrWidth;
     this.trueOrientation = trueOrientation;
 
     blocks.forEach(block => {
@@ -80,6 +84,14 @@ export class BrowserInterval {
     // update the comparison locations
     this.setCompStartForInterval();
     this.setCompEndForInterval();
+  }
+
+  /**
+   * Returns the formatted reference chr, start point, and end point of the
+   * current interval
+   */
+  getRefInterval(): string {
+    return `${this.getRefStartLabel()} - ${this.format(this.refEnd)}bp`;
   }
 
   /**

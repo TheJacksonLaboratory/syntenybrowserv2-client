@@ -95,6 +95,9 @@ export class BlockViewBrowserComponent {
   // current visible interval in the browser
   interval: BrowserInterval;
 
+  // all available cytogenetic bands for the current reference chr
+  cytoBands: any[];
+
   // list of all syntenic blocks in the current reference chr
   blocks: SyntenyBlock[];
 
@@ -178,6 +181,10 @@ export class BlockViewBrowserComponent {
     this.ref = this.data.refSpecies;
     this.comp = this.data.compSpecies;
     this.refChr = this.data.features.chr;
+
+    this.http.getChrCytoBands(this.ref.getID(), this.refChr).subscribe(bands => {
+      this.cytoBands = bands;
+    });
 
     // this one is going to get updated with transformations
     this.refBPToPixels = this.getRefScale(this.getRefChrSize());
@@ -310,29 +317,14 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Changes the current browser view to the interval entered into the reference
-   * interval field in the interface; if the interval only contains one value
-   * followed by a hyphen then interpret the interval as starting from the
-   * specified value to the end of the reference chromsome; if the single value
-   * is preceded by a hyphen, interpret as starting from the start of the
-   * reference chromsome to the specified value
+   * Changes the current browser view to the interval emitted from the quick
+   * navigation component validate that the start value isn't negative and the
+   * end isn't past the reference chromosome's size
    */
-  jumpToInterval(): void {
-    if (this.refInterval.length) {
-      const pts = this.refInterval
-        .replace(/\s+/g, '')
-        .replace(/,/g, '')
-        .split('-');
-
-      if (pts.length === 2) {
-        const start = pts[0].length ? pts[0] : 0;
-        const end = pts[1].length ? pts[1] : this.getRefChrSize();
-
-        if (Number(start) && Number(end)) {
-          this.brushView(Number(start), Number(end));
-        }
-      }
-    }
+  jumpToInterval(interval: number[]): void {
+    const start = Math.max(interval[0], 0);
+    const end = Math.min(interval[1], this.interval.refChrSize);
+    this.brushView(start, end);
   }
 
   /**
@@ -634,6 +626,8 @@ export class BlockViewBrowserComponent {
     this.compGenes = null;
     this.progress = 0;
     this.blocks = null;
+    this.blockLookup = {};
+    this.cytoBands = [];
     this.refBPToPixels = null;
     this.staticRefBPToPixels = null;
     this.selectedRefGenes = [];

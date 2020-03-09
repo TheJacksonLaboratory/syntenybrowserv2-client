@@ -19,6 +19,7 @@ import { SpeciesSelectionHelpComponent } from './species-selection/species-selec
 import { FeatureSelectionHelpComponent } from './feature-selection/feature-selection-help.component';
 import { GenomeViewHelpComponent } from './genome-view/genome-view-help.component';
 import { BlockViewBrowserHelpComponent } from './block-view-browser/block-view-browser-help.component';
+import { QuickNavigationComponent } from './block-view-browser/quick-navigation/quick-navigation.component';
 
 // services
 import { ApiService } from './services/api.service';
@@ -47,6 +48,7 @@ import { ApiService } from './services/api.service';
     FeatureSelectionHelpComponent,
     GenomeViewHelpComponent,
     BlockViewBrowserHelpComponent,
+    QuickNavigationComponent,
   ],
   providers: [ApiService, HttpClient],
 })
