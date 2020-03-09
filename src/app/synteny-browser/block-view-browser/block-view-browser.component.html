@@ -253,6 +253,19 @@
                 Show synteny in true orientation
               </label>
             </clr-checkbox-wrapper>
+
+            <!-- Human GWAS checkbox -->
+            <clr-checkbox-wrapper>
+              <input
+                type="checkbox"
+                clrCheckbox
+                id="human-gwas"
+                [(ngModel)]="options.GWAS"
+              />
+              <label for="human-gwas">
+                Show Human GWAS for T2D
+              </label>
+            </clr-checkbox-wrapper>
           </clr-signpost-content>
         </clr-signpost>
       </div>
@@ -538,7 +551,7 @@
 
           <!-- Reference human GWAS locations -->
           <g
-            *ngIf="humanGWAS.length && ref.getID() === '9606'"
+            *ngIf="humanGWAS.length && options.GWAS && ref.getID() === '9606'"
             id="human-ref-gwas"
           >
             <g
@@ -659,7 +672,7 @@
 
           <!-- Comparison human GWAS locations -->
           <g
-            *ngIf="humanGWAS.length && comp.getID() === '9606'"
+            *ngIf="humanGWAS.length && options.GWAS && comp.getID() === '9606'"
             id="human-comp-gwas"
           >
             <g

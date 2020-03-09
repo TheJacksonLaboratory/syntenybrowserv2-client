@@ -157,7 +157,12 @@ export class BlockViewBrowserComponent {
     private downloader: DownloadService,
     private cdr: ChangeDetectorRef,
   ) {
-    this.options = { symbols: false, anchors: false, trueOrientation: false };
+    this.options = {
+      symbols: false,
+      anchors: false,
+      trueOrientation: false,
+      GWAS: true
+    };
     this.staticCompBPToPixels = { match: {}, true: {} };
   }
 
@@ -1406,6 +1411,7 @@ export interface BlockViewBrowserOptions {
   symbols: boolean;
   anchors: boolean;
   trueOrientation: boolean;
+  GWAS: boolean;
 }
 
 export interface BlockInfo {
