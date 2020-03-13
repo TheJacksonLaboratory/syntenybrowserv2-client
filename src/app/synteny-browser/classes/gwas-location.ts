@@ -78,10 +78,11 @@ export class GWASLocation {
    *                             available info (default false)
    */
   private getHitDataForTooltip(hit: GWASHit, detailed = false): any {
+    const freq = Number(hit.frequency) || hit.frequency;
     const data = {
       id: hit.id,
       quality: hit.quality,
-      frequency: hit.frequency,
+      frequency: typeof freq === 'string' ? freq : this.roundToSigDigs(freq, 4),
       gene: hit.gene,
     };
 
@@ -91,6 +92,18 @@ export class GWASLocation {
       data['filter'] = hit.filter;
     }
     return data;
+  }
+
+  /**
+   * Takes a specified number and rounds it to the specified number of significant
+   * digits
+   * @param {number} numberToRound - the number to be rounded
+   * @param {number} numSigDigs - the number of significant digits to round to
+   */
+  private roundToSigDigs(numberToRound: number, numSigDigs: number): number {
+    const multiplier = Math.pow(10, numSigDigs);
+
+    return Math.round(numberToRound * multiplier) / multiplier;
   }
 }
 

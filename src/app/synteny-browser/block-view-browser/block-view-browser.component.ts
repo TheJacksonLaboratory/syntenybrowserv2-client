@@ -241,7 +241,7 @@ export class BlockViewBrowserComponent {
           )
           .join('');
 
-        return `${`<span style="font-size: 14px;"><b>${data.chr}:${data.loc}</b></span><br/>` +
+        return `${`<span style="font-size: 14px;"><b>Chr${data.chr}, ${data.loc}bp</b></span><br/>` +
           `<span><b>Num Hits:</b> ${data.numHits}</span><br/>`}${hitsData}`;
       });
 
