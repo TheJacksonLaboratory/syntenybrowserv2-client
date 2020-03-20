@@ -1,5 +1,4 @@
 import { format, ScaleLinear } from 'd3';
-import { SyntenyBlock } from './synteny-block';
 
 export class Gene {
   // genomic starting location for the gene
@@ -63,10 +62,14 @@ export class Gene {
   // used when app queries list of features which contain a mix of genes and QTLs
   isGene = true;
 
+  // used when app queries list of features which contain a mix of genes and
+  // QTLs and GWASLocations
+  isQTL = false;
+
   // formatting function from d3 that adds commas to large numbers to help with readability
   format: Function = format(',');
 
-  constructor(gene: any, vHeight: number, refTaxonID: number, blocks: SyntenyBlock[] = null) {
+  constructor(gene: any, vHeight: number, refTaxonID: number) {
     this.species = gene.taxon_id === refTaxonID ? 'ref' : 'comp';
     this.start = gene.start;
     this.end = gene.end;
@@ -80,8 +83,8 @@ export class Gene {
     this.homologIDs = gene.homologs;
     this.selected = gene.sel;
 
-    // set the block ID if the gene is in the comparison genome
-    if (blocks) this.setBlockID(blocks);
+    this.blockID = gene.blockID || null;
+    this.orientationMatches = gene.orientationMatches !== null ? gene.orientationMatches : null;
 
     // get the transcript of the gene
     this.transcript = gene.exons;
@@ -231,7 +234,7 @@ export class Gene {
    * Returns the content for a click tooltip for the gene which includes ID,
    * symbol and genomic location, type and strand
    */
-  getClicktipData(): object {
+  getClicktipData(): any {
     return {
       'Gene Symbol': this.symbol,
       'Gene ID': this.id,
@@ -247,7 +250,7 @@ export class Gene {
    * @param {string} refSpeciesName - common name of the current ref species
    * @param {string} compSpeciesName - common name of the current comp species
    */
-  getFilterMetadata(refSpeciesName: string, compSpeciesName: string): object {
+  getFilterMetadata(refSpeciesName: string, compSpeciesName: string): any {
     return {
       id: this.id,
       symbol: this.symbol,
@@ -259,8 +262,6 @@ export class Gene {
       status: this.hidden ? 'hidden' : 'highlighted',
     };
   }
-
-  // Reference Getter Methods
 
   /**
    * Returns the scaled x position for the reference gene's start position (px)
@@ -287,8 +288,6 @@ export class Gene {
   getRefExonXPos(exon: Exon, scale: ScaleLinear<number, number>): number {
     return Math.abs(scale(exon.start) - scale(this.start));
   }
-
-  // Comparison Getter Methods
 
   /**
    * Returns the scaled x position for the comparison gene's start position (px)
@@ -360,7 +359,7 @@ export class Gene {
    * Returns true if the gene has at least one homolog
    */
   isHomologous(): boolean {
-    return this.homologIDs.length > 0;
+    return !!this.homologIDs.length;
   }
 
   /**
@@ -394,23 +393,6 @@ export class Gene {
       this.getCompXPos(scale, trueCoords) + this.getWidth(scale) < 0 ||
       this.getCompXPos(scale, trueCoords) > width
     );
-  }
-
-  /**
-   * Sets the block ID to that of the block the gene is contained in; if the
-   * block doesn't fully contain the gene, it won't be considered syntenic
-   * @param {SyntenyBlock[]} blocks - blocks to use identify the gene's blockID
-   */
-  private setBlockID(blocks: SyntenyBlock[]): void {
-    // get the block that contains the gene
-    const b = blocks.filter(block => block.matchesCompChr(this.chr) && block.contains(this));
-
-    // if the gene is contained in a block, assign the block's id to
-    // this.blockID, otherwise keep it null
-    this.blockID = b.length > 0 ? b[0].id : null;
-
-    // if an ID was just assigned, it's important to note the orientation
-    if (this.blockID) this.orientationMatches = b[0].orientationMatches;
   }
 }
 

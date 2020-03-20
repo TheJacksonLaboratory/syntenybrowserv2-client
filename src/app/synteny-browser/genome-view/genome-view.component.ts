@@ -137,7 +137,7 @@ export class GenomeViewComponent implements OnInit {
   renderChordMapForChr(chr: string): void {
     // get the blocks that should be shown in the comparison plot's ref chromosome
     const featureBlocks = this.featureBlocks ? this.data.getChrBlocks(chr, this.featureBlocks) : [];
-    const blocks = featureBlocks.length > 0 ? featureBlocks : this.data.getChrBlocks(chr);
+    const blocks = featureBlocks.length ? featureBlocks : this.data.getChrBlocks(chr);
 
     // get the index of the selected chromosome
     const chrIndex = this.ref.getChromosomes().indexOf(chr);
@@ -379,7 +379,7 @@ export class GenomeViewComponent implements OnInit {
     };
 
     const chrFeatures = this.getChrFeatures(chr);
-    const hasFeatures = this.features && chrFeatures.length > 0;
+    const hasFeatures = this.features && chrFeatures.length;
 
     // if tooltip is for reference species and there are features, display
     // the feature symbols in the tooltip
@@ -388,8 +388,8 @@ export class GenomeViewComponent implements OnInit {
       const qtls = chrFeatures.filter(f => !f.isGene).map(qtl => qtl.id);
       const features = [];
 
-      if (genes.length > 0) features.push(...genes);
-      if (qtls.length > 0) features.push(...qtls);
+      if (genes.length) features.push(...genes);
+      if (qtls.length) features.push(...qtls);
 
       this.highlightFeatures.emit(features);
     } else {
@@ -409,7 +409,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the chromosomes that currently contain selected features
    */
   getChrsWithFeatures(): string[] {
-    return this.ref.getChromosomes().filter(c => this.getChrFeatures(c).length > 0);
+    return this.ref.getChromosomes().filter(c => this.getChrFeatures(c).length);
   }
 
   /**

@@ -238,6 +238,19 @@
                 Show synteny in true orientation
               </label>
             </clr-checkbox-wrapper>
+
+            <!-- Human GWAS checkbox -->
+            <clr-checkbox-wrapper>
+              <input
+                type="checkbox"
+                clrCheckbox
+                id="human-gwas"
+                [(ngModel)]="options.GWAS"
+              />
+              <label for="human-gwas">
+                Show Human GWAS for T2D
+              </label>
+            </clr-checkbox-wrapper>
           </clr-signpost-content>
         </clr-signpost>
       </div>
@@ -521,6 +534,31 @@
             ></rect>
           </g>
 
+          <!-- Reference human GWAS locations -->
+          <g
+            *ngIf="humanGWAS.length && options.GWAS && ref.getID() === '9606'"
+            id="human-ref-gwas"
+          >
+            <g
+              *ngFor="let hit of humanGWAS"
+              [attr.transform]="translate([hit.getXPos(refBPToPixels), 0])"
+            >
+              <rect
+                class="human-gwas-handle"
+                [attr.transform]="translate([-2, -4])"
+                height="4"
+                width="4"
+                fill="#444"
+              ></rect>
+              <line
+                class="human-gwas"
+                [attr.y2]="trackHeight"
+                stroke="#444"
+                stroke-width="2"
+              ></line>
+            </g>
+          </g>
+
           <!-- Reference genes -->
           <g *ngIf="refGenes" id="reference-genes">
             <g
@@ -615,6 +653,31 @@
                 stroke: block.getColor(legend.hoverChr)
               }"
             ></rect>
+          </g>
+
+          <!-- Comparison human GWAS locations -->
+          <g
+            *ngIf="humanGWAS.length && options.GWAS && comp.getID() === '9606'"
+            id="human-comp-gwas"
+          >
+            <g
+              *ngFor="let hit of humanGWAS"
+              [attr.transform]="translate([hit.getXPos(getScale(hit)), 0])"
+            >
+              <rect
+                class="human-gwas-handle"
+                [attr.transform]="translate([-2, -4])"
+                height="4"
+                width="4"
+                fill="#444"
+              ></rect>
+              <line
+                class="human-gwas"
+                [attr.y2]="trackHeight"
+                stroke="#444"
+                stroke-width="2"
+              ></line>
+            </g>
           </g>
 
           <!-- Comparison genes -->

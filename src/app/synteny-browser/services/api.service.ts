@@ -8,6 +8,7 @@ import { Feature } from '../classes/feature';
 import { Species } from '../classes/species';
 import { TermMetadata } from '../feature-selection/ontology-search/row-detail.component';
 import { OntologyTerm } from '../feature-selection/ontology-search/ontology-search.component';
+import { GWASHit } from '../classes/gwas-location';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -134,10 +135,31 @@ export class ApiService {
    * Returns a list of cytogenetic band objects for the specified species and
    * chromosome
    * @param {string} taxonID - stringified taxon ID for the desired species
-   * @param {string} chr - the chromosome to get bands for
+   * @param {string} chr - chromosome to get bands for
    */
   getChrCytoBands(taxonID: string, chr: string): Observable<any[]> {
     return this.http.get<ArrayResponse>(`${this.root}/bands/${taxonID}/${chr}`);
+  }
+
+  /**
+   * Returns a list of GWAS hits for the specified species, chromosome, and
+   * trait ID
+   * @param {string} taxonID - stringified taxon ID for the desired species
+   * @param {string} chr - chromosome to get hits for
+   * @param {string} traitID - the ID associated with the GWAS study desired
+   */
+  getChrGWASHits(taxonID: string, chr: string, traitID: string): Observable<GWASHit[]> {
+    return this.http.get<ArrayResponse>(`${this.root}/variants/snp/${taxonID}/${traitID}/${chr}`);
+  }
+
+  /**
+   * Returns a list of GWAS hits for the specified species and trait ID (whole
+   * genome)
+   * @param {string} taxonID - stringified taxon ID for the desired species
+   * @param {string} traitID - the ID associated with the GWAS study desired
+   */
+  getGenomeGWASHits(taxonID: string, traitID: string): Observable<GWASHit[]> {
+    return this.http.get<ArrayResponse>(`${this.root}/variants/snp/${taxonID}/${traitID}`);
   }
 }
 

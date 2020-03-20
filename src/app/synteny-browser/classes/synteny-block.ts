@@ -28,35 +28,40 @@ export class SyntenyBlock {
   // depending on visualization settings)
   compStart: number;
 
-  // ending genomic location of the block to be drawn (may not be the true end depending
-  // on visualization settings)
+  // ending genomic location of the block to be drawn (may not be the true end
+  // depending on visualization settings)
   compEnd: number;
 
   // indicates whether the block's "true" start/end is synonymous with "matching"
   // start/end (used in block view only)
   orientationMatches: boolean;
 
-  // stores "true" start and end genomic locations where the start value will always be less
-  // than the end value (used in block view only)
+  // stores "true" start and end genomic locations where the start value will
+  // always be less than the end value (used in block view only)
   trueCoords: ComparisonBlockCoordinates;
 
-  // stores "matching" start and end genomic locations where the values may be reversed from
-  // the syntenic features are located on opposite strands and thus, when visualizing the
-  // block, genes line up better when displayed in reverse (used in block view only)
+  // stores "matching" start and end genomic locations where the values may be
+  // reversed from the syntenic features are located on opposite strands and thus,
+  // when visualizing the block, genes line up better when displayed in reverse
+  // (used in block view only)
   matchCoords: ComparisonBlockCoordinates;
 
-  // scale used to control drawing the block, features within it, and coordinates in the ref track
+  // scale used to control drawing the block, features within it, and coordinates
+  // in the ref track
   refScale: ScaleLinear<number, number>;
 
-  // scale used to control drawing the block, features within it, and coordinates in the
-  // comp track when the matching orientation option is selected (used in block view only)
+  // scale used to control drawing the block, features within it, and coordinates
+  // in the comp track when the matching orientation option is selected (used in
+  // block view only)
   compMatchScale: ScaleLinear<number, number>;
 
-  // scale used to control drawing the block, features within it, and coordinates in the
-  // comp track when the matching orientation option is NOT selected (used in block view only)
+  // scale used to control drawing the block, features within it, and coordinates
+  // in the comp track when the matching orientation option is NOT selected (used
+  // in block view only)
   compTrueScale: ScaleLinear<number, number>;
 
-  // formatting function from d3 that adds commas to large numbers to help with readability
+  // formatting function from d3 that adds commas to large numbers to help with
+  // readability
   format: Function = format(',');
 
   constructor(block: any, moreInfo = false) {
@@ -196,8 +201,9 @@ export class SyntenyBlock {
    * Returns either the true comparison or matching comparison scale depending
    * on the trueScale boolean flag
    * @param {boolean} trueScale - whether the true or matching scale is needed
+   *                              (default true)
    */
-  getScale(trueScale: boolean): ScaleLinear<number, number> {
+  getScale(trueScale = true): ScaleLinear<number, number> {
     return trueScale ? this.compTrueScale : this.compMatchScale;
   }
 
@@ -205,8 +211,9 @@ export class SyntenyBlock {
    * Returns either the true start point or matching start point depending on
    * the trueCoords boolean flag
    * @param {boolean} trueCoords - whether the true or matching start is needed
+   *                               (default true)
    */
-  getStart(trueCoords: boolean): number {
+  getStart(trueCoords = true): number {
     return trueCoords ? this.getTrueCompStart() : this.matchCoords.compStart;
   }
 
@@ -214,8 +221,9 @@ export class SyntenyBlock {
    * Returns either the true end point or matching end point depending on the
    * trueCoords boolean flag
    * @param {boolean} trueCoords - whether the true or matching start is needed
+   *                               (default true)
    */
-  getEnd(trueCoords: boolean): number {
+  getEnd(trueCoords = true): number {
     return trueCoords ? this.getTrueCompEnd() : this.matchCoords.compEnd;
   }
 
@@ -251,8 +259,8 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns true if the block is in the specified chromosome (extracted
-   * as feature.chr) and if specified feature occurs in the block in any capacity
+   * Returns true if the block is in the specified chromosome (extracted as
+   * feature.chr) and if specified feature occurs in the block in any capacity
    * @param {any} feature - the feature (gene or QTL) to compare to the block
    */
   isAFeatureBlock(feature: any): boolean {
