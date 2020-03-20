@@ -42,6 +42,7 @@ export class GWASLocation {
    * Returns the data to be displayed in a tooltip
    */
   getTooltipData(): any {
+    console.log(this.hits);
     return {
       chr: this.chr,
       loc: this.format(this.location),
@@ -90,6 +91,7 @@ export class GWASLocation {
       data['refBase'] = hit.ref_base;
       data['altAllele'] = hit.alt_allele;
       data['filter'] = hit.filter;
+      data['ncbi'] = `https://www.ncbi.nlm.nih.gov/snp/${hit.id}`;
     }
     return data;
   }

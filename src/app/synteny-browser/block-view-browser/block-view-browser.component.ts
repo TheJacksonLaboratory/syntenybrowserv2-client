@@ -929,6 +929,7 @@ export class BlockViewBrowserComponent {
       });
 
     // GWAS locations
+    // vertical lines across the track
     d3.selectAll('.human-gwas')
       .data(this.humanGWAS)
       .on('mouseover', function(d: GWASLocation) {
@@ -938,6 +939,7 @@ export class BlockViewBrowserComponent {
         featureTip.hide();
       });
 
+    // small squares at the top of vertical lines above the track
     d3.selectAll('.human-gwas-handle')
       .data(this.humanGWAS)
       .on('mouseover', function(d: GWASLocation) {
