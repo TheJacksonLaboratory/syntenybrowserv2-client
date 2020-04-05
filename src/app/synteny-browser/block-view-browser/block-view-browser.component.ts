@@ -231,13 +231,14 @@ export class BlockViewBrowserComponent {
             `<span><b>End:</b> ${data.end}</span><br/>`
           );
         }
-        // TODO: add ID and quality when those are filled fields from the API
+        // TODO: quality when those are filled from the API
         const hitsData = data.hits
           .map(
             h =>
               '<hr>' +
-              `<span><b>Gene:</b> ${h.gene}</span><br/>` +
-              `<span><b>Frequency:</b> ${h.frequency}</span><br/>`,
+              `<span><b>ID:</b> ${h.ID}</span><br/>` +
+              `<span><b>Gene:</b> ${h.Gene}</span><br/>` +
+              `<span><b>Frequency:</b> ${h.Frequency}</span><br/>`,
           )
           .join('');
 
@@ -464,6 +465,22 @@ export class BlockViewBrowserComponent {
   }
 
   /**
+   * Retrieves the information necessary to show GWAS hit location data in the
+   * clicktip dialog
+   * @param {GWASLocation} loc - the gene clicked to retrieve data for
+   */
+  showDataForHitLocation(loc: GWASLocation): void {
+    const locData = loc.getClicktipData();
+
+    this.clicktip = {
+      title: `Chr${locData.chr}: ${locData.loc}bp`,
+      hits: locData.hits
+    };
+
+    this.clicktipOpen = true;
+  }
+
+  /**
    * Returns the list of synteny blocks in the reference genome
    */
   getGenomeBlocks(): SyntenyBlock[] {
@@ -606,9 +623,10 @@ export class BlockViewBrowserComponent {
 
   /**
    * Returns the keys of the tooltip's content attribute
+   * @param {any} tooltipObject - the obect to get keys for
    */
-  getTTItems(tooltip: any): string[] {
-    return Object.keys(tooltip.content);
+  getTTItems(tooltipObject: any): string[] {
+    return Object.keys(tooltipObject);
   }
 
   /**
