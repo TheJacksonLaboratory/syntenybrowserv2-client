@@ -467,7 +467,7 @@ export class BlockViewBrowserComponent {
   /**
    * Retrieves the information necessary to show GWAS hit location data in the
    * clicktip dialog
-   * @param {GWASLocation} loc - the gene clicked to retrieve data for
+   * @param {GWASLocation} loc - the hit location clicked to retrieve data for
    */
   showDataForHitLocation(loc: GWASLocation): void {
     const locData = loc.getClicktipData();
