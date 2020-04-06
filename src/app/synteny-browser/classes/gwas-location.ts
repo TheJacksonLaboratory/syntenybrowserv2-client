@@ -42,7 +42,6 @@ export class GWASLocation {
    * Returns the data to be displayed in a tooltip
    */
   getTooltipData(): any {
-    console.log(this.hits);
     return {
       chr: this.chr,
       loc: this.format(this.location),
@@ -81,17 +80,17 @@ export class GWASLocation {
   private getHitDataForTooltip(hit: GWASHit, detailed = false): any {
     const freq = Number(hit.frequency) || hit.frequency;
     const data = {
-      id: hit.id,
-      quality: hit.quality,
-      frequency: typeof freq === 'string' ? freq : this.roundToSigDigs(freq, 4),
-      gene: hit.gene,
+      ID: hit.id,
+      Quality: hit.quality,
+      Frequency: typeof freq === 'string' ? freq : this.roundToSigDigs(freq, 4),
+      Gene: hit.gene,
     };
 
     if (detailed) {
-      data['refBase'] = hit.ref_base;
-      data['altAllele'] = hit.alt_allele;
-      data['filter'] = hit.filter;
-      data['ncbi'] = `https://www.ncbi.nlm.nih.gov/snp/${hit.id}`;
+      data['Reference Base'] = hit.ref_base;
+      data['Alternate Allele'] = hit.alt_allele;
+      data['Filter'] = hit.filter;
+      data['NCBI'] = `https://www.ncbi.nlm.nih.gov/snp/${hit.id}`;
     }
     return data;
   }

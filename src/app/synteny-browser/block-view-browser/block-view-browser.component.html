@@ -549,12 +549,14 @@
                 height="4"
                 width="4"
                 fill="#444"
+                (click)="showDataForHitLocation(hit)"
               ></rect>
               <line
                 class="human-gwas"
                 [attr.y2]="trackHeight"
                 stroke="#444"
                 stroke-width="2"
+                (click)="showDataForHitLocation(hit)"
               ></line>
             </g>
           </g>
@@ -670,12 +672,14 @@
                 height="4"
                 width="4"
                 fill="#444"
+                (click)="showDataForHitLocation(hit)"
               ></rect>
               <line
                 class="human-gwas"
                 [attr.y2]="trackHeight"
                 stroke="#444"
                 stroke-width="2"
+                (click)="showDataForHitLocation(hit)"
               ></line>
             </g>
           </g>
@@ -958,9 +962,9 @@
 
 <clr-modal *ngIf="clicktip; let c" id="ctip" [(clrModalOpen)]="clicktipOpen">
   <h3 class="modal-title" style="font-weight: bold">{{ c.title }}</h3>
-  <div class="modal-body">
+  <div *ngIf="c.content" class="modal-body">
     <h4>Basic Information</h4>
-    <p *ngFor="let key of getTTItems(c)">
+    <p *ngFor="let key of getTTItems(c.content)">
       <span style="font-weight: bold">{{ key }}:</span> {{ c.content[key] }}
     </p>
     <br />
@@ -970,6 +974,15 @@
         >See information on {{ r.name }}</a
       >
     </p>
+  </div>
+  <div *ngIf="c.hits" class="modal-body">
+    <h4>GWAS Hits</h4>
+    <div *ngFor="let h of c.hits">
+      <hr>
+      <p *ngFor="let key of getTTItems(h)">
+        <span *ngIf="h[key]" style="font-weight: bold">{{ key }}:</span> {{ h[key] }}
+      </p>
+    </div>
   </div>
 </clr-modal>
 
