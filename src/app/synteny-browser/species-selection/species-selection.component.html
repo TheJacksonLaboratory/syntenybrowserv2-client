@@ -10,7 +10,6 @@
       <option
         *ngFor="let s of species"
         [value]="s.getID()"
-        [disabled]="s.getID() === compSpecies"
       >
         {{ s.commonName }}
       </option>

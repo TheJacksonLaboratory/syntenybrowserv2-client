@@ -42,8 +42,7 @@ export class Species {
     this.taxonID = species.id;
     this.resources = species.resources;
     this.genome = species.genome;
-    // TODO: species config lists humans as having QTLs; fix this
-    this.hasQTLs = species.id === 10090;
+    this.hasQTLs = species.qtls;
     this.searchTypes = species.searches;
     this.onts = species.ontologies;
   }
