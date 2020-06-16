@@ -115,9 +115,11 @@ export class GenomeViewComponent implements OnInit {
       this.refGMap = new CircularGenomeMap(this.ref.genome);
       this.compGMap = new CircularGenomeMap(this.comp.genome);
 
+      const genomicBlocks = blocks.filter(b => b.compChr !== 'MT');
+
       // set the color for each block
-      blocks.forEach(b => b.setColor(this.data.genomeColorMap[b.compChr]));
-      this.data.genomeData = blocks;
+      genomicBlocks.forEach(b => b.setColor(this.data.genomeColorMap[b.compChr]));
+      this.data.genomeData = genomicBlocks;
     });
   }
 
@@ -482,6 +484,18 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
+   * Returns a translate command in the form of a string to be used in the
+   * template for custom translations
+   * @param {number} dx - the number of pixels horizontally away from (0, 0),
+   *                      the top left of parent container
+   * @param {number} dy - the number of pixels vertically away from (0, 0),
+   *                      the top left of parent container
+   */
+  translate(dx: number, dy: number): string {
+    return `translate(${dx}, ${dy})`;
+  }
+
+  /**
    * Returns a path command for the given four specified coordinates (x, y pairs)
    * and the desired radii
    * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally)
@@ -526,18 +540,6 @@ export class GenomeViewComponent implements OnInit {
     const vLine = outEnd.y < 0 ? outEnd.y - vLineLength : outEnd.y + vLineLength;
 
     return `M${inEnd.x},${inEnd.y} L${outEnd.x},${outEnd.y} V${vLine}`;
-  }
-
-  /**
-   * Returns a translate command in the form of a string to be used in the
-   * template for custom translations
-   * @param {number} dx - the number of pixels horizontally away from (0, 0),
-   *                      the top left of parent container
-   * @param {number} dy - the number of pixels vertically away from (0, 0),
-   *                      the top left of parent container
-   */
-  private translate(dx: number, dy: number): string {
-    return `translate(${dx}, ${dy})`;
   }
 
   /**
