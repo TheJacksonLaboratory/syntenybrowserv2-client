@@ -7,10 +7,7 @@
       [(ngModel)]="refSpecies"
       (change)="changeComparison()"
     >
-      <option
-        *ngFor="let s of species"
-        [value]="s.getID()"
-      >
+      <option *ngFor="let s of species" [value]="s.getID()">
         {{ s.commonName }}
       </option>
     </select>
