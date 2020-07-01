@@ -650,6 +650,9 @@ export class BlockViewBrowserComponent {
     this.staticRefBPToPixels = null;
     this.selectedRefGenes = [];
     this.selectedCompGenes = [];
+    this.filteredRefGenes = [];
+    this.filteredCompGenes = [];
+    this.filters = []; // if we want to maintain filters between renders, remove
     this.selectedQTLs = [];
     this.humanGWAS = [];
     this.staticCompBPToPixels.match = {};

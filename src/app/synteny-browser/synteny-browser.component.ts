@@ -88,6 +88,9 @@ export class SyntenyBrowserComponent implements OnInit {
     // render the genome view for the new selections
     this.genomeView.render();
 
+    // clear out any block view filters
+    this.data.clearFilters();
+
     // load the feature selection using the most recent reference species
     this.features.load();
 
@@ -110,6 +113,9 @@ export class SyntenyBrowserComponent implements OnInit {
    * chromosome (if any) to the block view browser
    */
   getChromosomeFeatures(): void {
+    // clear out any block view filters
+    this.data.clearFilters();
+
     // show block view synteny-browser
     this.viewInBrowser = true;
 
