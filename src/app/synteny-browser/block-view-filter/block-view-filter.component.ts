@@ -32,7 +32,11 @@ export class BlockViewFilterComponent implements OnInit {
   @Input() compGenes: Gene[];
 
   // 'navigation' links to show in the sidebar of the dialog
-  navigation: NavigationObject[];
+  navigation: NavigationObject[] = [
+    { name: 'edit filters', value: 'edit' },
+    { name: 'preview filters', value: 'preview' },
+    { name: 'filtering guide', value: 'guide' },
+  ];
 
   // 'page' in the dialog navigation is currently visible
   activePage = 'edit';
@@ -60,13 +64,7 @@ export class BlockViewFilterComponent implements OnInit {
     private http: ApiService,
     public data: DataStorageService,
     private download: DownloadService,
-  ) {
-    this.navigation = [
-      { name: 'edit filters', value: 'edit' },
-      { name: 'preview filters', value: 'preview' },
-      { name: 'filtering guide', value: 'guide' },
-    ];
-  }
+  ) {}
 
   ngOnInit(): void {
     this.allGenes = this.refGenes.concat(...this.compGenes);
