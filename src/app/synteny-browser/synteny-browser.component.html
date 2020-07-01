@@ -4,11 +4,10 @@
 
     <div class="card-block">
       <div class="clr-row clr-col-12">
-        <div class="clr-col-xl-7 clr-col-lg-12">
+        <div class="clr-col-xl-6 clr-col-lg-12">
           <div class="clr-row">
             <h6>
-              1. Select the species that you wish to use as reference and
-              comparison (or destination).
+              1. Select the desired reference and comparison/destination species
 
               <span
                 style="color: #006A91;cursor: pointer"
@@ -25,10 +24,7 @@
 
           <div class="clr-row">
             <h6 *ngIf="features.searchType === 'symbol'">
-              2. (Optional) Select genes and/or QTLs, if there are any, in the
-              reference genome that you want to view by clicking rows in the
-              table. You can search the table by entering a chromosome or
-              feature ID, symbol, or type.
+              2. (Optional) Select reference features of interest
 
               <span
                 style="color: #006A91;cursor: pointer"
@@ -38,13 +34,7 @@
               </span>
             </h6>
             <h6 *ngIf="features.searchType === 'ontology'">
-              2. (Optional) Select the ontology you want to see terms for in the
-              associated select menu below (only ontologies available for the
-              reference species will be listed). As long as the term is not too
-              broad, you can either select all reference genes associated with
-              that term by clicking the checkmark icon, or click the list icon
-              to view all of the associated genes (and select features
-              individually from there).
+              2. (Optional) Select reference features by ontology annotation.
 
               <span
                 style="color: #006A91;cursor: pointer"
@@ -58,13 +48,11 @@
           <feature-selection (update)="updateFeatures()"></feature-selection>
         </div>
 
-        <div class="clr-col-xl-5 clr-col-lg-12">
+        <div class="clr-col-xl-6 clr-col-lg-12">
           <div class="clr-row">
             <h6>
-              3. Interact with the genome view and select a reference chromosome
-              (outer ring) that you'd like to explore and then click the 'See
-              selection in block view' button to render the selected chromosome
-              in the block view.
+              3. Select a reference chromosome (outer ring) to explore and then
+              click the button below the plot
 
               <span
                 style="color: #006A91;cursor: pointer"
