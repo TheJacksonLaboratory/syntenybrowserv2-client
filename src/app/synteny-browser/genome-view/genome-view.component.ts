@@ -28,10 +28,11 @@ export class GenomeViewComponent implements OnInit {
   // dictionary that adds an extra spot for a selected reference chromosome
   tempCompGenome: object;
 
-  // width (and height) of the SVG
+  // width of the SVG
   width = 500;
 
-  height = 525;
+  // height of the SVG
+  height = 510;
 
   // height of the circular bands
   bandThickness = 18;
