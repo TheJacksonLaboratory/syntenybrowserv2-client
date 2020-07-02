@@ -515,9 +515,11 @@ export class BlockViewBrowserComponent {
    * Returns a list of comparison genes that are in the current browser's view
    */
   getCompGenesInView(): Gene[] {
-    return this.compGenes.filter(g =>
-      g.isInCompView(this.getScale(g), this.width, this.options.trueOrientation),
-    );
+    if (this.compGenes) {
+      return this.compGenes.filter(g =>
+        g.isInCompView(this.getScale(g), this.width, this.options.trueOrientation),
+      );
+    }
   }
 
   /**
