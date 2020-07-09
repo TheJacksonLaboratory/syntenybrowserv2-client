@@ -520,6 +520,8 @@ export class BlockViewBrowserComponent {
         g.isInCompView(this.getScale(g), this.width, this.options.trueOrientation),
       );
     }
+
+    return [];
   }
 
   /**
