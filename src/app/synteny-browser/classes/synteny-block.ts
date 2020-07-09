@@ -264,7 +264,8 @@ export class SyntenyBlock {
    * @param {any} feature - the feature (gene or QTL) to compare to the block
    */
   isAFeatureBlock(feature: any): boolean {
-    return this.matchesRefChr(feature.chr) && this.includes(feature);
+    return this.matchesRefChr(feature.chr) &&
+      (this.includes(feature) || this.isSpannedBy(feature));
   }
 
   /**
@@ -277,6 +278,15 @@ export class SyntenyBlock {
       (feature.start >= this.refStart && feature.start <= this.refEnd) ||
       (feature.end <= this.refEnd && feature.end >= this.refStart)
     );
+  }
+
+  /**
+   * Returns true if the specified feature starts prior to the block start and
+   * ends after the block ends (essentially the feature contains the block)
+   * @param {any} feature - the feature to check for its location in the block
+   */
+  private isSpannedBy(feature: any): boolean {
+    return feature.start <= this.refStart && feature.end >= this.refEnd;
   }
 
   /**

@@ -28,8 +28,11 @@ export class GenomeViewComponent implements OnInit {
   // dictionary that adds an extra spot for a selected reference chromosome
   tempCompGenome: object;
 
-  // width (and height) of the SVG
+  // width of the SVG
   width = 500;
+
+  // height of the SVG
+  height = 510;
 
   // height of the circular bands
   bandThickness = 18;
@@ -229,7 +232,7 @@ export class GenomeViewComponent implements OnInit {
     const end = this.ref.genome[chr];
     const radii = this.refRadii;
     const inEnd = this.refGMap.bpToCartesian(chr, end, radii.ringInner);
-    const outEnd = this.refGMap.bpToCartesian(chr, end, radii.ringOuter + this.bandThickness * 1.2);
+    const outEnd = this.refGMap.bpToCartesian(chr, end, radii.ringOuter + this.bandThickness);
 
     return this.getLegendPathCommand(inEnd, outEnd);
   }
@@ -357,8 +360,7 @@ export class GenomeViewComponent implements OnInit {
    * Returns the translation to the center of the plot
    */
   getCenter(): string {
-    const radius = this.width * 0.5;
-    return this.translate(radius, radius);
+    return this.translate(this.width * 0.5, this.height * 0.5);
   }
 
   /**
@@ -536,7 +538,7 @@ export class GenomeViewComponent implements OnInit {
     // if the legend path is really close to the horizontal center of the SVG,
     // make the vertical line marginally shorter since the "angled" line is
     // already fairly vertical
-    const vLineLength = Math.abs(outEnd.x) < 60 ? 5 : 15;
+    const vLineLength = Math.abs(outEnd.x) < 60 ? 0 : 15;
     const vLine = outEnd.y < 0 ? outEnd.y - vLineLength : outEnd.y + vLineLength;
 
     return `M${inEnd.x},${inEnd.y} L${outEnd.x},${outEnd.y} V${vLine}`;

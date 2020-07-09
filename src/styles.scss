@@ -150,4 +150,14 @@ quick-navigation {
   }
 }
 
+.clr-control-container {
+  min-width: 100% !important;
+
+  .clr-select-wrapper,
+  .clr-input-wrapper,
+  .clr-select,
+  .clr-input { min-width: 100% !important; }
+}
+
+
 
