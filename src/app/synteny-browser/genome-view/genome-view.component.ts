@@ -598,9 +598,9 @@ export class GenomeViewComponent implements OnInit {
    * @private
    */
   private setDimensions(refMulti: number, compMulti: number, bandWidth): void {
-    // generate a radii dictionary to help with rendering the reference plot
     this.bandThickness = bandWidth;
 
+    // generate a radii dictionary to help with rendering the reference plot
     const radius = this.width * 0.5;
     const refRadius = Math.round(radius * refMulti);
     const compRadius = Math.round(radius * compMulti);
