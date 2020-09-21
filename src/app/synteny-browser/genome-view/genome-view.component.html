@@ -175,7 +175,6 @@
             *ngFor="let chr of comp.getChromosomes()"
             text-anchor="middle"
             font-size="10"
-            [attr.fill]="getCompLabelColor(chr)"
             [attr.transform]="getCompLabelPos(chr, compGMap, true)"
           >
             {{ chr }}
