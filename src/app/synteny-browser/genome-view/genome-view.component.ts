@@ -34,8 +34,8 @@ export class GenomeViewComponent implements OnInit {
   // height of the SVG
   height = 510;
 
-  // height of the circular bands
-  bandThickness = 18;
+  // thickness of the circular bands
+  bandThickness: number;
 
   // radius data for reference band inner and outer edges and labels
   refRadii: RadiiDictionary;
@@ -77,7 +77,7 @@ export class GenomeViewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.setDimensions(0.75, 0.5);
+    this.setDimensions(0.75, 0.5, 21);
   }
 
   /**
@@ -154,7 +154,8 @@ export class GenomeViewComponent implements OnInit {
 
     // if there are features selected, scale the visualization down to fit the
     // legends and text; if selected features are removed, scale it back up
-    this.features.length ? this.setDimensions(0.62, 0.4) : this.setDimensions(0.75, 0.5);
+    this.features.length ?
+      this.setDimensions(0.62, 0.4, 18) : this.setDimensions(0.75, 0.5, 21);
 
     const blocks = this.data.getFeatureBlocks(features);
 
@@ -542,6 +543,7 @@ export class GenomeViewComponent implements OnInit {
     this.data.genomeData = null;
     this.refChr = null;
     this.tempCompGenome = null;
+    this.setDimensions(0.75, 0.5, 21);
 
     this.features = [];
     this.featureBlocks = [];
@@ -592,31 +594,34 @@ export class GenomeViewComponent implements OnInit {
    * reference ring, comparison ring, and feature information
    * @param {number} refMulti - radius multiplier for the reference ring elements
    * @param {number} compMulti - radius multiplier for the comparison ring elements
+   * @param {number} bandWidth - thickness of the chromosome bands in both rings
    * @private
    */
-  private setDimensions(refMulti: number, compMulti: number): void {
+  private setDimensions(refMulti: number, compMulti: number, bandWidth): void {
     // generate a radii dictionary to help with rendering the reference plot
+    this.bandThickness = bandWidth;
+
     const radius = this.width * 0.5;
     const refRadius = Math.round(radius * refMulti);
     const compRadius = Math.round(radius * compMulti);
 
     this.refRadii = {
       ringInner: refRadius,
-      ringOuter: refRadius + this.bandThickness,
-      labels: refRadius + this.bandThickness + 10,
+      ringOuter: refRadius + bandWidth,
+      labels: refRadius + bandWidth + 10,
     };
 
     // generate a radii dictionary for feature blocks
     this.featureRadii = {
-      ringInner: this.refRadii.ringInner - this.bandThickness * 0.75,
+      ringInner: this.refRadii.ringInner - bandWidth * 0.75,
       ringOuter: this.refRadii.ringInner,
     };
 
     // generate a radii dictionary to help with rendering the comparison plot
     this.compRadii = {
       ringInner: compRadius,
-      ringOuter: compRadius + this.bandThickness,
-      labels: compRadius + this.bandThickness + 10,
+      ringOuter: compRadius + bandWidth,
+      labels: compRadius + bandWidth + 10,
     };
   }
 }
