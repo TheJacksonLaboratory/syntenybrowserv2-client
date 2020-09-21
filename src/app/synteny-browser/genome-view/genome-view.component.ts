@@ -79,7 +79,7 @@ export class GenomeViewComponent implements OnInit {
   ngOnInit(): void {
     // generate a radii dictionary to help with rendering the reference plot
     const refRadius = Math.round(this.width * 0.5 * 0.62);
-    const compRadius = this.width * 0.5 * 0.4;
+    const compRadius = this.width * 0.5 * 0.45;
 
     this.refRadii = {
       ringInner: refRadius,
@@ -97,7 +97,7 @@ export class GenomeViewComponent implements OnInit {
     this.compRadii = {
       ringInner: compRadius,
       ringOuter: compRadius + this.bandThickness,
-      labels: compRadius + this.bandThickness + 10,
+      labels: compRadius + 10,
     };
   }
 
@@ -236,11 +236,24 @@ export class GenomeViewComponent implements OnInit {
    */
   getLegendPath(chr: string): string {
     const end = this.ref.genome[chr];
-    const radii = this.refRadii;
-    const inEnd = this.refGMap.bpToCartesian(chr, end, radii.ringInner);
-    const outEnd = this.refGMap.bpToCartesian(chr, end, radii.ringOuter + this.bandThickness);
+    const inner = this.refRadii.ringOuter;
+    const outer = this.refRadii.labels;
+    const getCoords = (c, bp, rad) => this.refGMap.bpToCartesian(c, bp, rad);
 
-    return this.getLegendPathCommand(inEnd, outEnd);
+    const inStrt = getCoords(chr, 0, inner);
+    const inEnd = getCoords(chr, end, inner);
+    const outStrt = getCoords(chr, 0, outer);
+    const outEnd = getCoords(chr, end, outer);
+    const cntrIn = getCoords(chr, end * 0.5, outer);
+    const cntrOut = getCoords(chr, end * 0.5, outer + (this.bandThickness/2));
+    const vLineLength = Math.abs(cntrOut.x) < 20 ? 5 : 10;
+    const vLine = cntrOut.y < 0 ? cntrOut.y - vLineLength : cntrOut.y + vLineLength;
+
+    return `M${inStrt.x},${inStrt.y}` +
+      `A${inner},${inner} 0 0,1 ${inEnd.x},${inEnd.y}` +
+      `L${outEnd.x},${outEnd.y}` +
+      `A${outer},${outer} 0 0,0 ${outStrt.x},${outStrt.y}Z` +
+      `M${cntrIn.x},${cntrIn.y} L${cntrOut.x},${cntrOut.y} V${vLine}`;
   }
 
   /**
@@ -342,7 +355,11 @@ export class GenomeViewComponent implements OnInit {
     // a few small manual adjustments for the x and y values as I notice they
     // don't center with the rings as well when not rotated; this is probably
     // due to not rotating them with the bands
-    return this.translate(pos.x - 2, pos.y + 4);
+    const adj = {
+      x: pos.x < 0 ? 1 : -1,
+      y: pos.y < 0 ? 4 : 3
+    }
+    return this.translate(pos.x + adj.x, pos.y + adj.y);
   }
 
   /**
@@ -359,7 +376,16 @@ export class GenomeViewComponent implements OnInit {
     // a few small manual adjustments for the x and y values as I notice they
     // don't center with the rings as well when not rotated; this is probably
     // due to not rotating them with the bands
-    return this.translate(pos.x - 2, pos.y + 4);
+    const adj = {
+      x: pos.x < 0 ? 0 : -1,
+      y: pos.y < 0 ? 4 : 3
+    }
+    return this.translate(pos.x + adj.x, pos.y + adj.y);
+  }
+
+  getCompLabelColor(chr: string): string {
+    const whtChrs = ['2', '5', '9', '11', '13', '15', '16', '17', '18', '19', '20', '21', '22'];
+    return whtChrs.indexOf(chr) >= 0 ? '#fff' : '#000';
   }
 
   /**
@@ -447,6 +473,8 @@ export class GenomeViewComponent implements OnInit {
       x = x > 0 ? x - 8 : x + 5;
     }
 
+    console.log(chr, x, y);
+
     return this.translate(x, y);
   }
 
@@ -522,32 +550,10 @@ export class GenomeViewComponent implements OnInit {
     inRad: number,
     outRad: number,
   ): string {
-    return `M${inStrt.x},${inStrt.y}
-            A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}
-            L${outEnd.x},${outEnd.y}
-            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
-  }
-
-  /**
-   * Returns the path command for the legend chromosome line given the two
-   * specified coordinates (x, y pairs) by constructing the angled line extending
-   * from the band and a vertical line either up or down from the end of the
-   * angled line, depending on y-position of the end of the angled line
-   * @param {CartesianCoordinate} inEnd - the bottom right corner of the
-   *                                      chromosome band
-   * @param {CartesianCoordinate} outEnd - the coordinate of the end of the
-   *                                       angled line following the end of the
-   *                                       chromosome band (it will extend past
-   *                                       the outer edge of the band)
-   */
-  private getLegendPathCommand(inEnd: CartesianCoordinate, outEnd: CartesianCoordinate): string {
-    // if the legend path is really close to the horizontal center of the SVG,
-    // make the vertical line marginally shorter since the "angled" line is
-    // already fairly vertical
-    const vLineLength = Math.abs(outEnd.x) < 60 ? 0 : 15;
-    const vLine = outEnd.y < 0 ? outEnd.y - vLineLength : outEnd.y + vLineLength;
-
-    return `M${inEnd.x},${inEnd.y} L${outEnd.x},${outEnd.y} V${vLine}`;
+    return `M${inStrt.x},${inStrt.y}` +
+      `A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}` +
+      `L${outEnd.x},${outEnd.y}` +
+      `A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
   }
 
   /**
@@ -576,6 +582,7 @@ export class GenomeViewComponent implements OnInit {
     const commands = this.getLegendPath(chr)
       .replace(/[^\d.,-/\s]/g, '')
       .split(' ');
+    console.log(commands);
 
     return [Number(commands[1].split(',')[0]), Number(commands[2])];
   }

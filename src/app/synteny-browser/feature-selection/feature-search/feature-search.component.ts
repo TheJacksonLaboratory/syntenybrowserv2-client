@@ -46,15 +46,20 @@ export class FeatureSearchComponent {
 
       // get genes by chromosome
       let returnedChrs = 0;
-      this.refSpecies.getChromosomes().forEach(chr => {
-        this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
-          this.features.setRows(genes);
-          returnedChrs += 1;
+      // this.refSpecies.getChromosomes().forEach(chr => {
+      //   this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
+      //     this.features.setRows(genes);
+      //     returnedChrs += 1;
+      //
+      //     if (returnedChrs === this.refSpecies.getNumChrs()) {
+      //       this.features.loading = false;
+      //     }
+      //   });
+      // });
 
-          if (returnedChrs === this.refSpecies.getNumChrs()) {
-            this.features.loading = false;
-          }
-        });
+      this.http.getGeneMetadata(refSpecies.getID(), '1').subscribe((genes: Feature[]) => {
+        this.features.setRows(genes);
+        this.features.loading = false;
       });
 
       // get QTLs if the reference species has them
