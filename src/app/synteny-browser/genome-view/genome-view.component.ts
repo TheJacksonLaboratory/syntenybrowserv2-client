@@ -79,7 +79,7 @@ export class GenomeViewComponent implements OnInit {
   ngOnInit(): void {
     // generate a radii dictionary to help with rendering the reference plot
     const refRadius = Math.round(this.width * 0.5 * 0.62);
-    const compRadius = this.width * 0.5 * 0.45;
+    const compRadius = this.width * 0.5 * 0.4;
 
     this.refRadii = {
       ringInner: refRadius,
@@ -97,7 +97,7 @@ export class GenomeViewComponent implements OnInit {
     this.compRadii = {
       ringInner: compRadius,
       ringOuter: compRadius + this.bandThickness,
-      labels: compRadius + 10,
+      labels: compRadius + this.bandThickness + 10,
     };
   }
 
@@ -380,11 +380,6 @@ export class GenomeViewComponent implements OnInit {
       y: pos.y < 0 ? 4 : 3
     }
     return this.translate(pos.x + adj.x, pos.y + adj.y);
-  }
-
-  getCompLabelColor(chr: string): string {
-    const lightChrs = ['4', '6', '7', '10', '12', '14', 'Y'];
-    return lightChrs.indexOf(chr) >= 0 ? '#000' : '#fff';
   }
 
   /**
