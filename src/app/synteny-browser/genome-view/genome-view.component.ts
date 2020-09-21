@@ -142,8 +142,7 @@ export class GenomeViewComponent implements OnInit {
   renderChordMapForChr(chr: string): void {
     // get the blocks that should be shown in the comparison plot's ref chromosome
     const featureBlocks = this.featureBlocks ? this.data.getChrBlocks(chr, this.featureBlocks) : [];
-    const blocks = featureBlocks.length || this.getChrFeatures(chr).length ?
-      featureBlocks : this.data.getChrBlocks(chr);
+    const blocks = featureBlocks.length ? featureBlocks : this.data.getChrBlocks(chr);
     // TODO: If it's more accurate to not show ANY blocks to map if only
     //  non-syntenic features are in that chr, use the below blocks const instead
     //  of the above
@@ -246,13 +245,13 @@ export class GenomeViewComponent implements OnInit {
     const outEnd = getCoords(chr, end, outer);
     const cntrIn = getCoords(chr, end * 0.5, outer);
     const cntrOut = getCoords(chr, end * 0.5, outer + (this.bandThickness/2));
-    const vLineLength = Math.abs(cntrOut.x) < 20 ? 5 : 10;
+    const vLineLength = Math.abs(cntrOut.x) < 50 ? 5 : 10;
     const vLine = cntrOut.y < 0 ? cntrOut.y - vLineLength : cntrOut.y + vLineLength;
 
     return `M${inStrt.x},${inStrt.y}` +
-      `A${inner},${inner} 0 0,1 ${inEnd.x},${inEnd.y}` +
-      `L${outEnd.x},${outEnd.y}` +
-      `A${outer},${outer} 0 0,0 ${outStrt.x},${outStrt.y}Z` +
+      `L${outStrt.x},${outStrt.y}` +
+      `A${outer},${outer} 0 0,1 ${outEnd.x},${outEnd.y}` +
+      `L${inEnd.x},${inEnd.y}` +
       `M${cntrIn.x},${cntrIn.y} L${cntrOut.x},${cntrOut.y} V${vLine}`;
   }
 
@@ -384,8 +383,8 @@ export class GenomeViewComponent implements OnInit {
   }
 
   getCompLabelColor(chr: string): string {
-    const whtChrs = ['2', '5', '9', '11', '13', '15', '16', '17', '18', '19', '20', '21', '22'];
-    return whtChrs.indexOf(chr) >= 0 ? '#fff' : '#000';
+    const lightChrs = ['4', '6', '7', '10', '12', '14', 'Y'];
+    return lightChrs.indexOf(chr) >= 0 ? '#000' : '#fff';
   }
 
   /**
@@ -472,8 +471,6 @@ export class GenomeViewComponent implements OnInit {
     if (Math.abs(x) > 100) {
       x = x > 0 ? x - 8 : x + 5;
     }
-
-    console.log(chr, x, y);
 
     return this.translate(x, y);
   }
@@ -582,9 +579,9 @@ export class GenomeViewComponent implements OnInit {
     const commands = this.getLegendPath(chr)
       .replace(/[^\d.,-/\s]/g, '')
       .split(' ');
-    console.log(commands);
 
-    return [Number(commands[1].split(',')[0]), Number(commands[2])];
+    const len = commands.length;
+    return [Number(commands[len-2].split(',')[0]), Number(commands[len-1])];
   }
 
   /**
