@@ -142,8 +142,7 @@ export class GenomeViewComponent implements OnInit {
   renderChordMapForChr(chr: string): void {
     // get the blocks that should be shown in the comparison plot's ref chromosome
     const featureBlocks = this.featureBlocks ? this.data.getChrBlocks(chr, this.featureBlocks) : [];
-    const blocks = featureBlocks.length || this.getChrFeatures(chr).length ?
-      featureBlocks : this.data.getChrBlocks(chr);
+    const blocks = featureBlocks.length ? featureBlocks : this.data.getChrBlocks(chr);
     // TODO: If it's more accurate to not show ANY blocks to map if only
     //  non-syntenic features are in that chr, use the below blocks const instead
     //  of the above
