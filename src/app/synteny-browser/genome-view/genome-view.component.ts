@@ -597,7 +597,7 @@ export class GenomeViewComponent implements OnInit {
    * @param {number} bandWidth - thickness of the chromosome bands in both rings
    * @private
    */
-  private setDimensions(refMulti: number, compMulti: number, bandWidth): void {
+  private setDimensions(refMulti: number, compMulti: number, bandWidth: number): void {
     this.bandThickness = bandWidth;
 
     // generate a radii dictionary to help with rendering the reference plot
