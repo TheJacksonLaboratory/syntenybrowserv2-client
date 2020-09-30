@@ -34,8 +34,8 @@ export class GenomeViewComponent implements OnInit {
   // height of the SVG
   height = 510;
 
-  // height of the circular bands
-  bandThickness = 18;
+  // thickness of the circular bands
+  bandThickness: number;
 
   // radius data for reference band inner and outer edges and labels
   refRadii: RadiiDictionary;
@@ -77,28 +77,7 @@ export class GenomeViewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // generate a radii dictionary to help with rendering the reference plot
-    const refRadius = Math.round(this.width * 0.5 * 0.62);
-    const compRadius = this.width * 0.5 * 0.4;
-
-    this.refRadii = {
-      ringInner: refRadius,
-      ringOuter: refRadius + this.bandThickness,
-      labels: refRadius + this.bandThickness + 10,
-    };
-
-    // generate a radii dictionary for feature blocks
-    this.featureRadii = {
-      ringInner: this.refRadii.ringInner - this.bandThickness * 0.75,
-      ringOuter: this.refRadii.ringInner,
-    };
-
-    // generate a radii dictionary to help with rendering the comparison plot
-    this.compRadii = {
-      ringInner: compRadius,
-      ringOuter: compRadius + this.bandThickness,
-      labels: compRadius + this.bandThickness + 10,
-    };
+    this.setDimensions(0.75, 0.5, 21);
   }
 
   /**
@@ -173,6 +152,11 @@ export class GenomeViewComponent implements OnInit {
   updateFeatures(features: Feature[]): void {
     this.features = features;
 
+    // if there are features selected, scale the visualization down to fit the
+    // legends and text; if selected features are removed, scale it back up
+    this.features.length ?
+      this.setDimensions(0.62, 0.4, 18) : this.setDimensions(0.75, 0.5, 21);
+
     const blocks = this.data.getFeatureBlocks(features);
 
     this.featuresNoBlocks = features.filter(f => this.data.isFeatureNonSyntenic(f));
@@ -235,11 +219,24 @@ export class GenomeViewComponent implements OnInit {
    */
   getLegendPath(chr: string): string {
     const end = this.ref.genome[chr];
-    const radii = this.refRadii;
-    const inEnd = this.refGMap.bpToCartesian(chr, end, radii.ringInner);
-    const outEnd = this.refGMap.bpToCartesian(chr, end, radii.ringOuter + this.bandThickness);
+    const inner = this.refRadii.ringOuter;
+    const outer = this.refRadii.labels;
+    const getCoords = (c, bp, rad) => this.refGMap.bpToCartesian(c, bp, rad);
 
-    return this.getLegendPathCommand(inEnd, outEnd);
+    const inStrt = getCoords(chr, 0, inner);
+    const inEnd = getCoords(chr, end, inner);
+    const outStrt = getCoords(chr, 0, outer);
+    const outEnd = getCoords(chr, end, outer);
+    const cntrIn = getCoords(chr, end * 0.5, outer);
+    const cntrOut = getCoords(chr, end * 0.5, outer + (this.bandThickness/2));
+    const vLineLength = Math.abs(cntrOut.x) < 50 ? 5 : 10;
+    const vLine = cntrOut.y < 0 ? cntrOut.y - vLineLength : cntrOut.y + vLineLength;
+
+    return `M${inStrt.x},${inStrt.y}` +
+      `L${outStrt.x},${outStrt.y}` +
+      `A${outer},${outer} 0 0,1 ${outEnd.x},${outEnd.y}` +
+      `L${inEnd.x},${inEnd.y}` +
+      `M${cntrIn.x},${cntrIn.y} L${cntrOut.x},${cntrOut.y} V${vLine}`;
   }
 
   /**
@@ -341,7 +338,11 @@ export class GenomeViewComponent implements OnInit {
     // a few small manual adjustments for the x and y values as I notice they
     // don't center with the rings as well when not rotated; this is probably
     // due to not rotating them with the bands
-    return this.translate(pos.x - 2, pos.y + 4);
+    const adj = {
+      x: pos.x < 0 ? 1 : -1,
+      y: pos.y < 0 ? 4 : 3
+    }
+    return this.translate(pos.x + adj.x, pos.y + adj.y);
   }
 
   /**
@@ -358,7 +359,11 @@ export class GenomeViewComponent implements OnInit {
     // a few small manual adjustments for the x and y values as I notice they
     // don't center with the rings as well when not rotated; this is probably
     // due to not rotating them with the bands
-    return this.translate(pos.x - 2, pos.y + 4);
+    const adj = {
+      x: pos.x < 0 ? 0 : -1,
+      y: pos.y < 0 ? 4 : 3
+    }
+    return this.translate(pos.x + adj.x, pos.y + adj.y);
   }
 
   /**
@@ -521,32 +526,10 @@ export class GenomeViewComponent implements OnInit {
     inRad: number,
     outRad: number,
   ): string {
-    return `M${inStrt.x},${inStrt.y}
-            A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}
-            L${outEnd.x},${outEnd.y}
-            A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
-  }
-
-  /**
-   * Returns the path command for the legend chromosome line given the two
-   * specified coordinates (x, y pairs) by constructing the angled line extending
-   * from the band and a vertical line either up or down from the end of the
-   * angled line, depending on y-position of the end of the angled line
-   * @param {CartesianCoordinate} inEnd - the bottom right corner of the
-   *                                      chromosome band
-   * @param {CartesianCoordinate} outEnd - the coordinate of the end of the
-   *                                       angled line following the end of the
-   *                                       chromosome band (it will extend past
-   *                                       the outer edge of the band)
-   */
-  private getLegendPathCommand(inEnd: CartesianCoordinate, outEnd: CartesianCoordinate): string {
-    // if the legend path is really close to the horizontal center of the SVG,
-    // make the vertical line marginally shorter since the "angled" line is
-    // already fairly vertical
-    const vLineLength = Math.abs(outEnd.x) < 60 ? 0 : 15;
-    const vLine = outEnd.y < 0 ? outEnd.y - vLineLength : outEnd.y + vLineLength;
-
-    return `M${inEnd.x},${inEnd.y} L${outEnd.x},${outEnd.y} V${vLine}`;
+    return `M${inStrt.x},${inStrt.y}` +
+      `A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}` +
+      `L${outEnd.x},${outEnd.y}` +
+      `A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
   }
 
   /**
@@ -560,6 +543,7 @@ export class GenomeViewComponent implements OnInit {
     this.data.genomeData = null;
     this.refChr = null;
     this.tempCompGenome = null;
+    this.setDimensions(0.75, 0.5, 21);
 
     this.features = [];
     this.featureBlocks = [];
@@ -576,7 +560,8 @@ export class GenomeViewComponent implements OnInit {
       .replace(/[^\d.,-/\s]/g, '')
       .split(' ');
 
-    return [Number(commands[1].split(',')[0]), Number(commands[2])];
+    const len = commands.length;
+    return [Number(commands[len-2].split(',')[0]), Number(commands[len-1])];
   }
 
   /**
@@ -602,6 +587,42 @@ export class GenomeViewComponent implements OnInit {
       this.refGMap.getRadiansOfChromosome(chr) * new CircularGenomeMap(tempComp).radsToBP;
 
     this.tempCompGenome = tempComp;
+  }
+
+  /**
+   * Sets dimensions for rendering the genome view including radii for
+   * reference ring, comparison ring, and feature information
+   * @param {number} refMulti - radius multiplier for the reference ring elements
+   * @param {number} compMulti - radius multiplier for the comparison ring elements
+   * @param {number} bandWidth - thickness of the chromosome bands in both rings
+   * @private
+   */
+  private setDimensions(refMulti: number, compMulti: number, bandWidth: number): void {
+    this.bandThickness = bandWidth;
+
+    // generate a radii dictionary to help with rendering the reference plot
+    const radius = this.width * 0.5;
+    const refRadius = Math.round(radius * refMulti);
+    const compRadius = Math.round(radius * compMulti);
+
+    this.refRadii = {
+      ringInner: refRadius,
+      ringOuter: refRadius + bandWidth,
+      labels: refRadius + bandWidth + 10,
+    };
+
+    // generate a radii dictionary for feature blocks
+    this.featureRadii = {
+      ringInner: this.refRadii.ringInner - bandWidth * 0.75,
+      ringOuter: this.refRadii.ringInner,
+    };
+
+    // generate a radii dictionary to help with rendering the comparison plot
+    this.compRadii = {
+      ringInner: compRadius,
+      ringOuter: compRadius + bandWidth,
+      labels: compRadius + bandWidth + 10,
+    };
   }
 }
 
