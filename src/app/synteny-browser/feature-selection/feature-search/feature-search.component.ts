@@ -39,7 +39,7 @@ export class FeatureSearchComponent {
     // only get the gene (and QTL) data if changes have been made to what the
     // user wants to see; otherwise it's just another 6-7 wasted seconds
     if (this.refSpecies !== refSpecies || !this.features.rows.length) {
-      this.features.clear();
+      this.clear();
       this.features.loading = true;
 
       this.refSpecies = refSpecies;

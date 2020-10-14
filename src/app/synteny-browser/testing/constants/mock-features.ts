@@ -66,3 +66,92 @@ export const SELECTED_QTL_FEATURES = [
     "end": 120601949
   }
 ].map(f => new Feature(f));
+
+export const MOUSE_FEATURES_CHR_2 = [
+  {
+    "id": "MGI:5610620",
+    "taxon_id": 10090,
+    "symbol": "Gm37392",
+    "chr": "2",
+    "start": 3065573,
+    "end": 3066088,
+    "strand": "-1",
+    "type": "pseudogene"
+  },
+  {
+    "id": "MGI:5530688",
+    "taxon_id": 10090,
+    "symbol": "Gm27306",
+    "chr": "2",
+    "start": 3075107,
+    "end": 3075213,
+    "strand": "1",
+    "type": "miRNA gene"
+  },
+  {
+    "id": "MGI:1920714",
+    "taxon_id": 10090,
+    "symbol": "1700057A11Rik",
+    "chr": "2",
+    "start": 3148802,
+    "end": 3149230,
+    "strand": "0",
+    "type": "unclassified gene"
+  }
+].map(f => new Feature(f));
+
+export const HUMAN_FEATURES_CHR_1 = [
+  {
+    "id": "100287102",
+    "taxon_id": 9606,
+    "symbol": "DDX11L1",
+    "chr": "1",
+    "start": 11874,
+    "end": 14409,
+    "strand": "1",
+    "type": "gene"
+  },
+  {
+    "id": "102466751",
+    "taxon_id": 9606,
+    "symbol": "MIR6859-1",
+    "chr": "1",
+    "start": 17369,
+    "end": 17436,
+    "strand": "-1",
+    "type": "gene"
+  }
+].map(f => new Feature(f));
+
+export const HUMAN_FEATURES_CHR_3 = [
+  {
+    "id": "102723448",
+    "taxon_id": 9606,
+    "symbol": "LINC01986",
+    "chr": "3",
+    "start": 11751,
+    "end": 24501,
+    "strand": "1",
+    "type": "gene"
+  },
+  {
+    "id": "105376921",
+    "taxon_id": 9606,
+    "symbol": "LOC105376921",
+    "chr": "3",
+    "start": 54198,
+    "end": 67717,
+    "strand": "1",
+    "type": "gene"
+  },
+  {
+    "id": "107986040",
+    "taxon_id": 9606,
+    "symbol": "LOC107986040",
+    "chr": "3",
+    "start": 67885,
+    "end": 70120,
+    "strand": "1",
+    "type": "gene"
+  }
+].map(f => new Feature(f));

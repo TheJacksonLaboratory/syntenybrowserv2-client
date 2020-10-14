@@ -171,14 +171,6 @@ export class OntologySearchComponent {
       term.count >= 200 ? ' [disabled for being too broad]' : ''
     }`;
   }
-
-  /**
-   * Removes the gene association with the specified symbol from the selections
-   * @param {string} symbol - the symbol of the gene association to remove
-   */
-  removeAssociation(symbol: string): void {
-    this.associations.removeSelection(symbol);
-  }
 }
 
 export interface OntologyTerm {
