@@ -200,4 +200,20 @@ describe('GenomeViewComponent', () => {
 
     expect(component.refChr.blocks.length).toBe(39);
   });
+
+  it('generates a correct translation string', () => {
+    expect(component.translate(0, 0)).toBe('translate(0, 0)');
+    expect(component.translate(-2, 0)).toBe('translate(-2, 0)');
+    expect(component.translate(2, 2)).toBe('translate(2, 2)');
+  });
+
+  it('gets all genome synteny blocks', () => {
+    component.render();
+
+    expect(component.getGenomeBlocks().length).toBe(42);
+  });
+
+  it('can identify the center of the SVG', () => {
+    expect(component.getCenter()).toBe('translate(250, 255)');
+  });
 });
