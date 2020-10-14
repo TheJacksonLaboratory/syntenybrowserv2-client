@@ -1,12 +1,20 @@
 import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
+import { ClarityModule } from '@clr/angular';
+import { FormsModule } from '@angular/forms';
+import { DeviceDetectorService } from 'ngx-device-detector';
+
+export class MockDeviceDetectorService {}
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [RouterTestingModule, FormsModule, ClarityModule],
       declarations: [AppComponent],
+      providers: [
+        { provide: DeviceDetectorService, useClass: MockDeviceDetectorService },
+      ]
     }).compileComponents();
   }));
 
@@ -16,16 +24,17 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should have as title "synteny"', () => {
+  it('should have 4 pages', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('synteny');
+    expect(app.pages.length).toBe(4);
   });
 
-  it('should render title in a h1 tag', () => {
+  it('should render the header and navigation', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to synteny!');
+    expect(compiled.querySelector('.branding')).toBeTruthy();
+    expect(compiled.querySelectorAll('.nav-link').length).toBe(4);
   });
 });

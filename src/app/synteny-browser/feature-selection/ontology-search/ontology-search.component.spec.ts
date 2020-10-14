@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OntologySearchComponent } from './ontology-search.component';
+import { ClarityModule } from '@clr/angular';
+import { RowDetailComponent } from './row-detail.component';
+import { ApiService } from '../../services/api.service';
+import { MockApiService } from '../../testing/mock-api.service';
 
 describe('OntologySearchComponent', () => {
   let component: OntologySearchComponent;
@@ -8,7 +12,11 @@ describe('OntologySearchComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [OntologySearchComponent],
+      imports: [ClarityModule],
+      declarations: [OntologySearchComponent, RowDetailComponent],
+      providers: [
+        { provide: ApiService, useClass: MockApiService }
+      ],
     }).compileComponents();
   }));
 

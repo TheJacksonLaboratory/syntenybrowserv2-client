@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { Species } from '../classes/species';
 import { SpeciesSelectionComponent } from './species-selection.component';
+import { ClarityModule } from '@clr/angular';
+import { HUMAN, MOUSE, RAT } from '../testing/constants/mock-species';
 
 describe('SpeciesSelectionComponent', () => {
   let component: SpeciesSelectionComponent;
@@ -13,14 +15,21 @@ describe('SpeciesSelectionComponent', () => {
   let multiSpecies: Species[];
 
   beforeAll(() => {
-    dualSpecies = [new Species(9606), new Species(10090)];
-    multiSpecies = [new Species(9606), new Species(10090), new Species(0)];
+    dualSpecies = [
+      new Species(HUMAN.organism),
+      new Species(MOUSE.organism),
+    ];
+    multiSpecies = [
+      new Species(HUMAN.organism),
+      new Species(MOUSE.organism),
+      new Species(RAT.organism),
+    ];
   });
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [SpeciesSelectionComponent],
-      imports: [FormsModule],
+      imports: [FormsModule, ClarityModule],
     }).compileComponents();
   }));
 
@@ -41,6 +50,7 @@ describe('SpeciesSelectionComponent', () => {
   describe('Dual Species Selection', () => {
     it('should create reference and comparison species for only two species total', () => {
       component.setSpecies(dualSpecies);
+
 
       expect(component.refSpecies).toEqual('9606');
       expect(component.getReferenceSelection()).toEqual(dualSpecies[0]);
@@ -130,7 +140,7 @@ describe('SpeciesSelectionComponent', () => {
       component.setSpecies(multiSpecies);
 
       expect(component.species.length).toEqual(3);
-      expect(component.species[2].getID()).toBe('0');
+      expect(component.species[2].getID()).toBe('10116');
 
       expect(component.refSpecies).toEqual('9606');
       expect(component.getReferenceSelection()).toEqual(multiSpecies[0]);
@@ -156,7 +166,7 @@ describe('SpeciesSelectionComponent', () => {
         expect(refOptions[0].nativeElement.disabled).toBeFalsy();
         expect(refOptions[1].nativeElement.value).toBe('10090');
         expect(refOptions[1].nativeElement.disabled).toBeFalsy();
-        expect(refOptions[2].nativeElement.value).toBe('0');
+        expect(refOptions[2].nativeElement.value).toBe('10116');
         expect(refOptions[2].nativeElement.disabled).toBeFalsy();
 
         // test that second option is selected as comparison by default
@@ -171,7 +181,7 @@ describe('SpeciesSelectionComponent', () => {
         expect(compOptions[0].nativeElement.disabled).toBeTruthy();
         expect(compOptions[1].nativeElement.value).toBe('10090');
         expect(compOptions[1].nativeElement.disabled).toBeFalsy();
-        expect(compOptions[2].nativeElement.value).toBe('0');
+        expect(compOptions[2].nativeElement.value).toBe('10116');
         expect(compOptions[2].nativeElement.disabled).toBeFalsy();
       });
     });
@@ -208,7 +218,7 @@ describe('SpeciesSelectionComponent', () => {
           expect(compOptions[0].nativeElement.disabled).toBeFalsy();
           expect(compOptions[1].nativeElement.value).toBe('10090');
           expect(compOptions[1].nativeElement.disabled).toBeTruthy();
-          expect(compOptions[2].nativeElement.value).toBe('0');
+          expect(compOptions[2].nativeElement.value).toBe('10116');
           expect(compOptions[2].nativeElement.disabled).toBeFalsy();
         });
       });
@@ -232,7 +242,7 @@ describe('SpeciesSelectionComponent', () => {
         // wait until selects have stabilized again
         fixture.whenStable().then(() => {
           // test that selected reference value has been changed
-          expect(refSelect.nativeElement.value).toBe('0');
+          expect(refSelect.nativeElement.value).toBe('10116');
 
           // test that comparison hasn't been changed
           const compSelect = fixture.debugElement.query(By.css('#comp')).nativeElement;
@@ -245,7 +255,7 @@ describe('SpeciesSelectionComponent', () => {
           expect(compOptions[0].nativeElement.disabled).toBeFalsy();
           expect(compOptions[1].nativeElement.value).toBe('10090');
           expect(compOptions[1].nativeElement.disabled).toBeFalsy();
-          expect(compOptions[2].nativeElement.value).toBe('0');
+          expect(compOptions[2].nativeElement.value).toBe('10116');
           expect(compOptions[2].nativeElement.disabled).toBeTruthy();
         });
       });

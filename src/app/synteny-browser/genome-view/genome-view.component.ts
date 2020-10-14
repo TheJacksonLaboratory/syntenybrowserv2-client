@@ -535,7 +535,7 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Resets variables associated with rendering the genome view
    */
-  private reset(): void {
+  reset(): void {
     this.ref = null;
     this.comp = null;
     this.refGMap = null;
@@ -547,6 +547,7 @@ export class GenomeViewComponent implements OnInit {
 
     this.features = [];
     this.featureBlocks = [];
+    this.featuresNoBlocks = [];
   }
 
   /**
