@@ -40,7 +40,7 @@ export class MockDataStorageService {
   }
 }
 
-fdescribe('GenomeViewComponent', () => {
+describe('GenomeViewComponent', () => {
   let comp: GenomeViewComponent;
   let fixture: ComponentFixture<GenomeViewComponent>;
   const getNumericValues = (pos) => pos.replace('translate(', '').replace(')', '').split(', ');
