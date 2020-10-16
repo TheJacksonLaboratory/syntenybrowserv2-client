@@ -158,8 +158,8 @@ export class FeatureSelectionComponent {
   removeSelection(symbol: string): void {
     // if the feature with specified symbol isn't in one of the selection lists,
     // nothing will happen
-    this.featureSearch.removeFeature(symbol);
-    this.ontologySearch.removeAssociation(symbol);
+    this.featureSearch.features.removeSelection(symbol);
+    this.ontologySearch.associations.removeSelection(symbol);
 
     // update the list
     this.updateSelections();
