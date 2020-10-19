@@ -11,6 +11,8 @@ import {
   SELECTED_FEATURES_NO_SYNTENY,
   SELECTED_QTL_FEATURES
 } from './constants/mock-features';
+import { OntologyTerm } from '../feature-selection/ontology-search/ontology-search.component';
+import { GO, MOUSE_GO_ASSOC } from './constants/ontology-terms';
 
 export class MockApiService {
   getGenomeSynteny(refID: string, compID: string): Observable<SyntenyBlock[]> {
@@ -44,5 +46,17 @@ export class MockApiService {
 
   getQTLs(taxonID: string): Observable<Feature[]> {
     return of(SELECTED_QTL_FEATURES);
+  }
+
+  getOntologyTerms(ontology: string): Observable<OntologyTerm[]> {
+    return of(GO);
+  }
+
+  getTermAssociations(taxonID: string, termID: string): Observable<Feature[]> {
+    if (termID.toLowerCase() === 'go:0002003') {
+      return of(MOUSE_GO_ASSOC['GO:0002003'].map(a => new Feature(a, true)));
+    } else if (termID.toLowerCase() === 'go:0002020') {
+      return of(MOUSE_GO_ASSOC['GO:0002020'].map(a => new Feature(a, true)));
+    }
   }
 }
