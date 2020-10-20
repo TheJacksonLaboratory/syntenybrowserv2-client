@@ -141,4 +141,4 @@ export const MOUSE_GO_ASSOC = {
       "term_name": "protease binding"
     }
   ]
-}
+};

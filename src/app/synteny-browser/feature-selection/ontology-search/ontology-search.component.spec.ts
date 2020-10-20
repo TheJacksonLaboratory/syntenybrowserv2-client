@@ -5,7 +5,7 @@ import { ClarityModule } from '@clr/angular';
 import { RowDetailComponent } from './row-detail.component';
 import { ApiService } from '../../services/api.service';
 import { MockApiService } from '../../testing/mock-api.service';
-import { HUMAN, MOUSE } from '../../testing/constants/mock-species';
+import { MOUSE } from '../../testing/constants/mock-species';
 import { Species } from '../../classes/species';
 import { GO } from '../../testing/constants/ontology-terms';
 
@@ -13,7 +13,7 @@ export class MockDataStorageService {
   ontologyTerms;
 }
 
-fdescribe('OntologySearchComponent', () => {
+describe('OntologySearchComponent', () => {
   let component: OntologySearchComponent;
   let fixture: ComponentFixture<OntologySearchComponent>;
 
