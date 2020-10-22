@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
+import { NavigationEnd, Router } from '@angular/router';
+
+declare let gtag: Function;
 
 @Component({
   selector: 'app-root',
@@ -14,7 +17,13 @@ export class AppComponent implements OnInit {
 
   browserIssue: boolean;
 
-  constructor(private browserInfo: DeviceDetectorService) {}
+  constructor(private browserInfo: DeviceDetectorService, public router: Router) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        gtag('config', 'UA-181089511-1', {'page_path': event.urlAfterRedirects});
+      }
+    })
+  }
 
   ngOnInit(): void {
     this.browser = this.browserInfo.browser;
