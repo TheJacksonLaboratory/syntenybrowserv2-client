@@ -155,7 +155,7 @@ export class BlockViewBrowserComponent {
   @Output() getHelp: EventEmitter<any> = new EventEmitter();
 
   constructor(
-    private data: DataStorageService,
+    public data: DataStorageService,
     private http: ApiService,
     private downloader: DownloadService,
     private cdr: ChangeDetectorRef,

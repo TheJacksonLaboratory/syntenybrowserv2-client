@@ -33,6 +33,39 @@ export const SELECTED_FEATURES_NO_SYNTENY = [
   }
 ].map(f => new Feature(f));
 
+export const SELECTED_SYNTENIC_FEATURES = [
+  {
+    "id": "MGI:1916147",
+    "taxon_id": 10090,
+    "symbol": "Disp1",
+    "chr": "1",
+    "start": 183086266,
+    "end": 183221522,
+    "strand": "-1",
+    "type": "protein coding gene"
+  },
+  {
+    "id": "MGI:2182368",
+    "taxon_id": 10090,
+    "symbol": "Sgk3",
+    "chr": "1",
+    "start": 9798107,
+    "end": 9900845,
+    "strand": "1",
+    "type": "protein coding gene"
+  },
+  {
+    "id": "MGI:2138327",
+    "taxon_id": 10090,
+    "symbol": "Phlpp1",
+    "chr": "1",
+    "start": 106171869,
+    "end": 106394245,
+    "strand": "1",
+    "type": "protein coding gene"
+  }
+].map(f => new Feature(f));
+
 export const SELECTED_FEATURE_MULTI_BLOCK = [
   new Feature({
     "id": "MGI:5141853",

@@ -9,7 +9,7 @@ import { MOUSE } from '../../testing/constants/mock-species';
 import { Species } from '../../classes/species';
 import { GO } from '../../testing/constants/ontology-terms';
 
-export class MockDataStorageService {
+class MockDataStorageService {
   ontologyTerms;
 }
 
