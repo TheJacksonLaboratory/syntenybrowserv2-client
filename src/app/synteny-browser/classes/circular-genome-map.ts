@@ -10,11 +10,11 @@ export class CircularGenomeMap {
   // scaling factor when converting radians to genomic locations
   radsToBP: number;
 
+  // list of genomic sizes of chromosome
+  sizes: number[];
+
   // dictionary of scales for the genome
   private scales = {};
-
-  // list of genomic sizes of chromosome
-  private sizes: number[];
 
   /**
    * Creates a genome map object that stores scaling functions for each

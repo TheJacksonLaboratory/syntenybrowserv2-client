@@ -240,48 +240,16 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Return the path command for the curved line that the label for the
-   * specified genome will be based on
-   * @param {any} radiiDict - the radius dictionary of the specified genome
-   * @param {CircularGenomeMap} gMap - the genome map for the specified genome
-   *                            (reference or comparison)
-   * @param {any} genome - the genome of the specified species (dictionary
-   *                       describing chr sizes)
-   */
-  getSpeciesLabelPath(radiiDict: any, gMap: CircularGenomeMap, genome: any): string {
-    const inner = radiiDict.ringInner;
-    const start = gMap.bpToCartesian('0', 0, inner);
-    const end = gMap.bpToCartesian('0', genome['0'], inner);
-
-    return `M${start.x},${start.y} A${inner},${inner} 0 0,1 ${end.x},${end.y}Z`;
-  }
-
-  /**
-   * Returns the pixel width of the specified species label
-   * @param {string} selector - 'ref' or 'comp'
-   */
-  getSpeciesLabelWidth(selector: string): number {
-    return document.getElementById(`${selector}-species-abbrev`).clientWidth;
-  }
-
-  /**
    * Returns a path command for a syntenic block
    * @param {any} radiiDict - the radius dictionary of the specified genome
    * @param {CircularGenomeMap} gMap - the genome map for the specified genome
    *                            (reference or comparison)
    * @param {SyntenyBlock} block - the synteny block to render the band for
-   * @param {boolean} comp - the default false flag that indicates if the block
-   *                         band is for the inner plot
    */
-  getBlockBandPath(
-    radiiDict: any,
-    gMap: CircularGenomeMap,
-    block: SyntenyBlock,
-    comp = false,
-  ): string {
+  getBlockBandPath(radiiDict: any, gMap: CircularGenomeMap, block: SyntenyBlock): string {
     // if the block is located in the inner plot and it has a temporary chr
     // (only the reference chr), use the temp chr
-    const chr = comp && block.tempChr ? block.tempChr : block.refChr;
+    const chr = block.refChr;
     const start = block.refStart;
     const end = block.refEnd;
     const inner = radiiDict.ringInner;
@@ -320,11 +288,11 @@ export class GenomeViewComponent implements OnInit {
     const compStart = gMap.bpToCartesian(block.compChr, block.compStart, endRad);
     const compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, endRad);
 
-    return `M${refStart.x},${refStart.y}
-            A205,205 0 0,1 ${refEnd.x},${refEnd.y}
-            Q0,0 ${compEnd.x},${compEnd.y}
-            A 205,205 0 0,1${compStart.x},${compStart.y}
-            Q0,0 ${refStart.x},${refStart.y}Z`;
+    return `M${refStart.x},${refStart.y}` +
+      `A205,205 0 0,1 ${refEnd.x},${refEnd.y}` +
+      `Q0,0 ${compEnd.x},${compEnd.y}` +
+      `A 205,205 0 0,1${compStart.x},${compStart.y}` +
+      `Q0,0 ${refStart.x},${refStart.y}Z`;
   }
 
   /**
@@ -383,8 +351,8 @@ export class GenomeViewComponent implements OnInit {
 
   /**
    * Returns the content for a tooltip for the specified chromosome and species
-   * @param {string} chr - the chromosome that needs the tooltip
    * @param {Species} species - the species of the specified chromosome
+   * @param {string} chr - the chromosome that needs the tooltip
    */
   getTooltipContent(species: Species, chr: string = null): void {
     this.tooltipContent = {
@@ -535,7 +503,7 @@ export class GenomeViewComponent implements OnInit {
   /**
    * Resets variables associated with rendering the genome view
    */
-  private reset(): void {
+  reset(): void {
     this.ref = null;
     this.comp = null;
     this.refGMap = null;
@@ -547,6 +515,7 @@ export class GenomeViewComponent implements OnInit {
 
     this.features = [];
     this.featureBlocks = [];
+    this.featuresNoBlocks = [];
   }
 
   /**
