@@ -175,7 +175,7 @@
       <!-- Button group -->
       <div class="btn-group btn-icon">
         <!-- Download button -->
-        <button
+        <button id="block-view-download"
           class="btn block-view-option"
           [disabled]="!compGenes"
           (click)="filenameModalOpen = true"
@@ -564,6 +564,7 @@
               <!-- Gene label -->
               <text
                 *ngIf="gene.hasVisibleLabel() || options.symbols"
+                class="reference-gene-symbol"
                 [ngStyle]="{
                   fill: gene.getColor(),
                   display: gene.hidden ? 'none' : 'initial'
@@ -691,6 +692,7 @@
               <!-- Gene label -->
               <text
                 *ngIf="gene.hasVisibleLabel() || options.symbols"
+                class="comparison-gene-symbol"
                 [ngStyle]="{
                   fill: gene.getColor(),
                   display: gene.hidden ? 'none' : 'initial'
@@ -980,7 +982,7 @@
   </div>
 </clr-modal>
 
-<clr-modal [(clrModalOpen)]="filenameModalOpen">
+<clr-modal id="block-view-download-modal" [(clrModalOpen)]="filenameModalOpen">
   <h3 class="modal-title">Download SVG</h3>
   <div class="modal-body">
     <h4>Choose a Filename</h4>
@@ -1000,6 +1002,7 @@
       </div>
       <div class="clr-col">
         <button
+          id="download-btn"
           class="btn"
           [disabled]="downloadFilename === ''"
           (click)="download()"

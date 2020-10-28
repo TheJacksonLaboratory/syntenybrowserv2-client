@@ -157,7 +157,7 @@ export class BlockViewBrowserComponent {
   constructor(
     public data: DataStorageService,
     private http: ApiService,
-    private downloader: DownloadService,
+    public downloader: DownloadService,
     private cdr: ChangeDetectorRef,
   ) {
     this.options = {
