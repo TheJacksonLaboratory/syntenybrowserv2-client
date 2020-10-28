@@ -457,4 +457,123 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.human-gwas').length).toBe(42);
     expect(fixture.nativeElement.querySelectorAll('.human-gwas-handle').length).toBe(42);
   });
+
+  it('translates to specified coordinates', () => {
+    expect(component.translate([0, 0])).toBe('translate(0, 0)');
+    expect(component.translate([-222, 0])).toBe('translate(-222, 0)');
+    expect(component.translate([0, 67])).toBe('translate(0, 67)');
+    expect(component.translate([0, 0.44])).toBe('translate(0, 0.44)');
+  });
+
+  it('highlights reference gene with no homologs', () => {
+    component.render();
+    component.highlightRefGene(component.refGenes[4]);
+
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(1);
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(0);
+
+    component.unhighlightGene();
+
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(0);
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(0);
+  });
+
+  it('highlights reference gene with one homolog', () => {
+    component.render();
+    component.highlightRefGene(component.refGenes[2]);
+
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(1);
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(1);
+
+    component.unhighlightGene();
+
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(0);
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(0);
+  });
+
+  it('highlights reference gene with multiple homologs', () => {
+    component.render();
+    component.highlightRefGene(component.refGenes[1]);
+
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(1);
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(2);
+
+    component.unhighlightGene();
+
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(0);
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(0);
+  });
+
+  it('highlights comparison gene and its homolog', () => {
+    component.render();
+    component.highlightCompGene(component.compGenes[2]);
+
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(1);
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(1);
+
+    component.unhighlightGene();
+
+    expect(component.compGenes.filter(g => g.highlighted).length).toBe(0);
+    expect(component.refGenes.filter(g => g.highlighted).length).toBe(0);
+  });
+
+  it('shows clicktip data for a reference gene', () => {
+    component.render();
+
+    expect(component.clicktip).toBeFalsy();
+    expect(component.clicktipOpen).toBe(false);
+
+    component.showDataForGene(component.refGenes[0]);
+
+    expect(component.clicktipOpen).toBe(true);
+    expect(component.clicktip.title).toBe('Disp1');
+    expect(component.clicktip.id).toBe('MGI:1916147');
+    expect(component.clicktip.content)
+      .toEqual({'Gene Symbol': 'Disp1', 'Gene ID': 'MGI:1916147', Type: 'protein coding gene', Location: 'Chr1: 183,086,266bp - 183,221,522bp', Strand: '-1'});
+    expect(component.clicktip.resources)
+      .toEqual([{url: 'http://www.informatics.jax.org/marker/', name: 'MGI'}]);
+  });
+
+  it('shows clicktip data for a comparison gene', () => {
+    component.render();
+
+    expect(component.clicktip).toBeFalsy();
+    expect(component.clicktipOpen).toBe(false);
+
+    component.showDataForGene(component.compGenes[0]);
+
+    expect(component.clicktipOpen).toBe(true);
+    expect(component.clicktip.title).toBe('DISP1');
+    expect(component.clicktip.id).toBe('84976');
+    expect(component.clicktip.content)
+      .toEqual({'Gene Symbol': 'DISP1', 'Gene ID': '84976', Type: 'gene', Location: 'Chr1: 222,814,514bp - 223,005,995bp', Strand: '1'});
+    expect(component.clicktip.resources)
+      .toEqual([{url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI'}]);
+  });
+
+  it('shows clicktip data for a GWAS location', () => {
+    component.render();
+
+    expect(component.clicktip).toBeFalsy();
+    expect(component.clicktipOpen).toBe(false);
+
+    component.showDataForHitLocation(component.humanGWAS[3]);
+
+    expect(component.clicktipOpen).toBe(true);
+    expect(component.clicktip.title).toBe('Chr2: 226,229,029bp');
+    expect(component.clicktip.hits.length).toBe(1);
+  });
+
+  it('can get genome blocks', () => {
+    component.render();
+
+    expect(component.getGenomeBlocks().length).toBe(42);
+  });
+
+  fit('can position chromosome labels correctly', () => {
+    component.render();
+
+    expect(component.getChrLabelPos('1')).toBe('translate(37.29393797414988, 13.5)');
+    expect(component.getChrLabelPos('5')).toBe('translate(28.968415565936283, 13.5)');
+  });
 });
