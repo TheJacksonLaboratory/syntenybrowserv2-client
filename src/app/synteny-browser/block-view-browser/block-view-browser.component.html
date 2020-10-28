@@ -89,7 +89,7 @@
         <button
           class="btn btn-outline"
           title="Zoom out"
-          [disabled]="!interval || interval.width === getRefChrSize()"
+          [disabled]="!interval || interval.isFullChrView()"
           (click)="zoomOut()"
         >
           <clr-icon shape="zoom-out"></clr-icon>

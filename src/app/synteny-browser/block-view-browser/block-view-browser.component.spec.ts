@@ -36,14 +36,14 @@ fdescribe('BlockViewBrowserComponent', () => {
         { provide: DataStorageService, useClass: MockDataStorageService },
         { provide: ComponentFixtureAutoDetect, useValue: true }
       ],
-    }).compileComponents();
+    })
+      .compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(BlockViewBrowserComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+      });
   }));
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(BlockViewBrowserComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
 
   it('should create with default values', () => {
     expect(component).toBeTruthy();
@@ -184,8 +184,7 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(component.interval.refEnd).toBe(114648038);
   });
 
-  // TODO: this currently fails probably for valid reasons
-  xit('will not zoom out past the reference chromosome extents', () => {
+  it('will not zoom out past the reference chromosome extents', () => {
     component.render();
     component.jumpToInterval([1402889, 192989936]);
     component.zoomOut();
@@ -242,8 +241,6 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(component.selectedCompGenes.length).toBe(4);
     expect(component.selectedQTLs.length).toBe(0);
 
-    // check that the interval focuses on the first (location-wise) selected feature
-    // TODO: these values being checked are incorrect; need to ensure that interval focuses on first location-wise instead of first in list
     expect(component.interval.refStart).toBe(180586266);
     expect(component.interval.refEnd).toBe(185721522);
   });
