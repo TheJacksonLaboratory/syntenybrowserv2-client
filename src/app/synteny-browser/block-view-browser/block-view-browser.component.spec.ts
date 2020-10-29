@@ -570,10 +570,244 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(component.getGenomeBlocks().length).toBe(42);
   });
 
-  fit('can position chromosome labels correctly', () => {
+  it('can position chromosome labels correctly', () => {
     component.render();
 
     expect(component.getChrLabelPos('1')).toBe('translate(37.29393797414988, 13.5)');
     expect(component.getChrLabelPos('5')).toBe('translate(28.968415565936283, 13.5)');
+  });
+
+  it('renders only reference genes in view', () => {
+    component.render();
+    component.jumpToInterval([90874118, 113142630]);
+
+    expect(component.getRefGenesInView().length).toBe(3);
+  });
+
+  it('renders no reference genes if all are out of view', () => {
+    component.render();
+    component.jumpToInterval([80000000, 84000000]);
+
+    expect(component.getRefGenesInView().length).toBe(0);
+  });
+
+  it('renders a reference gene that starts after interval start and ends before interval end', () => {
+    component.render();
+    component.jumpToInterval([93780627, 95441846]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  it('renders a reference gene that starts before interval start and ends before interval end', () => {
+    component.render();
+    component.jumpToInterval([93800000, 95441846]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  it('renders a reference gene that starts at interval start and ends before interval end', () => {
+    component.render();
+    component.jumpToInterval([93792576, 95441846]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  it('renders a reference gene that starts at interval start and ends at interval end', () => {
+    component.render();
+    component.jumpToInterval([93792576, 93801934]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  it('renders a reference gene that starts after interval start and ends at interval end', () => {
+    component.render();
+    component.jumpToInterval([93692576, 93801934]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  it('renders a reference gene that starts after interval start and ends after interval end', () => {
+    component.render();
+    component.jumpToInterval([93692576, 93801834]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  it('renders a reference gene that starts before interval start and ends after interval end', () => {
+    component.render();
+    component.jumpToInterval([106180000, 106200000]);
+
+    expect(component.getRefGenesInView().length).toBe(1);
+  });
+
+  // comp genes w/ matching orientation
+  it('renders only comparison genes in view (matching orientation)', () => {
+    component.render();
+    // remember that jumping to an interval is utilizing reference chromosome coordinates, not comparison
+    component.jumpToInterval([90874118, 113142630]);
+
+    expect(component.getCompGenesInView().length).toBe(2);
+  });
+
+  it('renders no comparison genes if all are out of view (matching orientation)', () => {
+    component.render();
+    component.jumpToInterval([80000000, 84000000]);
+
+    expect(component.getCompGenesInView().length).toBe(0);
+  });
+
+  it('renders a comparison gene that starts after interval start and ends before interval end (matching orientation)', () => {
+    component.render();
+    component.jumpToInterval([183188070, 183352234]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts before interval start and ends before interval end (matching orientation)', () => {
+    component.render();
+    component.jumpToInterval([183200108, 183364271]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts at interval start and ends before interval end (matching orientation)', () => {
+    component.render();
+    const compScale = component.getScale(component.compGenes[0]);
+    const refStart = component.refBPToPixels.invert(compScale(222814514));
+    component.jumpToInterval([refStart, 183364271]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts at interval start and ends at interval end (matching orientation)', () => {
+    component.render();
+    const compScale = component.getScale(component.compGenes[0]);
+    const refStart = component.refBPToPixels.invert(compScale(222814514));
+    const refEnd = component.refBPToPixels.invert(compScale(223005995));
+    component.jumpToInterval([refStart, refEnd]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts after interval start and ends at interval end (matching orientation)', () => {
+    component.render();
+    const compScale = component.getScale(component.compGenes[0]);
+    const refEnd = component.refBPToPixels.invert(compScale(223005995));
+    component.jumpToInterval([183188070, refEnd]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts after interval start and ends after interval end (matching orientation)', () => {
+    component.render();
+    component.jumpToInterval([183188070, 183322184]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts before interval start and ends after interval end (matching orientation)', () => {
+    component.render();
+    component.jumpToInterval([183194712, 183311601]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  // comp genes w/ true orientation
+  it('renders only comparison genes in view (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    component.jumpToInterval([90874118, 113142630]);
+
+    expect(component.getCompGenesInView().length).toBe(2);
+  });
+
+  it('renders no comparison genes if all are out of view (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    component.jumpToInterval([80000000, 84000000]);
+
+    expect(component.getCompGenesInView().length).toBe(0);
+  });
+
+  it('renders a comparison gene that starts after interval start and ends before interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    component.jumpToInterval([194095611, 194294110]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts before interval start and ends before interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    component.jumpToInterval([194119114, 194279676]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts at interval start and ends before interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    const compScale = component.getScale(component.compGenes[0]);
+    const refStart = component.refBPToPixels.invert(compScale(222814514));
+    component.jumpToInterval([refStart, 183364271]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts at interval start and ends at interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    const compScale = component.getScale(component.compGenes[0]);
+    const refStart = component.refBPToPixels.invert(compScale(222814514));
+    const refEnd = component.refBPToPixels.invert(compScale(223005995));
+    component.jumpToInterval([refStart, refEnd]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts after interval start and ends at interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    const compScale = component.getScale(component.compGenes[0]);
+    const refEnd = component.refBPToPixels.invert(compScale(223005995));
+    component.jumpToInterval([183188070, refEnd]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts after interval start and ends after interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    component.jumpToInterval([194089724, 194250286]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that starts before interval start and ends after interval end (true orientation)', () => {
+    component.render();
+    component.options.trueOrientation = true;
+    component.jumpToInterval([194116640, 194189699]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+  });
+
+  it('renders a comparison gene that is within view and then does not if it no longer is in view after orientation toggles', () => {
+    component.render();
+    component.jumpToInterval([183188070, 183322184]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+
+    component.options.trueOrientation = true;
+
+    expect(component.getCompGenesInView().length).toBe(0);
+
+    component.jumpToInterval([194116640, 194189699]);
+
+    expect(component.getCompGenesInView().length).toBe(1);
+
+    component.options.trueOrientation = false;
+
+    expect(component.getCompGenesInView().length).toBe(0);
   });
 });
