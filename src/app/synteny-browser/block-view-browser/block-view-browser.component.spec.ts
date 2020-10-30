@@ -115,6 +115,7 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(component.refGenes.length).toBe(5);
     expect(component.selectedRefGenes.length).toBe(0);
     expect(component.selectedCompGenes.length).toBe(0);
+    expect(component.featuresAreSelected()).toBe(false);
     expect(component.interval.refStart).toBe(0);
     expect(component.interval.refEnd).toBe(195471971);
     expect(component.interval.trueOrientation).toBe(false);
@@ -238,6 +239,7 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(component.selectedRefGenes.length).toBe(3);
     expect(component.selectedCompGenes.length).toBe(4);
     expect(component.selectedQTLs.length).toBe(0);
+    expect(component.featuresAreSelected()).toBe(true);
 
     expect(component.interval.refStart).toBe(180586266);
     expect(component.interval.refEnd).toBe(185721522);
@@ -250,6 +252,7 @@ fdescribe('BlockViewBrowserComponent', () => {
     expect(component.selectedRefGenes.length).toBe(0);
     expect(component.selectedCompGenes.length).toBe(0);
     expect(component.selectedQTLs.length).toBe(2);
+    expect(component.featuresAreSelected()).toBe(true);
 
     expect(component.interval.refStart).toBe(0);
     expect(component.interval.refEnd).toBe(195471971);
@@ -809,5 +812,152 @@ fdescribe('BlockViewBrowserComponent', () => {
     component.options.trueOrientation = false;
 
     expect(component.getCompGenesInView().length).toBe(0);
+  });
+
+  it('gets all reference genes with homologs', () => {
+    component.render();
+
+    expect(component.getHomologousRefGenes().length).toBe(4);
+  });
+
+  it('gets the correct comparison scale for a gene in a matching orientation sytenic block', () => {
+    component.render();
+
+    let scale = component.getScale(component.compGenes[3]);
+
+    expect(scale.domain()).toEqual([61333582, 67516730]);
+    expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
+
+    component.options.trueOrientation = true;
+    scale = component.getScale(component.compGenes[3]);
+
+    expect(scale.domain()).toEqual([61333582, 67516730]);
+    expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
+  });
+
+  it('gets the correct comparison scale for a gene in a non-matching orientation sytenic block', () => {
+    component.render();
+
+    let scale = component.getScale(component.compGenes[0]);
+
+    expect(scale.domain()).toEqual([224193441, 207454300]);
+    expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
+
+    component.options.trueOrientation = true;
+    scale = component.getScale(component.compGenes[0]);
+
+    // check that the domain has changed but the range remains the same
+    expect(scale.domain()).toEqual([207454300, 224193441]);
+    expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
+  });
+
+  it('gets the correct static comparison scale for a gene in a matching orientation sytenic block', () => {
+    component.render();
+
+    let scale = component.getStaticCompScale(component.compGenes[3]);
+
+    expect(scale.domain()).toEqual([61333582, 67516730]);
+    expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
+
+    component.options.trueOrientation = true;
+    scale = component.getStaticCompScale(component.compGenes[3]);
+
+    expect(scale.domain()).toEqual([61333582, 67516730]);
+    expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
+
+    component.jumpToInterval([194119114, 194279676]);
+
+    expect(scale.domain()).toEqual([61333582, 67516730]);
+    expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
+  });
+
+  it('gets the correct static comparison scale for a gene in a non-matching orientation sytenic block', () => {
+    component.render();
+
+    let scale = component.getStaticCompScale(component.compGenes[0]);
+
+    expect(scale.domain()).toEqual([224193441, 207454300]);
+    expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
+
+    component.options.trueOrientation = true;
+    scale = component.getStaticCompScale(component.compGenes[0]);
+
+    // check that the domain has changed but the range remains the same
+    expect(scale.domain()).toEqual([207454300, 224193441]);
+    expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
+
+    component.jumpToInterval([194119114, 194279676]);
+
+    expect(scale.domain()).toEqual([207454300, 224193441]);
+    expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
+  });
+
+  it('gets the correct comparison scale for a GWAS location in a matching orientation sytenic block', () => {
+    component.render();
+
+    let scale = component.getScale(component.humanGWAS[4]);
+
+    expect(scale.domain()).toEqual([132415972, 137677712]);
+    expect(scale.range()).toEqual([770.8865748532305, 798.7483500741905]);
+
+    component.options.trueOrientation = true;
+    scale = component.getScale(component.humanGWAS[4]);
+
+    expect(scale.domain()).toEqual([132415972, 137677712]);
+    expect(scale.range()).toEqual([770.8865748532305, 798.7483500741905]);
+  });
+
+  it('gets the correct comparison scale for a GWAS location in a non-matching orientation sytenic block', () => {
+    component.render();
+
+    let scale = component.getScale(component.humanGWAS[20]);
+
+    expect(scale.domain()).toEqual([73198851, 56457987]);
+    expect(scale.range()).toEqual([131.25505956554764, 210.44492634189484]);
+
+    component.options.trueOrientation = true;
+    scale = component.getScale(component.humanGWAS[20]);
+
+    // check that the domain has changed but the range remains the same
+    expect(scale.domain()).toEqual([56457987, 73198851]);
+    expect(scale.range()).toEqual([131.25505956554764, 210.44492634189484]);
+  });
+
+  it('gets the reference chromosome', () => {
+    component.render();
+
+    expect(component.getRefChrSize()).toBe(195471971)
+  });
+
+  it('gets a vertical line path', () => {
+    expect(component.getVLinePath(0, 5)).toBe('M0,0L0,5Z');
+    expect(component.getVLinePath(-8, 65, 9)).toBe('M-8,9L-8,74Z');
+    expect(component.getVLinePath(3, -10, 0)).toBe('M3,0L3,-10Z');
+  });
+
+  it('gets a horizontal line path', () => {
+    expect(component.getHLinePath(0, 5)).toBe('M0,0L5,0Z');
+    expect(component.getHLinePath(-8, 65, 9)).toBe('M9,-8L74,-8Z');
+    expect(component.getHLinePath(3, -10, 0)).toBe('M0,3L-10,3Z');
+  });
+
+  it('gets syntenic blocks with mismatched orientation', () => {
+    component.render();
+
+    expect(component.getNonMatchedBlocks().length).toBe(17);
+  });
+
+  it('gets anchor path for gene with single homolog', () => {
+    component.render();
+
+    expect(component.getAnchorPathCommand(component.refGenes[0]))
+      .toBe('M1123.0276740494933,25.890576417125082V80L1123.6697371902014,110V153.76445029099895M1123.8573170063344,25.890576417125082V80L1124.5749459909953,110V153.76445029099895');
+  });
+
+  it('gets anchor path for gene with multiple homologs', () => {
+    component.render();
+
+    expect(component.getAnchorPathCommand(component.refGenes[1]))
+      .toBe('M60.100331688986756,14.431116957665623V80L59.94799702020832,110V156.5031890297377M60.730513404400064,14.431116957665623V80L61.08754062844289,110V156.5031890297377M60.100331688986756,14.431116957665623V80L60.21090010822731,110V146.84553137208005M60.730513404400064,14.431116957665623V80L61.08754062844289,110V146.84553137208005');
   });
 });

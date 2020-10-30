@@ -565,8 +565,8 @@ export class BlockViewBrowserComponent {
    *                         the parent element for the vertical line
    */
   getVLinePath(x: number, length: number, start: number = null): string {
-    return `M${x},${start || 0}
-            L${x},${start ? length + start : length}Z`;
+    return `M${x},${start || 0}` +
+      `L${x},${start ? length + start : length}Z`;
   }
 
   /**
@@ -579,8 +579,8 @@ export class BlockViewBrowserComponent {
    *                         the parent element for the horizontal line
    */
   getHLinePath(y: number, length: number, start: number = null): string {
-    return `M${start || 0},${y}
-            L${start ? length + start : length},${y}Z`;
+    return `M${start || 0},${y}` +
+      `L${start ? length + start : length},${y}Z`;
   }
 
   /**
@@ -607,14 +607,14 @@ export class BlockViewBrowserComponent {
       const homStart = scale(hom.getStart(this.options.trueOrientation));
       const homEnd = scale(hom.getEnd(this.options.trueOrientation));
 
-      command += `M${refStart},${gene.yPos + 2}
-                  V${this.trackHeight}
-                  L${homStart},${this.trackHeight + 30}
-                  V${this.trackHeight + 30 + hom.yPos + 2}
-                  M${refEnd},${gene.yPos + 2}
-                  V${this.trackHeight}
-                  L${homEnd},${this.trackHeight + 30}
-                  V${this.trackHeight + 30 + hom.yPos + 2}`;
+      command += `M${refStart},${gene.yPos + 2}` +
+        `V${this.trackHeight}` +
+        `L${homStart},${this.trackHeight + 30}` +
+        `V${this.trackHeight + 30 + hom.yPos + 2}` +
+        `M${refEnd},${gene.yPos + 2}` +
+        `V${this.trackHeight}` +
+        `L${homEnd},${this.trackHeight + 30}` +
+        `V${this.trackHeight + 30 + hom.yPos + 2}`;
     });
 
     return command;
