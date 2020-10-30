@@ -25,7 +25,7 @@ class MockDataStorageService {
   genomeColorMap = COLOR_MAP;
 }
 
-fdescribe('BlockViewBrowserComponent', () => {
+describe('BlockViewBrowserComponent', () => {
   let component: BlockViewBrowserComponent;
   let fixture: ComponentFixture<BlockViewBrowserComponent>;
 
