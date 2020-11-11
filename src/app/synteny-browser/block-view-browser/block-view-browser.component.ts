@@ -155,9 +155,9 @@ export class BlockViewBrowserComponent {
   @Output() getHelp: EventEmitter<any> = new EventEmitter();
 
   constructor(
-    private data: DataStorageService,
+    public data: DataStorageService,
     private http: ApiService,
-    private downloader: DownloadService,
+    public downloader: DownloadService,
     private cdr: ChangeDetectorRef,
   ) {
     this.options = {
@@ -355,36 +355,42 @@ export class BlockViewBrowserComponent {
     const intEnd = this.interval.refEnd;
     const chrEnd = this.getRefChrSize();
 
-    // if the new width would still be a valid width, check for start and end points
-    if (this.interval.width * 1.3 <= chrEnd) {
-      // if both edges are inside chromosome start or end, zoom out 15% on each end
-      if (intStart - basesZoom >= 0 && intEnd + basesZoom <= chrEnd) {
-        this.brushView(intStart - basesZoom, intEnd + basesZoom);
-        // if only new start edge of view is a problem,
-        // set start to chromosome start and increment end
-      } else if (intStart - basesZoom < 0) {
-        this.brushView(0, intEnd + basesZoom);
-        // if only new end edge of view is a problem,
-        // set end to chromosome end and decrement start
-      } else if (intEnd + basesZoom > chrEnd) {
-        this.brushView(intStart - basesZoom, chrEnd);
+    if(intStart > 0 || intEnd < chrEnd) {
+      // if the new width would still be a valid width, check for start and end points
+      if (this.interval.width * 1.3 <= chrEnd) {
+        // if both edges are inside chromosome start or end, zoom out 15% on each end
+        if (intStart - basesZoom >= 0 && intEnd + basesZoom <= chrEnd) {
+          this.brushView(intStart - basesZoom, intEnd + basesZoom);
+          // if only new start edge of view is a problem,
+          // set start to chromosome start and increment end
+        } else if (intStart - basesZoom < 0) {
+          this.brushView(0, intEnd + basesZoom);
+          // if only new end edge of view is a problem,
+          // set end to chromosome end and decrement start
+        } else if (intEnd + basesZoom > chrEnd) {
+          this.brushView(intStart - basesZoom, chrEnd);
+        }
+      } else {
+        // get the difference of widths; divide by 2 to get the number for each edge
+        const diff = (chrEnd - this.interval.width) / 2;
+
+        // if both edges are in chromosome start or end, zoom out by diff on each end
+        if (intStart - diff >= 0 && intEnd + diff <= chrEnd) {
+          this.brushView(intStart - diff, intEnd + diff);
+          // if only new start edge of view is a problem,
+          // set start to chromosome start and increment end by 2 * diff
+        } else if (intStart - diff < 0) {
+          const newEnd = Math.min(chrEnd, intEnd + (2 * diff))
+          this.brushView(0, newEnd);
+          // if only new end edge of view is a problem,
+          // set end to chromosome end and decrement start by 2 * diff
+        } else if (intEnd + diff > chrEnd) {
+          const newStart = Math.max(0, intStart - (2 * diff));
+          this.brushView(newStart, chrEnd);
+        }
       }
     } else {
-      // get the difference of widths; divide by 2 to get the number for each edge
-      const diff = (chrEnd - this.interval.width) / 2;
-
-      // if both edges are in chromosome start or end, zoom out by diff on each end
-      if (intStart - diff >= 0 && intEnd + diff <= chrEnd) {
-        this.brushView(intStart - diff, intEnd + diff);
-        // if only new start edge of view is a problem,
-        // set start to chromosome start and increment end by 2 * diff
-      } else if (intStart - diff < 0) {
-        this.brushView(0, intEnd + 2 * diff);
-        // if only new end edge of view is a problem,
-        // set end to chromosome end and decrement start by 2 * diff
-      } else if (intEnd + diff > chrEnd) {
-        this.brushView(intStart - 2 * diff, chrEnd);
-      }
+      this.brushView(0, chrEnd);
     }
   }
 
@@ -559,8 +565,8 @@ export class BlockViewBrowserComponent {
    *                         the parent element for the vertical line
    */
   getVLinePath(x: number, length: number, start: number = null): string {
-    return `M${x},${start || 0}
-            L${x},${start ? length + start : length}Z`;
+    return `M${x},${start || 0}` +
+      `L${x},${start ? length + start : length}Z`;
   }
 
   /**
@@ -573,8 +579,8 @@ export class BlockViewBrowserComponent {
    *                         the parent element for the horizontal line
    */
   getHLinePath(y: number, length: number, start: number = null): string {
-    return `M${start || 0},${y}
-            L${start ? length + start : length},${y}Z`;
+    return `M${start || 0},${y}` +
+      `L${start ? length + start : length},${y}Z`;
   }
 
   /**
@@ -601,14 +607,14 @@ export class BlockViewBrowserComponent {
       const homStart = scale(hom.getStart(this.options.trueOrientation));
       const homEnd = scale(hom.getEnd(this.options.trueOrientation));
 
-      command += `M${refStart},${gene.yPos + 2}
-                  V${this.trackHeight}
-                  L${homStart},${this.trackHeight + 30}
-                  V${this.trackHeight + 30 + hom.yPos + 2}
-                  M${refEnd},${gene.yPos + 2}
-                  V${this.trackHeight}
-                  L${homEnd},${this.trackHeight + 30}
-                  V${this.trackHeight + 30 + hom.yPos + 2}`;
+      command += `M${refStart},${gene.yPos + 2}` +
+        `V${this.trackHeight}` +
+        `L${homStart},${this.trackHeight + 30}` +
+        `V${this.trackHeight + 30 + hom.yPos + 2}` +
+        `M${refEnd},${gene.yPos + 2}` +
+        `V${this.trackHeight}` +
+        `L${homEnd},${this.trackHeight + 30}` +
+        `V${this.trackHeight + 30 + hom.yPos + 2}`;
     });
 
     return command;

@@ -123,6 +123,13 @@ export class BrowserInterval {
   }
 
   /**
+   * Returns true if the interval is equivalent to the full reference chromosome
+   */
+  isFullChrView(): boolean {
+    return this.refStart <= 0 && this.refEnd >= this.refChrSize;
+  }
+
+  /**
    * Sets the comparison start coordinate and chromosome in the browser view;
    * if the start of the interval is within a syntenic region, the location is a
    * conversion of the reference location; if the location is outside of a

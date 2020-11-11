@@ -17,7 +17,7 @@ import {
   SELECTED_QTL_FEATURES
 } from '../testing/constants/mock-features';
 
-export class MockDataStorageService {
+class MockDataStorageService {
   refSpecies = new Species(MOUSE.organism);
   compSpecies = new Species(HUMAN.organism);
   genomeColorMap = COLOR_MAP;
