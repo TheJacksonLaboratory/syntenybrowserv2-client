@@ -70,6 +70,10 @@ export class BlockViewFilterComponent implements OnInit {
     this.allGenes = this.refGenes.concat(...this.compGenes);
     this.filteredGenes = [];
 
+    if (this.filters.length) {
+      this.applyFilters();
+    }
+
     this.createNewEditableFilter();
   }
 

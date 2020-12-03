@@ -133,7 +133,7 @@
 
   <div class="modal-body">
     <block-view-filter
-      *ngIf="blockViewBrowser && blockViewBrowser.refGenes"
+      *ngIf="blockViewBrowser && blockViewBrowser.refGenes && filterOpen"
       [refSpecies]="data.refSpecies"
       [compSpecies]="data.compSpecies"
       [refGenes]="blockViewBrowser.refGenes"
