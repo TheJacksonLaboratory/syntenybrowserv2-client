@@ -385,7 +385,10 @@ export class BlockViewFilterComponent implements OnInit {
             const assocIDs = assoc.map(a => a.id);
             const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
 
-            associations.forEach(a => (!f.hides() ? a.filter() : a.hide()));
+            associations.forEach(a => {
+              !f.hides() ? a.filter() : a.hide();
+              a.filters.push(f.filterLabel);
+            });
             this.filteredGenes.push(...associations);
           });
         });
@@ -398,6 +401,7 @@ export class BlockViewFilterComponent implements OnInit {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
             !attributeFilters[i].hides() ? g.filter() : g.hide();
+            g.filters.push(attributeFilters[i].filterLabel);
             return true;
           }
         }

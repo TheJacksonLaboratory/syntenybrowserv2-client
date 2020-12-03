@@ -567,10 +567,10 @@
 
           <!-- Results table -->
           <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact">
-            <clr-dg-column *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
+            <clr-dg-column *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']">
               {{ attr }}
             </clr-dg-column>
-            <clr-dg-column> species </clr-dg-column>
+            <clr-dg-column> filters </clr-dg-column>
 
             <clr-dg-placeholder> No genes to show! </clr-dg-placeholder>
 
@@ -578,10 +578,10 @@
               *clrDgItems="let row of filteredGenes"
               [ngClass]="{ 'hidden-row': row.hidden }"
             >
-              <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
+              <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']">
                 {{ row[attr] }}
               </clr-dg-cell>
-              <clr-dg-cell> {{ row.species }} </clr-dg-cell>
+              <clr-dg-cell> {{ row.filters.join(', ') }} </clr-dg-cell>
             </clr-dg-row>
 
             <!-- Table pagination -->

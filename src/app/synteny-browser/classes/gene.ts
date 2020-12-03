@@ -55,6 +55,9 @@ export class Gene {
   // and is colored blue
   filtered = false;
 
+  // list of filter labels that the gene matches with
+  filters: string[] = [];
+
   // indicates if the gene is affected by at least one hiding filter (and
   // no highlighting filters) and is hidden from the SVG
   hidden = false;
@@ -152,6 +155,7 @@ export class Gene {
   resetFilterStatus(): void {
     this.unfilter();
     this.show();
+    this.filters = [];
   }
 
   /**
