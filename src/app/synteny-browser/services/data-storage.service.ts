@@ -58,6 +58,13 @@ export class DataStorageService {
   }
 
   /**
+   * Clears the array of block view filters
+   */
+  clearFilters(): void {
+    this.filters = [];
+  }
+
+  /**
    * Returns the synteny blocks in the specified list of synteny blocks
    * (genomeData by default) that are in the specified chr
    * @param {string} chr - the chromosome to get block for

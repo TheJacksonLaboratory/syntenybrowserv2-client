@@ -15,7 +15,12 @@
 
   <clr-select-container class="clr-col-4">
     <label for="comp">Comparison species</label>
-    <select clrSelect id="comp" [(ngModel)]="compSpecies">
+    <select
+      clrSelect
+      id="comp"
+      [(ngModel)]="compSpecies"
+      (change)="changeReference()"
+    >
       <option
         *ngFor="let s of species"
         [value]="s.getID()"

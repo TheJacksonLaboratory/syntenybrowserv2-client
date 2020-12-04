@@ -5,15 +5,9 @@
   <!-- Guide -->
   <div class="clr-row">
     <h6 style="line-height: 0.8rem">
-      4. Manipulate the view in the block view browser by using a scroll wheel
-      or scrollable trackpad to zoom in or out over the tracks or chromosome
-      view, click and dragging the tracks or viewbox in the chromosome view to
-      move left or right. Click and drag the ends of the viewbox in the
-      chromosome view to make finer adjustments. You may also zoom and pan using
-      the block view navigation buttons below, above the block view browser. If
-      you have a specific interval you'd like to see, you can enter it in the
-      input below in the form (click the info icon to see formats of possible
-      intervals).
+      4. Explore with the block view browser by using the block view navigation
+      buttons or scroll-zooming over the tracks or chromosome view or dragging
+      the tracks or viewbox in the chromosome view to pan
       <span style="color: #006A91;cursor: pointer" (click)="getHelp.emit()">
         <clr-icon shape="info" size="21"></clr-icon> More Info
       </span>
@@ -95,7 +89,7 @@
         <button
           class="btn btn-outline"
           title="Zoom out"
-          [disabled]="!interval || interval.width === getRefChrSize()"
+          [disabled]="!interval || interval.isFullChrView()"
           (click)="zoomOut()"
         >
           <clr-icon shape="zoom-out"></clr-icon>
@@ -181,7 +175,7 @@
       <!-- Button group -->
       <div class="btn-group btn-icon">
         <!-- Download button -->
-        <button
+        <button id="block-view-download"
           class="btn block-view-option"
           [disabled]="!compGenes"
           (click)="filenameModalOpen = true"
@@ -549,12 +543,14 @@
                 height="4"
                 width="4"
                 fill="#444"
+                (click)="showDataForHitLocation(hit)"
               ></rect>
               <line
                 class="human-gwas"
                 [attr.y2]="trackHeight"
                 stroke="#444"
                 stroke-width="2"
+                (click)="showDataForHitLocation(hit)"
               ></line>
             </g>
           </g>
@@ -568,6 +564,7 @@
               <!-- Gene label -->
               <text
                 *ngIf="gene.hasVisibleLabel() || options.symbols"
+                class="reference-gene-symbol"
                 [ngStyle]="{
                   fill: gene.getColor(),
                   display: gene.hidden ? 'none' : 'initial'
@@ -670,12 +667,14 @@
                 height="4"
                 width="4"
                 fill="#444"
+                (click)="showDataForHitLocation(hit)"
               ></rect>
               <line
                 class="human-gwas"
                 [attr.y2]="trackHeight"
                 stroke="#444"
                 stroke-width="2"
+                (click)="showDataForHitLocation(hit)"
               ></line>
             </g>
           </g>
@@ -693,6 +692,7 @@
               <!-- Gene label -->
               <text
                 *ngIf="gene.hasVisibleLabel() || options.symbols"
+                class="comparison-gene-symbol"
                 [ngStyle]="{
                   fill: gene.getColor(),
                   display: gene.hidden ? 'none' : 'initial'
@@ -958,9 +958,9 @@
 
 <clr-modal *ngIf="clicktip; let c" id="ctip" [(clrModalOpen)]="clicktipOpen">
   <h3 class="modal-title" style="font-weight: bold">{{ c.title }}</h3>
-  <div class="modal-body">
+  <div *ngIf="c.content" class="modal-body">
     <h4>Basic Information</h4>
-    <p *ngFor="let key of getTTItems(c)">
+    <p *ngFor="let key of getTTItems(c.content)">
       <span style="font-weight: bold">{{ key }}:</span> {{ c.content[key] }}
     </p>
     <br />
@@ -971,9 +971,18 @@
       >
     </p>
   </div>
+  <div *ngIf="c.hits" class="modal-body">
+    <h4>GWAS Hits</h4>
+    <div *ngFor="let h of c.hits">
+      <hr>
+      <p *ngFor="let key of getTTItems(h)">
+        <span *ngIf="h[key]" style="font-weight: bold">{{ key }}:</span> {{ h[key] }}
+      </p>
+    </div>
+  </div>
 </clr-modal>
 
-<clr-modal [(clrModalOpen)]="filenameModalOpen">
+<clr-modal id="block-view-download-modal" [(clrModalOpen)]="filenameModalOpen">
   <h3 class="modal-title">Download SVG</h3>
   <div class="modal-body">
     <h4>Choose a Filename</h4>
@@ -993,6 +1002,7 @@
       </div>
       <div class="clr-col">
         <button
+          id="download-btn"
           class="btn"
           [disabled]="downloadFilename === ''"
           (click)="download()"

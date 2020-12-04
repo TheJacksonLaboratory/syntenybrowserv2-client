@@ -42,7 +42,7 @@ export class OntologySearchComponent {
   // emits whenever user wants to see associations for a term or go back to see all terms
   @Output() switchView: EventEmitter<any> = new EventEmitter();
 
-  constructor(private http: ApiService, private data: DataStorageService) {
+  constructor(private http: ApiService, public data: DataStorageService) {
     this.terms = new TableData(['id', 'name'], ['id', 'name']);
     this.associations = new TableData(['termID', 'term', 'id', 'symbol'], ['term', 'id', 'symbol']);
   }
@@ -170,14 +170,6 @@ export class OntologySearchComponent {
     return `Select all gene associations with this term${
       term.count >= 200 ? ' [disabled for being too broad]' : ''
     }`;
-  }
-
-  /**
-   * Removes the gene association with the specified symbol from the selections
-   * @param {string} symbol - the symbol of the gene association to remove
-   */
-  removeAssociation(symbol: string): void {
-    this.associations.removeSelection(symbol);
   }
 }
 

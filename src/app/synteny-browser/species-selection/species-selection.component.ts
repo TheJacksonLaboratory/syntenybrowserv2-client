@@ -30,7 +30,20 @@ export class SpeciesSelectionComponent {
   }
 
   /**
-   * Changes the comparison species to the first non-reference species available
+   * Changes the reference species to the first non-comparison species
+   * available if the comparison species is the same as the reference
+   */
+  changeReference(): void {
+    if (this.refSpecies === this.compSpecies) {
+      this.refSpecies = this.species.filter(s => !this.isComparison(s))[0].getID();
+    }
+
+    this.update.emit();
+  }
+
+  /**
+   * Changes the comparison species to the first non-reference species
+   * available if the reference species is the same as the comparison
    */
   changeComparison(): void {
     if (this.refSpecies === this.compSpecies) {
