@@ -388,8 +388,17 @@ export class BlockViewFilterComponent implements OnInit {
             associations.forEach(a => {
               !f.hides() ? a.filter() : a.hide();
               a.filters.push(f.filterLabel);
+
+              // if an association is both filtered and hidden, default it to be filtered
+              if (a.filtered && a.hidden) {
+                a.show();
+              }
             });
-            this.filteredGenes.push(...associations);
+
+            // avoid adding duplicates
+            const filteredGeneIDs = this.filteredGenes.map(g => g.id);
+            const nonDupeAssoc = associations.filter(a => filteredGeneIDs.indexOf(a.id) < 0);
+            this.filteredGenes.push(...nonDupeAssoc);
           });
         });
       });
@@ -397,12 +406,20 @@ export class BlockViewFilterComponent implements OnInit {
 
     // check attribute filters
     if (attributeFilters.length) {
+      const filteredGeneIDs = this.filteredGenes.map(g => g.id);
       const matches = genes.filter(g => {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
             !attributeFilters[i].hides() ? g.filter() : g.hide();
             g.filters.push(attributeFilters[i].filterLabel);
-            return true;
+
+            // if an association is both filtered and hidden, default it to be filtered
+            if (g.filtered && g.hidden) {
+              g.show();
+            }
+
+            // avoid adding duplicates
+            return filteredGeneIDs.indexOf(g.id) < 0;
           }
         }
 
