@@ -387,6 +387,8 @@ export class BlockViewFilterComponent implements OnInit {
 
             associations.forEach(a => {
               !f.hides() ? a.filter() : a.hide();
+
+              // add the filter label of the filter it matches
               a.filters.push(f.filterLabel);
 
               // if an association is both filtered and hidden, default it to be filtered
@@ -411,6 +413,8 @@ export class BlockViewFilterComponent implements OnInit {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
             !attributeFilters[i].hides() ? g.filter() : g.hide();
+            
+            // add the filter label of the filter it matches
             g.filters.push(attributeFilters[i].filterLabel);
 
             // if an association is both filtered and hidden, default it to be filtered
