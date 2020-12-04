@@ -143,9 +143,9 @@ export class SyntenyBrowserComponent implements OnInit {
     this.data.filters = bvf.getCreatedFilters();
     bvb.filters = this.data.filters;
 
+
     const filteredGenes = bvf.filteredGenes.filter(g => g.filtered);
-    bvb.filteredRefGenes = filteredGenes.filter(g => g.species === 'ref');
-    bvb.filteredCompGenes = filteredGenes.filter(g => g.species === 'comp');
+    bvb.showFilteredGenes(filteredGenes);
 
     this.filterOpen = false;
   }

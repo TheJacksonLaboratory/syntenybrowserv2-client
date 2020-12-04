@@ -487,6 +487,41 @@ export class BlockViewBrowserComponent {
   }
 
   /**
+   * Splits the specified list of genes into reference and comparison filtered
+   * gene lists and sets up the filtered indicators that are located in the
+   * chromosome view
+   * @param {Filter[]} filteredGenes - list of genes matching at least one of
+   *                                   the block view filters
+   */
+  showFilteredGenes(filteredGenes: Gene[]): void {
+    this.filteredRefGenes = filteredGenes.filter(g => g.species === 'ref');
+    this.filteredCompGenes = filteredGenes.filter(g => g.species === 'comp');
+
+    this.cdr.detectChanges();
+
+    const bvb = this;
+    const featureTip = bvb.featureTip;
+
+    d3.selectAll('.ref-filtered-ind')
+      .data(this.filteredRefGenes)
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
+
+    d3.selectAll('.comp-filtered-ind')
+      .data(this.filteredCompGenes)
+      .on('mouseover', function(d: Gene) {
+        featureTip.show(d, this);
+      })
+      .on('mouseout', function() {
+        featureTip.hide();
+      });
+  }
+
+  /**
    * Returns the list of synteny blocks in the reference genome
    */
   getGenomeBlocks(): SyntenyBlock[] {
@@ -913,26 +948,8 @@ export class BlockViewBrowserComponent {
         featureTip.hide();
       });
 
-    d3.selectAll('.ref-filtered-ind')
-      .data(this.filteredRefGenes)
-      .on('mouseover', function(d: Gene) {
-        featureTip.show(d, this);
-      })
-      .on('mouseout', function() {
-        featureTip.hide();
-      });
-
     d3.selectAll('.comp-selected-ind')
       .data(this.selectedCompGenes)
-      .on('mouseover', function(d: Gene) {
-        featureTip.show(d, this);
-      })
-      .on('mouseout', function() {
-        featureTip.hide();
-      });
-
-    d3.selectAll('.comp-filtered-ind')
-      .data(this.filteredCompGenes)
       .on('mouseover', function(d: Gene) {
         featureTip.show(d, this);
       })
