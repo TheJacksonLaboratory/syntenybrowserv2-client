@@ -80,7 +80,7 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new default filter and sets it as the current filter
    */
-  createNewEditableFilter(advancedMode = true): void {
+  createNewEditableFilter(advancedMode = false): void {
     this.filters.push(this.getNewFilter(advancedMode));
     this.currentFilter = this.getCurrentFilter();
   }
@@ -413,7 +413,7 @@ export class BlockViewFilterComponent implements OnInit {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
             !attributeFilters[i].hides() ? g.filter() : g.hide();
-            
+
             // add the filter label of the filter it matches
             g.filters.push(attributeFilters[i].filterLabel);
 
