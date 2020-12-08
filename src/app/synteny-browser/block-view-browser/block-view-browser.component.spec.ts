@@ -520,6 +520,24 @@ describe('BlockViewBrowserComponent', () => {
     expect(component.refGenes.filter(g => g.highlighted).length).toBe(0);
   });
 
+  it('filters genes that match highlighting filters', () => {
+    component.render();
+
+    expect(component.filteredRefGenes.length).toBe(0);
+    expect(component.filteredCompGenes.length).toBe(0);
+
+    const filteredGenes = [component.refGenes[1],component.refGenes[2],component.compGenes[2]]
+    filteredGenes.forEach(g => g.filter());
+
+    component.showFilteredGenes(filteredGenes);
+    fixture.detectChanges();
+
+    expect(component.filteredRefGenes.length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('.ref-filtered-ind').length).toBe(2);
+    expect(component.filteredCompGenes.length).toBe(1);
+    expect(fixture.nativeElement.querySelectorAll('.comp-filtered-ind').length).toBe(1);
+  });
+
   it('shows clicktip data for a reference gene', () => {
     component.render();
 
