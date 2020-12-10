@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
         <ul>
           <li>
             Use the table(s) to mark genes or QTLs of interest (QTLs are only available for species
-            that have them loaded into the database, which currently is only Mouse).
+            that have them loaded into the database, which currently are Mouse and Rat).
           </li>
           <li>
             Clicking on rows in a table containing features will mark that feature as selected.
@@ -37,7 +37,7 @@ import { Component } from '@angular/core';
             Selecting the search by feature attribute option (the default) from the select menu
             above the table will start loading a table containing genes and QTLs (QTLs are only
             available for species that have them loaded into the database, by default this is mouse
-            only) in the reference genome.
+            and rat) in the reference genome.
           </li>
           <li>
             The table can't be filtered or interacted with until all of the features have been
