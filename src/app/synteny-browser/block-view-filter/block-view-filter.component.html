@@ -2,12 +2,12 @@
   <!-- Side navigation -->
   <clr-vertical-nav class="clr-col-2">
     <a
-      *ngFor="let page of navigation"
+      *ngFor="let pg of navigation"
       clrVerticalNavLink
-      (click)="activePage = page.value"
-      [ngStyle]="getNavItemStyle(page.value)"
+      (click)="activePage = pg.value"
+      [ngStyle]="{ 'font-weight': activePage === pg.value ? 'bold' : 'normal' }"
     >
-      {{ page.name | titlecase }}
+      {{ pg.name | titlecase }}
     </a>
   </clr-vertical-nav>
 
@@ -338,7 +338,7 @@
                 *ngIf="c.removable"
                 class="btn btn-icon btn-danger-outline"
                 title="Remove condition"
-                (click)="removeCondition(c)"
+                (click)="currentFilter.removeCondition(c)"
               >
                 <clr-icon shape="trash"></clr-icon>
               </button>
@@ -591,9 +591,12 @@
                 <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
                   Features per page
                 </clr-dg-page-size>
-                {{
-                  filteredGenes.length > 0 ? getPaginatorLabel(pag) : "0 of 0"
-                }}
+                <ng-container *ngIf="filteredGenes.length > 0">
+                  {{ pag.firstItem + 1 }} - {{ pag.lastItem + 1 }} of {{ pag.totalItems }}
+                </ng-container>
+                <ng-container *ngIf="!filteredGenes.length">
+                  0 of 0
+                </ng-container>
               </clr-dg-pagination>
             </clr-dg-footer>
           </clr-datagrid>

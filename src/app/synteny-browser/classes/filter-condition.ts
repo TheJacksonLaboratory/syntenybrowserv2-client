@@ -15,7 +15,7 @@ export class FilterCondition {
   exact = true;
 
   // value to match features against when searching utilizing user input
-  value: string;
+  value: string = '';
 
   // controls if the condition can be removed (true unless it's the only condition in a filter)
   removable: boolean;
