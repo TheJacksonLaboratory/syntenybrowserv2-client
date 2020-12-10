@@ -2,12 +2,12 @@
   <!-- Side navigation -->
   <clr-vertical-nav class="clr-col-2">
     <a
-      *ngFor="let page of navigation"
+      *ngFor="let pg of navigation"
       clrVerticalNavLink
-      (click)="activePage = page.value"
-      [ngStyle]="getNavItemStyle(page.value)"
+      (click)="activePage = pg.value"
+      [ngStyle]="{ 'font-weight': activePage === pg.value ? 'bold' : 'normal' }"
     >
-      {{ page.name | titlecase }}
+      {{ pg.name | titlecase }}
     </a>
   </clr-vertical-nav>
 
@@ -338,7 +338,7 @@
                 *ngIf="c.removable"
                 class="btn btn-icon btn-danger-outline"
                 title="Remove condition"
-                (click)="removeCondition(c)"
+                (click)="currentFilter.removeCondition(c)"
               >
                 <clr-icon shape="trash"></clr-icon>
               </button>
@@ -561,16 +561,17 @@
           <div class="clr-row clr-justify-content-center">
             <p>
               Blue rows are features that will be highlighted while red rows are
-              features that will be hidden.
+              features that will be hidden. Features that match both a hiding and
+              highlighting filter will default to highlighting.
             </p>
           </div>
 
           <!-- Results table -->
           <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact">
-            <clr-dg-column *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
+            <clr-dg-column *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']">
               {{ attr }}
             </clr-dg-column>
-            <clr-dg-column> species </clr-dg-column>
+            <clr-dg-column> filters </clr-dg-column>
 
             <clr-dg-placeholder> No genes to show! </clr-dg-placeholder>
 
@@ -578,10 +579,10 @@
               *clrDgItems="let row of filteredGenes"
               [ngClass]="{ 'hidden-row': row.hidden }"
             >
-              <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr']">
+              <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']">
                 {{ row[attr] }}
               </clr-dg-cell>
-              <clr-dg-cell> {{ row.species }} </clr-dg-cell>
+              <clr-dg-cell> {{ row.filters.join(', ') }} </clr-dg-cell>
             </clr-dg-row>
 
             <!-- Table pagination -->
@@ -590,9 +591,12 @@
                 <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
                   Features per page
                 </clr-dg-page-size>
-                {{
-                  filteredGenes.length > 0 ? getPaginatorLabel(pag) : "0 of 0"
-                }}
+                <ng-container *ngIf="filteredGenes.length > 0">
+                  {{ pag.firstItem + 1 }} - {{ pag.lastItem + 1 }} of {{ pag.totalItems }}
+                </ng-container>
+                <ng-container *ngIf="!filteredGenes.length">
+                  0 of 0
+                </ng-container>
               </clr-dg-pagination>
             </clr-dg-footer>
           </clr-datagrid>

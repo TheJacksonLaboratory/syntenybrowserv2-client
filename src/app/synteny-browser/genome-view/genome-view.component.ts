@@ -97,7 +97,7 @@ export class GenomeViewComponent implements OnInit {
       this.refGMap = new CircularGenomeMap(this.ref.genome);
       this.compGMap = new CircularGenomeMap(this.comp.genome);
 
-      const genomicBlocks = blocks.filter(b => b.compChr !== 'MT');
+      const genomicBlocks = blocks.filter(b => b.compChr !== 'MT' && b.refChr !== 'MT');
 
       // set the color for each block
       genomicBlocks.forEach(b => b.setColor(this.data.genomeColorMap[b.compChr]));

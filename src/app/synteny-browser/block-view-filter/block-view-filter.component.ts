@@ -70,13 +70,21 @@ export class BlockViewFilterComponent implements OnInit {
     this.allGenes = this.refGenes.concat(...this.compGenes);
     this.filteredGenes = [];
 
+    if (this.filters.length) {
+      this.applyFilters();
+    }
+
     this.createNewEditableFilter();
   }
 
   /**
    * Creates a new default filter and sets it as the current filter
    */
-  createNewEditableFilter(advancedMode = true): void {
+  createNewEditableFilter(advancedMode = false): void {
+    // make sure that any prior filters are marked as not being edited
+    this.filters.forEach(f => f.editing = false);
+
+    // add the new filter
     this.filters.push(this.getNewFilter(advancedMode));
     this.currentFilter = this.getCurrentFilter();
   }
@@ -88,6 +96,9 @@ export class BlockViewFilterComponent implements OnInit {
    */
   editFilter(filter: Filter): void {
     if (this.activePage === 'edit') {
+      // make sure that all filters are marked as not being edited
+      this.filters.forEach(f => f.editing = false);
+
       this.filterMode = 'edit';
       filter.editing = true;
 
@@ -153,14 +164,6 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Removes the specified condition from the current filter
-   * @param {FilterCondition} cond - the condition to remove
-   */
-  removeCondition(cond: FilterCondition): void {
-    this.currentFilter.removeCondition(cond);
-  }
-
-  /**
    * Formats all of the selected filters' metadata as well as all of the
    * resulting genes in the table into a TSV-like file
    */
@@ -205,6 +208,7 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {string} type - the feature type to filter features by
    */
   simpleFilterByType(type: string): void {
+    this.currentFilter.conditions[0].filterBy = 'type';
     this.currentFilter.conditions[0].value = type;
     this.finishFilter();
   }
@@ -224,15 +228,17 @@ export class BlockViewFilterComponent implements OnInit {
    * Emits a message if the term that's been selected is too broad to search
    */
   checkTermChildren(cond: FilterCondition = this.currentFilter.conditions[0]): void {
-    const ontTerms = this.data.ontologyTerms[cond.getOntology()];
+    this.filterErrorState = '';
+
     if (cond && cond.value) {
+      const ontTerms = this.data.ontologyTerms[cond.getOntology()];
       const termIDs = ontTerms.map(t => t.id);
       const term = ontTerms[termIDs.indexOf(cond.value)];
 
       if (term.count && term.count > 500) {
+        this.currentFilter.filterLabel = '';
         this.filterErrorState = 'Term too broad';
       } else {
-        this.filterErrorState = '';
         this.currentFilter.setLabel();
       }
     }
@@ -270,25 +276,11 @@ export class BlockViewFilterComponent implements OnInit {
     if (filter.isRefFilter()) {
       return this.refGenes;
     }
-    return this.compGenes;
-  }
+    if (filter.isCompFilter()) {
+      return this.compGenes;
+    }
 
-  /**
-   * Returns a style configuration object for a navigation item in the sidebar
-   * to determine font weight for the specified page (makes active page bold)
-   * @param {string} pageTitle - the title of the page
-   */
-  getNavItemStyle(pageTitle: string): object {
-    return { 'font-weight': this.activePage === pageTitle ? 'bold' : 'normal' };
-  }
-
-  /**
-   * Returns the label for the paginator for the table based on how many
-   * results are being displayed
-   * @param {ClrDatagridPagination} pag - the datagrid paginator
-   */
-  getPaginatorLabel(pag: ClrDatagridPagination): string {
-    return `${pag.firstItem + 1} - ${pag.lastItem + 1} of ${pag.totalItems}`;
+    return [];
   }
 
   /**
@@ -381,8 +373,22 @@ export class BlockViewFilterComponent implements OnInit {
             const assocIDs = assoc.map(a => a.id);
             const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
 
-            associations.forEach(a => (!f.hides() ? a.filter() : a.hide()));
-            this.filteredGenes.push(...associations);
+            associations.forEach(a => {
+              !f.hides() ? a.filter() : a.hide();
+
+              // add the filter label of the filter it matches
+              a.filters.push(f.filterLabel);
+
+              // if an association is both filtered and hidden, default it to be filtered
+              if (a.filtered && a.hidden) {
+                a.show();
+              }
+            });
+
+            // avoid adding duplicates
+            const filteredGeneIDs = this.filteredGenes.map(g => g.id);
+            const nonDupeAssoc = associations.filter(a => filteredGeneIDs.indexOf(a.id) < 0);
+            this.filteredGenes.push(...nonDupeAssoc);
           });
         });
       });
@@ -390,11 +396,22 @@ export class BlockViewFilterComponent implements OnInit {
 
     // check attribute filters
     if (attributeFilters.length) {
+      const filteredGeneIDs = this.filteredGenes.map(g => g.id);
       const matches = genes.filter(g => {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
             !attributeFilters[i].hides() ? g.filter() : g.hide();
-            return true;
+
+            // add the filter label of the filter it matches
+            g.filters.push(attributeFilters[i].filterLabel);
+
+            // if an association is both filtered and hidden, default it to be filtered
+            if (g.filtered && g.hidden) {
+              g.show();
+            }
+
+            // avoid adding duplicates
+            return filteredGeneIDs.indexOf(g.id) < 0;
           }
         }
 
