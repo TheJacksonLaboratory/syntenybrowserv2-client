@@ -498,9 +498,8 @@ export class BlockViewBrowserComponent {
     this.filteredCompGenes = filteredGenes.filter(g => g.species === 'comp');
 
     this.cdr.detectChanges();
-
-    const bvb = this;
-    const featureTip = bvb.featureTip;
+    
+    const featureTip = this.featureTip;
 
     d3.selectAll('.ref-filtered-ind')
       .data(this.filteredRefGenes)
