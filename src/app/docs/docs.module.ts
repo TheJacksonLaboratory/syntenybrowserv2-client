@@ -11,7 +11,6 @@ import { DocsContributorsComponent } from './sections/docs-contributors.componen
 import { DocsDataPrepComponent } from './sections/docs-data-prep.component';
 import { DocsDockerComponent } from './sections/docs-docker.component';
 import { DocsFeaturesComponent } from './sections/docs-features.component';
-import { DocsMenuComponent } from './sections/docs-menu.component';
 import { DocsServiceAPIComponent } from './sections/docs-python-api.component';
 import { DocsTutorialComponent } from './sections/docs-tutorial.component';
 
@@ -25,10 +24,9 @@ import { DocsTutorialComponent } from './sections/docs-tutorial.component';
     DocsDataPrepComponent,
     DocsDockerComponent,
     DocsFeaturesComponent,
-    DocsMenuComponent,
     DocsServiceAPIComponent,
     DocsTutorialComponent,
   ],
-  exports: [DocsMenuComponent],
+  exports: [],
 })
 export class DocsModule {}

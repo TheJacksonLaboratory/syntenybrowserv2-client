@@ -18,15 +18,18 @@ import { DocsContributorsComponent } from './docs/sections/docs-contributors.com
 const routes: Routes = [
   { path: 'browser', component: SyntenyBrowserComponent },
   { path: 'about', component: AboutComponent },
-  { path: 'docs', component: DocsComponent },
-  { path: 'docs-tutorial', component: DocsTutorialComponent },
-  { path: 'docs-client-api', component: DocsClientAPIComponent },
-  { path: 'docs-service-api', component: DocsServiceAPIComponent },
-  { path: 'docs-data-prep', component: DocsDataPrepComponent },
-  { path: 'docs-browser-features', component: DocsFeaturesComponent },
-  { path: 'docs-docker', component: DocsDockerComponent },
-  { path: 'docs-configs', component: DocsConfigsComponent },
-  { path: 'docs-contributors', component: DocsContributorsComponent },
+  { path: 'docs', component: DocsComponent,
+    children: [
+      { path: 'tutorial', component: DocsTutorialComponent },
+      { path: 'client-api', component: DocsClientAPIComponent },
+      { path: 'service-api', component: DocsServiceAPIComponent },
+      { path: 'data-prep', component: DocsDataPrepComponent },
+      { path: 'browser-features', component: DocsFeaturesComponent },
+      { path: 'docker', component: DocsDockerComponent },
+      { path: 'configs', component: DocsConfigsComponent },
+      { path: 'contributors', component: DocsContributorsComponent },
+    ]
+  },
   { path: 'examples', component: ExamplesComponent },
   { path: '', pathMatch: 'full', redirectTo: 'browser' },
 ];

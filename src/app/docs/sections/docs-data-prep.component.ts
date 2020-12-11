@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sb-docs-data-prep',
+  selector: 'data-prep',
   template: `
     <div class="content-container">
       <div class="content-area">
@@ -152,11 +152,6 @@ import { Component } from '@angular/core';
           </tbody>
         </table>
       </div>
-      <!-- nav element should be kept in
-      the parent component to preserve layout -->
-      <nav class="sidenav">
-        <sb-docs-menu></sb-docs-menu>
-      </nav>
     </div>
   `,
   styleUrls: ['../docs.component.scss'],

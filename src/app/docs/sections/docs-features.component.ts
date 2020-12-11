@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sb-docs-features',
+  selector: 'docs-features',
   template: `
     <div class="content-container">
       <div class="content-area">
@@ -54,11 +54,6 @@ import { Component } from '@angular/core';
           <h5>Feature Display Filters</h5>
         </div>
       </div>
-      <!-- nav element should be kept in
-      the parent component to preserve layout -->
-      <nav class="sidenav">
-        <sb-docs-menu></sb-docs-menu>
-      </nav>
     </div>
   `,
   styleUrls: ['../docs.component.scss'],
