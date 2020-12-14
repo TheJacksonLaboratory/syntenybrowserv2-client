@@ -30,6 +30,7 @@ const routes: Routes = [
   },
   { path: 'examples', component: ExamplesComponent,
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'human-lung-cancer' },
       { path: 'human-lung-cancer', component: LungCancerExampleComponent },
       { path: 'mouse-T2-diabetes', component: Type2DiabetesExampleComponent },
     ]
