@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
         <table>
           <tbody class="table">
             <tr>
-              <td class="left"><i>H. sapines</i></td>
+              <td class="left"><i>H. sapiens</i></td>
               <td class="left">
                 <a
                   target="_blank"
