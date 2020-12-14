@@ -7,8 +7,6 @@ import { ExamplesComponent } from './examples/examples.component';
 import { SyntenyBrowserComponent } from './synteny-browser/synteny-browser.component';
 
 import { DocsTutorialComponent } from './docs/sections/docs-tutorial.component';
-import { DocsClientAPIComponent } from './docs/sections/docs-client-api.component';
-import { DocsServiceAPIComponent } from './docs/sections/docs-python-api.component';
 import { DocsDataPrepComponent } from './docs/sections/docs-data-prep.component';
 import { DocsFeaturesComponent } from './docs/sections/docs-features.component';
 import { DocsDockerComponent } from './docs/sections/docs-docker.component';
@@ -23,8 +21,6 @@ const routes: Routes = [
   { path: 'docs', component: DocsComponent,
     children: [
       { path: 'tutorial', component: DocsTutorialComponent },
-      { path: 'client-api', component: DocsClientAPIComponent },
-      { path: 'service-api', component: DocsServiceAPIComponent },
       { path: 'data-prep', component: DocsDataPrepComponent },
       { path: 'browser-features', component: DocsFeaturesComponent },
       { path: 'docker', component: DocsDockerComponent },
