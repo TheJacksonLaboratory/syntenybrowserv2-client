@@ -1,0 +1,188 @@
+<div class="content-container">
+  <div class="content-area">
+    <h2>Synteny Browser Features</h2>
+    <div class="clr-row">
+      <div class="clr-col-lg-6 clr-col-12">
+        <div class="card">
+          <div class="card-header">
+            1. Feature Search
+          </div>
+          <div class="card-block">
+            <div>
+              <div style="max-width: 250px;" class="block-float-left padding-5">
+                <img id="sb-architecture-diagram"
+                  class="img-rounded-corners responsive"
+                  src="../assets/jax-synbrowser-find-features-panel.png"
+                  alt="Synteny Browser Feature Search"
+                  title="Synteny Browser Feature Search"
+                  style="max-width: 250px;"
+                />
+                <div class="container">
+                  A screenshot of feature search with populated features table
+                </div>
+              </div>
+              <div>
+              <p>
+                The feature search allows users to search for genome features
+                such as QTLs and individual (or groups of) genes.
+                <br/>
+                Searches could be done either by <b>attributes</b> such as feature
+                symbol or type, or by <b>ontology term association</b>. Users can
+                toggle between the two search options using the select above the
+                visible table without having their selections cleared. To learn more
+                about the source of the data resulting in the table read the Data
+                Sources &amp; Formats page.
+                <br/>
+                The feature search will always search and display results for
+                the selected reference species, which can be changed from the
+                select options. By default, the reference genome is the mouse
+                and the comparison is the human.
+                <br/>
+                The search feature table can be filtered to narrow the results
+                and the selected features will appear in the area below. From the
+                search results, users can select some or all of the data elements
+                for viewing in the genome view.
+              </div>
+            </div>
+          </div> <!-- end card block -->
+          <div class="card-footer">
+            <a [routerLink]="'/docs-data-prep'" class="btn btn-sm btn-link">Data Sources &amp; Formats</a>
+          </div>
+        </div>
+      </div>
+      <div class="clr-col-lg-6 clr-col-12">
+        <div class="card">
+          <div class="card-header">
+            2. Genome View
+          </div>
+          <div class="card-block">
+            <div>
+              <div style="max-width: 250px;" class="block-float-left padding-5">
+                <img id="sb-architecture-diagram"
+                  class="img-rounded-corners responsive"
+                  src="../assets/jax-syntenybrowser-genome-view-panel.png"
+                  alt="Synteny Browser Genome View"
+                  title="Synteny Browser Genome View"
+                  style="max-width: 250px;"
+                />
+                <div class="container">
+                  A screenshot of genome view with three selected features
+                </div>
+              </div>
+              <div>
+              <p>
+                The genome view consists of two rings: the outer ring represents the
+                selected reference genome, separated into chromosomes and the inner
+                ring represents the comparison genome, also separated into chromosomes.
+                <br/>
+                Users can alternatively skip the feature search and begin
+                their exploration of conserved synteny by selecting one of the
+                reference chromosomes displayed in the outer ring in the genome view.
+                This action will generate color arcs showing
+                the regions of conserved synteny in the comparison genome.
+                <br/>
+                Selected data elements resulting from a feature search are indicated by
+                labels along the reference genome; the syntenic blocks of the selected
+                data elements are also extended out from the inner edge of the reference
+                chromosome for emphasis. If you click on a reference chromosome that contains
+                features you selected from the feature/ontology search, the regions that
+                contain at least one feature will extend to the locations in the comparison
+                genome.
+              </p>
+              </div>
+            </div>
+          </div> <!-- end card block -->
+        </div>
+      </div>
+    </div>
+
+    <div class="clr-row">
+      <div class="clr-col-lg-6 clr-col-12">
+        <div class="card">
+          <div class="card-header">
+            3. Chromosome &amp; Block View
+          </div>
+          <div class="card-block">
+            <div>
+              <div style="max-width: 250px;" class="block-float-left padding-5">
+                <img id="sb-architecture-diagram"
+                  class="img-rounded-corners responsive"
+                  src="../assets/jax-syntenybrowser-chromosome-block-view.png"
+                  alt="Chromosome and Block View Synteny Browser"
+                  title="Chromosome and Block View Synteny Browser"
+                  style="max-width: 250px;"
+                />
+                <div class="container">
+                  A screenshot of block view and a hover over a gene in the reference
+                </div>
+              </div>
+              <div>
+              <p>
+                The syntenic block view browser displays the genome features
+                in the reference and comparison species. This consists of
+                five distinct elements (top to bottom): a set of tools, the linear genome view,
+                a chromosome view, the reference and comparison tracks, and a comparison genome key.
+                The reference genome track is shaded in gray and the comparison
+                genome is color coded to highlight the chromosomal locations of
+                the conserved syntenic blocks.
+                <br/>
+                Navigation operations in block view include zoom and pan. Guidelines
+                to indicate the anchor features used to define blocks can be toggled on and off.
+              </p>
+              </div>
+            </div>
+          </div> <!-- end card block -->
+        </div>
+      </div>
+      <div class="clr-col-lg-6 clr-col-12">
+        <div class="card">
+          <div class="card-header">
+            4. Filtering the Block View
+          </div>
+          <div class="card-block">
+            <div>
+              <div style="max-width: 250px;" class="block-float-left padding-5">
+                <img id="sb-architecture-diagram"
+                  class="img-rounded-corners responsive"
+                  src="../assets/jax-syntenybrowser-block-view-filtering.png"
+                  alt="Synteny Browser Block View Filtering"
+                  title="Synteny Browser Block View Filtering"
+                  style="max-width: 250px;"
+                />
+                <div class="container">
+                  A screenshot of the filter feature with two filering conditions specified
+                </div>
+              </div>
+              <div>
+              <p>
+                A unique function of the JAX Synteny Browser lies in the syntenic
+                block feature display filters. The filter interface allows researchers
+                to search for and selectively display genome features within the
+                region of conserved synteny that match biological attributes of interest.
+                <br/>
+                The block view browser contains a lot of information and much of it may
+                not be pertinent to what you’re looking for. You have the ability to select
+                features from the feature table towards the top of the application,
+                which will appear in red in the block view, but filtering can add another
+                level of focus to features or regions of interest.
+                <br/>
+                The filtering can be limited to the reference
+                or comparison genomes, or set to include matches from either genome.
+                A table of matching features is displayed in the 'Preview Filters'
+                section of the filtering tool and can be downloaded as
+                a comma separated file. The locations of matching features are highlighted
+                in the block view using vertical tick marks.
+              </p>
+              </div>
+            </div>
+          </div> <!-- end card block -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- nav element should be kept in the parent component to preserve layout -->
+  <nav class="sidenav">
+    <sb-docs-menu></sb-docs-menu>
+  </nav>
+</div>
