@@ -27,10 +27,13 @@ import { Component } from '@angular/core';
           genome using the Block View Filtering tool to find genes annotated to relevant phenotype
           terms from the Mammalian Phenotype (MP) ontology
           (Smith and Eppig <a href="https://link.springer.com/article/10.1007/s00335-019-09821-4#ref-CR29" target="_blank">2012</a>).
-          Creating a new filter that highlights matches in mouse annotated with a Mammalian Phenotype
-          ontology term and then searching for and selecting "impaired glucose tolerance", identifies
+          To do this, make sure that the filter mode is set to 'Highlight' and click through the
+          dropdown menu series, first selecting 'Mouse Only', then 'By Ontology Term', and last,
+          'From Mouse Phenotype Ontology'. Doing this will cause an autocomplete to display, where
+          the researcher can start typing “impaired glucose tolerance” in and then select the term
+          when it appears as an option. Clicking 'Done' will create the filter. This filter identifies
           thirteen genes that fall within the boundaries of the T2dm2sa QTL interval: Pkn3, Lcn2,
-          Dpm2, Zbtb43, Bbs5, Commd9, Hipk3, Pax6, Hdc, Ap4e1,Chgb, and Pcsk2.
+          Dpm2, Zbtb43, Bbs5, Commd9, Hipk3, Pax6, Hdc, Ap4e1, Chgb, and Pcsk2.
         </p>
         <br/>
         <p> The researcher could then create another filter on the MP term "increased circulating
