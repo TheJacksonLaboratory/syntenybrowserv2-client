@@ -55,6 +55,7 @@ import { Component } from '@angular/core';
           Kobayashi et al.
           (<a href="https://link.springer.com/article/10.1007/s00335-019-09821-4#ref-CR13" target="_blank">2006</a>).
         </p>
+        <br/>
         <p>
           MP terms are relevant only for mouse genes. To identify mouse orthologs of human genes
           relevant to type 2 diabetes phenotypes, a researcher could limit annotation searches to the
