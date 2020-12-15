@@ -20,6 +20,7 @@ const routes: Routes = [
   { path: 'about', component: AboutComponent },
   { path: 'docs', component: DocsComponent,
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'browser-features' },
       { path: 'tutorial', component: DocsTutorialComponent },
       { path: 'data-prep', component: DocsDataPrepComponent },
       { path: 'browser-features', component: DocsFeaturesComponent },

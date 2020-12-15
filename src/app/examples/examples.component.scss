@@ -19,3 +19,17 @@ img {
   padding-right: 10px;
   padding-bottom: 10px;
 }
+
+.sidenav {
+  max-width: 300px;
+  width: 15%;
+  text-overflow: ellipsis;
+  padding-top: 1em;
+
+  .sidenav-content .nav-link {
+    margin: 1em;
+    width: unset;
+    text-align: right;
+    padding-right: 5px;
+  }
+}

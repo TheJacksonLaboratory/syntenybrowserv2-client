@@ -6,10 +6,10 @@ import { Component } from '@angular/core';
     <div class="content-container">
       <nav class="sidenav">
         <section class="sidenav-content">
-          <a class="nav-link" [routerLink]="['human-lung-cancer']">
+          <a class="nav-link" [routerLink]="['human-lung-cancer']" routerLinkActive="active">
             Lung Cancer Susceptibility in Humans
           </a>
-          <a class="nav-link" [routerLink]="['mouse-T2-diabetes']">
+          <a class="nav-link" [routerLink]="['mouse-T2-diabetes']" routerLinkActive="active">
             Mouse Type 2 Diabetes Candidate Genes
           </a>
         </section>

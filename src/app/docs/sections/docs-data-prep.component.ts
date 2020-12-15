@@ -18,7 +18,7 @@ import { Component } from '@angular/core';
           </thead>
           <tbody>
             <tr>
-              <td class="left"><b>1. Syntenyc Relationships</b></td>
+              <td class="left"><b>1. Syntenic Relationships</b></td>
               <td class="left"></td>
               <td class="left"></td>
               <td class="left"></td>
