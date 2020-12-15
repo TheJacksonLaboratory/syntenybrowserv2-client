@@ -9,7 +9,7 @@ import { DocsConfigsComponent } from './sections/docs-configs.component';
 import { DocsContributorsComponent } from './sections/docs-contributors.component';
 import { DocsDataPrepComponent } from './sections/docs-data-prep.component';
 import { DocsDockerComponent } from './sections/docs-docker.component';
-import { DocsFeaturesComponent } from './sections/docs-features.component';
+import { DocsFeaturesComponent } from './sections/docs-features/docs-features.component';
 import { DocsTutorialComponent } from './sections/docs-tutorial.component';
 
 @NgModule({
