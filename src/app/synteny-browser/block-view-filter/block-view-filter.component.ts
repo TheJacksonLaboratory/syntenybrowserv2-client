@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ClrDatagridPagination } from '@clr/angular';
 import { Species } from '../classes/species';
 
 import { Gene } from '../classes/gene';
@@ -7,7 +6,6 @@ import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
-import { FilterCondition } from '../classes/filter-condition';
 import { Option } from '../synteny-browser.component';
 
 @Component({
@@ -80,12 +78,12 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new default filter and sets it as the current filter
    */
-  createNewEditableFilter(advancedMode = false): void {
+  createNewEditableFilter(): void {
     // make sure that any prior filters are marked as not being edited
     this.filters.forEach(f => f.editing = false);
 
     // add the new filter
-    this.filters.push(this.getNewFilter(advancedMode));
+    this.filters.push(this.getNewFilter());
     this.currentFilter = this.getCurrentFilter();
   }
 
@@ -118,20 +116,10 @@ export class BlockViewFilterComponent implements OnInit {
     // clear any current messages
     this.filterErrorState = '';
 
-    if (!this.currentFilter.allConditionsAreComplete()) {
+    if (!this.currentFilter.isComplete()) {
       this.filterErrorState = 'Please fill out all fields';
       return;
     }
-
-    // if it's a "simple" filter, make sure that it only has a single condition
-    if (!this.currentFilter.advancedFilter) {
-      this.currentFilter.conditions = [this.currentFilter.conditions[0]];
-      this.currentFilter.setLabel();
-    }
-
-    this.currentFilter.conditions.forEach(c => {
-      c.editing = false;
-    });
 
     this.currentFilter.editing = false;
     this.currentFilter.created = true;
@@ -144,7 +132,7 @@ export class BlockViewFilterComponent implements OnInit {
     this.filterMode = 'add';
 
     // create a new filter using the current filter's advanced/simple setting
-    this.createNewEditableFilter(this.currentFilter.advancedFilter);
+    this.createNewEditableFilter();
   }
 
   /**
@@ -186,8 +174,8 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {string} attribute - the attribute to filter features by
    */
   simpleFilterByAttribute(attribute: string): void {
-    this.currentFilter.conditions[0].filterBy = attribute;
-    this.currentFilter.conditions[0].value = attribute;
+    this.currentFilter.filterBy = attribute;
+    this.currentFilter.value = attribute;
   }
 
   /**
@@ -195,9 +183,9 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {string} ontology - the ontology to filter features by
    */
   simpleFilterByOntology(ontology: string): void {
-    this.currentFilter.conditions[0].filterBy = `ont-${ontology}`;
-    this.currentFilter.conditions[0].qualifier = 'equal';
-    this.currentFilter.conditions[0].value = null;
+    this.currentFilter.filterBy = `ont-${ontology}`;
+    this.currentFilter.qualifier = 'equal';
+    this.currentFilter.value = null;
     this.currentFilter.simpleUserInputNeeded = true;
     this.currentFilter.setSimpleTitle();
   }
@@ -208,8 +196,8 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {string} type - the feature type to filter features by
    */
   simpleFilterByType(type: string): void {
-    this.currentFilter.conditions[0].filterBy = 'type';
-    this.currentFilter.conditions[0].value = type;
+    this.currentFilter.filterBy = 'type';
+    this.currentFilter.value = type;
     this.finishFilter();
   }
 
@@ -219,7 +207,7 @@ export class BlockViewFilterComponent implements OnInit {
    *                             loose matching model
    */
   simpleFilterQualifier(qualifier: string): void {
-    this.currentFilter.conditions[0].qualifier = qualifier;
+    this.currentFilter.qualifier = qualifier;
     this.currentFilter.simpleUserInputNeeded = true;
     this.currentFilter.setSimpleTitle();
   }
@@ -227,8 +215,9 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Emits a message if the term that's been selected is too broad to search
    */
-  checkTermChildren(cond: FilterCondition = this.currentFilter.conditions[0]): void {
+  checkTermChildren(): void {
     this.filterErrorState = '';
+    let cond = this.currentFilter;
 
     if (cond && cond.value) {
       const ontTerms = this.data.ontologyTerms[cond.getOntology()];
@@ -251,17 +240,8 @@ export class BlockViewFilterComponent implements OnInit {
    */
   getFeatureTypes(filter: Filter): string[] {
     const genes = this.getGenesForSpecies(filter);
-    const types = Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();
 
-    // if any of the conditions have type selections that aren't valid
-    // anymore, revert them to null so that user must choose a new type
-    this.currentFilter.conditions.forEach(c => {
-      if (c.hasInvalidType(types)) {
-        c.value = null;
-      }
-    });
-
-    return types;
+    return Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();;
   }
 
   /**
@@ -300,8 +280,8 @@ export class BlockViewFilterComponent implements OnInit {
   /**
    * Creates a new filter and returns it
    */
-  private getNewFilter(advancedMode: boolean): Filter {
-    return new Filter(this.refSpecies, this.compSpecies, this.filters.length, advancedMode);
+  private getNewFilter(): Filter {
+    return new Filter(this.refSpecies, this.compSpecies, this.filters.length);
   }
 
   /**
@@ -368,28 +348,26 @@ export class BlockViewFilterComponent implements OnInit {
     // check ontology filters first since they will take the longest
     if (ontologyFilters.length) {
       ontologyFilters.forEach(f => {
-        f.conditions.forEach(c => {
-          this.http.getTermAssociations(species.getID(), c.value).subscribe(assoc => {
-            const assocIDs = assoc.map(a => a.id);
-            const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
+        this.http.getTermAssociations(species.getID(), f.value).subscribe(assoc => {
+          const assocIDs = assoc.map(a => a.id);
+          const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
 
-            associations.forEach(a => {
-              !f.hides() ? a.filter() : a.hide();
+          associations.forEach(a => {
+            !f.hides() ? a.filter() : a.hide();
 
-              // add the filter label of the filter it matches
-              a.filters.push(f.filterLabel);
+            // add the filter label of the filter it matches
+            a.filters.push(f.filterLabel);
 
-              // if an association is both filtered and hidden, default it to be filtered
-              if (a.filtered && a.hidden) {
-                a.show();
-              }
-            });
-
-            // avoid adding duplicates
-            const filteredGeneIDs = this.filteredGenes.map(g => g.id);
-            const nonDupeAssoc = associations.filter(a => filteredGeneIDs.indexOf(a.id) < 0);
-            this.filteredGenes.push(...nonDupeAssoc);
+            // if an association is both filtered and hidden, default it to be filtered
+            if (a.filtered && a.hidden) {
+              a.show();
+            }
           });
+
+          // avoid adding duplicates
+          const filteredGeneIDs = this.filteredGenes.map(g => g.id);
+          const nonDupeAssoc = associations.filter(a => filteredGeneIDs.indexOf(a.id) < 0);
+          this.filteredGenes.push(...nonDupeAssoc);
         });
       });
     }
