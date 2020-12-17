@@ -1,6 +1,5 @@
 import { SearchType, Species } from './species';
 import { Gene } from './gene';
-import { FilterCondition } from './filter-condition';
 
 export class Filter {
   // data for species a filter could apply to

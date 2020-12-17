@@ -102,7 +102,7 @@ export class SyntenyBrowserComponent implements OnInit {
     this.data.retrieveOntologyTerms();
 
     // TODO: this is here for work on filters
-    // this.automateFlowToWorkOnFilters();
+    this.automateFlowToWorkOnFilters();
   }
 
   /**
@@ -163,7 +163,7 @@ export class SyntenyBrowserComponent implements OnInit {
       this.getChromosomeFeatures();
 
       this.filterOpen = true;
-    }, 300);
+    }, 1000);
   }
 }
 

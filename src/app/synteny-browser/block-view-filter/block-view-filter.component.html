@@ -182,19 +182,20 @@
                 </clr-dropdown>
               </clr-dropdown-menu>
             </clr-dropdown>
+          </div>
+          <div
+            *ngIf="currentFilter.simpleUserInputNeeded"
+            class="clr-row clr-col-12"
+          >
 
             <!-- Input for ID or symbol -->
             <clr-input-container
-              *ngIf="
-                currentFilter.simpleUserInputNeeded &&
-                !currentFilter.isFilteringByOntologyTerm()
-              "
-              class="right-1"
+              *ngIf="!currentFilter.isFilteringByOntologyTerm()"
             >
-              <label for="simple-value"> Value </label>
+              <label for="filter-value"> Value </label>
 
               <input
-                id="simple-value"
+                id="filter-value"
                 clrInput
                 placeholder="Enter a value here"
                 [(ngModel)]="currentFilter.value"
@@ -203,11 +204,8 @@
 
             <!-- Autocomplete for ontology term -->
             <ng-select
-              *ngIf="
-                currentFilter.simpleUserInputNeeded &&
-                currentFilter.isFilteringByOntologyTerm()
-              "
-              class="simple-autocomplete right-1"
+              *ngIf="currentFilter.isFilteringByOntologyTerm()"
+              class="simple-autocomplete"
               bindLabel="name"
               bindValue="id"
               [items]="
@@ -219,6 +217,8 @@
               (change)="checkTermChildren()"
             >
             </ng-select>
+          </div>
+          <div *ngIf="currentFilter.isComplete()" class="clr-row clr-col-12">
 
             <!-- Filter name button -->
             <clr-input-container class="right-1">

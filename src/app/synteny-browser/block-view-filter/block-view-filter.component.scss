@@ -15,30 +15,9 @@ h6 {
 
 p { margin-top: 0.2em; }
 
-.mode-toggle p { margin-top: 0.23rem; }
-
-.smaller { font-size: 0.5rem; }
-
-.new-filter { border-top: 1px #AAA solid; }
-
-.input-btn {
-  padding: 5px;
-  border: none;
-  min-width: 0;
-}
-
 .clr-select { min-width: 0 !important; }
 
-.error-msg { color: #F00; }
-
-.test-run-msg { color: #0079b8; }
-
-.filter-controls {
-  padding: 0;
-  margin-top: 0.5rem;
-}
-
-clr-select-container, clr-input-container { margin-top: -0.3rem !important; }
+clr-select-container { margin-top: -0.3rem !important; }
 
 .hidden-row { background: rgba(255, 0, 0, 0.2); }
 
