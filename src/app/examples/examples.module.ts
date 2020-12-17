@@ -5,9 +5,10 @@ import { AppRoutingModule } from '../app-routing.module';
 import { ExamplesComponent } from './examples.component';
 import { LungCancerExampleComponent } from './use-cases/lung-cancer.component';
 import { Type2DiabetesExampleComponent } from './use-cases/type-2-diabetes.component';
+import { ClarityModule } from '@clr/angular';
 
 @NgModule({
-  imports: [CommonModule, AppRoutingModule],
+  imports: [CommonModule, AppRoutingModule, ClarityModule],
   declarations: [
     ExamplesComponent,
     LungCancerExampleComponent,
