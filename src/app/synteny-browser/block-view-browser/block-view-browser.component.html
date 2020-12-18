@@ -175,7 +175,8 @@
       <!-- Button group -->
       <div class="btn-group btn-icon">
         <!-- Download button -->
-        <button id="block-view-download"
+        <button
+          id="block-view-download"
           class="btn block-view-option"
           [disabled]="!compGenes"
           (click)="filenameModalOpen = true"
@@ -974,9 +975,10 @@
   <div *ngIf="c.hits" class="modal-body">
     <h4>GWAS Hits</h4>
     <div *ngFor="let h of c.hits">
-      <hr>
+      <hr />
       <p *ngFor="let key of getTTItems(h)">
-        <span *ngIf="h[key]" style="font-weight: bold">{{ key }}:</span> {{ h[key] }}
+        <span *ngIf="h[key]" style="font-weight: bold">{{ key }}:</span>
+        {{ h[key] }}
       </p>
     </div>
   </div>

@@ -38,32 +38,32 @@ export class FeatureSearchComponent {
   loadFeatures(refSpecies: Species): void {
     // only get the gene (and QTL) data if changes have been made to what the
     // user wants to see; otherwise it's just another 6-7 wasted seconds
-    // if (this.refSpecies !== refSpecies || !this.features.rows.length) {
-    //   this.clear();
-    //   this.features.loading = true;
-    //
-    //   this.refSpecies = refSpecies;
-    //
-    //   // get genes by chromosome
-    //   let returnedChrs = 0;
-    //   this.refSpecies.getChromosomes().forEach(chr => {
-    //     this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
-    //       this.features.setRows(genes);
-    //       returnedChrs += 1;
-    //
-    //       if (returnedChrs === this.refSpecies.getNumChrs()) {
-    //         this.features.loading = false;
-    //       }
-    //     });
-    //   });
-    //
-    //   // get QTLs if the reference species has them
-    //   if (this.refSpecies.hasQTLs) {
-    //     this.http.getQTLs(this.refSpecies.getID()).subscribe(qtls => {
-    //       this.features.setRows(qtls);
-    //     });
-    //   }
-    // }
+    if (this.refSpecies !== refSpecies || !this.features.rows.length) {
+      this.clear();
+      this.features.loading = true;
+
+      this.refSpecies = refSpecies;
+
+      // get genes by chromosome
+      let returnedChrs = 0;
+      this.refSpecies.getChromosomes().forEach(chr => {
+        this.http.getGeneMetadata(refSpecies.getID(), chr).subscribe((genes: Feature[]) => {
+          this.features.setRows(genes);
+          returnedChrs += 1;
+
+          if (returnedChrs === this.refSpecies.getNumChrs()) {
+            this.features.loading = false;
+          }
+        });
+      });
+
+      // get QTLs if the reference species has them
+      if (this.refSpecies.hasQTLs) {
+        this.http.getQTLs(this.refSpecies.getID()).subscribe(qtls => {
+          this.features.setRows(qtls);
+        });
+      }
+    }
   }
 
   /**

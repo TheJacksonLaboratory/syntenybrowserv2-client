@@ -271,8 +271,8 @@ import { Component } from '@angular/core';
                   </li>
                   <li>
                     If you selected any QTLs in a previous step, they will appear as purple-shaded
-                    blocks in the reference track (currently only for mouse or rat when mouse or rat is the
-                    reference species). Hovering over these blocks will open a tooltip with
+                    blocks in the reference track (currently only for mouse or rat when mouse or rat
+                    is the reference species). Hovering over these blocks will open a tooltip with
                     information about the QTL.
                   </li>
                   <li>

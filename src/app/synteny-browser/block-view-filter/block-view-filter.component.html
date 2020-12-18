@@ -45,10 +45,7 @@
         </div>
 
         <!-- Current simple filter -->
-        <div
-          *ngIf="currentFilter"
-          class="clr-row clr-col-12 top-1"
-        >
+        <div *ngIf="currentFilter" class="clr-row clr-col-12 top-1">
           <div class="clr-row clr-col-12">
             <!-- Mode select -->
             <clr-select-container class="right-1">
@@ -187,7 +184,6 @@
             *ngIf="currentFilter.simpleUserInputNeeded"
             class="clr-row clr-col-12"
           >
-
             <!-- Input for ID or symbol -->
             <clr-input-container
               *ngIf="!currentFilter.isFilteringByOntologyTerm()"
@@ -208,9 +204,7 @@
               class="simple-autocomplete"
               bindLabel="name"
               bindValue="id"
-              [items]="
-                data.ontologyTerms[currentFilter.getOntology()]
-              "
+              [items]="data.ontologyTerms[currentFilter.getOntology()]"
               [virtualScroll]="true"
               placeholder="Enter a term"
               [(ngModel)]="currentFilter.value"
@@ -219,7 +213,6 @@
             </ng-select>
           </div>
           <div *ngIf="currentFilter.isComplete()" class="clr-row clr-col-12">
-
             <!-- Filter name button -->
             <clr-input-container class="right-1">
               <label for="filter-name"> Name the filter </label>
@@ -278,14 +271,16 @@
           <div class="clr-row clr-justify-content-center">
             <p>
               Blue rows are features that will be highlighted while red rows are
-              features that will be hidden. Features that match both a hiding and
-              highlighting filter will default to highlighting.
+              features that will be hidden. Features that match both a hiding
+              and highlighting filter will default to highlighting.
             </p>
           </div>
 
           <!-- Results table -->
           <clr-datagrid *ngIf="filteredGenes" class="datagrid-compact">
-            <clr-dg-column *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']">
+            <clr-dg-column
+              *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']"
+            >
               {{ attr }}
             </clr-dg-column>
             <clr-dg-column> filters </clr-dg-column>
@@ -296,10 +291,12 @@
               *clrDgItems="let row of filteredGenes"
               [ngClass]="{ 'hidden-row': row.hidden }"
             >
-              <clr-dg-cell *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']">
+              <clr-dg-cell
+                *ngFor="let attr of ['type', 'id', 'symbol', 'chr', 'species']"
+              >
                 {{ row[attr] }}
               </clr-dg-cell>
-              <clr-dg-cell> {{ row.filters.join(', ') }} </clr-dg-cell>
+              <clr-dg-cell> {{ row.filters.join(", ") }} </clr-dg-cell>
             </clr-dg-row>
 
             <!-- Table pagination -->
@@ -309,7 +306,8 @@
                   Features per page
                 </clr-dg-page-size>
                 <ng-container *ngIf="filteredGenes.length > 0">
-                  {{ pag.firstItem + 1 }} - {{ pag.lastItem + 1 }} of {{ pag.totalItems }}
+                  {{ pag.firstItem + 1 }} - {{ pag.lastItem + 1 }} of
+                  {{ pag.totalItems }}
                 </ng-container>
                 <ng-container *ngIf="!filteredGenes.length">
                   0 of 0

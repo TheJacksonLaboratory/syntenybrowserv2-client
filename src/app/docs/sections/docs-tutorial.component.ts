@@ -13,17 +13,14 @@ import { Component } from '@angular/core';
         </p>
         <h4>Prerequisites</h4>
         <p>
-          To follow the steps in this tutorial you will require the followng
-          packages:
+          To follow the steps in this tutorial you will require the followng packages:
         </p>
         <ul>
           <li>
-            Docker(<a
-            href="https://www.docker.com/community-edition"
-            target="_blank"
-          >https://www.docker.com/community-edition</a
-          >): Docker is a program that lets you run "containers" hosting software
-            and its dependencies
+            Docker(<a href="https://www.docker.com/community-edition" target="_blank"
+              >https://www.docker.com/community-edition</a
+            >): Docker is a program that lets you run "containers" hosting software and its
+            dependencies
           </li>
           <li>Python 3.x</li>
           <li>synbrowser-manage:</li>

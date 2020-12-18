@@ -12,7 +12,8 @@
     <!-- Non-syntenic selected features -->
     <g
       *ngIf="featuresNoBlocks && featuresNoBlocks.length > 0"
-      font-size="11" id="non-syntenic-feature-list"
+      font-size="11"
+      id="non-syntenic-feature-list"
       [attr.transform]="translate(5, 46)"
     >
       <text font-weight="bold">Non-syntenic Features</text>
@@ -66,16 +67,13 @@
         </g>
 
         <!-- Reference genome labels -->
-        <g id="ref-labels" >
+        <g id="ref-labels">
           <g
             *ngFor="let chr of ref.getChromosomes()"
             [attr.transform]="getRefLabelPos(chr, refGMap)"
           >
             <circle r="8" cy="-4" fill="#fff"></circle>
-            <text
-              text-anchor="middle"
-              (click)="renderChordMapForChr(chr)"
-            >
+            <text text-anchor="middle" (click)="renderChordMapForChr(chr)">
               {{ chr }}
             </text>
           </g>

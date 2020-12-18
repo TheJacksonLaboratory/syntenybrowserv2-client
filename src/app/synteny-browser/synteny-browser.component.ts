@@ -63,7 +63,7 @@ export class SyntenyBrowserComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if(!this.data.species) {
+    if (!this.data.species) {
       this.http.getSpecies().subscribe(species => {
         this.species.setSpecies(species);
         this.data.species = species;

@@ -2,9 +2,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { ClarityModule } from '@clr/angular';
 import { Species } from '../classes/species';
 import { SpeciesSelectionComponent } from './species-selection.component';
-import { ClarityModule } from '@clr/angular';
 import { HUMAN, MOUSE, RAT } from '../testing/constants/mock-species';
 
 describe('SpeciesSelectionComponent', () => {
@@ -15,10 +15,7 @@ describe('SpeciesSelectionComponent', () => {
   let multiSpecies: Species[];
 
   beforeAll(() => {
-    dualSpecies = [
-      new Species(HUMAN.organism),
-      new Species(MOUSE.organism),
-    ];
+    dualSpecies = [new Species(HUMAN.organism), new Species(MOUSE.organism)];
     multiSpecies = [
       new Species(HUMAN.organism),
       new Species(MOUSE.organism),
@@ -50,7 +47,6 @@ describe('SpeciesSelectionComponent', () => {
   describe('Dual Species Selection', () => {
     it('should create reference and comparison species for only two species total', () => {
       component.setSpecies(dualSpecies);
-
 
       expect(component.refSpecies).toEqual('9606');
       expect(component.getReferenceSelection()).toEqual(dualSpecies[0]);

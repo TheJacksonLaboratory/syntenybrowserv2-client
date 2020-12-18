@@ -21,7 +21,7 @@ export class Filter {
   qualifier = 'equal';
 
   // value to match features against when searching utilizing user input
-  value: string = '';
+  value = '';
 
   // ID for the filter to identify it from other possible filters
   id: number;

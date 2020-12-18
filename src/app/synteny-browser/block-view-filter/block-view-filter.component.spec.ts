@@ -1,21 +1,22 @@
+/* eslint-disable max-classes-per-file */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BlockViewFilterComponent } from './block-view-filter.component';
 import { ClarityModule } from '@clr/angular';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { Observable, of } from 'rxjs';
+import { BlockViewFilterComponent } from './block-view-filter.component';
 import { ApiService } from '../services/api.service';
 import { Species } from '../classes/species';
 import { HUMAN, MOUSE } from '../testing/constants/mock-species';
 import { DataStorageService } from '../services/data-storage.service';
-import { Observable, of } from 'rxjs';
 import { Feature } from '../classes/feature';
 import {
   HYPERGLYCEMIA,
   IMP_GLUC_TOL,
   MOUSE_HUMAN_REF_GENES_CHR_2,
   MOUSE_HUMAN_COMP_GENES_CHR_2,
-  TYPE_2_DIAB
+  TYPE_2_DIAB,
 } from '../testing/constants/filtering-features';
 import { Gene } from '../classes/gene';
 
@@ -27,13 +28,11 @@ class MockDataStorageService {
       { id: 'MP:0005291', name: 'abnormal glucose tolerance', count: 2 },
       { id: 'MP:0005508', name: 'abnormal skeleton morphology', count: 698 },
     ],
-    go: [
-      { id: 'GO:0009232', name: 'thiamine catabolic process', count: null },
-    ],
+    go: [{ id: 'GO:0009232', name: 'thiamine catabolic process', count: null }],
     doid: [
       { id: 'DOID:5614', name: 'eye disease', count: 626 },
       { id: 'DOID:9352', name: 'type 2 diabetes mellitus', count: 3 },
-    ]
+    ],
   };
 }
 
@@ -56,8 +55,8 @@ class FilteringMockApiService {
 describe('BlockViewFilterComponent', () => {
   let component: BlockViewFilterComponent;
   let fixture: ComponentFixture<BlockViewFilterComponent>;
-  let ref: Species = new Species(MOUSE.organism);
-  let comp: Species = new Species(HUMAN.organism);
+  const ref: Species = new Species(MOUSE.organism);
+  const comp: Species = new Species(HUMAN.organism);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -320,14 +319,20 @@ describe('BlockViewFilterComponent', () => {
   });
 
   it('gets the viable feature types given the filter species', () => {
-    expect(component.getFeatureTypes(component.currentFilter))
-      .toEqual(['gene', 'lncRNA gene', 'protein coding gene', 'snoRNA']);
+    expect(component.getFeatureTypes(component.currentFilter)).toEqual([
+      'gene',
+      'lncRNA gene',
+      'protein coding gene',
+      'snoRNA',
+    ]);
 
     // filter on ref species only
     component.currentFilter.species.comp.selected = false;
 
-    expect(component.getFeatureTypes(component.currentFilter))
-      .toEqual(['lncRNA gene', 'protein coding gene']);
+    expect(component.getFeatureTypes(component.currentFilter)).toEqual([
+      'lncRNA gene',
+      'protein coding gene',
+    ]);
 
     // filter on neither species (invalid via the UI)
     component.currentFilter.species.ref.selected = false;
@@ -337,8 +342,7 @@ describe('BlockViewFilterComponent', () => {
     // filter on comp species only
     component.currentFilter.species.comp.selected = true;
 
-    expect(component.getFeatureTypes(component.currentFilter))
-      .toEqual(['gene', 'snoRNA']);
+    expect(component.getFeatureTypes(component.currentFilter)).toEqual(['gene', 'snoRNA']);
   });
 
   it('unsets condition value if species selections change that negate condition value', () => {

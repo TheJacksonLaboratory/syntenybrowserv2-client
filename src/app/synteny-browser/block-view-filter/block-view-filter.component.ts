@@ -80,7 +80,9 @@ export class BlockViewFilterComponent implements OnInit {
    */
   createNewEditableFilter(): void {
     // make sure that any prior filters are marked as not being edited
-    this.filters.forEach(f => f.editing = false);
+    this.filters.forEach(f => {
+      f.editing = false;
+    });
 
     // add the new filter
     this.filters.push(this.getNewFilter());
@@ -95,7 +97,9 @@ export class BlockViewFilterComponent implements OnInit {
   editFilter(filter: Filter): void {
     if (this.activePage === 'edit') {
       // make sure that all filters are marked as not being edited
-      this.filters.forEach(f => f.editing = false);
+      this.filters.forEach(f => {
+        f.editing = false;
+      });
 
       this.filterMode = 'edit';
       filter.editing = true;
@@ -217,7 +221,7 @@ export class BlockViewFilterComponent implements OnInit {
    */
   checkTermChildren(): void {
     this.filterErrorState = '';
-    let cond = this.currentFilter;
+    const cond = this.currentFilter;
 
     if (cond && cond.value) {
       const ontTerms = this.data.ontologyTerms[cond.getOntology()];
@@ -241,7 +245,7 @@ export class BlockViewFilterComponent implements OnInit {
   getFeatureTypes(filter: Filter): string[] {
     const genes = this.getGenesForSpecies(filter);
 
-    return Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();;
+    return Array.from(new Set(genes.map(g => g.type).filter(t => t))).sort();
   }
 
   /**
