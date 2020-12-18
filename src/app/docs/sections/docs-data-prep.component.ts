@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'data-prep',
+  selector: 'docs-data-prep',
   template: `
     <div class="content-container">
       <div class="content-area">
