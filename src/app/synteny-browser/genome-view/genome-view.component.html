@@ -40,7 +40,7 @@
           <g *ngFor="let chr of getChrsWithFeatures()">
             <path
               stroke="#000"
-              stroke-width="0.5"
+              stroke-width=".5"
               fill="transparent"
               [attr.d]="getLegendPath(chr)"
             ></path>
@@ -94,7 +94,7 @@
           <path
             *ngFor="let chr of ref.getChromosomes()"
             stroke="#000"
-            stroke-width="0.25"
+            stroke-width=".25"
             fill="transparent"
             [attr.d]="getChrBandPath(refRadii, refGMap, chr, ref.genome)"
             (click)="renderChordMapForChr(chr)"
@@ -121,7 +121,7 @@
           <path
             *ngFor="let chr of comp.getChromosomes()"
             stroke="#000"
-            stroke-width="0.25"
+            stroke-width=".25"
             [attr.d]="getChrBandPath(compRadii, compGMap, chr, comp.genome)"
             [attr.fill]="getChrColor(chr)"
             (mouseenter)="getTooltipContent(comp, chr)"
@@ -160,7 +160,7 @@
         <g id="chord-mapping">
           <path
             *ngFor="let blk of refChr.blocks"
-            stroke-width="0.3"
+            stroke-width=".3"
             [attr.d]="getChordPath(compGMap, blk)"
             [attr.fill]="blk.getColor()"
             [attr.stroke]="blk.getColor()"
@@ -201,7 +201,7 @@
     <div class="clr-row bottom-1 left-1">
       <p><i>Downloaded files will be in PNG format</i></p>
       <div class="clr-col-7">
-        <clr-input-container style="margin-top: 0.4rem;">
+        <clr-input-container style="margin-top: .4rem;">
           <label for="filename-input"></label>
 
           <input

@@ -26,7 +26,7 @@ h2 { margin-top: 0; }
 
 #loading-overlay {
   fill: #FFF;
-  fill-opacity: 0.5;
+  fill-opacity: .5;
   stroke: none;
 }
 
@@ -57,7 +57,7 @@ clr-input-container { margin-top: 10px !important; }
 
 clr-checkbox-wrapper .clr-control-label {
   line-height: 12px;
-  margin-bottom: 0.75em;
+  margin-bottom: .75em;
   padding-top: 6px;
   text-align: left;
   height: auto;
@@ -72,9 +72,9 @@ clr-checkbox-wrapper .clr-control-label {
 clr-signpost-content {
   h4 {
     margin-top: 0;
-    padding-bottom: 0.5em;
-    border-bottom: 0.5px #AAA solid;
-    margin-bottom: 0.75em;
+    padding-bottom: .5em;
+    border-bottom: .5px #AAA solid;
+    margin-bottom: .75em;
   }
 
   span {
@@ -95,19 +95,19 @@ clr-signpost-content {
 
   rect {
     fill: #FFF;
-    fill-opacity: 0.7;
+    fill-opacity: .7;
     width: 1200px;
   }
 }
 
 .modal-body p {
-  margin-top: 0.2rem;
-  margin-left: 0.75rem;
+  margin-top: .2rem;
+  margin-left: .75rem;
 }
 
 #reference-interval-input {
   p {
-    padding-top: 0.25rem;
+    padding-top: .25rem;
     border-bottom: 1px solid #9a9a9a !important;
     cursor: default;
     text-decoration: none;

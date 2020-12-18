@@ -288,7 +288,7 @@ export class BlockViewBrowserComponent {
 
     const selectors =
       '#browser-axis line,#browser-axis path,#chr-view-axis line,#chr-view-axis path';
-    document.querySelectorAll(selectors).forEach(obj => obj.setAttribute('stroke-width', '0.5'));
+    document.querySelectorAll(selectors).forEach(obj => obj.setAttribute('stroke-width', '.5'));
 
     document
       .querySelectorAll('#browser-axis text, #chr-view-axis text')
