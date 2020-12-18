@@ -45,10 +45,6 @@ export class BlockViewFilterComponent implements OnInit {
   // error message for current filter, if issues present
   filterErrorState: string = null;
 
-  // 'add' or 'edit' describing if the current filter already exists (being edited)
-  // or if it's new (it needs to be added when finished)
-  filterMode = 'add';
-
   // concatenation of refGenes and compGenes for filters applied to both species
   allGenes: Gene[];
 
@@ -66,7 +62,6 @@ export class BlockViewFilterComponent implements OnInit {
 
   ngOnInit(): void {
     this.allGenes = this.refGenes.concat(...this.compGenes);
-    this.filteredGenes = [];
 
     if (this.filters.length) {
       this.applyFilters();
@@ -85,7 +80,7 @@ export class BlockViewFilterComponent implements OnInit {
     });
 
     // add the new filter
-    this.filters.push(this.getNewFilter());
+    this.filters.push(new Filter(this.refSpecies, this.compSpecies, this.filters.length));
     this.currentFilter = this.getCurrentFilter();
   }
 
@@ -96,16 +91,16 @@ export class BlockViewFilterComponent implements OnInit {
    */
   editFilter(filter: Filter): void {
     if (this.activePage === 'edit') {
+      this.filters = this.createdFilters;
+
       // make sure that all filters are marked as not being edited
       this.filters.forEach(f => {
         f.editing = false;
       });
 
-      this.filterMode = 'edit';
       filter.editing = true;
 
       this.currentFilter = this.getCurrentFilter();
-      this.filters = this.getCreatedFilters();
 
       this.reassignFilterIDs();
     }
@@ -130,10 +125,7 @@ export class BlockViewFilterComponent implements OnInit {
 
     // TODO: this is vastly inefficient and shouldn't be run for every filter
     //       every time a new one is finished
-    this.filteredGenes = [];
     this.applyFilters();
-
-    this.filterMode = 'add';
 
     // create a new filter using the current filter's advanced/simple setting
     this.createNewEditableFilter();
@@ -151,7 +143,6 @@ export class BlockViewFilterComponent implements OnInit {
 
     // TODO: this is vastly inefficient and shouldn't be run for every filter
     //       every time a new one is finished
-    this.filteredGenes = [];
     this.applyFilters();
   }
 
@@ -164,8 +155,8 @@ export class BlockViewFilterComponent implements OnInit {
     const comp = this.compSpecies.commonName;
     const rows = this.filteredGenes.map(g => g.getFilterMetadata(ref, comp));
 
-    const lines = `[FILTER DATA]\nfilter type\tspecies\tcondition(s)\n${this.getCreatedFilters()
-      .map(f => f.getTSVRowForFilter())
+    const lines = `[FILTER DATA]\nfilter type\tspecies\tcondition(s)\n${this.createdFilters
+      .map(f => f.TSVRowForFilter)
       .join('\n')}\n\n[RESULTS DATA]\n${Object.keys(rows[0]).join('\t')}\n${rows
       .map(r => Object.values(r).join('\t'))
       .join('\n')}`;
@@ -177,7 +168,7 @@ export class BlockViewFilterComponent implements OnInit {
    * Sets the current filter's variables to filter by the specified attribute
    * @param {string} attribute - the attribute to filter features by
    */
-  simpleFilterByAttribute(attribute: string): void {
+  filterByAttribute(attribute: string): void {
     this.currentFilter.filterBy = attribute;
     this.currentFilter.value = attribute;
   }
@@ -186,11 +177,10 @@ export class BlockViewFilterComponent implements OnInit {
    * Sets the current filter's variables to filter by a specified ontology
    * @param {string} ontology - the ontology to filter features by
    */
-  simpleFilterByOntology(ontology: string): void {
+  filterByOntology(ontology: string): void {
     this.currentFilter.filterBy = `ont-${ontology}`;
     this.currentFilter.qualifier = 'equal';
     this.currentFilter.value = null;
-    this.currentFilter.simpleUserInputNeeded = true;
     this.currentFilter.setSimpleTitle();
   }
 
@@ -199,7 +189,7 @@ export class BlockViewFilterComponent implements OnInit {
    * finishes the filter
    * @param {string} type - the feature type to filter features by
    */
-  simpleFilterByType(type: string): void {
+  filterByType(type: string): void {
     this.currentFilter.filterBy = 'type';
     this.currentFilter.value = type;
     this.finishFilter();
@@ -210,9 +200,8 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {string} qualifier - whether the user wants exact matches or a more
    *                             loose matching model
    */
-  simpleFilterQualifier(qualifier: string): void {
+  filterQualifier(qualifier: string): void {
     this.currentFilter.qualifier = qualifier;
-    this.currentFilter.simpleUserInputNeeded = true;
     this.currentFilter.setSimpleTitle();
   }
 
@@ -221,18 +210,18 @@ export class BlockViewFilterComponent implements OnInit {
    */
   checkTermChildren(): void {
     this.filterErrorState = '';
-    const cond = this.currentFilter;
+    const filter = this.currentFilter;
 
-    if (cond && cond.value) {
-      const ontTerms = this.data.ontologyTerms[cond.getOntology()];
+    if (filter && filter.value) {
+      const ontTerms = this.data.ontologyTerms[filter.ontology];
       const termIDs = ontTerms.map(t => t.id);
-      const term = ontTerms[termIDs.indexOf(cond.value)];
+      const term = ontTerms[termIDs.indexOf(filter.value)];
 
       if (term.count && term.count > 500) {
         this.currentFilter.filterLabel = '';
         this.filterErrorState = 'Term too broad';
       } else {
-        this.currentFilter.setLabel();
+        this.currentFilter.filterLabel = `${filter.title} in ${filter.species}`;
       }
     }
   }
@@ -271,21 +260,14 @@ export class BlockViewFilterComponent implements OnInit {
    * Returns the current filter being edited
    */
   getCurrentFilter(): Filter {
-    return this.filters.filter(f => f.editing)[0];
+    return this.filters.find(f => f.editing);
   }
 
   /**
    * Returns the list of filters that have been completed/created
    */
-  getCreatedFilters(): Filter[] {
+  get createdFilters(): Filter[] {
     return this.filters.filter(f => f.created);
-  }
-
-  /**
-   * Creates a new filter and returns it
-   */
-  private getNewFilter(): Filter {
-    return new Filter(this.refSpecies, this.compSpecies, this.filters.length);
   }
 
   /**
@@ -302,11 +284,12 @@ export class BlockViewFilterComponent implements OnInit {
    * for the table
    */
   private applyFilters(): Gene[] {
+    this.filteredGenes = [];
     this.refGenes.forEach(g => g.resetFilterStatus());
     this.compGenes.forEach(g => g.resetFilterStatus());
 
-    if (this.anyFiltersSelected()) {
-      const filters = this.getCreatedFilters();
+    if (this.createdFilters.length) {
+      const filters = this.createdFilters;
       const hidingFilters = filters.filter(f => f.hides());
       const highlightFilters = filters.filter(f => !f.hides());
 
@@ -329,13 +312,6 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Returns true if there is at least one filter
-   */
-  private anyFiltersSelected(): boolean {
-    return !!this.getCreatedFilters().length;
-  }
-
-  /**
    * Updates the list of genes from the specified list of genes that match at least
    * one of the specified filters
    * @param {Gene[]} genes - the list of genes to search for matches
@@ -346,8 +322,8 @@ export class BlockViewFilterComponent implements OnInit {
    *                            weight)
    */
   private getMatches(genes: Gene[], filters: Filter[], species: Species): void {
-    const ontologyFilters = filters.filter(f => f.isFilteringByOntologyTerm());
-    const attributeFilters = filters.filter(f => !f.isFilteringByOntologyTerm());
+    const ontologyFilters = filters.filter(f => f.filtersOnOntology());
+    const attributeFilters = filters.filter(f => !f.filtersOnOntology());
 
     // check ontology filters first since they will take the longest
     if (ontologyFilters.length) {

@@ -256,7 +256,7 @@ describe('BlockViewFilterComponent', () => {
     expect(component.currentFilter.conditions[0].qualifier).toBe('equal');
     expect(component.currentFilter.conditions[0].value).toBe(null);
     expect(component.currentFilter.simpleUserInputNeeded).toBe(true);
-    expect(component.currentFilter.simpleFilterTitle).toBe('in Mouse only by mp term ');
+    expect(component.currentFilter.filterByButtonText).toBe('in Mouse only by mp term ');
   });
 
   it('sets simple filter by type', () => {
@@ -275,7 +275,7 @@ describe('BlockViewFilterComponent', () => {
 
     // the simple title should have a missing word as that word is set by
     // clicking throught he dropdown menu to get to the qualifier select
-    expect(component.currentFilter.simpleFilterTitle).toBe('in either species by  like');
+    expect(component.currentFilter.filterByButtonText).toBe('in either species by  like');
   });
 
   it('identifies a satisfactory ontology term to select for a filter', () => {

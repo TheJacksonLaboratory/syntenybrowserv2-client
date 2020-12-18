@@ -17,14 +17,14 @@
     <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
       <div class="clr-col-12 label-container">
         <!-- No filters message -->
-        <div *ngIf="getCreatedFilters().length === 0" class="no-filters">
+        <div *ngIf="!createdFilters.length" class="no-filters">
           No filters yet; when filters are created, they will appear here
         </div>
 
         <!-- Labels -->
-        <div *ngIf="getCreatedFilters().length > 0">
+        <div *ngIf="createdFilters.length">
           <span
-            *ngFor="let f of getCreatedFilters()"
+            *ngFor="let f of createdFilters"
             class="label"
             (click)="editFilter(f)"
             [ngClass]="{ 'label-info': !f.hides(), 'label-danger': f.hides() }"
@@ -41,19 +41,19 @@
       <!-- Content -->
       <div class="clr-row clr-col-12">
         <div class="clr-row clr-col-12 clr-justify-content-center">
-          <h5>{{ filterMode }} Filter</h5>
+          <h5>{{ currentFilter.created ? 'Edit' : 'Create New' }} Filter</h5>
         </div>
 
-        <!-- Current simple filter -->
+        <!-- Current filter -->
         <div *ngIf="currentFilter" class="clr-row clr-col-12 top-1">
           <div class="clr-row clr-col-12">
             <!-- Mode select -->
             <clr-select-container class="right-1">
-              <label for="simple-mode"> Mode </label>
+              <label for="mode"> Mode </label>
 
               <select
                 clrSelect
-                id="simple-mode"
+                id="mode"
                 [(ngModel)]="currentFilter.mode"
               >
                 <option value="highlight"> Highlight </option>
@@ -67,18 +67,18 @@
             <clr-dropdown class="right-1">
               <button class="btn" clrDropdownTrigger>
                 {{
-                  currentFilter.simpleFilterTitle || "Select filter condition"
+                  currentFilter.filterByButtonText || "Select filter condition"
                 }}
                 <clr-icon shape="caret down"></clr-icon>
               </button>
               <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
                 <!-- Select species -->
                 <clr-dropdown
-                  *ngFor="let s of currentFilter.getSimpleSpeciesOptions()"
+                  *ngFor="let s of currentFilter.speciesOptions"
                 >
                   <button
                     clrDropdownTrigger
-                    (click)="currentFilter.selectSimpleSpecies(s)"
+                    (click)="currentFilter.selectSpecies(s)"
                   >
                     In {{ s }}
                   </button>
@@ -88,7 +88,7 @@
                     <clr-dropdown>
                       <button
                         clrDropdownTrigger
-                        (click)="simpleFilterByAttribute('type')"
+                        (click)="filterByAttribute('type')"
                       >
                         by type
                       </button>
@@ -97,7 +97,7 @@
                       <clr-dropdown-menu id="type-menu" clrPosition="left-top">
                         <button
                           *ngFor="let t of getFeatureTypes(currentFilter)"
-                          (click)="simpleFilterByType(t)"
+                          (click)="filterByType(t)"
                           clrDropdownItem
                         >
                           {{ t }}
@@ -108,7 +108,7 @@
                     <clr-dropdown>
                       <button
                         clrDropdownTrigger
-                        (click)="simpleFilterByAttribute('id')"
+                        (click)="filterByAttribute('id')"
                       >
                         by ID
                       </button>
@@ -117,13 +117,13 @@
                       <clr-dropdown-menu>
                         <button
                           clrDropdownItem
-                          (click)="simpleFilterQualifier('equal')"
+                          (click)="filterQualifier('equal')"
                         >
                           that equals...
                         </button>
                         <button
                           clrDropdownItem
-                          (click)="simpleFilterQualifier('like')"
+                          (click)="filterQualifier('like')"
                         >
                           that is like...
                         </button>
@@ -133,7 +133,7 @@
                     <clr-dropdown>
                       <button
                         clrDropdownTrigger
-                        (click)="simpleFilterByAttribute('symbol')"
+                        (click)="filterByAttribute('symbol')"
                       >
                         by symbol
                       </button>
@@ -142,13 +142,13 @@
                       <clr-dropdown-menu>
                         <button
                           clrDropdownItem
-                          (click)="simpleFilterQualifier('equal')"
+                          (click)="filterQualifier('equal')"
                         >
                           that equals...
                         </button>
                         <button
                           clrDropdownItem
-                          (click)="simpleFilterQualifier('like')"
+                          (click)="filterQualifier('like')"
                         >
                           that is like...
                         </button>
@@ -167,8 +167,8 @@
                       <!-- Select ontology -->
                       <clr-dropdown-menu clrPosition="left-top">
                         <button
-                          *ngFor="let o of currentFilter.getOntologies()"
-                          (click)="simpleFilterByOntology(o.value)"
+                          *ngFor="let o of currentFilter.ontologies"
+                          (click)="filterByOntology(o.value)"
                           clrDropdownItem
                         >
                           from {{ o.name }}
@@ -181,12 +181,12 @@
             </clr-dropdown>
           </div>
           <div
-            *ngIf="currentFilter.simpleUserInputNeeded"
+            *ngIf="currentFilter.inputNeeded"
             class="clr-row clr-col-12"
           >
             <!-- Input for ID or symbol -->
             <clr-input-container
-              *ngIf="!currentFilter.isFilteringByOntologyTerm()"
+              *ngIf="!currentFilter.filtersOnOntology()"
             >
               <label for="filter-value"> Value </label>
 
@@ -200,11 +200,11 @@
 
             <!-- Autocomplete for ontology term -->
             <ng-select
-              *ngIf="currentFilter.isFilteringByOntologyTerm()"
+              *ngIf="currentFilter.filtersOnOntology()"
               class="simple-autocomplete"
               bindLabel="name"
               bindValue="id"
-              [items]="data.ontologyTerms[currentFilter.getOntology()]"
+              [items]="data.ontologyTerms[currentFilter.ontology]"
               [virtualScroll]="true"
               placeholder="Enter a term"
               [(ngModel)]="currentFilter.value"
@@ -220,7 +220,7 @@
               <input
                 id="filter-name"
                 clrInput
-                [disabled]="!currentFilter.filterLabel"
+                [disabled]="!currentFilter.value"
                 [(ngModel)]="currentFilter.filterLabel"
               />
             </clr-input-container>
@@ -228,8 +228,7 @@
             <!-- Finish filter button -->
             <button
               type="button"
-              *ngIf="currentFilter.simpleUserInputNeeded"
-              class="btn btn-success-outline top-0"
+              class="btn btn-success-outline"
               title="Finish the filter"
               [disabled]="!currentFilter.value"
               (click)="finishFilter()"

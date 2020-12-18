@@ -521,6 +521,14 @@ export class BlockViewBrowserComponent {
   }
 
   /**
+   * Returns the subset of filters that have been created (aka finished); filters
+   * that are currently being edited or created should not appear here yet
+   */
+  getFilters(): Filter[] {
+    return this.filters.filter(f => f.created);
+  }
+
+  /**
    * Returns the list of synteny blocks in the reference genome
    */
   getGenomeBlocks(): SyntenyBlock[] {

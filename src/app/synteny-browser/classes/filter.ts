@@ -3,7 +3,7 @@ import { Gene } from './gene';
 
 export class Filter {
   // data for species a filter could apply to
-  species: any;
+  allSpecies: any;
 
   // filter mode ('highlight' or 'hide')
   mode = 'highlight';
@@ -27,14 +27,10 @@ export class Filter {
   id: number;
 
   // title that is generated from using the simple creation interface
-  simpleFilterTitle: string;
+  filterByButtonText: string;
 
   // value to display in the tag to identify the filter to the user
   filterLabel: string;
-
-  // controls whether an input is needed for the user to enter a value as a result of
-  // their selection(s) from the simple creation interface
-  simpleUserInputNeeded = false;
 
   // indicates if the filter has been created and is displayed in the list of filters
   created = false;
@@ -46,7 +42,7 @@ export class Filter {
     this.refSpecies = ref;
     this.compSpecies = comp;
     this.id = id;
-    this.species = {
+    this.allSpecies = {
       ref: { name: this.refSpecies.commonName, value: 'ref', selected: true },
       comp: { name: this.compSpecies.commonName, value: 'comp', selected: true },
     };
@@ -56,16 +52,16 @@ export class Filter {
    * Marks the appropriate species as (de)selected
    * @param {string} speciesKey - the value associated with the selected species
    */
-  selectSimpleSpecies(speciesKey: string): void {
+  selectSpecies(speciesKey: string): void {
     if (speciesKey.includes('either')) {
-      this.species.ref.selected = true;
-      this.species.comp.selected = true;
-    } else if (speciesKey.includes(this.refSpecies.commonName)) {
-      this.species.ref.selected = true;
-      this.species.comp.selected = false;
+      this.ref.selected = true;
+      this.comp.selected = true;
+    } else if (speciesKey.includes(this.ref.name)) {
+      this.ref.selected = true;
+      this.comp.selected = false;
     } else {
-      this.species.comp.selected = true;
-      this.species.ref.selected = false;
+      this.comp.selected = true;
+      this.ref.selected = false;
     }
   }
 
@@ -74,7 +70,7 @@ export class Filter {
    * filter mode (hiding/highlighting), the conditions and affected species
    */
   setLabel(): void {
-    this.filterLabel = `${this.getCompleteTitle()} in ${this.getSpecies()}`;
+    this.filterLabel = `${this.title} in ${this.species}`;
     this.setSimpleTitle();
   }
 
@@ -83,11 +79,11 @@ export class Filter {
    */
   setSimpleTitle(): void {
     if (this.filtersOnType()) {
-      this.simpleFilterTitle = `that are ${this.value}s in ${this.getSpecies()}`;
+      this.filterByButtonText = `that are ${this.value}s in ${this.species}`;
     } else {
-      const filterBy = this.filtersOnOntology() ? `${this.getOntology()} term` : this.filterBy;
+      const filterBy = this.filtersOnOntology() ? `${this.ontology} term` : this.filterBy;
       const qual = this.qualifier === 'like' ? 'like' : '';
-      this.simpleFilterTitle = `in ${this.getSpecies()} by ${filterBy} ${qual}`;
+      this.filterByButtonText = `in ${this.species} by ${filterBy} ${qual}`;
     }
   }
 
@@ -95,9 +91,11 @@ export class Filter {
    * Returns the list of ontologies that are available to choose from for each
    * condition given the selected species for the filter
    */
-  getOntologies(): SearchType[] {
+  get ontologies(): SearchType[] {
     if (this.isRefFilter() && this.isCompFilter()) {
-      return this.getMutualOntologies();
+      return this.refSpecies.onts.filter(
+        ro => this.compSpecies.onts.map(co => co.value).indexOf(ro.value) >= 0,
+      );
     }
     if (this.isRefFilter()) {
       return this.refSpecies.onts;
@@ -108,7 +106,7 @@ export class Filter {
   /**
    * Returns the common names of the species that the filter will affect
    */
-  getSpecies(): string {
+  get species(): string {
     const ref = this.isRefFilter();
     const comp = this.isCompFilter();
 
@@ -116,20 +114,32 @@ export class Filter {
       return 'either species';
     }
     if (ref && !comp) {
-      return `${this.refSpecies.commonName} only`;
+      return `${this.ref.name} only`;
     }
 
     if (!ref && comp) {
-      return `${this.compSpecies.commonName} only`;
+      return `${this.comp.name} only`;
     }
 
     return null;
   }
 
+  get comp(): any {
+    return this.allSpecies.comp;
+  }
+
+  get ref(): any {
+    return this.allSpecies.ref;
+  }
+
+  get inputNeeded(): boolean {
+    return this.filterBy && !this.filtersOnType();
+  }
+
   /**
    * Returns a list of option titles for species selection in simple filter mode
    */
-  getSimpleSpeciesOptions(): any[] {
+  get speciesOptions(): any[] {
     return [
       'either species',
       `${this.refSpecies.commonName} only`,
@@ -138,17 +148,9 @@ export class Filter {
   }
 
   /**
-   * Returns the color that text related to this filter should be based on the
-   * type of filter it is (hiding/highlighting)
-   */
-  getColor(): string {
-    return this.hides() ? '#F00' : '#2A9FE0';
-  }
-
-  /**
    * Returns the title of the filter condition
    */
-  getCompleteTitle(): string {
+  get title(): string {
     if (this.filterBy === 'chr') {
       return `Chr${this.value}`;
     }
@@ -158,7 +160,15 @@ export class Filter {
     if (this.filtersOnOntology()) {
       return this.value;
     }
-    return `${this.filterBy} ${this.getQualifierString()} ${this.value}`;
+
+    let qual;
+    if (this.qualifier.includes('not')) {
+      qual = this.qualifier.includes('equal') ? '&ne' : 'not like';
+    } else {
+      qual = this.qualifier.includes('equal') ? '=' : 'like';
+    }
+
+    return `${this.filterBy} ${qual} ${this.value}`;
   }
 
   /**
@@ -166,15 +176,14 @@ export class Filter {
    * conditions for the purposes of being included in the file representing the
    * table
    */
-  getTSVRowForFilter(): string {
-    const conds = this.getCompleteTitle();
-    return [this.mode, this.getSpecies(), conds].join('\t');
+  get TSVRowForFilter(): string {
+    return [this.mode, this.species, this.title].join('\t');
   }
 
   /**
    * Returns the selected ontology abbreviation from the filter by its value
    */
-  getOntology(): string {
+  get ontology(): string {
     return this.filterBy.replace('ont-', '');
   }
 
@@ -183,15 +192,6 @@ export class Filter {
    */
   hides(): boolean {
     return this.mode === 'hide';
-  }
-
-  /**
-   * Returns true if the current type value isn't present in the specified list
-   * of types
-   * @param {string[]} types - valid types to choose from given the current species
-   */
-  hasInvalidType(types: string[]): boolean {
-    return this.filtersOnType() ? types.indexOf(this.value) < 0 : false;
   }
 
   /**
@@ -239,7 +239,7 @@ export class Filter {
    * species
    */
   isRefFilter(): boolean {
-    return this.species.ref.selected;
+    return this.ref.selected;
   }
 
   /**
@@ -248,35 +248,6 @@ export class Filter {
    * species
    */
   isCompFilter(): boolean {
-    return this.species.comp.selected;
-  }
-
-  /**
-   * Returns true if the filter contains at least one ontology-related condition
-   */
-  isFilteringByOntologyTerm(): boolean {
-    return this.filterBy.includes('ont-');
-  }
-
-  /**
-   * Returns list of search ontologies that exist for both species for
-   * filtering by ontology options
-   */
-  private getMutualOntologies(): SearchType[] {
-    return this.refSpecies.onts.filter(
-      ro => this.compSpecies.onts.map(co => co.value).indexOf(ro.value) >= 0,
-    );
-  }
-
-  /**
-   * Returns a converted value from the qualifier select value to a
-   * human-readable value for a label
-   */
-  private getQualifierString(): string {
-    if (this.qualifier.includes('not')) {
-      return this.qualifier.includes('equal') ? '&ne' : 'not like';
-    }
-
-    return this.qualifier.includes('equal') ? '=' : 'like';
+    return this.comp.selected;
   }
 }

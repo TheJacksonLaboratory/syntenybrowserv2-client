@@ -145,7 +145,7 @@ export class SyntenyBrowserComponent implements OnInit {
     const bvb = this.blockViewBrowser;
     const bvf = this.blockViewFilters;
 
-    this.data.filters = bvf.getCreatedFilters();
+    this.data.filters = bvf.createdFilters;
     bvb.filters = this.data.filters;
 
     const filteredGenes = bvf.filteredGenes.filter(g => g.filtered);

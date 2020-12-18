@@ -23,14 +23,14 @@
         <!-- Filters -->
         <div id="filters" class="label-container clr-col-xl-8 clr-col-10">
           <!-- No filters message -->
-          <div *ngIf="filters.length === 0" class="no-selections filter-labels">
+          <div *ngIf="getFilters().length === 0" class="no-selections filter-labels">
             No filters have been created yet
           </div>
 
           <!-- Labels -->
-          <div *ngIf="filters.length > 0" class="filter-labels">
+          <div *ngIf="getFilters().length > 0" class="filter-labels">
             <span
-              *ngFor="let f of filters"
+              *ngFor="let f of getFilters()"
               class="label"
               [ngClass]="{
                 'label-info': !f.hides(),
