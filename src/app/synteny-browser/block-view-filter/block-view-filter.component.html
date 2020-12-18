@@ -41,7 +41,7 @@
       <!-- Content -->
       <div class="clr-row clr-col-12">
         <div class="clr-row clr-col-12 clr-justify-content-center">
-          <h5>{{ currentFilter.created ? 'Edit' : 'Create New' }} Filter</h5>
+          <h5>{{ currentFilter.created ? "Edit" : "Create New" }} Filter</h5>
         </div>
 
         <!-- Current filter -->
@@ -51,11 +51,7 @@
             <clr-select-container class="right-1">
               <label for="mode"> Mode </label>
 
-              <select
-                clrSelect
-                id="mode"
-                [(ngModel)]="currentFilter.mode"
-              >
+              <select clrSelect id="mode" [(ngModel)]="currentFilter.mode">
                 <option value="highlight"> Highlight </option>
                 <option value="hide"> Hide </option>
               </select>
@@ -73,9 +69,7 @@
               </button>
               <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
                 <!-- Select species -->
-                <clr-dropdown
-                  *ngFor="let s of currentFilter.speciesOptions"
-                >
+                <clr-dropdown *ngFor="let s of currentFilter.speciesOptions">
                   <button
                     clrDropdownTrigger
                     (click)="currentFilter.selectSpecies(s)"
@@ -180,14 +174,9 @@
               </clr-dropdown-menu>
             </clr-dropdown>
           </div>
-          <div
-            *ngIf="currentFilter.inputNeeded"
-            class="clr-row clr-col-12"
-          >
+          <div *ngIf="currentFilter.inputNeeded" class="clr-row clr-col-12">
             <!-- Input for ID or symbol -->
-            <clr-input-container
-              *ngIf="!currentFilter.filtersOnOntology()"
-            >
+            <clr-input-container *ngIf="!currentFilter.filtersOnOntology()">
               <label for="filter-value"> Value </label>
 
               <input
@@ -304,7 +293,7 @@
                 <clr-dg-page-size [clrPageSizeOptions]="[15, 25, 50, 100]">
                   Features per page
                 </clr-dg-page-size>
-                <ng-container *ngIf="filteredGenes.length > 0">
+                <ng-container *ngIf="filteredGenes.length">
                   {{ pag.firstItem + 1 }} - {{ pag.lastItem + 1 }} of
                   {{ pag.totalItems }}
                 </ng-container>
