@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sb-docs-tutorial',
+  selector: 'docs-tutorial',
   template: `
     <div class="content-container">
       <div class="content-area">
@@ -11,6 +11,23 @@ import { Component } from '@angular/core';
           mouse and human data or how to install the application locally and use it with your
           personal data. First, let's look at the application's architecture.
         </p>
+        <h4>Prerequisites</h4>
+        <p>
+          To follow the steps in this tutorial you will require the followng
+          packages:
+        </p>
+        <ul>
+          <li>
+            Docker(<a
+            href="https://www.docker.com/community-edition"
+            target="_blank"
+          >https://www.docker.com/community-edition</a
+          >): Docker is a program that lets you run "containers" hosting software
+            and its dependencies
+          </li>
+          <li>Python 3.x</li>
+          <li>synbrowser-manage:</li>
+        </ul>
         <h4><b>Application Architecture</b></h4>
         <br />
         <img
@@ -70,11 +87,6 @@ import { Component } from '@angular/core';
           </li>
         </ul>
       </div>
-      <!-- nav element should be kept in
-      the parent component to preserve layout -->
-      <nav class="sidenav">
-        <sb-docs-menu></sb-docs-menu>
-      </nav>
     </div>
   `,
   styleUrls: ['../docs.component.scss'],

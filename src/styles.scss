@@ -97,7 +97,6 @@ button { text-transform: uppercase !important; }
   padding: 3px 15px;
   width: 100%;
   position: static;
-  margin-top: 2em;
 
   a {
     color: #FFF !important;
@@ -157,6 +156,13 @@ quick-navigation {
   .clr-input-wrapper,
   .clr-select,
   .clr-input { min-width: 100% !important; }
+}
+
+app-examples,
+app-docs,
+app-about,
+app-synteny-browser {
+  background: #fafafa !important;
 }
 
 

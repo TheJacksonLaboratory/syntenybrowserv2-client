@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sb-docs-configs',
+  selector: 'docs-configs',
   template: `
     <div class="content-container">
       <div class="content-area">
@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
         <table>
           <tbody class="table">
             <tr>
-              <td class="left"><i>H. sapines</i></td>
+              <td class="left"><i>H. sapiens</i></td>
               <td class="left">
                 <a
                   target="_blank"
@@ -106,11 +106,6 @@ import { Component } from '@angular/core';
           "}}</code>
         </pre>
       </div>
-      <!-- nav element should be kept in
-      the parent component to preserve layout -->
-      <nav class="sidenav">
-        <sb-docs-menu></sb-docs-menu>
-      </nav>
     </div>
   `,
   styleUrls: ['../docs.component.scss'],

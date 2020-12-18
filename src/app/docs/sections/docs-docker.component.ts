@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sb-docs-docker',
+  selector: 'docs-docker',
   template: `
     <div class="content-container">
       <div class="content-area">
@@ -52,11 +52,6 @@ import { Component } from '@angular/core';
           http://localhost:8989/admin
         </p>
       </div>
-      <!-- nav element should be kept in
-      the parent component to preserve layout -->
-      <nav class="sidenav">
-        <sb-docs-menu></sb-docs-menu>
-      </nav>
     </div>
   `,
   styleUrls: ['../docs.component.scss'],

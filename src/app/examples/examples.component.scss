@@ -1,0 +1,38 @@
+.image-container {
+  margin-bottom: 2em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  text-align: center;
+
+  img {
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .p6 {
+    margin-top: 0.5em;
+    text-transform: uppercase;
+  }
+}
+
+.sidenav {
+  max-width: 300px;
+  width: 15%;
+  padding-top: 1.5em;
+
+  .sidenav-content .nav-link {
+    margin: 0.5em 0;
+    width: unset;
+    text-align: right;
+    padding-right: 10px;
+  }
+}
+
+.float-right {
+  float: right;
+}
+
+.modal-body img {
+  max-width: 100%;
+}

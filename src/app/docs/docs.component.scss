@@ -9,31 +9,43 @@ code {
   font-size: 0.9em;
 }
 
-.padding-5 {
-  padding: 5px;
-}
-
-div.block-float-left {
+.image-container {
   float: left;
-}
-
-img.img-float-left {
-  float: left;
-}
-
-img.img-rounded-corners {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 5px;
-}
-
-.responsive {
-  width: 100%;
-  height: auto;
-}
-
-div.container {
+  max-width: 250px;
   text-align: center;
-  font-size: 0.9em;
-  color: #000000;
+  margin: 5px;
+
+  img {
+    cursor: pointer;
+    width: 100%;
+  }
+}
+
+.sidenav {
+  max-width: 300px;
+  width: 15%;
+  padding-top: 1.5em;
+
+  .sidenav-content .nav-link {
+    margin: 0.5em 0;
+    width: unset;
+    text-align: right;
+    display: block;
+    padding-right: 8px;
+  }
+}
+
+.clr-icon {
+  margin-top: -4px;
+}
+
+.modal-body {
+  text-align: center;
+
+  img {
+    max-width: 100%;
+  }
 }
