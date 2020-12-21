@@ -1,0 +1,489 @@
+<div class="content-container">
+  <div class="content-area">
+    <h2>Data Sources and Formats</h2>
+
+    <h4>Mouse Data</h4>
+    <p>Data files from mouse source data. For ontologies pertaining to mouse see the General Data.</p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="left">Name</th>
+          <th class="left no-wrap">File Format</th>
+          <th class="left">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Mouse_GenomeFeatures_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: created from the file <b>MGI.exome.gff3.gz</b>, which can be found
+                <a href="http://www.informatics.jax.org/downloads/mgigff3/" target="_blank">here</a>
+              </li>
+              <li>
+                <b>description</b>: contains MGI's (Mouse Genome Informatics) genes
+                and pseudogenes in minimized format (i.e. all exons combined into a single feature);
+                each feature has its gene name, gene symbol, and MGI ID
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Mouse_QTL_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: source data is taken from the <b>MRK_List2.rpt</b> file available
+                on <a href="http://www.informatics.jax.org/downloads/reports/" target="_blank">MGI's public FTP</a>
+                and then converted to GFF3
+              </li>
+              <li>
+                <b>description</b>: features in this file have the type QTL; the <b>column 9</b>
+                field contains 3 attributes - (1) the <b>ID</b> field is the
+                feature's MGI ID, (2) the <b>Name</b> field is the QTL's official name,
+                and (3) <b>Dbxref</b> is MGI's ID again but only the numeric portion
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Mouse_GeneAssociation_MP_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">GAF</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>: this file contains 4 columns; the first column
+                is MGI's ID of the genome feature (MGI:1234); the second column is the
+                feature symbol; the third column is the MP term for the specific
+                annotation (MP:1234); the last column is the extended name for the specific
+                MP term (increased systemic arterial diastolic blood pressure, etc)
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Mouse_GeneAssocication_GO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GAF</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: source data is taken from the <b>gene_association.mgi</b> file available
+                on <a href="http://www.informatics.jax.org/downloads/reports/" target="_blank">MGI's public FTP</a> and then converted to GAF
+              </li>
+              <li>
+                <b>description</b>: file's headers provide more complete description; however,
+                the gene with annotation is stored in the second column (MGI:1234) and the specific
+                annotation term is stored in the fourth column (GO:1234)
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Mouse_CytoBand_synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: downloaded from UCSC
+              </li>
+              <li>
+                <b>description</b>: the original (UCSC) file has been converted into
+                a standard GFF3 format and renamed for clarity; column 9 contains three attributes: ID (the provided UCSC ID),
+                Location (the p/q arm position of this band), and Color (the stain color of this band)
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- END Mouse Data -->
+
+    <h4>Human Data</h4>
+    <p>Data files from human source data.  For ontologies pertaining to human see the general section.</p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="left">Name</th>
+          <th class="left no-wrap">File Format</th>
+          <th class="left">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Human_GenomeFeatures_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: this file contains all of NCBI's genes and pseudogenes
+                in a minimized format (all exons combined into a single feature). It is
+                created from the ref_GRCh38.p12_top_level.gff3 file from NCBI and contains
+                the official gene symbol, gene name, and GeneID for each of these features.
+              </li>
+              <li>
+                <b>description</b>: this file is in standard GFF3 format with the following
+                column 9 properties; ID, Symbol, Name, and Dbxref. Please note the NCBI
+                GeneID is stored in the Dbxref field whereas the ID field should be used
+                only to identify parent/child features within the GFF.
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Human_GeneAnnotation_GO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GAF</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: source data is from a regularly generated report on the
+                Gene Ontology Consortium's website and can be found
+                <a href="http://current.geneontology.org/products/pages/downloads.html" target="_blank">here</a>;
+                the particular file to use is goa_human.gaf that is filtered to reduce
+                complexity and circular annotations that exist in other files
+              </li>
+              <li>
+                <b>description</b>: the files headers provide a more complete description
+                however the gene with annotation is stored in the second column (format A0A024RBG1)
+                and the specific annotation term is stored in the 4th column (format GO:1234).
+                In the downloaded version this ID is a UniProtKB ID but in the future it should
+                be changed to a NCBI ID.
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Human_GWAS_Synteny.vcf <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">VCF</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: the source data is from the
+                <a href="https://www.ebi.ac.uk/gwas/docs/file-downloads" target="_blank">EBI GWAS database</a>,
+                in particular, 1.0.2 all associations with added ontology annotations
+              </li>
+              <li>
+                <b>description</b>: contains GWAS loci that match the term 'type II diabetes mellitus';
+                note that GWAS hits classified with multiple terms including type II diabetes mellitus
+                were not included; this file was converted into a standard VCF format with
+                4 additional fields: AF (allele frequency), CG (mapped gene symbols), LT (ontology term for loci),
+                and PMID (the study's PubMed ID)
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Human_CytoBand_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: downloaded from UCSC
+              </li>
+              <li>
+                <b>description</b>: the original (UCSC) file has been converted into
+                a standard GFF3 format and renamed for clarity; column 9 contains three attributes: ID (the provided UCSC ID),
+                Location (the p/q arm position of this band), and Color (the stain color of this band)
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- END Human Data -->
+
+    <h4>Rat Data</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="left">Name</th>
+          <th class="left no-wrap">File Format</th>
+          <th class="left">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Rat_GenomeFeatures_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: The files for rat were derived from RGD provided source files
+                found <a href="" target="_blank">here</a>, in this case the gff3 file.  In rat the top level feature is "gene."
+              </li>
+              <li>
+                <b>description</b>: This file contains all exons from the rn6 assembly
+                for rat which is the most current genome assembly. This file is in standard
+                GFF3 format with the following column 9 properties; ID, Symbol, Name, and Dbxref.
+                Please note the MGI ID is stored in the Dbxref field whereas the ID field
+                should be used only to identify parent/child features within the GFF.
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Rat_QTL_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Rat_GeneAssociation_GO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GAF</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: This file is in a standard GAF format with several comment lines
+                (indicated by !) followed by the file data. This file is also a regularly generated
+                report on RGD's website and can be found here. The file that is currently being used
+                was provided by RGD in their Synteny Browser FTP folder but in the future
+                the updated version should be used.
+              </li>
+              <li>
+                <b>description</b>: The files headers provide a more complete description
+                however the gene with annotation is stored in the second column (just the numeric
+                portion of the RGD ID) and the specific annotation term is stored in the 4th column
+                (format GO:1234). In the downloaded version this ID is without its RGD prefix
+                and should be changed in the future.
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              Rat_CytoBand_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">GFF3</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>: downloaded from UCSC
+              </li>
+              <li>
+                <b>description</b>: the original (UCSC) file has been converted into
+                a standard GFF3 format and renamed for clarity; column 9 contains three attributes: ID (the provided UCSC ID),
+                Location (the p/q arm position of this band), and Color (the stain color of this band)
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- END Rat Data -->
+
+    <h4>General Data</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="left">Name</th>
+          <th class="left no-wrap">File Format</th>
+          <th class="left">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left no-wrap line-height-12">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              MouseHuman_Homologs_Synteny.tsv <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+            <br><br>
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              RatHuman_Homologs_Synteny.tsv <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+            <br><br>
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              RatMouse_Homologs_Synteny.tsv <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">TSV</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              HumanRat_Blocks_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+            <br><br>
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              RatMouse_Blocks_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+            <br><br>
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              MouseHuman_Blocks_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">TSV</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- END General Data -->
+
+    <h4>General Data</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="left">Name</th>
+          <th class="left no-wrap">File Format</th>
+          <th class="left">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              go-basic.obo <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">OBO</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              MGI_DO.rte <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">OBO</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              MPheno_OBO.ontology <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left">GAF</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="left no-wrap">
+            <a href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank" class="table-link">
+              HumanDO.obo <clr-icon shape="pop-out" size="14"></clr-icon>
+            </a>
+          </td>
+          <td class="left no-wrap">OBO</td>
+          <td class="left line-height-12">
+            <ul>
+              <li>
+                <b>source</b>:
+              </li>
+              <li>
+                <b>description</b>:
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- END General Data -->
+  </div>
+</div>
