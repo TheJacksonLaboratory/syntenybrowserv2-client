@@ -18,7 +18,7 @@ export class Filter {
   filterBy = '';
 
   // qualifier to change how matches are found (equal, not equal, like, not like)
-  qualifier = 'equal';
+  qualifier;
 
   // value to match features against when searching utilizing user input
   value = '';
@@ -70,20 +70,19 @@ export class Filter {
    * filter mode (hiding/highlighting), the conditions and affected species
    */
   setLabel(): void {
-    this.filterLabel = `${this.title} in ${this.species}`;
-    this.setSimpleTitle();
+    this.filterLabel = `${this.title} ${this.species}`;
   }
 
   /**
    * Sets the label for the simple filter menu button
    */
-  setSimpleTitle(): void {
+  setDropdownText(): void {
     if (this.filtersOnType()) {
-      this.filterByButtonText = `that are ${this.value}s in ${this.species}`;
+      this.filterByButtonText = `that are ${this.value}s ${this.species}`;
     } else {
       const filterBy = this.filtersOnOntology() ? `${this.ontology} term` : this.filterBy;
       const qual = this.qualifier === 'like' ? 'like' : '';
-      this.filterByButtonText = `in ${this.species} by ${filterBy} ${qual}`;
+      this.filterByButtonText = `${this.species} by ${filterBy} ${qual}`;
     }
   }
 
@@ -111,14 +110,14 @@ export class Filter {
     const comp = this.isCompFilter();
 
     if (ref && comp) {
-      return 'either species';
+      return '';
     }
     if (ref && !comp) {
-      return `${this.ref.name} only`;
+      return `in ${this.ref.name}`;
     }
 
     if (!ref && comp) {
-      return `${this.comp.name} only`;
+      return `in ${this.comp.name}`;
     }
 
     return null;
@@ -133,7 +132,7 @@ export class Filter {
   }
 
   get inputNeeded(): boolean {
-    return this.filterBy && !this.filtersOnType();
+    return this.filterBy && !(this.filtersOnType() || this.filtersOnOntology());
   }
 
   /**
@@ -151,9 +150,6 @@ export class Filter {
    * Returns the title of the filter condition
    */
   get title(): string {
-    if (this.filterBy === 'chr') {
-      return `Chr${this.value}`;
-    }
     if (this.filtersOnType()) {
       return `${this.value}s`;
     }
@@ -161,14 +157,7 @@ export class Filter {
       return this.value;
     }
 
-    let qual;
-    if (this.qualifier.includes('not')) {
-      qual = this.qualifier.includes('equal') ? '&ne' : 'not like';
-    } else {
-      qual = this.qualifier.includes('equal') ? '=' : 'like';
-    }
-
-    return `${this.filterBy} ${qual} ${this.value}`;
+    return `"${this.value}"`;
   }
 
   /**
@@ -230,7 +219,13 @@ export class Filter {
    * Returns true if all fields are complete/have values
    */
   isComplete(): boolean {
-    return !!(this.filterBy && this.qualifier && this.value);
+    if (this.filtersOnType()) {
+      return !!(this.value);
+    } else if (this.filterBy) {
+      return !!(this.qualifier && this.value);
+    }
+
+    return false;
   }
 
   /**

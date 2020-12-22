@@ -45,165 +45,164 @@
         </div>
 
         <!-- Current filter -->
-        <div *ngIf="currentFilter" class="clr-row clr-col-12 top-1">
-          <div class="clr-row clr-col-12">
-            <!-- Mode select -->
-            <clr-select-container class="right-1">
-              <label for="mode"> Mode </label>
+        <div *ngIf="currentFilter" class="clr-row clr-col-12 top-1 bottom-1">
+          <!-- Mode select -->
+          <clr-select-container>
+            <label for="mode"> Mode </label>
 
-              <select clrSelect id="mode" [(ngModel)]="currentFilter.mode">
-                <option value="highlight"> Highlight </option>
-                <option value="hide"> Hide </option>
-              </select>
-            </clr-select-container>
+            <select clrSelect id="mode" [(ngModel)]="currentFilter.mode">
+              <option value="highlight"> Highlight </option>
+              <option value="hide"> Hide </option>
+            </select>
+          </clr-select-container>
 
-            <h6 class="right-1">features</h6>
+          <h6>features</h6>
 
-            <!-- Dropdown menu system -->
-            <clr-dropdown class="right-1">
-              <button class="btn" clrDropdownTrigger>
-                {{
-                  currentFilter.filterByButtonText || "Select filter condition"
-                }}
-                <clr-icon shape="caret down"></clr-icon>
-              </button>
-              <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-                <!-- Select species -->
-                <clr-dropdown *ngFor="let s of currentFilter.speciesOptions">
-                  <button
-                    clrDropdownTrigger
-                    (click)="currentFilter.selectSpecies(s)"
-                  >
-                    In {{ s }}
-                  </button>
+          <!-- Dropdown menu system -->
+          <clr-dropdown style="max-width: 350px">
+            <button class="btn" clrDropdownTrigger
+                    title="{{ currentFilter.filterByButtonText || 'Select filter condition' }}">
+              {{
+                currentFilter.filterByButtonText || "Select filter condition"
+              }}
+              <clr-icon shape="caret down"></clr-icon>
+            </button>
+            <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+              <!-- Select species -->
+              <clr-dropdown *ngFor="let s of currentFilter.speciesOptions">
+                <button
+                  clrDropdownTrigger
+                  (click)="currentFilter.selectSpecies(s)"
+                >
+                  In {{ s }}
+                </button>
 
-                  <!-- Select aspect to filter by -->
-                  <clr-dropdown-menu>
-                    <clr-dropdown>
+                <!-- Select aspect to filter by -->
+                <clr-dropdown-menu>
+                  <clr-dropdown>
+                    <button
+                      clrDropdownTrigger
+                      (click)="filterByAttribute('type')"
+                    >
+                      by type
+                    </button>
+
+                    <!-- Select type -->
+                    <clr-dropdown-menu id="type-menu" clrPosition="left-top">
                       <button
-                        clrDropdownTrigger
-                        (click)="filterByAttribute('type')"
+                        *ngFor="let t of getFeatureTypes(currentFilter)"
+                        (click)="filterByType(t)"
+                        clrDropdownItem
                       >
-                        by type
+                        {{ t }}
                       </button>
+                    </clr-dropdown-menu>
+                  </clr-dropdown>
 
-                      <!-- Select type -->
-                      <clr-dropdown-menu id="type-menu" clrPosition="left-top">
-                        <button
-                          *ngFor="let t of getFeatureTypes(currentFilter)"
-                          (click)="filterByType(t)"
-                          clrDropdownItem
-                        >
-                          {{ t }}
-                        </button>
-                      </clr-dropdown-menu>
-                    </clr-dropdown>
+                  <clr-dropdown>
+                    <button
+                      clrDropdownTrigger
+                      (click)="filterByAttribute('id')"
+                    >
+                      by ID
+                    </button>
 
-                    <clr-dropdown>
+                    <!-- Select ID qualifier -->
+                    <clr-dropdown-menu>
                       <button
-                        clrDropdownTrigger
-                        (click)="filterByAttribute('id')"
+                        clrDropdownItem
+                        (click)="filterQualifier('equal')"
                       >
-                        by ID
+                        that equals...
                       </button>
-
-                      <!-- Select ID qualifier -->
-                      <clr-dropdown-menu>
-                        <button
-                          clrDropdownItem
-                          (click)="filterQualifier('equal')"
-                        >
-                          that equals...
-                        </button>
-                        <button
-                          clrDropdownItem
-                          (click)="filterQualifier('like')"
-                        >
-                          that is like...
-                        </button>
-                      </clr-dropdown-menu>
-                    </clr-dropdown>
-
-                    <clr-dropdown>
                       <button
-                        clrDropdownTrigger
-                        (click)="filterByAttribute('symbol')"
+                        clrDropdownItem
+                        (click)="filterQualifier('like')"
                       >
-                        by symbol
+                        that is like...
                       </button>
+                    </clr-dropdown-menu>
+                  </clr-dropdown>
 
-                      <!-- Select symbol qualifier -->
-                      <clr-dropdown-menu>
-                        <button
-                          clrDropdownItem
-                          (click)="filterQualifier('equal')"
-                        >
-                          that equals...
-                        </button>
-                        <button
-                          clrDropdownItem
-                          (click)="filterQualifier('like')"
-                        >
-                          that is like...
-                        </button>
-                      </clr-dropdown-menu>
-                    </clr-dropdown>
+                  <clr-dropdown>
+                    <button
+                      clrDropdownTrigger
+                      (click)="filterByAttribute('symbol')"
+                    >
+                      by symbol
+                    </button>
 
-                    <div
-                      class="dropdown-divider"
-                      role="separator"
-                      aria-hidden="true"
-                    ></div>
+                    <!-- Select symbol qualifier -->
+                    <clr-dropdown-menu>
+                      <button
+                        clrDropdownItem
+                        (click)="filterQualifier('equal')"
+                      >
+                        that equals...
+                      </button>
+                      <button
+                        clrDropdownItem
+                        (click)="filterQualifier('like')"
+                      >
+                        that is like...
+                      </button>
+                    </clr-dropdown-menu>
+                  </clr-dropdown>
 
-                    <clr-dropdown>
-                      <button clrDropdownTrigger>by ontology term</button>
+                  <div
+                    class="dropdown-divider"
+                    role="separator"
+                    aria-hidden="true"
+                  ></div>
 
-                      <!-- Select ontology -->
-                      <clr-dropdown-menu clrPosition="left-top">
-                        <button
-                          *ngFor="let o of currentFilter.ontologies"
-                          (click)="filterByOntology(o.value)"
-                          clrDropdownItem
-                        >
-                          from {{ o.name }}
-                        </button>
-                      </clr-dropdown-menu>
-                    </clr-dropdown>
-                  </clr-dropdown-menu>
-                </clr-dropdown>
-              </clr-dropdown-menu>
-            </clr-dropdown>
-          </div>
-          <div *ngIf="currentFilter.inputNeeded" class="clr-row clr-col-12">
-            <!-- Input for ID or symbol -->
-            <clr-input-container *ngIf="!currentFilter.filtersOnOntology()">
-              <label for="filter-value"> Value </label>
+                  <clr-dropdown>
+                    <button clrDropdownTrigger>by ontology term</button>
 
-              <input
-                id="filter-value"
-                clrInput
-                placeholder="Enter a value here"
-                [(ngModel)]="currentFilter.value"
-              />
-            </clr-input-container>
+                    <!-- Select ontology -->
+                    <clr-dropdown-menu clrPosition="left-top">
+                      <button
+                        *ngFor="let o of currentFilter.ontologies"
+                        (click)="filterByOntology(o.value)"
+                        clrDropdownItem
+                      >
+                        from {{ o.name }}
+                      </button>
+                    </clr-dropdown-menu>
+                  </clr-dropdown>
+                </clr-dropdown-menu>
+              </clr-dropdown>
+            </clr-dropdown-menu>
+          </clr-dropdown>
 
-            <!-- Autocomplete for ontology term -->
-            <ng-select
-              *ngIf="currentFilter.filtersOnOntology()"
-              class="simple-autocomplete"
-              bindLabel="name"
-              bindValue="id"
-              [items]="data.ontologyTerms[currentFilter.ontology]"
-              [virtualScroll]="true"
-              placeholder="Enter a term"
+          <!-- Input for ID or symbol -->
+          <clr-input-container *ngIf="currentFilter.inputNeeded && currentFilter.qualifier">
+            <label for="filter-value">{{ currentFilter.filterBy }}</label>
+
+            <input
+              id="filter-value"
+              clrInput
               [(ngModel)]="currentFilter.value"
-              (change)="checkTermChildren()"
-            >
-            </ng-select>
-          </div>
-          <div *ngIf="currentFilter.isComplete()" class="clr-row clr-col-12">
+              (ngModelChange)="currentFilter.setLabel()"
+            />
+          </clr-input-container>
+
+          <!-- Autocomplete for ontology term -->
+          <ng-select
+            *ngIf="currentFilter.filtersOnOntology()"
+            class="autocomplete"
+            bindLabel="name"
+            bindValue="id"
+            [items]="data.ontologyTerms[currentFilter.ontology]"
+            [virtualScroll]="true"
+            placeholder="Enter a term"
+            [(ngModel)]="currentFilter.value"
+            (change)="checkTermChildren()"
+          >
+          </ng-select>
+
+          <ng-container *ngIf="currentFilter.isComplete()">
             <!-- Filter name button -->
-            <clr-input-container class="right-1">
+            <clr-input-container>
               <label for="filter-name"> Name the filter </label>
 
               <input
@@ -217,14 +216,14 @@
             <!-- Finish filter button -->
             <button
               type="button"
-              class="btn btn-success-outline"
+              class="btn btn-success btn-icon top-0"
               title="Finish the filter"
               [disabled]="!currentFilter.value"
               (click)="finishFilter()"
             >
-              <clr-icon shape="check"></clr-icon> Done
+              <clr-icon shape="check"></clr-icon>
             </button>
-          </div>
+          </ng-container>
         </div>
       </div>
 

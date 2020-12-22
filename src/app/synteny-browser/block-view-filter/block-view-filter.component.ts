@@ -170,7 +170,8 @@ export class BlockViewFilterComponent implements OnInit {
    */
   filterByAttribute(attribute: string): void {
     this.currentFilter.filterBy = attribute;
-    this.currentFilter.value = attribute;
+    this.currentFilter.value = '';
+    this.currentFilter.qualifier = '';
   }
 
   /**
@@ -181,7 +182,8 @@ export class BlockViewFilterComponent implements OnInit {
     this.currentFilter.filterBy = `ont-${ontology}`;
     this.currentFilter.qualifier = 'equal';
     this.currentFilter.value = null;
-    this.currentFilter.setSimpleTitle();
+    this.currentFilter.setDropdownText();
+    this.currentFilter.setLabel();
   }
 
   /**
@@ -192,7 +194,8 @@ export class BlockViewFilterComponent implements OnInit {
   filterByType(type: string): void {
     this.currentFilter.filterBy = 'type';
     this.currentFilter.value = type;
-    this.finishFilter();
+    this.currentFilter.setDropdownText();
+    this.currentFilter.setLabel();
   }
 
   /**
@@ -202,7 +205,8 @@ export class BlockViewFilterComponent implements OnInit {
    */
   filterQualifier(qualifier: string): void {
     this.currentFilter.qualifier = qualifier;
-    this.currentFilter.setSimpleTitle();
+    this.currentFilter.setDropdownText();
+    this.currentFilter.setLabel();
   }
 
   /**
@@ -221,7 +225,7 @@ export class BlockViewFilterComponent implements OnInit {
         this.currentFilter.filterLabel = '';
         this.filterErrorState = 'Term too broad';
       } else {
-        this.currentFilter.filterLabel = `${filter.title} in ${filter.species}`;
+        this.currentFilter.filterLabel = `${filter.title} ${filter.species}`;
       }
     }
   }

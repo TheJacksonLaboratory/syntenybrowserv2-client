@@ -42,12 +42,8 @@
 }
 
 .autocomplete {
-  width: 300px !important;
-  margin-left: .5rem;
-}
-
-.simple-autocomplete {
-  width: 200px !important;
+  width: 220px !important;
+  margin-right: .5em;
 }
 
 // The following styles need to be here; any further up in the chain and they
@@ -115,7 +111,13 @@ button { text-transform: uppercase !important; }
 
   .modal-footer { padding: 1rem; }
 
-  #edit-filters .signpost .signpost-action clr-icon { height: .75rem !important; }
+  #edit-filters {
+    .signpost .signpost-action clr-icon { height: .75rem !important; }
+
+    clr-input-container {
+      margin: -7px 1em 0 0 !important;
+    }
+  }
 
   .block-body {
     dt.stack-block-label { display: none; }
