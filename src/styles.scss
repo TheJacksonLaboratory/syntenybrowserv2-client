@@ -109,7 +109,10 @@ button { text-transform: uppercase !important; }
     border-bottom: .5px #CCC solid;
   }
 
-  .modal-footer { padding: 1rem; }
+  .modal-footer {
+    padding: .75em 1rem;
+    border-top: .5px #CCC solid;
+  }
 
   #edit-filters {
     .signpost .signpost-action clr-icon { height: .75rem !important; }

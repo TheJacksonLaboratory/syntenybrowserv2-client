@@ -226,17 +226,6 @@
           </ng-container>
         </div>
       </div>
-
-      <!-- Done button -->
-      <div class="clr-row clr-justify-content-end top-1 bottom-1">
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="userClose.emit()"
-        >
-          Close
-        </button>
-      </div>
     </div>
 
     <!-- Filter results preview page/tab -->
@@ -306,19 +295,10 @@
       </div>
 
       <!-- Buttons -->
-      <div class="clr-row clr-justify-content-end top-1 bottom-1">
+      <div *ngIf="filteredGenes.length" class="clr-row clr-justify-content-start top-1">
         <!-- Download table button -->
         <button type="button" class="btn btn-outline" (click)="downloadTable()">
           <clr-icon shape="download"></clr-icon> Download Table
-        </button>
-
-        <!-- Done button -->
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="userClose.emit()"
-        >
-          Done
         </button>
       </div>
     </div>
@@ -327,17 +307,6 @@
     <div *ngIf="activePage === 'guide'" id="guide" class="clr-col-12">
       <!-- Content -->
       <filtering-guide></filtering-guide>
-
-      <!-- Done button -->
-      <div class="clr-row clr-justify-content-end top-1 bottom-1">
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="userClose.emit()"
-        >
-          Done
-        </button>
-      </div>
     </div>
   </div>
 </div>

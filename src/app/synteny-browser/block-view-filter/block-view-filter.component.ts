@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Species } from '../classes/species';
 
 import { Gene } from '../classes/gene';
@@ -50,9 +50,6 @@ export class BlockViewFilterComponent implements OnInit {
 
   // all genes affected by one or more filters
   filteredGenes: Gene[];
-
-  // emits when the user wants to close the dialog
-  @Output() userClose: EventEmitter<any> = new EventEmitter();
 
   constructor(
     private http: ApiService,
