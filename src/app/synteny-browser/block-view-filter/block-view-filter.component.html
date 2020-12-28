@@ -1,21 +1,23 @@
 <div id="filter-modal-container" class="clr-row">
   <!-- Side navigation -->
-  <clr-vertical-nav class="clr-col-2">
-    <a
-      *ngFor="let pg of navigation"
-      clrVerticalNavLink
-      (click)="activePage = pg.value"
-      [ngStyle]="{ 'font-weight': activePage === pg.value ? 'bold' : 'normal' }"
+  <clr-vertical-nav>
+    <a clrVerticalNavLink (click)="activePage = 'filters'"
+      [ngStyle]="{ 'font-weight': activePage === 'filters' ? 'bold' : 'normal' }"
     >
-      {{ pg.name | titlecase }}
+      Filters
+    </a>
+    <a clrVerticalNavLink (click)="activePage = 'guide'"
+       [ngStyle]="{ 'font-weight': activePage === 'guide' ? 'bold' : 'normal' }"
+    >
+      Guide
     </a>
   </clr-vertical-nav>
 
   <!-- Page/tab content-->
-  <div id="page-content" class="clr-col-10">
+  <div id="page-content" class="clr-col">
     <!-- Current filters -->
     <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row clr-col-12 top-1">
-      <div class="clr-col-12 label-container">
+      <div class="clr-col-10 label-container">
         <!-- No filters message -->
         <div *ngIf="!createdFilters.length" class="no-filters">
           No filters yet; when filters are created, they will appear here
@@ -34,18 +36,29 @@
           </span>
         </div>
       </div>
+      <div class="clr-col-2">
+        <!-- Finish filter button -->
+        <button
+          type="button"
+          class="btn btn-success-outline btn-icon top-0"
+          title="Add a filter"
+          (click)="createNewEditableFilter()"
+        >
+          <clr-icon shape="add"></clr-icon> Add Filter
+        </button>
+      </div>
     </div>
 
     <!-- Filter editing page/tab -->
-    <div *ngIf="activePage === 'edit'" id="edit-filters" class="clr-col-12">
+    <div *ngIf="activePage === 'filters'" class="clr-col-12">
       <!-- Content -->
-      <div class="clr-row clr-col-12">
+      <ng-container *ngIf="currentFilter">
         <div class="clr-row clr-col-12 clr-justify-content-center">
           <h5>{{ currentFilter.created ? "Edit" : "Create New" }} Filter</h5>
         </div>
 
         <!-- Current filter -->
-        <div *ngIf="currentFilter" class="clr-row clr-col-12 top-1 bottom-1">
+        <div class="clr-row clr-col-12 top-1 bottom-1">
           <!-- Mode select -->
           <clr-select-container>
             <label for="mode"> Mode </label>
@@ -63,7 +76,7 @@
             <button class="btn" clrDropdownTrigger
                     title="{{ currentFilter.filterByButtonText || 'Select filter condition' }}">
               {{
-                currentFilter.filterByButtonText || "Select filter condition"
+              currentFilter.filterByButtonText || "Select filter condition"
               }}
               <clr-icon shape="caret down"></clr-icon>
             </button>
@@ -225,15 +238,8 @@
             </button>
           </ng-container>
         </div>
-      </div>
-    </div>
+      </ng-container>
 
-    <!-- Filter results preview page/tab -->
-    <div
-      *ngIf="activePage === 'preview'"
-      id="preview-filters"
-      class="clr-col-12"
-    >
       <!-- Content -->
       <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row clr-col-12 top-1">
         <!-- Filter results table -->

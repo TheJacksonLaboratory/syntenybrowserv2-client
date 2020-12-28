@@ -142,7 +142,7 @@ export class Filter {
    * or ID)
    */
   get inputNeeded(): boolean {
-    return this.filterBy && !(this.filtersOnType() || this.filtersOnOntology());
+    return !!(this.filterBy) && !(this.filtersOnType() || this.filtersOnOntology());
   }
 
   /**

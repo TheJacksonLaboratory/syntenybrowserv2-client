@@ -25,9 +25,11 @@ clr-dg-row { background: rgba(42, 159, 224, .2); }
 
 .datagrid .datagrid-cell { font-size: .45rem; }
 
-#diagram { margin-top: 5vh; }
-
 #filter-modal-container { min-height: 50vh; }
+
+clr-vertical-nav {
+  width: 100px;
+}
 
 #page-content {
   padding-bottom: 15px;

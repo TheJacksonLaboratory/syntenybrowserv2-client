@@ -5,7 +5,6 @@ import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
 import { DownloadService } from '../services/download.service';
 import { DataStorageService } from '../services/data-storage.service';
-import { Option } from '../synteny-browser.component';
 
 @Component({
   selector: 'block-view-filter',
@@ -19,21 +18,14 @@ export class BlockViewFilterComponent implements OnInit {
   // all genes in the comparison regions in the block view browser
   @Input() compGenes: Gene[];
 
-  // 'navigation' links to show in the sidebar of the dialog
-  navigation: NavigationObject[] = [
-    { name: 'edit filters', value: 'edit' },
-    { name: 'preview filters', value: 'preview' },
-    { name: 'filtering guide', value: 'guide' },
-  ];
-
   // 'page' in the dialog navigation is currently visible
-  activePage = 'edit';
+  activePage = 'filters';
 
   // list of filters that are being edited and have been created
   filters: Filter[];
 
   // current filter being edited
-  currentFilter: Filter;
+  currentFilter: Filter = null;
 
   // error message for current filter, if issues present
   filterErrorState: string = null;
@@ -57,8 +49,6 @@ export class BlockViewFilterComponent implements OnInit {
     if (this.filters.length) {
       this.applyFilters();
     }
-
-    this.createNewEditableFilter();
   }
 
   /**
@@ -69,6 +59,8 @@ export class BlockViewFilterComponent implements OnInit {
     this.filters.forEach(f => {
       f.editing = false;
     });
+
+    this.filters = this.createdFilters;
 
     // add the new filter
     this.filters.push(new Filter(this.data.refSpecies, this.data.compSpecies, this.filters.length));
@@ -81,7 +73,7 @@ export class BlockViewFilterComponent implements OnInit {
    * @param {Filter} filter - the filter to mark as the current one to edit
    */
   editFilter(filter: Filter): void {
-    if (this.activePage === 'edit') {
+    if (this.activePage === 'filters') {
       this.filters = this.createdFilters;
 
       // make sure that all filters are marked as not being edited
@@ -116,8 +108,7 @@ export class BlockViewFilterComponent implements OnInit {
 
     this.applyFilters();
 
-    // create a new filter
-    this.createNewEditableFilter();
+    this.currentFilter = null;
   }
 
   /**
@@ -132,8 +123,9 @@ export class BlockViewFilterComponent implements OnInit {
 
     this.applyFilters();
 
-    // create a new filter
-    this.createNewEditableFilter();
+    if (this.currentFilter.id === filter.id) {
+      this.currentFilter = null;
+    }
   }
 
   /**
@@ -409,5 +401,3 @@ export class BlockViewFilterComponent implements OnInit {
     }
   }
 }
-
-export type NavigationObject = Option;
