@@ -24,7 +24,9 @@ import { Component } from '@angular/core';
             <clr-stack-label> Anatomy of a Filter </clr-stack-label>
             <clr-stack-block class="block-body">
               <p>
-                Using the dropdown menu, you are provided options to construct the filter
+                Createa a new filter by clicking the 'Add Filter' button to the right of the filter
+                list. Once a new filter is created, using the options and dropdown menu, you are
+                provided options to construct the filter
                 instructions. If the condition you select requires an input value, a field to enter
                 that input will become available.
               </p>
@@ -155,17 +157,13 @@ import { Component } from '@angular/core';
           </clr-stack-block>
         </clr-stack-block>
         <clr-stack-block>
-          <clr-stack-label> Previewing Filters </clr-stack-label>
+          <clr-stack-label> Filter Results </clr-stack-label>
           <clr-stack-block class="block-body">
             <ul class="list">
               <li>
-                If you have created filters, you can utilize the preview filters page. If you
-                haven’t created any filters, you can see the preview filters page but it won’t be
-                helpful at all.
-              </li>
-              <li>
                 The filter results table will show the features that will be affected by the current
-                combination of filters selected in the checklist.
+                combination of filters selected in the checklist. If you haven't created any filters,
+                this table will, naturally, be empty.
               </li>
               <li>
                 Features that will be hidden by the set of filters will be represented by a red row

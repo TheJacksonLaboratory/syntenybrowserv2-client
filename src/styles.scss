@@ -114,12 +114,8 @@ button { text-transform: uppercase !important; }
     border-top: .5px #CCC solid;
   }
 
-  #edit-filters {
-    .signpost .signpost-action clr-icon { height: .75rem !important; }
-
-    clr-input-container {
-      margin: -7px 1em 0 0 !important;
-    }
+  clr-input-container {
+    margin: -7px 1em 0 0 !important;
   }
 
   .block-body {
