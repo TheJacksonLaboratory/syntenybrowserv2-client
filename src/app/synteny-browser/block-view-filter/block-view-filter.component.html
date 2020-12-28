@@ -12,9 +12,9 @@
   </clr-vertical-nav>
 
   <!-- Page/tab content-->
-  <div class="clr-col-10">
+  <div id="page-content" class="clr-col-10">
     <!-- Current filters -->
-    <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
+    <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row clr-col-12 top-1">
       <div class="clr-col-12 label-container">
         <!-- No filters message -->
         <div *ngIf="!createdFilters.length" class="no-filters">
@@ -235,7 +235,7 @@
       class="clr-col-12"
     >
       <!-- Content -->
-      <div *ngIf="refSpecies && compSpecies" class="clr-row clr-col-12 top-1">
+      <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row clr-col-12 top-1">
         <!-- Filter results table -->
         <div id="filter-results" class="clr-col-12">
           <!-- Title -->
@@ -295,7 +295,7 @@
       </div>
 
       <!-- Buttons -->
-      <div *ngIf="filteredGenes.length" class="clr-row clr-justify-content-start top-1">
+      <div *ngIf="filteredGenes?.length" class="clr-row clr-justify-content-start top-1">
         <!-- Download table button -->
         <button type="button" class="btn btn-outline" (click)="downloadTable()">
           <clr-icon shape="download"></clr-icon> Download Table

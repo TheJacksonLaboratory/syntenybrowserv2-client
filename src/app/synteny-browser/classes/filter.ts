@@ -66,15 +66,15 @@ export class Filter {
   }
 
   /**
-   * Sets the text that should appear within a label component, including the
-   * filter mode (hiding/highlighting), the conditions and affected species
+   * Sets the default text that appears within a label with the condition and
+   * affected species
    */
   setLabel(): void {
     this.filterLabel = `${this.title} ${this.species}`;
   }
 
   /**
-   * Sets the label for the simple filter menu button
+   * Sets the label for the filter menu button
    */
   setDropdownText(): void {
     if (this.filtersOnType()) {
@@ -87,8 +87,8 @@ export class Filter {
   }
 
   /**
-   * Returns the list of ontologies that are available to choose from for each
-   * condition given the selected species for the filter
+   * Returns the list of ontologies that are available to choose from given the
+   * selected species for the filter
    */
   get ontologies(): SearchType[] {
     if (this.isRefFilter() && this.isCompFilter()) {
@@ -123,20 +123,30 @@ export class Filter {
     return null;
   }
 
+  /**
+   * Returns the info (name, value, selection status) for the comparison species
+   */
   get comp(): any {
     return this.allSpecies.comp;
   }
 
+  /**
+   * Returns the info (name, value, selection status) for the reference species
+   */
   get ref(): any {
     return this.allSpecies.ref;
   }
 
+  /**
+   * Returns true if the filter needs an input (if user wants to filter by symbol
+   * or ID)
+   */
   get inputNeeded(): boolean {
     return this.filterBy && !(this.filtersOnType() || this.filtersOnOntology());
   }
 
   /**
-   * Returns a list of option titles for species selection in simple filter mode
+   * Returns a list of titles for species selection in the dropdown menu
    */
   get speciesOptions(): any[] {
     return [
@@ -147,7 +157,7 @@ export class Filter {
   }
 
   /**
-   * Returns the title of the filter condition
+   * Returns a short title for the filter's condition
    */
   get title(): string {
     if (this.filtersOnType()) {
@@ -205,11 +215,6 @@ export class Filter {
     const geneValue = gene[this.filterBy].toLowerCase();
     const condValue = this.value.toLowerCase();
 
-    if (this.qualifier.includes('not')) {
-      return this.qualifier.includes('equal')
-        ? geneValue !== condValue
-        : !geneValue.includes(condValue);
-    }
     return this.qualifier.includes('equal')
       ? geneValue === condValue
       : geneValue.includes(condValue);

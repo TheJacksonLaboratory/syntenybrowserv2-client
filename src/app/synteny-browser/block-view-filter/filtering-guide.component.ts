@@ -24,14 +24,9 @@ import { Component } from '@angular/core';
             <clr-stack-label> Anatomy of a Filter </clr-stack-label>
             <clr-stack-block class="block-body">
               <p>
-                There are two ways to create filters. The default method is creating a simple
-                filter. Using the dropdown menu, you are provided options to construct the filter
+                Using the dropdown menu, you are provided options to construct the filter
                 instructions. If the condition you select requires an input value, a field to enter
-                that input will become available. Simple filters are the quickest to create but they
-                have some limitations. A simple filter is made up of only a single condition and in
-                some cases, doesn't support as many qualifier options. If you need more control or
-                customization, you may need to create an advanced filter, which can be found under
-                the form.
+                that input will become available.
               </p>
               <ul class="list">
                 <li>
@@ -39,7 +34,7 @@ import { Component } from '@angular/core';
                   If the selected species is the reference, the current reference chromosome will be
                   searched for matches. If the selected species is the comparison, the regions in
                   the comparison genome that are syntenic to the reference on the current reference
-                  chromosome will be searched for matches. If the selected species is ‘Both’, both
+                  chromosome will be searched for matches. If the selected species is ‘In either species’, both
                   of the aforementioned regions will be included in the search.
                 </li>
                 <li>
@@ -50,77 +45,37 @@ import { Component } from '@angular/core';
                   the highlight filter will be prioritized.
                 </li>
                 <li>
-                  <b>Conditions:</b> filters can have one or more conditions. In order for a feature
-                  to match a filter, it must satisfy ALL of the filter’s conditions. If there are
-                  multiple conditions in a filter, a remove button should appear to the right of
-                  each of the additional conditions. Since a filter requires at least a single
-                  condition, all but the first condition can be removed.
-                  <ul class="list">
-                    <li>
-                      <b>Filtering by Type:</b> offered as 'is categorized as a...' in the dropdown,
-                      provides you with a select dropdown with the available types available based
-                      on the selected species.
-                    </li>
-                    <li>
-                      <b>Filtering by ID:</b> offered as 'Has an ID that...' in the dropdown,
-                      provides you with an input where you could enter a gene ID select and a
-                      dropdown allowing you to choose whether you're looking for exact matches,
-                      "like" matches or features that <i>don't</i> match the input value.
-                    </li>
-                    <li>
-                      <b>Filtering by Symbol:</b> offered as 'Has a symbol that...' in the dropdown,
-                      provides you with an input where you could enter a gene symbol or a prefix and
-                      a select dropdown allowing you to choose whether you're looking for exact
-                      matches, "like" matches or features that <i>don't</i> match the input value.
-                    </li>
-                    <li>
-                      <b>Filtering by Chromosome: (available only for a comparison filter)</b>
-                      offered as 'Is located on chromosome...' in the dropdown, provides you with a
-                      select dropdown allowing you to choose a comparison species chromosome.
-                    </li>
-                    <li>
-                      <b>Ontology Term:</b> offered as 'Is associated with a
-                      <i>ontology abbrev</i> term...' in the dropdown, provides you an input where
-                      you can scroll through the selected ontology terms and select from the options
-                      or start typing a term to filter options.
-                    </li>
-                    <li>
-                      <b>Qualifiers:</b> filtering by symbol/ID attribute will provide you with a
-                      qualifier select. By default, the qualifier will be ‘is equal to’ which will
-                      check that the search for features whose attribute is an exact match for the
-                      value entered. You can choose ‘not equal to’ which will search for features
-                      whose attribute is NOT the entered value. Additionally you have ‘is like’ and
-                      ‘is not like’ which will search for features whose attribute contains (or not)
-                      the entered value.
-                      <i
-                        >For example, if you were viewing Mouse as the reference species, chromosome
-                        14, and wanted to highlight a series of genes whose symbol starts with
-                        ‘traj’ (for which there are several), you’d be able to highlight all of them
-                        no matter what numeric suffix they have. On the other hand, if you wanted to
-                        highlight all BUT that series of genes, you could use the ‘is not like’
-                        qualifier.</i
-                      >
-                    </li>
-                  </ul>
+                  <b>Filtering by Type:</b> provides you with a select dropdown with the available
+                  types based on the selected species.
                 </li>
                 <li>
-                  If you want to want more than one condition in a filter, you can press the ‘new
-                  condition’ button to add another condition to the filter. It’s important to note
-                  that when applying a single filter, matches must match all conditions in the
-                  filter.
+                  <b>Filtering by ID:</b> provides you with an input where you can enter a gene ID select and a
+                  dropdown allowing you to choose whether you're looking for exact matches ('that equals'), or
+                  "like" matches.
+                </li>
+                <li>
+                  <b>Filtering by Symbol:</b> provides you with an input where you can enter a gene symbol or a prefix and
+                  a select dropdown allowing you to choose whether you're looking for exact
+                  matches ('that equals'), or "like" matches.
+                </li>
+                <li>
+                  <b>Ontology Term:</b> provies you with a menu of available ontologies based on the
+                  selected species. After selecting a specific ontology, an input/select menu will
+                  appear for you to search for and select the ontology term you're looking for.
+                </li>
+                <li>
+                  <b>Qualifiers:</b> if filtering by symbol/ID attribute you will get the option to
+                  filter by exact match ('that equals') or more fuzzy matching ('that is like').
                   <i
-                    >For example, if you wanted to highlight rRNA genes and tRNA genes (which
-                    translates to ‘type = rRNA gene’ OR ‘type = tRNA gene’), you will want to create
-                    two separate filters, each with a single condition to filter on the types you
-                    want. You would <b>NOT</b> want to create a single filter with two type filters
-                    (which would translate to ‘type = rRNA gene’ AND ‘type = tRNA’) as the filter
-                    would be looking for features that are both rRNA genes AND tRNA genes, producing
-                    a result of 0 matching features for the filter.</i
+                    >For example, if you were viewing Mouse as the reference species, chromosome
+                    14, and wanted to highlight a series of genes whose symbol starts with
+                    ‘traj’ (for which there are several), you’d be able to highlight all of them
+                    no matter what numeric suffix they have.</i
                   >
                 </li>
                 <li>
-                  As you fill out the fields in the conditions, a filter name will generate. You can
-                  use this name, by default, or you can rename it.
+                  As you fill out the fields in the condition, a filter name will automatically be generated. You can
+                  use this default name or you can rename it.
                 </li>
               </ul>
             </clr-stack-block>
@@ -140,15 +95,9 @@ import { Component } from '@angular/core';
                   highlighted as highlighting filters always take precedence over hiding filters.
                 </li>
                 <li>
-                  The first word in the filter label also indicates the mode of the filter.
-                </li>
-                <li>
-                  The content within square brackets in the filter label summarize the conditions of
-                  the filter.
-                </li>
-                <li>
-                  The last part of the filter label identifies the common names of species the
-                  filter will search for matches.
+                  If a filter is only being applied to one of the species, the species it applies to
+                  will be included (by default) in the label. If the filter is to search for matches
+                  in either species, the species will not appear in the default label.
                 </li>
                 <li>
                   Clicking on the ‘X’ in a filter label will delete the associated filter.
@@ -158,9 +107,6 @@ import { Component } from '@angular/core';
                   mode below the filter labels.
                 </li>
               </ul>
-              <div class="clr-col-6">
-                <img id="diagram" src="../../../assets/filter-label-diagram.png" alt="" />
-              </div>
             </clr-stack-block>
           </clr-stack-block>
           <clr-stack-block>
@@ -172,14 +118,14 @@ import { Component } from '@angular/core';
                   loaded so you can start editing the fields to create a new filter.
                 </li>
                 <li>
-                  Once finished with a filter, click the ‘finish editing filter’ button and you will
+                  Once finished with a filter, click the green checkmark button and you will
                   see a colored label appear in the field towards the top of the modal. A blue label
                   indicates a ‘highlight’ filter and a red label indicates a ‘hide’ filter.
                 </li>
                 <li>
                   If you’re editing a filter and navigate to a different tab (as long as you don’t
                   close the modal), your current filter will still be there, in its current state
-                  for you to finish, continue editing, or throw out.
+                  for you to continue editing.
                 </li>
                 <li>
                   If you’re editing a filter and click on a label of a different filter, the changes
@@ -228,6 +174,10 @@ import { Component } from '@angular/core';
                 highlighting filters take precedence over hiding filters, if a feature matches a
                 highlighting filter AND a hiding filter, it will appear blue in the table as it will
                 be highlighted rather than hidden.
+              </li>
+              <li>
+                The filters that each feature matched to will be listed in the 'filters' column,
+                represented by their filter label.
               </li>
               <li>
                 If you would like to download the contents of the table, click the ‘download table’

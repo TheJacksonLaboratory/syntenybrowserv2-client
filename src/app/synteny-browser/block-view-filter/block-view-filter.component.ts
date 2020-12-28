@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Species } from '../classes/species';
-
 import { Gene } from '../classes/gene';
 import { Filter } from '../classes/filter';
 import { ApiService } from '../services/api.service';
@@ -14,15 +13,6 @@ import { Option } from '../synteny-browser.component';
   styleUrls: ['./block-view-filter.component.scss'],
 })
 export class BlockViewFilterComponent implements OnInit {
-  // currently selected reference species
-  @Input() refSpecies: Species;
-
-  // currently selected comparison species
-  @Input() compSpecies: Species;
-
-  // currently active filters
-  @Input() filters: Filter[];
-
   // all genes in the reference chromosome in the block view browser
   @Input() refGenes: Gene[];
 
@@ -39,6 +29,9 @@ export class BlockViewFilterComponent implements OnInit {
   // 'page' in the dialog navigation is currently visible
   activePage = 'edit';
 
+  // list of filters that are being edited and have been created
+  filters: Filter[];
+
   // current filter being edited
   currentFilter: Filter;
 
@@ -49,7 +42,7 @@ export class BlockViewFilterComponent implements OnInit {
   allGenes: Gene[];
 
   // all genes affected by one or more filters
-  filteredGenes: Gene[];
+  filteredGenes: Gene[] = [];
 
   constructor(
     private http: ApiService,
@@ -58,6 +51,7 @@ export class BlockViewFilterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.filters = this.data.filters;
     this.allGenes = this.refGenes.concat(...this.compGenes);
 
     if (this.filters.length) {
@@ -77,7 +71,7 @@ export class BlockViewFilterComponent implements OnInit {
     });
 
     // add the new filter
-    this.filters.push(new Filter(this.refSpecies, this.compSpecies, this.filters.length));
+    this.filters.push(new Filter(this.data.refSpecies, this.data.compSpecies, this.filters.length));
     this.currentFilter = this.getCurrentFilter();
   }
 
@@ -120,11 +114,9 @@ export class BlockViewFilterComponent implements OnInit {
     this.currentFilter.editing = false;
     this.currentFilter.created = true;
 
-    // TODO: this is vastly inefficient and shouldn't be run for every filter
-    //       every time a new one is finished
     this.applyFilters();
 
-    // create a new filter using the current filter's advanced/simple setting
+    // create a new filter
     this.createNewEditableFilter();
   }
 
@@ -138,9 +130,10 @@ export class BlockViewFilterComponent implements OnInit {
     // update filter ids so they reflect their current index in the filter list
     this.reassignFilterIDs();
 
-    // TODO: this is vastly inefficient and shouldn't be run for every filter
-    //       every time a new one is finished
     this.applyFilters();
+
+    // create a new filter
+    this.createNewEditableFilter();
   }
 
   /**
@@ -148,8 +141,8 @@ export class BlockViewFilterComponent implements OnInit {
    * resulting genes in the table into a TSV-like file
    */
   downloadTable(): void {
-    const ref = this.refSpecies.commonName;
-    const comp = this.compSpecies.commonName;
+    const ref = this.data.refSpecies.commonName;
+    const comp = this.data.compSpecies.commonName;
     const rows = this.filteredGenes.map(g => g.getFilterMetadata(ref, comp));
 
     const lines = `[FILTER DATA]\nfilter type\tspecies\tcondition(s)\n${this.createdFilters
@@ -184,8 +177,7 @@ export class BlockViewFilterComponent implements OnInit {
   }
 
   /**
-   * Sets the current filter's type to be the specified feature type and
-   * finishes the filter
+   * Sets the current filter's type to be the specified feature type
    * @param {string} type - the feature type to filter features by
    */
   filterByType(type: string): void {
@@ -391,11 +383,11 @@ export class BlockViewFilterComponent implements OnInit {
     const compFilters = filters.filter(f => f.isCompFilter());
 
     if (refFilters.length) {
-      this.getMatches(this.refGenes, refFilters, this.refSpecies);
+      this.getMatches(this.refGenes, refFilters, this.data.refSpecies);
     }
 
     if (compFilters.length) {
-      this.getMatches(this.compGenes, compFilters, this.compSpecies);
+      this.getMatches(this.compGenes, compFilters, this.data.compSpecies);
     }
   }
 
@@ -409,11 +401,11 @@ export class BlockViewFilterComponent implements OnInit {
     const compFilters = filters.filter(f => f.isCompFilter());
 
     if (refFilters.length) {
-      this.getMatches(this.refGenes, refFilters, this.refSpecies);
+      this.getMatches(this.refGenes, refFilters, this.data.refSpecies);
     }
 
     if (compFilters.length) {
-      this.getMatches(this.compGenes, compFilters, this.compSpecies);
+      this.getMatches(this.compGenes, compFilters, this.data.compSpecies);
     }
   }
 }
