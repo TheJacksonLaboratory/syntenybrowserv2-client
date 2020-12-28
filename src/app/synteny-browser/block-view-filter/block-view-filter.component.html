@@ -1,13 +1,19 @@
 <div id="filter-modal-container" class="clr-row">
   <!-- Side navigation -->
   <clr-vertical-nav>
-    <a clrVerticalNavLink (click)="activePage = 'filters'"
-      [ngStyle]="{ 'font-weight': activePage === 'filters' ? 'bold' : 'normal' }"
+    <a
+      clrVerticalNavLink
+      (click)="activePage = 'filters'"
+      [ngStyle]="{
+        'font-weight': activePage === 'filters' ? 'bold' : 'normal'
+      }"
     >
       Filters
     </a>
-    <a clrVerticalNavLink (click)="activePage = 'guide'"
-       [ngStyle]="{ 'font-weight': activePage === 'guide' ? 'bold' : 'normal' }"
+    <a
+      clrVerticalNavLink
+      (click)="activePage = 'guide'"
+      [ngStyle]="{ 'font-weight': activePage === 'guide' ? 'bold' : 'normal' }"
     >
       Guide
     </a>
@@ -16,7 +22,10 @@
   <!-- Page/tab content-->
   <div id="page-content" class="clr-col">
     <!-- Current filters -->
-    <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row clr-col-12 top-1">
+    <div
+      *ngIf="data.refSpecies && data.compSpecies"
+      class="clr-row clr-col-12 top-1"
+    >
       <div class="clr-col-10 label-container">
         <!-- No filters message -->
         <div *ngIf="!createdFilters.length" class="no-filters">
@@ -73,10 +82,15 @@
 
           <!-- Dropdown menu system -->
           <clr-dropdown style="max-width: 350px">
-            <button class="btn" clrDropdownTrigger
-                    title="{{ currentFilter.filterByButtonText || 'Select filter condition' }}">
+            <button
+              class="btn"
+              clrDropdownTrigger
+              title="{{
+                currentFilter.filterByButtonText || 'Select filter condition'
+              }}"
+            >
               {{
-              currentFilter.filterByButtonText || "Select filter condition"
+                currentFilter.filterByButtonText || "Select filter condition"
               }}
               <clr-icon shape="caret down"></clr-icon>
             </button>
@@ -128,10 +142,7 @@
                       >
                         that equals...
                       </button>
-                      <button
-                        clrDropdownItem
-                        (click)="filterQualifier('like')"
-                      >
+                      <button clrDropdownItem (click)="filterQualifier('like')">
                         that is like...
                       </button>
                     </clr-dropdown-menu>
@@ -153,10 +164,7 @@
                       >
                         that equals...
                       </button>
-                      <button
-                        clrDropdownItem
-                        (click)="filterQualifier('like')"
-                      >
+                      <button clrDropdownItem (click)="filterQualifier('like')">
                         that is like...
                       </button>
                     </clr-dropdown-menu>
@@ -188,7 +196,9 @@
           </clr-dropdown>
 
           <!-- Input for ID or symbol -->
-          <clr-input-container *ngIf="currentFilter.inputNeeded && currentFilter.qualifier">
+          <clr-input-container
+            *ngIf="currentFilter.inputNeeded && currentFilter.qualifier"
+          >
             <label for="filter-value">{{ currentFilter.filterBy }}</label>
 
             <input
@@ -241,7 +251,10 @@
       </ng-container>
 
       <!-- Content -->
-      <div *ngIf="data.refSpecies && data.compSpecies" class="clr-row clr-col-12 top-1">
+      <div
+        *ngIf="data.refSpecies && data.compSpecies"
+        class="clr-row clr-col-12 top-1"
+      >
         <!-- Filter results table -->
         <div id="filter-results" class="clr-col-12">
           <!-- Title -->
@@ -301,7 +314,10 @@
       </div>
 
       <!-- Buttons -->
-      <div *ngIf="filteredGenes?.length" class="clr-row clr-justify-content-start top-1">
+      <div
+        *ngIf="filteredGenes?.length"
+        class="clr-row clr-justify-content-start top-1"
+      >
         <!-- Download table button -->
         <button type="button" class="btn btn-outline" (click)="downloadTable()">
           <clr-icon shape="download"></clr-icon> Download Table

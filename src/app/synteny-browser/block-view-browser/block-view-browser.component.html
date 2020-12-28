@@ -44,7 +44,11 @@
 
         <!-- Button to open filter tools -->
         <div class="clr-col-2">
-          <button class="btn btn-primary" [disabled]="refGenes && compGenes" (click)="filter.emit()">
+          <button
+            class="btn btn-primary"
+            [disabled]="refGenes && compGenes"
+            (click)="filter.emit()"
+          >
             <clr-icon shape="pencil" class="is-solid"></clr-icon> Edit
           </button>
         </div>

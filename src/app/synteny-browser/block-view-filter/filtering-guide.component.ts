@@ -26,9 +26,8 @@ import { Component } from '@angular/core';
               <p>
                 Createa a new filter by clicking the 'Add Filter' button to the right of the filter
                 list. Once a new filter is created, using the options and dropdown menu, you are
-                provided options to construct the filter
-                instructions. If the condition you select requires an input value, a field to enter
-                that input will become available.
+                provided options to construct the filter instructions. If the condition you select
+                requires an input value, a field to enter that input will become available.
               </p>
               <ul class="list">
                 <li>
@@ -36,8 +35,8 @@ import { Component } from '@angular/core';
                   If the selected species is the reference, the current reference chromosome will be
                   searched for matches. If the selected species is the comparison, the regions in
                   the comparison genome that are syntenic to the reference on the current reference
-                  chromosome will be searched for matches. If the selected species is ‘In either species’, both
-                  of the aforementioned regions will be included in the search.
+                  chromosome will be searched for matches. If the selected species is ‘In either
+                  species’, both of the aforementioned regions will be included in the search.
                 </li>
                 <li>
                   <b>Mode:</b> filters can operate in one of two modes: hide or highlight. If the
@@ -51,14 +50,14 @@ import { Component } from '@angular/core';
                   types based on the selected species.
                 </li>
                 <li>
-                  <b>Filtering by ID:</b> provides you with an input where you can enter a gene ID select and a
-                  dropdown allowing you to choose whether you're looking for exact matches ('that equals'), or
-                  "like" matches.
+                  <b>Filtering by ID:</b> provides you with an input where you can enter a gene ID
+                  select and a dropdown allowing you to choose whether you're looking for exact
+                  matches ('that equals'), or "like" matches.
                 </li>
                 <li>
-                  <b>Filtering by Symbol:</b> provides you with an input where you can enter a gene symbol or a prefix and
-                  a select dropdown allowing you to choose whether you're looking for exact
-                  matches ('that equals'), or "like" matches.
+                  <b>Filtering by Symbol:</b> provides you with an input where you can enter a gene
+                  symbol or a prefix and a select dropdown allowing you to choose whether you're
+                  looking for exact matches ('that equals'), or "like" matches.
                 </li>
                 <li>
                   <b>Ontology Term:</b> provies you with a menu of available ontologies based on the
@@ -69,15 +68,15 @@ import { Component } from '@angular/core';
                   <b>Qualifiers:</b> if filtering by symbol/ID attribute you will get the option to
                   filter by exact match ('that equals') or more fuzzy matching ('that is like').
                   <i
-                    >For example, if you were viewing Mouse as the reference species, chromosome
-                    14, and wanted to highlight a series of genes whose symbol starts with
-                    ‘traj’ (for which there are several), you’d be able to highlight all of them
-                    no matter what numeric suffix they have.</i
+                    >For example, if you were viewing Mouse as the reference species, chromosome 14,
+                    and wanted to highlight a series of genes whose symbol starts with ‘traj’ (for
+                    which there are several), you’d be able to highlight all of them no matter what
+                    numeric suffix they have.</i
                   >
                 </li>
                 <li>
-                  As you fill out the fields in the condition, a filter name will automatically be generated. You can
-                  use this default name or you can rename it.
+                  As you fill out the fields in the condition, a filter name will automatically be
+                  generated. You can use this default name or you can rename it.
                 </li>
               </ul>
             </clr-stack-block>
@@ -120,8 +119,8 @@ import { Component } from '@angular/core';
                   loaded so you can start editing the fields to create a new filter.
                 </li>
                 <li>
-                  Once finished with a filter, click the green checkmark button and you will
-                  see a colored label appear in the field towards the top of the modal. A blue label
+                  Once finished with a filter, click the green checkmark button and you will see a
+                  colored label appear in the field towards the top of the modal. A blue label
                   indicates a ‘highlight’ filter and a red label indicates a ‘hide’ filter.
                 </li>
                 <li>
@@ -162,8 +161,8 @@ import { Component } from '@angular/core';
             <ul class="list">
               <li>
                 The filter results table will show the features that will be affected by the current
-                combination of filters selected in the checklist. If you haven't created any filters,
-                this table will, naturally, be empty.
+                combination of filters selected in the checklist. If you haven't created any
+                filters, this table will, naturally, be empty.
               </li>
               <li>
                 Features that will be hidden by the set of filters will be represented by a red row

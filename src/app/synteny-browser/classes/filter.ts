@@ -142,7 +142,7 @@ export class Filter {
    * or ID)
    */
   get inputNeeded(): boolean {
-    return !!(this.filterBy) && !(this.filtersOnType() || this.filtersOnOntology());
+    return !!this.filterBy && !(this.filtersOnType() || this.filtersOnOntology());
   }
 
   /**
@@ -225,8 +225,9 @@ export class Filter {
    */
   isComplete(): boolean {
     if (this.filtersOnType()) {
-      return !!(this.value);
-    } else if (this.filterBy) {
+      return !!this.value;
+    }
+    if (this.filterBy) {
       return !!(this.qualifier && this.value);
     }
 

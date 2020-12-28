@@ -35,8 +35,11 @@ class MockDataStorageService {
       { id: 'DOID:9352', name: 'type 2 diabetes mellitus', count: 3 },
     ],
   };
+
   refSpecies = new Species(MOUSE.organism);
+
   compSpecies = new Species(HUMAN.organism);
+
   filters = [];
 }
 
