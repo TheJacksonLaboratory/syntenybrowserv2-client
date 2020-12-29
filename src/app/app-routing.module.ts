@@ -18,7 +18,9 @@ import { Type2DiabetesExampleComponent } from './examples/use-cases/type-2-diabe
 const routes: Routes = [
   { path: 'browser', component: SyntenyBrowserComponent },
   { path: 'about', component: AboutComponent },
-  { path: 'docs', component: DocsComponent,
+  {
+    path: 'docs',
+    component: DocsComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'browser-features' },
       { path: 'tutorial', component: DocsTutorialComponent },
@@ -27,14 +29,16 @@ const routes: Routes = [
       { path: 'docker', component: DocsDockerComponent },
       { path: 'configs', component: DocsConfigsComponent },
       { path: 'contributors', component: DocsContributorsComponent },
-    ]
+    ],
   },
-  { path: 'examples', component: ExamplesComponent,
+  {
+    path: 'examples',
+    component: ExamplesComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'human-lung-cancer' },
       { path: 'human-lung-cancer', component: LungCancerExampleComponent },
       { path: 'mouse-T2-diabetes', component: Type2DiabetesExampleComponent },
-    ]
+    ],
   },
   { path: '', pathMatch: 'full', redirectTo: 'browser' },
 ];

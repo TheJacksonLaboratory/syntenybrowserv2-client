@@ -29,7 +29,11 @@ import { Component } from '@angular/core';
             Contributor Guidelines
           </a>
           <!-- TODO: change this URL once we get a the Github repo(s) set up -->
-          <a class="nav-link" href="https://github.com/TheJacksonLaboratory/syntenybrowser" target="_blank">
+          <a
+            class="nav-link"
+            href="https://github.com/TheJacksonLaboratory/syntenybrowser"
+            target="_blank"
+          >
             Source Code (Github) <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
         </section>

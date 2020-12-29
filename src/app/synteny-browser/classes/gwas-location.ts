@@ -102,7 +102,7 @@ export class GWASLocation {
    * @param {number} numSigDigs - the number of significant digits to round to
    */
   private roundToSigDigs(numberToRound: number, numSigDigs: number): number {
-    const multiplier = Math.pow(10, numSigDigs);
+    const multiplier = 10 ** numSigDigs;
 
     return Math.round(numberToRound * multiplier) / multiplier;
   }

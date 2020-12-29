@@ -264,8 +264,7 @@ export class SyntenyBlock {
    * @param {any} feature - the feature (gene or QTL) to compare to the block
    */
   isAFeatureBlock(feature: any): boolean {
-    return this.matchesRefChr(feature.chr) &&
-      (this.includes(feature) || this.isSpannedBy(feature));
+    return this.matchesRefChr(feature.chr) && (this.includes(feature) || this.isSpannedBy(feature));
   }
 
   /**

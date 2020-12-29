@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FeatureSearchComponent } from './feature-search.component';
 import { ClarityModule } from '@clr/angular';
+import { FeatureSearchComponent } from './feature-search.component';
 import { ApiService } from '../../services/api.service';
 import { MockApiService } from '../../testing/mock-api.service';
 import { HUMAN, MOUSE } from '../../testing/constants/mock-species';
@@ -15,9 +15,7 @@ describe('FeatureSearchComponent', () => {
     TestBed.configureTestingModule({
       imports: [ClarityModule],
       declarations: [FeatureSearchComponent],
-      providers: [
-        { provide: ApiService, useClass: MockApiService }
-      ],
+      providers: [{ provide: ApiService, useClass: MockApiService }],
     }).compileComponents();
   }));
 
@@ -63,7 +61,7 @@ describe('FeatureSearchComponent', () => {
   });
 
   it('ignores loading again if the reference species is the same as current', () => {
-    const species = new Species(HUMAN.organism)
+    const species = new Species(HUMAN.organism);
     const spyOnClear = spyOn(component, 'clear');
     component.loadFeatures(species);
 

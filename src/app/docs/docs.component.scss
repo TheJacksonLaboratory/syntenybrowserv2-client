@@ -5,8 +5,8 @@ pre { background-color:#EEEEEE; }
 code {
   color: #688DB2;
   font-family: Consolas, Menlo, Monaco, monospace;
-  line-height: 0.9;
-  font-size: 0.9em;
+  line-height: .9;
+  font-size: .9em;
 }
 
 ul {
@@ -47,7 +47,7 @@ ul {
   padding-top: 1.5em;
 
   .sidenav-content .nav-link {
-    margin: 0.5em 0;
+    margin: .5em 0;
     width: unset;
     text-align: right;
     display: block;
