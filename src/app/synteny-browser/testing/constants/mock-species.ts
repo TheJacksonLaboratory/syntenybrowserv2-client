@@ -174,3 +174,14 @@ export const RAT = {
     ],
   },
 };
+
+export const EMPTY_MOUSE = {
+  name: 'Mus musculus',
+  alias: 'Mouse',
+  id: 10090,
+  resources: [],
+  genome: {},
+  qtls: true,
+  searches: [],
+  ontologies: [],
+}

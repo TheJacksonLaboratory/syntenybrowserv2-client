@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MOUSE } from '../../synteny-browser/testing/constants/mock-species';
+import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock-species';
 
 @Component({
   selector: 'docs-configs',
@@ -64,8 +64,38 @@ import { MOUSE } from '../../synteny-browser/testing/constants/mock-species';
               <li>JSON format</li>
               <li>File should be named "[NCBI taxon ID of new species]_config.json"</li>
               <li>If running the API locally, the config file should be located in the <code>/service/src/static/data/</code> directory</li>
+              <li>
+                The base-level properties in the JSON should be <code>order</code> and <code>organism</code> (see more in the 'Order' and 'Organism' sections for more information)
+              </li>
             </ul>
             <br />
+          </div>
+        </div>
+        <div class="clr-row clr-col-12">
+          <div class="clr-col-md-12 clr-col-lg-6">
+            <h4>Order</h4>
+            <p>
+              The <code>order</code> in a configuration file identifies the order in which that
+              species will be presented in the list of available species from the API and will
+              affect what the default reference and comparison species are (the default reference
+              species will be the species with <code>order: 0</code> and the default comparison
+              species will be that with <code>order: 1</code>. Each value in the configuration files
+              being used should be unique, starting with 0.
+            </p>
+          </div>
+          <div class="clr-col-md-12 clr-col-lg-6">
+            <h4>Organism</h4>
+            <p>
+              The <code>organism</code> contains all of the information regarding the species itself.
+              The required values needed for <code>organism</code> are <code>name</code> (the formal
+              latin name of the species), <code>alias</code> (the English common name for the species),
+              <code>id</code> (the numeric NCBI taxon ID of the species), <code>resources</code> (see
+              'Resources' section below), <code>genome</code> (see 'Genome' section below),
+              <code>qtls</code> (whether QTL data has been loaded into the database for this species),
+              <code>searches</code> (see 'Searches' section below), and <code>ontologies</code>
+              (see 'Ontologies section below).
+            </p>
+            <pre><code>"organism": {{ formattedJSON() }}</code></pre>
           </div>
         </div>
         <div class="clr-row clr-col-12">
@@ -130,7 +160,11 @@ import { MOUSE } from '../../synteny-browser/testing/constants/mock-species';
 })
 export class DocsConfigsComponent {
 
-  formattedJSON(property: string): string {
-    return JSON.stringify(MOUSE.organism[property], null, '  ').trim();
+  formattedJSON(property: string = null): string {
+    if (!property) {
+      return JSON.stringify(EMPTY_MOUSE, null, '  ');
+    }
+
+    return JSON.stringify(MOUSE.organism[property], null, '  ');
   }
 }
