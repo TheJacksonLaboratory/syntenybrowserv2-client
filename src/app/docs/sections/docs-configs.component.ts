@@ -6,14 +6,12 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
   template: `
     <div class="content-container">
       <div class="content-area">
-        <div class="clr-col-12">
-          <h2>Species Configs Files</h2>
-          <p>
-            Each species loaded into Synteny Browser, such as <i>M. musculus</i> and <i>H. sapiens</i>, requires its own
-            configuration file, which specifies species chromosome sizes, searching options, as well
-            as external resources. All of the JSON examples below are from the configuration file for Mus musculus.
-          </p>
-        </div>
+        <h2>Species Configs Files</h2>
+        <p>
+          Each species loaded into Synteny Browser, such as <i>M. musculus</i> and <i>H. sapiens</i>, requires its own
+          configuration file, which specifies species chromosome sizes, searching options, as well
+          as external resources. All of the JSON examples below are from the configuration file for Mus musculus.
+        </p>
         <div class="clr-row clr-col-12">
           <div class="clr-col-md-12 clr-col-lg-6">
             <h4>Available Configuration Files</h4>
