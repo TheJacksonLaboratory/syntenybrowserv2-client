@@ -1,12 +1,16 @@
 p { margin-top: 0; }
 
-pre { background-color:#EEEEEE; }
+pre {
+  background-color:#EEEEEE;
+  padding-left: 25px;
+  max-height: unset !important;
+}
 
 code {
   color: #688DB2;
   font-family: Consolas, Menlo, Monaco, monospace;
-  line-height: .9;
-  font-size: .9em;
+  line-height: 1;
+  font-size: 1em;
 }
 
 ul {
