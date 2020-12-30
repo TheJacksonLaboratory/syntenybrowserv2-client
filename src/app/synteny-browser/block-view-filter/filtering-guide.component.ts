@@ -115,8 +115,8 @@ import { Component } from '@angular/core';
             <clr-stack-block class="block-body">
               <ul class="list">
                 <li>
-                  When opening the block view filters modal, a default filter constructor will be
-                  loaded so you can start editing the fields to create a new filter.
+                  When opening the block view filters modal, you will need to click the 'Add filter'
+                  button in the top left of the filter modal.
                 </li>
                 <li>
                   Once finished with a filter, click the green checkmark button and you will see a
@@ -124,7 +124,7 @@ import { Component } from '@angular/core';
                   indicates a ‘highlight’ filter and a red label indicates a ‘hide’ filter.
                 </li>
                 <li>
-                  If you’re editing a filter and navigate to a different tab (as long as you don’t
+                  If you’re editing a filter and navigate to the guide (as long as you don’t
                   close the modal), your current filter will still be there, in its current state
                   for you to continue editing.
                 </li>
@@ -146,7 +146,7 @@ import { Component } from '@angular/core';
                 </li>
                 <li>
                   You can edit any parts of the filter in this mode, and when finished, click the
-                  ‘finish editing filter’.
+                  green checkmark button.
                 </li>
                 <li>
                   Clicking on the ‘X’ in a filter label will delete the associated filter.

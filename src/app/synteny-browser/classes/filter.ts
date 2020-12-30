@@ -18,7 +18,7 @@ export class Filter {
   filterBy = '';
 
   // qualifier to change how matches are found (equal, not equal, like, not like)
-  qualifier;
+  qualifier: string;
 
   // value to match features against when searching utilizing user input
   value = '';
