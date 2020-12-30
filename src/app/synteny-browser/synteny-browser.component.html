@@ -127,21 +127,22 @@
   id="block-view-filters"
   clrModalSize="xl"
   [(clrModalOpen)]="filterOpen"
-  [clrModalClosable]="true"
+  [clrModalClosable]="false"
 >
   <h3 class="modal-title">Filtering the Block View</h3>
 
   <div class="modal-body">
     <block-view-filter
-      *ngIf="blockViewBrowser && blockViewBrowser.refGenes && filterOpen"
-      [refSpecies]="data.refSpecies"
-      [compSpecies]="data.compSpecies"
+      *ngIf="blockViewBrowser?.refGenes && filterOpen"
       [refGenes]="blockViewBrowser.refGenes"
       [compGenes]="blockViewBrowser.compGenes"
-      [filters]="data.filters"
-      (userClose)="getFilters()"
     >
     </block-view-filter>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="getFilters()">
+      Close
+    </button>
   </div>
 </clr-modal>
 

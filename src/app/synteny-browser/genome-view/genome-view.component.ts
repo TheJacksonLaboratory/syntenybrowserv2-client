@@ -154,8 +154,7 @@ export class GenomeViewComponent implements OnInit {
 
     // if there are features selected, scale the visualization down to fit the
     // legends and text; if selected features are removed, scale it back up
-    this.features.length ?
-      this.setDimensions(0.62, 0.4, 18) : this.setDimensions(0.75, 0.5, 21);
+    this.features.length ? this.setDimensions(0.62, 0.4, 18) : this.setDimensions(0.75, 0.5, 21);
 
     const blocks = this.data.getFeatureBlocks(features);
 
@@ -221,22 +220,24 @@ export class GenomeViewComponent implements OnInit {
     const end = this.ref.genome[chr];
     const inner = this.refRadii.ringOuter;
     const outer = this.refRadii.labels;
-    const getCoords = (c, bp, rad) => this.refGMap.bpToCartesian(c, bp, rad);
+    const getCoords = (c, bp, rad): CartesianCoordinate => this.refGMap.bpToCartesian(c, bp, rad);
 
     const inStrt = getCoords(chr, 0, inner);
     const inEnd = getCoords(chr, end, inner);
     const outStrt = getCoords(chr, 0, outer);
     const outEnd = getCoords(chr, end, outer);
     const cntrIn = getCoords(chr, end * 0.5, outer);
-    const cntrOut = getCoords(chr, end * 0.5, outer + (this.bandThickness/2));
+    const cntrOut = getCoords(chr, end * 0.5, outer + this.bandThickness / 2);
     const vLineLength = Math.abs(cntrOut.x) < 50 ? 5 : 10;
     const vLine = cntrOut.y < 0 ? cntrOut.y - vLineLength : cntrOut.y + vLineLength;
 
-    return `M${inStrt.x},${inStrt.y}` +
+    return (
+      `M${inStrt.x},${inStrt.y}` +
       `L${outStrt.x},${outStrt.y}` +
       `A${outer},${outer} 0 0,1 ${outEnd.x},${outEnd.y}` +
       `L${inEnd.x},${inEnd.y}` +
-      `M${cntrIn.x},${cntrIn.y} L${cntrOut.x},${cntrOut.y} V${vLine}`;
+      `M${cntrIn.x},${cntrIn.y} L${cntrOut.x},${cntrOut.y} V${vLine}`
+    );
   }
 
   /**
@@ -288,11 +289,13 @@ export class GenomeViewComponent implements OnInit {
     const compStart = gMap.bpToCartesian(block.compChr, block.compStart, endRad);
     const compEnd = gMap.bpToCartesian(block.compChr, block.compEnd, endRad);
 
-    return `M${refStart.x},${refStart.y}` +
+    return (
+      `M${refStart.x},${refStart.y}` +
       `A205,205 0 0,1 ${refEnd.x},${refEnd.y}` +
       `Q0,0 ${compEnd.x},${compEnd.y}` +
       `A 205,205 0 0,1${compStart.x},${compStart.y}` +
-      `Q0,0 ${refStart.x},${refStart.y}Z`;
+      `Q0,0 ${refStart.x},${refStart.y}Z`
+    );
   }
 
   /**
@@ -308,8 +311,8 @@ export class GenomeViewComponent implements OnInit {
     // due to not rotating them with the bands
     const adj = {
       x: pos.x < 0 ? 1 : -1,
-      y: pos.y < 0 ? 4 : 3
-    }
+      y: pos.y < 0 ? 4 : 3,
+    };
     return this.translate(pos.x + adj.x, pos.y + adj.y);
   }
 
@@ -329,8 +332,8 @@ export class GenomeViewComponent implements OnInit {
     // due to not rotating them with the bands
     const adj = {
       x: pos.x < 0 ? 0 : -1,
-      y: pos.y < 0 ? 4 : 3
-    }
+      y: pos.y < 0 ? 4 : 3,
+    };
     return this.translate(pos.x + adj.x, pos.y + adj.y);
   }
 
@@ -476,31 +479,6 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
-   * Returns a path command for the given four specified coordinates (x, y pairs)
-   * and the desired radii
-   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally)
-   *                                       the bottom left corner of band
-   * @param {CartesianCoordinate} inEnd - ("") the bottom right corner of band
-   * @param {CartesianCoordinate} outStrt - ("") the top left corner of band
-   * @param {CartesianCoordinate} outEnd - ("") the top right corner of band
-   * @param {number} inRad - the radius of the inner edge of the band
-   * @param {number} outRad - the radius of the outer edge of the band
-   */
-  private getBandPathCommand(
-    inStrt: CartesianCoordinate,
-    inEnd: CartesianCoordinate,
-    outStrt: CartesianCoordinate,
-    outEnd: CartesianCoordinate,
-    inRad: number,
-    outRad: number,
-  ): string {
-    return `M${inStrt.x},${inStrt.y}` +
-      `A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}` +
-      `L${outEnd.x},${outEnd.y}` +
-      `A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`;
-  }
-
-  /**
    * Resets variables associated with rendering the genome view
    */
   reset(): void {
@@ -519,6 +497,33 @@ export class GenomeViewComponent implements OnInit {
   }
 
   /**
+   * Returns a path command for the given four specified coordinates (x, y pairs)
+   * and the desired radii
+   * @param {CartesianCoordinate} inStrt - (if band is positioned horizontally)
+   *                                       the bottom left corner of band
+   * @param {CartesianCoordinate} inEnd - ("") the bottom right corner of band
+   * @param {CartesianCoordinate} outStrt - ("") the top left corner of band
+   * @param {CartesianCoordinate} outEnd - ("") the top right corner of band
+   * @param {number} inRad - the radius of the inner edge of the band
+   * @param {number} outRad - the radius of the outer edge of the band
+   */
+  private getBandPathCommand(
+    inStrt: CartesianCoordinate,
+    inEnd: CartesianCoordinate,
+    outStrt: CartesianCoordinate,
+    outEnd: CartesianCoordinate,
+    inRad: number,
+    outRad: number,
+  ): string {
+    return (
+      `M${inStrt.x},${inStrt.y}` +
+      `A${inRad},${inRad} 0 0,1 ${inEnd.x},${inEnd.y}` +
+      `L${outEnd.x},${outEnd.y}` +
+      `A${outRad},${outRad} 0 0,0 ${outStrt.x},${outStrt.y}Z`
+    );
+  }
+
+  /**
    * Returns the end coordinates of the legend path for the specified chromosome
    * in order to properly place the associated feature list
    * @param {string} chr - the chromosome to get the position for
@@ -530,7 +535,7 @@ export class GenomeViewComponent implements OnInit {
       .split(' ');
 
     const len = commands.length;
-    return [Number(commands[len-2].split(',')[0]), Number(commands[len-1])];
+    return [Number(commands[len - 2].split(',')[0]), Number(commands[len - 1])];
   }
 
   /**

@@ -117,9 +117,7 @@ export class QuickNavigationComponent {
     const band2 = this.cytoEnd ? this.findBandByLoc(this.cytoEnd) : null;
 
     if (band1 && band2) {
-      return band1.start < band2.start
-        ? [band1.start, band2.end]
-        : [band2.start, band1.end];
+      return band1.start < band2.start ? [band1.start, band2.end] : [band2.start, band1.end];
     }
     return null;
   }

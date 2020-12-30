@@ -31,7 +31,7 @@
 
 .label-container {
   min-height: 35px;
-  border: 0.5px #CCC solid;
+  border: .5px #CCC solid;
   border-radius: 3px;
   margin: 0;
   padding: 4px;
@@ -42,12 +42,8 @@
 }
 
 .autocomplete {
-  width: 300px !important;
-  margin-left: 0.5rem;
-}
-
-.simple-autocomplete {
-  width: 200px !important;
+  width: 220px !important;
+  margin-right: .5em;
 }
 
 // The following styles need to be here; any further up in the chain and they
@@ -61,14 +57,14 @@ rect.selection {
 .d3-tip {
   line-height: 1.2;
   padding: 6px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, .7);
   color: #fff;
   border-radius: 4px;
   font-size: 12px;
 }
 
 #browser-axis, #chr-view-axis {
-  line, path { stroke-width: 0.5; }
+  line, path { stroke-width: .5; }
 
   text { font-size: 8px; }
 }
@@ -79,7 +75,7 @@ rect.selection {
   background: #FFF;
   border: #999;
   border-radius: 2px;
-  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2), 0 4px 15px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .2), 0 4px 15px 0 rgba(0, 0, 0, .19);
   color: #333;
 }
 
@@ -89,7 +85,7 @@ button { text-transform: uppercase !important; }
 
 .clr-input, .clr-select { min-width: 250px; }
 
-.selected { background: rgba(0, 106, 145, 0.1); }
+.selected { background: rgba(0, 106, 145, .1); }
 
 .footer {
   height: 30px;
@@ -110,12 +106,17 @@ button { text-transform: uppercase !important; }
 
   .modal-header {
     padding: 1rem;
-    border-bottom: 0.5px #CCC solid;
+    border-bottom: .5px #CCC solid;
   }
 
-  .modal-footer { padding: 1rem; }
+  .modal-footer {
+    padding: .75em 1rem;
+    border-top: .5px #CCC solid;
+  }
 
-  #edit-filters .signpost .signpost-action clr-icon { height: 0.75rem !important; }
+  clr-input-container {
+    margin: -7px 1em 0 0 !important;
+  }
 
   .block-body {
     dt.stack-block-label { display: none; }

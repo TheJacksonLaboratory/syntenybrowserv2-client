@@ -1,12 +1,16 @@
 p { margin-top: 0; }
 
-pre { background-color:#EEEEEE; }
+pre {
+  background-color:#EEEEEE;
+  padding-left: 25px;
+  max-height: unset !important;
+}
 
 code {
   color: #688DB2;
   font-family: Consolas, Menlo, Monaco, monospace;
-  line-height: 0.9;
-  font-size: 0.9em;
+  line-height: 1;
+  font-size: 1em;
 }
 
 .image-container {
@@ -30,7 +34,7 @@ code {
   padding-top: 1.5em;
 
   .sidenav-content .nav-link {
-    margin: 0.5em 0;
+    margin: .5em 0;
     width: unset;
     text-align: right;
     display: block;

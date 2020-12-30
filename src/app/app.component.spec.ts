@@ -1,9 +1,9 @@
 import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { AppComponent } from './app.component';
 import { ClarityModule } from '@clr/angular';
 import { FormsModule } from '@angular/forms';
 import { DeviceDetectorService } from 'ngx-device-detector';
+import { AppComponent } from './app.component';
 
 export class MockDeviceDetectorService {}
 
@@ -12,9 +12,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule, FormsModule, ClarityModule],
       declarations: [AppComponent],
-      providers: [
-        { provide: DeviceDetectorService, useClass: MockDeviceDetectorService },
-      ]
+      providers: [{ provide: DeviceDetectorService, useClass: MockDeviceDetectorService }],
     }).compileComponents();
   }));
 

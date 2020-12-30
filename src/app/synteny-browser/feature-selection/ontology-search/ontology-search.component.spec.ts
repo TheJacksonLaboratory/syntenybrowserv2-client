@@ -1,17 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OntologySearchComponent } from './ontology-search.component';
 import { ClarityModule } from '@clr/angular';
+import { OntologySearchComponent } from './ontology-search.component';
 import { RowDetailComponent } from './row-detail.component';
 import { ApiService } from '../../services/api.service';
 import { MockApiService } from '../../testing/mock-api.service';
 import { MOUSE } from '../../testing/constants/mock-species';
 import { Species } from '../../classes/species';
 import { GO } from '../../testing/constants/ontology-terms';
-
-class MockDataStorageService {
-  ontologyTerms;
-}
 
 describe('OntologySearchComponent', () => {
   let component: OntologySearchComponent;
@@ -21,9 +17,7 @@ describe('OntologySearchComponent', () => {
     TestBed.configureTestingModule({
       imports: [ClarityModule],
       declarations: [OntologySearchComponent, RowDetailComponent],
-      providers: [
-        { provide: ApiService, useClass: MockApiService }
-      ],
+      providers: [{ provide: ApiService, useClass: MockApiService }],
     }).compileComponents();
   }));
 
@@ -101,10 +95,12 @@ describe('OntologySearchComponent', () => {
     component.data.ontologyTerms.GO = GO;
     component.loadTerms(new Species(MOUSE.organism), 'GO');
 
-    expect(component.getViewAssociationsTitle(GO[2]))
-      .toBe('View gene associations with this term [disabled for being too broad]');
-    expect(component.getSelectAllAssociationsTitle(GO[2]))
-      .toBe('Select all gene associations with this term [disabled for being too broad]');
+    expect(component.getViewAssociationsTitle(GO[2])).toBe(
+      'View gene associations with this term [disabled for being too broad]',
+    );
+    expect(component.getSelectAllAssociationsTitle(GO[2])).toBe(
+      'Select all gene associations with this term [disabled for being too broad]',
+    );
   });
 
   it('can end a selection event', () => {

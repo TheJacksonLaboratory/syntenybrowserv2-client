@@ -1,10 +1,17 @@
-import { async, ComponentFixture, ComponentFixtureAutoDetect, TestBed } from '@angular/core/testing';
+import {
+  async,
+  ComponentFixture,
+  ComponentFixtureAutoDetect,
+  TestBed,
+} from '@angular/core/testing';
 
-import { BlockViewBrowserComponent } from './block-view-browser.component';
 import { ClarityModule } from '@clr/angular';
 import { FormsModule } from '@angular/forms';
-import { QuickNavigationComponent } from './quick-navigation/quick-navigation.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { By } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BlockViewBrowserComponent } from './block-view-browser.component';
+import { QuickNavigationComponent } from './quick-navigation/quick-navigation.component';
 import { ApiService } from '../services/api.service';
 import { MockApiService } from '../testing/mock-api.service';
 import { DataStorageService } from '../services/data-storage.service';
@@ -13,15 +20,20 @@ import { Species } from '../classes/species';
 import { MOUSE_TO_HUMAN_SYNTENY } from '../testing/constants/genome-synteny';
 import { COLOR_MAP } from '../testing/constants/color-map';
 import { SyntenyBlock } from '../classes/synteny-block';
-import { SELECTED_QTL_FEATURES, SELECTED_SYNTENIC_FEATURES } from '../testing/constants/mock-features';
-import { By } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  SELECTED_QTL_FEATURES,
+  SELECTED_SYNTENIC_FEATURES,
+} from '../testing/constants/mock-features';
 
 class MockDataStorageService {
   refSpecies = new Species(MOUSE.organism);
+
   compSpecies = new Species(HUMAN.organism);
-  features = {chr: '1', features: []};
+
+  features = { chr: '1', features: [] };
+
   genomeData = MOUSE_TO_HUMAN_SYNTENY.map(b => new SyntenyBlock(b));
+
   genomeColorMap = COLOR_MAP;
 }
 
@@ -36,7 +48,7 @@ describe('BlockViewBrowserComponent', () => {
       providers: [
         { provide: ApiService, useClass: MockApiService },
         { provide: DataStorageService, useClass: MockDataStorageService },
-        { provide: ComponentFixtureAutoDetect, useValue: true }
+        { provide: ComponentFixtureAutoDetect, useValue: true },
       ],
     })
       .compileComponents()
@@ -92,10 +104,8 @@ describe('BlockViewBrowserComponent', () => {
     component.render();
 
     expect(Object.keys(component.blockLookup).length).toBe(component.blocks.length);
-    expect(Object.keys(component.staticCompBPToPixels.match).length)
-      .toBe(component.blocks.length);
-    expect(Object.keys(component.staticCompBPToPixels.true).length)
-      .toBe(component.blocks.length);
+    expect(Object.keys(component.staticCompBPToPixels.match).length).toBe(component.blocks.length);
+    expect(Object.keys(component.staticCompBPToPixels.true).length).toBe(component.blocks.length);
     expect(component.legend.activeChrs.length).toBe(39);
   });
 
@@ -298,7 +308,6 @@ describe('BlockViewBrowserComponent', () => {
     expect(fixture.nativeElement.querySelector('.dropdown-header').textContent).toBe('QTLs');
     expect(fixture.nativeElement.querySelectorAll('button.dropdown-item').length).toBe(2);
     expect(fixture.nativeElement.querySelector('.dropdown-divider')).toBeFalsy();
-
   });
 
   it('should show "jump to feature" menu for selected genes and QTLs', () => {
@@ -372,7 +381,7 @@ describe('BlockViewBrowserComponent', () => {
     downloadBtn.triggerEventHandler('click', null);
     fixture.detectChanges();
 
-    // expect that the downloading functions have been called and that the modal is closed, filename reset
+    // expect that the downloading functions are called and the modal is closed, filename reset
     expect(spyOnSetObjectAttributes).toHaveBeenCalled();
     expect(spyOnDownloader).toHaveBeenCalled();
     expect(component.filenameModalOpen).toBe(false);
@@ -422,23 +431,35 @@ describe('BlockViewBrowserComponent', () => {
 
     expect(fixture.nativeElement.querySelectorAll('#orientation-indicators g').length).toBe(17);
     // the first block in chr 1 has unmatched orientation
-    expect(component.blocks[0].getBlockCompStartLabel(component.options.trueOrientation)).toBe('8:55,526,155bp');
-    expect(component.blocks[0].getBlockCompEndLabel(component.options.trueOrientation)).toBe('8:49,909,726bp');
+    expect(component.blocks[0].getBlockCompStartLabel(component.options.trueOrientation)).toBe(
+      '8:55,526,155bp',
+    );
+    expect(component.blocks[0].getBlockCompEndLabel(component.options.trueOrientation)).toBe(
+      '8:49,909,726bp',
+    );
 
     component.options.trueOrientation = true;
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('#orientation-indicators g').length).toBe(0);
     // check that the labels have switched
-    expect(component.blocks[0].getBlockCompStartLabel(component.options.trueOrientation)).toBe('8:49,909,726bp');
-    expect(component.blocks[0].getBlockCompEndLabel(component.options.trueOrientation)).toBe('8:55,526,155bp');
+    expect(component.blocks[0].getBlockCompStartLabel(component.options.trueOrientation)).toBe(
+      '8:49,909,726bp',
+    );
+    expect(component.blocks[0].getBlockCompEndLabel(component.options.trueOrientation)).toBe(
+      '8:55,526,155bp',
+    );
 
     component.options.trueOrientation = false;
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('#orientation-indicators g').length).toBe(17);
-    expect(component.blocks[0].getBlockCompStartLabel(component.options.trueOrientation)).toBe('8:55,526,155bp');
-    expect(component.blocks[0].getBlockCompEndLabel(component.options.trueOrientation)).toBe('8:49,909,726bp');
+    expect(component.blocks[0].getBlockCompStartLabel(component.options.trueOrientation)).toBe(
+      '8:55,526,155bp',
+    );
+    expect(component.blocks[0].getBlockCompEndLabel(component.options.trueOrientation)).toBe(
+      '8:49,909,726bp',
+    );
   });
 
   it('can toggle GWAS', () => {
@@ -526,7 +547,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(component.filteredRefGenes.length).toBe(0);
     expect(component.filteredCompGenes.length).toBe(0);
 
-    const filteredGenes = [component.refGenes[1],component.refGenes[2],component.compGenes[2]]
+    const filteredGenes = [component.refGenes[1], component.refGenes[2], component.compGenes[2]];
     filteredGenes.forEach(g => g.filter());
 
     component.showFilteredGenes(filteredGenes);
@@ -549,10 +570,16 @@ describe('BlockViewBrowserComponent', () => {
     expect(component.clicktipOpen).toBe(true);
     expect(component.clicktip.title).toBe('Disp1');
     expect(component.clicktip.id).toBe('MGI:1916147');
-    expect(component.clicktip.content)
-      .toEqual({'Gene Symbol': 'Disp1', 'Gene ID': 'MGI:1916147', Type: 'protein coding gene', Location: 'Chr1: 183,086,266bp - 183,221,522bp', Strand: '-1'});
-    expect(component.clicktip.resources)
-      .toEqual([{url: 'http://www.informatics.jax.org/marker/', name: 'MGI'}]);
+    expect(component.clicktip.content).toEqual({
+      'Gene Symbol': 'Disp1',
+      'Gene ID': 'MGI:1916147',
+      Type: 'protein coding gene',
+      Location: 'Chr1: 183,086,266bp - 183,221,522bp',
+      Strand: '-1',
+    });
+    expect(component.clicktip.resources).toEqual([
+      { url: 'http://www.informatics.jax.org/marker/', name: 'MGI' },
+    ]);
   });
 
   it('shows clicktip data for a comparison gene', () => {
@@ -566,10 +593,16 @@ describe('BlockViewBrowserComponent', () => {
     expect(component.clicktipOpen).toBe(true);
     expect(component.clicktip.title).toBe('DISP1');
     expect(component.clicktip.id).toBe('84976');
-    expect(component.clicktip.content)
-      .toEqual({'Gene Symbol': 'DISP1', 'Gene ID': '84976', Type: 'gene', Location: 'Chr1: 222,814,514bp - 223,005,995bp', Strand: '1'});
-    expect(component.clicktip.resources)
-      .toEqual([{url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI'}]);
+    expect(component.clicktip.content).toEqual({
+      'Gene Symbol': 'DISP1',
+      'Gene ID': '84976',
+      Type: 'gene',
+      Location: 'Chr1: 222,814,514bp - 223,005,995bp',
+      Strand: '1',
+    });
+    expect(component.clicktip.resources).toEqual([
+      { url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI' },
+    ]);
   });
 
   it('shows clicktip data for a GWAS location', () => {
@@ -664,7 +697,7 @@ describe('BlockViewBrowserComponent', () => {
   // comp genes w/ matching orientation
   it('renders only comparison genes in view (matching orientation)', () => {
     component.render();
-    // remember that jumping to an interval is utilizing reference chromosome coordinates, not comparison
+    // jumping to an interval is utilizing reference chromosome coordinates, not comparison
     component.jumpToInterval([90874118, 113142630]);
 
     expect(component.getCompGenesInView().length).toBe(2);
@@ -944,7 +977,7 @@ describe('BlockViewBrowserComponent', () => {
   it('gets the reference chromosome', () => {
     component.render();
 
-    expect(component.getRefChrSize()).toBe(195471971)
+    expect(component.getRefChrSize()).toBe(195471971);
   });
 
   it('gets a vertical line path', () => {
@@ -968,14 +1001,16 @@ describe('BlockViewBrowserComponent', () => {
   it('gets anchor path for gene with single homolog', () => {
     component.render();
 
-    expect(component.getAnchorPathCommand(component.refGenes[0]))
-      .toBe('M1123.0276740494933,25.890576417125082V80L1123.6697371902014,110V153.76445029099895M1123.8573170063344,25.890576417125082V80L1124.5749459909953,110V153.76445029099895');
+    expect(component.getAnchorPathCommand(component.refGenes[0])).toBe(
+      'M1123.0276740494933,25.890576417125082V80L1123.6697371902014,110V153.76445029099895M1123.8573170063344,25.890576417125082V80L1124.5749459909953,110V153.76445029099895',
+    );
   });
 
   it('gets anchor path for gene with multiple homologs', () => {
     component.render();
 
-    expect(component.getAnchorPathCommand(component.refGenes[1]))
-      .toBe('M60.100331688986756,14.431116957665623V80L59.94799702020832,110V156.5031890297377M60.730513404400064,14.431116957665623V80L61.08754062844289,110V156.5031890297377M60.100331688986756,14.431116957665623V80L60.21090010822731,110V146.84553137208005M60.730513404400064,14.431116957665623V80L61.08754062844289,110V146.84553137208005');
+    expect(component.getAnchorPathCommand(component.refGenes[1])).toBe(
+      'M60.100331688986756,14.431116957665623V80L59.94799702020832,110V156.5031890297377M60.730513404400064,14.431116957665623V80L61.08754062844289,110V156.5031890297377M60.100331688986756,14.431116957665623V80L60.21090010822731,110V146.84553137208005M60.730513404400064,14.431116957665623V80L61.08754062844289,110V146.84553137208005',
+    );
   });
 });

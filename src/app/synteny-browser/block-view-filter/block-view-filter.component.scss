@@ -8,49 +8,32 @@ h5 {
 }
 
 h6 {
-  margin-top: 6px;
+  margin: 6px .5em 0 .5em;
   text-transform: uppercase;
   height: 1rem;
 }
 
-p { margin-top: 0.2em; }
-
-.mode-toggle p { margin-top: 0.23rem; }
-
-.smaller { font-size: 0.5rem; }
-
-.new-filter { border-top: 1px #AAA solid; }
-
-.input-btn {
-  padding: 5px;
-  border: none;
-  min-width: 0;
-}
+p { margin-top: .2em; }
 
 .clr-select { min-width: 0 !important; }
 
-.error-msg { color: #F00; }
+clr-select-container { margin-top: -.5rem !important; }
 
-.test-run-msg { color: #0079b8; }
+.hidden-row { background: rgba(255, 0, 0, .2); }
 
-.filter-controls {
-  padding: 0;
-  margin-top: 0.5rem;
-}
+clr-dg-row { background: rgba(42, 159, 224, .2); }
 
-clr-select-container, clr-input-container { margin-top: -0.3rem !important; }
-
-.hidden-row { background: rgba(255, 0, 0, 0.2); }
-
-clr-dg-row { background: rgba(42, 159, 224, 0.2); }
-
-.datagrid .datagrid-cell { font-size: 0.45rem; }
-
-img { width: 100%; }
-
-#diagram { margin-top: 5vh; }
+.datagrid .datagrid-cell { font-size: .45rem; }
 
 #filter-modal-container { min-height: 50vh; }
+
+clr-vertical-nav {
+  width: 100px;
+}
+
+#page-content {
+  padding-bottom: 15px;
+}
 
 #type-menu {
   overflow-y: scroll;
@@ -60,4 +43,12 @@ img { width: 100%; }
     height: 30px;
     overflow: visible;
   }
+}
+
+.label {
+  cursor: pointer;
+}
+
+clr-dropdown {
+  margin-right: .5em;
 }

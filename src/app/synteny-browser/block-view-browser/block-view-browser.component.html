@@ -4,7 +4,7 @@
 
   <!-- Guide -->
   <div class="clr-row">
-    <h6 style="line-height: 0.8rem">
+    <h6 style="line-height: .8rem">
       4. Explore with the block view browser by using the block view navigation
       buttons or scroll-zooming over the tracks or chromosome view or dragging
       the tracks or viewbox in the chromosome view to pan
@@ -23,14 +23,14 @@
         <!-- Filters -->
         <div id="filters" class="label-container clr-col-xl-8 clr-col-10">
           <!-- No filters message -->
-          <div *ngIf="filters.length === 0" class="no-selections filter-labels">
+          <div *ngIf="!getFilters().length" class="no-selections filter-labels">
             No filters have been created yet
           </div>
 
           <!-- Labels -->
-          <div *ngIf="filters.length > 0" class="filter-labels">
+          <div *ngIf="getFilters().length" class="filter-labels">
             <span
-              *ngFor="let f of filters"
+              *ngFor="let f of getFilters()"
               class="label"
               [ngClass]="{
                 'label-info': !f.hides(),
@@ -44,7 +44,11 @@
 
         <!-- Button to open filter tools -->
         <div class="clr-col-2">
-          <button class="btn btn-primary" (click)="filter.emit()">
+          <button
+            class="btn btn-primary"
+            [disabled]="!refGenes || !compGenes"
+            (click)="filter.emit()"
+          >
             <clr-icon shape="pencil" class="is-solid"></clr-icon> Edit
           </button>
         </div>
@@ -111,7 +115,7 @@
           <!-- Dropdown selection -->
           <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
             <!-- Gene selections -->
-            <div *ngIf="selectedRefGenes.length > 0">
+            <div *ngIf="selectedRefGenes.length">
               <label class="dropdown-header">Genes</label>
 
               <button
@@ -126,12 +130,12 @@
 
             <!-- Divider -->
             <div
-              *ngIf="selectedQTLs.length > 0 && selectedRefGenes.length > 0"
+              *ngIf="selectedQTLs.length && selectedRefGenes.length"
               class="dropdown-divider"
             ></div>
 
             <!-- QTL selection -->
-            <div *ngIf="selectedQTLs.length > 0">
+            <div *ngIf="selectedQTLs.length">
               <label class="dropdown-header">QTLs</label>
 
               <button
@@ -175,7 +179,8 @@
       <!-- Button group -->
       <div class="btn-group btn-icon">
         <!-- Download button -->
-        <button id="block-view-download"
+        <button
+          id="block-view-download"
           class="btn block-view-option"
           [disabled]="!compGenes"
           (click)="filenameModalOpen = true"
@@ -974,9 +979,10 @@
   <div *ngIf="c.hits" class="modal-body">
     <h4>GWAS Hits</h4>
     <div *ngFor="let h of c.hits">
-      <hr>
+      <hr />
       <p *ngFor="let key of getTTItems(h)">
-        <span *ngIf="h[key]" style="font-weight: bold">{{ key }}:</span> {{ h[key] }}
+        <span *ngIf="h[key]" style="font-weight: bold">{{ key }}:</span>
+        {{ h[key] }}
       </p>
     </div>
   </div>
