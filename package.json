@@ -1,18 +1,16 @@
 {
-  "name": "synteny",
-  "version": "0.3.1",
+  "name": "synteny-browser",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "tests": "ng test",
     "headless-tests": "ng test -c headless",
-    "tslint": "ng lint",
     "lint": "eslint ./src -f table --ext .ts; exit 0",
     "fix-prettier": "prettier --write './src/**/*.{ts,js,css,html}'; exit 0",
     "fix-eslint": "eslint ./src -f table --ext .ts --fix; exit 0",
-    "fix": "npm run fix-prettier && npm run fix-eslint",
-    "e2e": "ng e2e"
+    "fix": "npm run fix-prettier && npm run fix-eslint"
   },
   "private": true,
   "dependencies": {
