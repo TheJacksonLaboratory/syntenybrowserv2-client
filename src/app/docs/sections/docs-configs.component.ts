@@ -11,8 +11,8 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
           <p>
             Each species loaded into Synteny Browser, such as
             <i>M. musculus</i> and <i>H. sapiens</i>, requires its own configuration file, which
-            specifies species chromosome sizes, searching options, as well as external resources. All
-            of the JSON examples below are from the configuration file for Mus musculus.
+            specifies species chromosome sizes, searching options, as well as external resources.
+            All of the JSON examples below are from the configuration file for Mus musculus.
           </p>
         </div>
         <div class="clr-row clr-col-12">
@@ -25,10 +25,7 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
                   <td class="left">9606_config.json</td>
                   <td class="left">
                     <!-- TODO: Add final Github repo URL to file when we have it -->
-                    <a
-                      target="_blank"
-                      href=""
-                    >
+                    <a target="_blank" href="">
                       See file
                     </a>
                   </td>
@@ -38,10 +35,7 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
                   <td class="left">10090_config.json</td>
                   <td class="left">
                     <!-- TODO: Add final Github repo URL to file when we have it -->
-                    <a
-                      target="_blank"
-                      href=""
-                    >
+                    <a target="_blank" href="">
                       See file
                     </a>
                   </td>
@@ -51,10 +45,7 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
                   <td class="left">10116_config.json</td>
                   <td class="left">
                     <!-- TODO: Add final Github repo URL to file when we have it -->
-                    <a
-                      target="_blank"
-                      href=""
-                    >
+                    <a target="_blank" href="">
                       See file
                     </a>
                   </td>
