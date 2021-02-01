@@ -1,3 +1,5 @@
+// This mock service doesn't need to use the vars to return static data but need
+// to still accept them from the calls from the
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';

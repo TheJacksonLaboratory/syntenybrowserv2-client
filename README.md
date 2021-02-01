@@ -4,7 +4,7 @@ This application utilizes Angular 8
 
 ## Installation and Setup
 
-**Prerequisites:** Node and NPM
+**Prerequisites:** Node (we're running 12.18.3) and NPM (we're running 6.14.6)
 
 (If you already have Angular installed, you can skip the following step!)
 
