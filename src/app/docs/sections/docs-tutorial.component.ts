@@ -29,7 +29,7 @@ import { Component } from '@angular/core';
         <br />
         <img
           id="sb-architecture-diagram"
-          src="../assets/sb-fig2-architecture-02072019.png"
+          src="../assets/synteny-architecture.png"
           alt="The JAX Synteny Browser Architecture Diagram"
           width="467"
           height="191"

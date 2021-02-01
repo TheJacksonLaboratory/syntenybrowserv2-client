@@ -24,6 +24,7 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
                   <td class="left"><b>Homo sapiens</b></td>
                   <td class="left">9606_config.json</td>
                   <td class="left">
+                    <!-- TODO: Add final Github repo URL to file when we have it -->
                     <a
                       target="_blank"
                       href=""
@@ -36,6 +37,7 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
                   <td class="left"><b>Mus musculus</b></td>
                   <td class="left">10090_config.json</td>
                   <td class="left">
+                    <!-- TODO: Add final Github repo URL to file when we have it -->
                     <a
                       target="_blank"
                       href=""
@@ -48,6 +50,7 @@ import { EMPTY_MOUSE, MOUSE } from '../../synteny-browser/testing/constants/mock
                   <td class="left"><b>Rattus norvegicus</b></td>
                   <td class="left">10116_config.json</td>
                   <td class="left">
+                    <!-- TODO: Add final Github repo URL to file when we have it -->
                     <a
                       target="_blank"
                       href=""
