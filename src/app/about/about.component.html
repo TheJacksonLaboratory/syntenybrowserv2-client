@@ -1,164 +1,134 @@
 <div class="content-container">
   <div class="content-area">
-    <p>
-      Conserved synteny describes a condition in which common ancestry is
-      reflected as similar genome feature content and order along a chromosome
-      in different species.
-      <br />
-      The JAX Synteny Browser allows users to search for and selectively display
-      genome features within syntenic blocks according to the biological and
-      functional annotations associated with the features.
-    </p>
+    <div class="clr-row clr-col-12">
+    <h2>What is JAX Synteny Browser?</h2>
+      <p>
+        The JAX Synteny Browser is an interactive, genome-agnostic, web-based
+        application that
+        allows researchers to select or highlight features based on annotated
+        biological properties in reference and comparison genomes in the context
+        of regions of conserved synteny (a condition in which shared ancestry is
+        reflected as similar genome feature content and order along a chromosome
+        in a different species) between the two genomes.
+      </p>
+      <p>
+        While it is genome-agnostic, the online JAX Synteny Browser is loaded and
+        configured for comparing Mouse, Rat and Human genomes along with feature
+        annotations for Gene Ontology (all species), Disease Ontology (Human),
+        and Mammalian Phenotype Ontology (Mouse & Rat). The application is open-source
+        so if additional species or ontologies are of interest to you,
+        assuming that you have access to the necessary source data (see the Data
+        Prep and Config Files pages for more information). You could load a custom
+        version of the backend and view the custom set of data using a local
+        version of the client application as well.
+      </p>
+    </div>
 
-    <h2><clr-icon shape="file-group" size="24"></clr-icon> Citation</h2>
-    <p>
-      Kolishovski, G., Lamoureux, A., Hale, P. <i>et al.</i>
-      <br />
-      <b>The JAX Synteny Browser for mouse-human comparative genomics.</b>
-      <br />
-      <i>Mamm Genome</i> <b>30</b>, 353–361 (2019).
-      https://doi.org/10.1007/s00335-019-09821-4
-    </p>
+    <div class="clr-row clr-col-12">
+      <div class="clr-col-md-12 clr-col-lg-6">
+        <h4><clr-icon shape="users" size="18"></clr-icon>Core Contributors</h4>
 
-    <h2><clr-icon shape="envelope" size="24"></clr-icon> Contact</h2>
-    <p>
-      <b>General</b>: &lt;carol.bult@jax.org&gt;, Carol J. Bult, Ph.D.
-      <br />
-      <b>Bugs</b>: &lt;cssc@jax.org&gt;, The Jackson Laboratory Scientific
-      Computing Group
-      <br />
-      <b>Implementation Help</b>: stackoverflow.com or
-      <a
-        href="https://bioinformatics.stackexchange.com/questions/ask?tags=higlass&tags=genomics&tags=visualization"
-        target="_blank"
-        >bioinformatics.stackexchange.com</a
-      >
-    </p>
+        <p>
+          <a href="https://www.jax.org/people/anna-lamoureux" target="_blank">
+            Anna Lamoureux, B.S.
+          </a>
+          &mdash; Associate Scientific Software Engineer; UX/UI design & Angular development
+        </p>
 
-    <h2><clr-icon shape="code" size="24"></clr-icon> Source Code</h2>
-    <p>
-      All code for the JAX Synteny Browser is open source and available on
-      <a
-        href="https://github.com/TheJacksonLaboratory/syntenybrowser"
-        target="_blank"
-        >GitHub</a
-      >
-      under the JAX Non-Commercial License. The core packages are:
-      <br />
-      <img src="../assets/github-mark-32.png" height="24" width="24" />
-      Data Sources and Formats:
-      <a
-        href="https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/source-data"
-        target="_blank"
-        >https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/source-data</a
-      >
-      <br />
-      <img src="../assets/github-mark-32.png" height="24" width="24" />
-      ETL Python Scripts:
-      <a
-        href="https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/data-loaders"
-        target="_blank"
-        >https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/data-loaders</a
-      >
-      <br />
-      <img src="../assets/github-mark-32.png" height="24" width="24" />
-      Database and Config Files: <a href="" target="_blank">N/A</a>
-      <br />
-      <img src="../assets/github-mark-32.png" height="24" width="24" />
-      Application Layer and API:
-      <a
-        href="https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/synbrowser"
-        target="_blank"
-        >https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/synbrowser</a
-      >
-      <br />
-      <img src="../assets/github-mark-32.png" height="24" width="24" />
-      User Interface and Visualization:
-      <a
-        href="https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/synbrowser"
-        target="_blank"
-        >https://github.com/TheJacksonLaboratory/syntenybrowser/tree/master/synbrowser</a
-      >
-    </p>
+        <p>
+          <a href="https://github.com/pjhale" target="_blank">
+            Paul Hale, M.S.
+          </a>
+          &mdash; Bioinformatics Analyst I; data generation and curation
+        </p>
 
-    <h2><clr-icon shape="book" size="24"></clr-icon> Resources</h2>
-    <p></p>
+        <p>
+          <a href="https://www.jax.org/people/georgi-kolishovski" target="_blank">
+            Georgi Kolishovski, M.S.
+          </a>
+          &mdash; Scientific Software Engineer; database and microservice development
+        </p>
 
-    <h2><clr-icon shape="users" size="24"></clr-icon> Core Contributors</h2>
-    <p>
-      &nbsp;&nbsp;<a
-        href="https://www.jax.org/people/anna-lamoureux"
-        target="_blank"
-        >Anna Lamoureux</a
-      >
-      , B.S., Associate Scientific Software Engineer
-      <br />
-      &nbsp;&nbsp;<a href="https://github.com/pjhale" target="_blank"
-        >Paul Hale</a
-      >
-      , M.S., Bioinformatics Analyst I
-      <br />
-      &nbsp;&nbsp;<a
-        href="https://www.jax.org/people/georgi-kolishovski"
-        target="_blank"
-        >Georgi Kolishovski</a
-      >
-      , M.S., Scientific Software Engineer
-      <br />
-      &nbsp;&nbsp;<a href="http://lobstersontheloose.com/" target="_blank"
-        >Al Simons</a
-      >
-      , Principal Scientific Software Engineer
-    </p>
+        <p>
+          Al Simons &mdash; Principal Scientific Software Engineer; legacy data loading and database management
+        </p>
 
-    <h2><clr-icon shape="users" size="24"></clr-icon> Advisors</h2>
-    <p>
-      &nbsp;&nbsp;<a
-        href="https://www.jax.org/research-and-faculty/faculty/carol-bult"
-        target="_blank"
-        >Carol J. Bult</a
-      >, Ph.D. Professor, Knowlton Family Chair
-      <br />
-      &nbsp;&nbsp;<a
-        href="https://www.jax.org/research-and-faculty/faculty/research-scientists/joel-richardson"
-        target="_blank"
-        >Joel E. Richardson</a
-      >, Ph.D., Senior Research Scientist
-      <br />
-      &nbsp;&nbsp;<a
-        href="https://www.jax.org/people/govindarajan-kunde-ramamoorthy"
-        target="_blank"
-        >Govindarajan Kunde-Ramamoorthy</a
-      >, Ph.D., Associate Director, Computational Sciences
-      <br />
-      &nbsp;&nbsp;<a
-        href="https://www.jax.org/research-and-faculty/research-labs/the-bult-lab"
-        target="_blank"
-        >Jill Recla</a
-      >, Ph.D., Bioinformatics Analyst II
-      <br />
-      &nbsp;&nbsp;<a href="" target="_blank">Omoluyi Adesanya</a>
-    </p>
+        <h4><clr-icon shape="users" size="18"></clr-icon>Advisors</h4>
+        <p>
+          <a href="https://www.jax.org/research-and-faculty/faculty/carol-bult" target="_blank">
+            Carol J. Bult, Ph.D.
+          </a>
+          &mdash; Professor, Knowlton Family Chair
+        </p>
+        <p>
+          <a href="https://www.jax.org/research-and-faculty/faculty/research-scientists/joel-richardson" target="_blank">
+            Joel E. Richardson, Ph.D.
+          </a>
+          &mdash; Senior Research Scientist
+        </p>
+        <p>
+          <a href="https://www.jax.org/people/govindarajan-kunde-ramamoorthy" target="_blank">
+            Govindarajan Kunde-Ramamoorthy, Ph.D.
+          </a>
+          &mdash; Associate Director, Computational Sciences
+        </p>
+        <p>
+            Jill Recla, Ph.D. &mdash; Bioinformatics Analyst II
+        </p>
+        <p>
+          Omoluyi Adesanya
+        </p>
 
-    <h2><clr-icon shape="ruler-pencil" size="24"></clr-icon> Design</h2>
-    <p>
-      The website and logo () are designed by
-      <a href="https://www.jax.org/people/anna-lamoureux" target="_blank"
-        >Anna Lamoureux</a
-      >
-      and The Jackson Laboratory Creative Services team.
-    </p>
+        <h4><clr-icon shape="code" size="18"></clr-icon>Source Code</h4>
 
-    <h2>Icons</h2>
-    <p></p>
+        <p>
+          All code for the JAX Synteny Browser is open source and available under the JAX Non-Commericial Licence.
+        </p>
 
-    <h2>Copyrights and Licenses</h2>
-    <p>
-      &copy; 2019 The Jackson Laboratory.
-      <br />
-      All content on this website is licensed under the Creative Commons
-      Attribution license (CC BY). Copyright of the linked papers is with the
-      publishers.
-    </p>
+        <p>
+          <!-- TODO: Add final UI Github repo URL when we have it -->
+          <img src="../assets/github-mark-32.png" height="16" width="16" />
+          <a href="" target="_blank">Client Angular Application</a>
+        </p>
+        <p>
+          <!-- TODO: Add final API Github repo URL when we have it -->
+          <img src="../assets/github-mark-32.png" height="16" width="16" />
+          <a href="" target="_blank">Flask RestPlus API & ETL Scripts</a>
+        </p>
+        <p>
+          <clr-icon shape="file-group" size="16"></clr-icon>
+          <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/" target="_blank"> Source Data (MGI)</a>
+        </p>
+      </div>
+
+      <div class="clr-col-md-12 clr-col-lg-6">
+        <h4><clr-icon shape="file-group" size="18"></clr-icon>Citation</h4>
+        <p style="width: 80%">
+          Kolishovski, G., Lamoureux, A., Hale, P. <i>et al</i>. The JAX Synteny Browser
+          for mouse-human comparative genomics. <i>Mammalian Genome</i> <b> 30</b>, 353–361 (2019).<br/>
+          <a href="https://doi.org/10.1007/s00335-019-09821-4">
+            https://doi.org/10.1007/s00335-019-09821-4
+          </a>
+        </p>
+
+        <h4><clr-icon shape="envelope" size="18"></clr-icon>Contact</h4>
+        <p>
+          <b>General</b>: Carol J. Bult, Ph.D. &mdash; <a href="mailto:carol.bult@jax.org">email</a>
+        </p>
+        <p>
+          <b>Bugs & Technical Questions</b>: Synteny Browser Support &mdash; <a href="mailto:synbrowser-support@jax.org">email</a>
+        </p>
+
+        <h4><clr-icon shape="scroll" size="18"></clr-icon>Copyrights and Licenses</h4>
+
+        <p>
+          &copy; 2021 The Jackson Laboratory.
+          <br />
+          All content on this website is licensed under the Creative Commons
+          Attribution license (CC BY). Copyright of the linked papers is with the
+          publishers.
+        </p>
+      </div>
+    </div>
   </div>
 </div>
