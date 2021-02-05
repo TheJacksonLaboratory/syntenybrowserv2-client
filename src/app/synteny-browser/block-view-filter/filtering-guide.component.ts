@@ -124,9 +124,9 @@ import { Component } from '@angular/core';
                   indicates a ‘highlight’ filter and a red label indicates a ‘hide’ filter.
                 </li>
                 <li>
-                  If you’re editing a filter and navigate to the guide (as long as you don’t
-                  close the modal), your current filter will still be there, in its current state
-                  for you to continue editing.
+                  If you’re editing a filter and navigate to the guide (as long as you don’t close
+                  the modal), your current filter will still be there, in its current state for you
+                  to continue editing.
                 </li>
                 <li>
                   If you’re editing a filter and click on a label of a different filter, the changes

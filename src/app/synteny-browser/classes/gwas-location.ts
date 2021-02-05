@@ -87,10 +87,14 @@ export class GWASLocation {
     };
 
     if (detailed) {
+      // these are dependent on capitalization and formatting so dot-notation
+      // isn't an option here
+      /* eslint-disable dot-notation */
       data['Reference Base'] = hit.ref_base;
       data['Alternate Allele'] = hit.alt_allele;
       data['Filter'] = hit.filter;
       data['NCBI'] = `https://www.ncbi.nlm.nih.gov/snp/${hit.id}`;
+      /* eslint-enable dot-notation */
     }
     return data;
   }

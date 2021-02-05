@@ -3,7 +3,10 @@
     <h2>Data Sources and Formats</h2>
 
     <h4>Mouse Data</h4>
-    <p>Data files from Mouse source data. For ontologies pertaining to Mouse see the <b>General Data</b> section.</p>
+    <p>
+      Data files from Mouse source data. For ontologies pertaining to Mouse see
+      the <b>General Data</b> section.
+    </p>
     <table class="table">
       <thead>
         <tr>
@@ -15,114 +18,155 @@
       <tbody>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_GenomeFeatures_Synteny.gff3"
-              target="_blank" class="table-link">
-              Mouse_GenomeFeatures_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_GenomeFeatures_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Mouse_GenomeFeatures_Synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: Mouse Genome Informatics - http://www.informatics.jax.org/
+                <b>source</b>: Mouse Genome Informatics -
+                http://www.informatics.jax.org/
               </li>
               <li>
-                <b>description</b>: generated from the file MGI.exome.gff3.gz, which can be found
-                <a href="http://www.informatics.jax.org/downloads/mgigff3/" target="_blank">here</a>, it contains
-                genes and pseudogenes in minimized format (i.e. all exons combined into a single feature).
-                Each feature has a name, a symbol, and an MGI ID.
+                <b>description</b>: generated from the file MGI.exome.gff3.gz,
+                which can be found
+                <a
+                  href="http://www.informatics.jax.org/downloads/mgigff3/"
+                  target="_blank"
+                  >here</a
+                >, it contains genes and pseudogenes in minimized format (i.e.
+                all exons combined into a single feature). Each feature has a
+                name, a symbol, and an MGI ID.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_QTL_Synteny.gff3"
-              target="_blank" class="table-link">
-              Mouse_QTL_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_QTL_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Mouse_QTL_Synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: Mouse Genome Informatics - http://www.informatics.jax.org/ -
-                source data is taken from the MRK_List2.rpt file available on
-                <a href="http://www.informatics.jax.org/downloads/reports/" target="_blank">MGI's public FTP</a>
+                <b>source</b>: Mouse Genome Informatics -
+                http://www.informatics.jax.org/ - source data is taken from the
+                MRK_List2.rpt file available on
+                <a
+                  href="http://www.informatics.jax.org/downloads/reports/"
+                  target="_blank"
+                  >MGI's public FTP</a
+                >
                 and then converted to GFF3 format
               </li>
               <li>
-                <b>description</b>: features in this file have the type QTL. The Column 9
-                field contains 3 attributes - 'ID' is the feature's MGI ID,
-                'Name' is the QTL's official name, and 'Dbxref' is MGI's ID again, but only the numeric portion.
+                <b>description</b>: features in this file have the type QTL. The
+                Column 9 field contains 3 attributes - 'ID' is the feature's MGI
+                ID, 'Name' is the QTL's official name, and 'Dbxref' is MGI's ID
+                again, but only the numeric portion.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_GeneAssociation_MP_Synteny.gaf"
-              target="_blank" class="table-link">
-              Mouse_GeneAssociation_MP_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_GeneAssociation_MP_Synteny.gaf"
+              target="_blank"
+              class="table-link"
+            >
+              Mouse_GeneAssociation_MP_Synteny.gaf
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left no-wrap">GAF</td>
           <td class="left line-height-12">
             <ul>
+              <li><b>source</b>: release 22 Dec, 2020</li>
               <li>
-                <b>source</b>: release 22 Dec, 2020
-              </li>
-              <li>
-                <b>description</b>: a standard GAF format file with several comment lines
-                (indicated by !) followed by the file data.
-                <br/>
-                Unlike a standard GAF file the gene ontology terms are instead mouse phenotype ID's.
-                Several required fields for GO such as evidence codes, cardinality, etc are not
-                included in this file because they do not apply to MP.
+                <b>description</b>: a standard GAF format file with several
+                comment lines (indicated by !) followed by the file data.
+                <br />
+                Unlike a standard GAF file the gene ontology terms are instead
+                mouse phenotype ID's. Several required fields for GO such as
+                evidence codes, cardinality, etc are not included in this file
+                because they do not apply to MP.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_GeneAssociation_GO_Synteny.gaf"
-              target="_blank" class="table-link">
-              Mouse_GeneAssocication_GO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_GeneAssociation_GO_Synteny.gaf"
+              target="_blank"
+              class="table-link"
+            >
+              Mouse_GeneAssocication_GO_Synteny.gaf
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GAF</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: source data is taken from the <b>gene_association.mgi</b> file available
-                on <a href="http://www.informatics.jax.org/downloads/reports/" target="_blank">MGI's public FTP</a> and then converted to GAF format
+                <b>source</b>: source data is taken from the
+                <b>gene_association.mgi</b> file available on
+                <a
+                  href="http://www.informatics.jax.org/downloads/reports/"
+                  target="_blank"
+                  >MGI's public FTP</a
+                >
+                and then converted to GAF format
               </li>
               <li>
-                <b>description</b>: file's headers provide more complete description.
-                The gene with annotation is stored in the second column (MGI:1234) and the specific
-                annotation term is stored in the fourth column (GO:1234)
+                <b>description</b>: file's headers provide more complete
+                description. The gene with annotation is stored in the second
+                column (MGI:1234) and the specific annotation term is stored in
+                the fourth column (GO:1234)
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_CytoBand_Synteny.gff3"
-              target="_blank" class="table-link">
-              Mouse_CytoBand_synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Mouse_CytoBand_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Mouse_CytoBand_synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: UCSC - https://www.ucsc.edu/ - release 12 Jun, 2020
+                <b>source</b>: UCSC - https://www.ucsc.edu/ - release 12 Jun,
+                2020
               </li>
               <li>
-                <b>description</b>: the original (UCSC) file has been converted into standard GFF3 format and renamed.
-                <br/>
+                <b>description</b>: the original (UCSC) file has been converted
+                into standard GFF3 format and renamed.
+                <br />
                 Column 9 contains 3 attributes: 'ID' - the provided UCSC ID,
-                'Location' - the p/q arm position of this band, and 'Color' - the stain color of this band.
+                'Location' - the p/q arm position of this band, and 'Color' -
+                the stain color of this band.
               </li>
             </ul>
           </td>
@@ -132,7 +176,10 @@
     <!-- END Mouse Data -->
 
     <h4>Human Data</h4>
-    <p>Data files from Human source data. For ontologies pertaining to Human see the <b>General Data</b> section.</p>
+    <p>
+      Data files from Human source data. For ontologies pertaining to Human see
+      the <b>General Data</b> section.
+    </p>
     <table class="table">
       <thead>
         <tr>
@@ -144,9 +191,13 @@
       <tbody>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GenomeFeatures_Synteny.gff3"
-              target="_blank" class="table-link">
-              Human_GenomeFeatures_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GenomeFeatures_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Human_GenomeFeatures_Synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GFF3</td>
@@ -155,38 +206,44 @@
               <li>
                 <b>source</b>: NCBI - https://www.ncbi.nlm.nih.gov/.
                 <br />
-                Created from the ref_GRCh38.p12_top_level.gff3 file from NCBI and
-                contains the official gene symbol, gene name, and GeneID.
+                Created from the ref_GRCh38.p12_top_level.gff3 file from NCBI
+                and contains the official gene symbol, gene name, and GeneID.
               </li>
               <li>
-                <b>description</b>: a standard GFF3 format file with the following
-                Column 9 properties; 'ID', 'Symbol', 'Name', and 'Dbxref'. Note that the NCBI
-                GeneID is stored in the 'Dbxref' field whereas the 'ID' field should be used
-                only to identify parent/child features within the file.
-                <br/>
-                This file contains all of NCBI's genes and pseudogenes
-                in a minimized format (all exons combined into a single feature)
+                <b>description</b>: a standard GFF3 format file with the
+                following Column 9 properties; 'ID', 'Symbol', 'Name', and
+                'Dbxref'. Note that the NCBI GeneID is stored in the 'Dbxref'
+                field whereas the 'ID' field should be used only to identify
+                parent/child features within the file.
+                <br />
+                This file contains all of NCBI's genes and pseudogenes in a
+                minimized format (all exons combined into a single feature)
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GeneAssociation_GO_Synteny.gaf"
-              target="_blank" class="table-link">
-              Human_GeneAssociation_DO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GeneAssociation_GO_Synteny.gaf"
+              target="_blank"
+              class="table-link"
+            >
+              Human_GeneAssociation_DO_Synteny.gaf
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GAF</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: Mouse Genome Informatics - http://www.informatics.jax.org/downloads/reports/MGI_DO.rpt
+                <b>source</b>: Mouse Genome Informatics -
+                http://www.informatics.jax.org/downloads/reports/MGI_DO.rpt
               </li>
               <li>
-                <b>description</b>: standard GAF format file in which the feature with annotation
-                is stored in the fourth column and the specific ontology annotation term
-                is stored in the first column.
+                <b>description</b>: standard GAF format file in which the
+                feature with annotation is stored in the fourth column and the
+                specific ontology annotation term is stored in the first column.
               </li>
             </ul>
           </td>
@@ -194,25 +251,34 @@
 
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GeneAssociation_GO_Synteny.gaf"
-              target="_blank" class="table-link">
-              Human_GeneAssociation_GO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GeneAssociation_GO_Synteny.gaf"
+              target="_blank"
+              class="table-link"
+            >
+              Human_GeneAssociation_GO_Synteny.gaf
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GAF</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: source data is from a regularly generated report on the
-                Gene Ontology Consortium's website and can be found
-                <a href="http://current.geneontology.org/products/pages/downloads.html" target="_blank">here</a>.
-                The particular file to use is goa_human.gaf that is filtered to reduce
-                complexity and circular annotations, which exist in other files.
+                <b>source</b>: source data is from a regularly generated report
+                on the Gene Ontology Consortium's website and can be found
+                <a
+                  href="http://current.geneontology.org/products/pages/downloads.html"
+                  target="_blank"
+                  >here</a
+                >. The particular file to use is goa_human.gaf that is filtered
+                to reduce complexity and circular annotations, which exist in
+                other files.
               </li>
               <li>
-                <b>description</b>: standard GAF format file in which the feature with annotation
-                is stored in the second column and the specific ontology annotation term
-                is stored in the fourth column. File headers provide a more complete description.
+                <b>description</b>: standard GAF format file in which the
+                feature with annotation is stored in the second column and the
+                specific ontology annotation term is stored in the fourth
+                column. File headers provide a more complete description.
               </li>
             </ul>
           </td>
@@ -220,9 +286,13 @@
 
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GWAS_Synteny.vcf"
-              target="_blank" class="table-link">
-              Human_GWAS_Synteny.vcf <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_GWAS_Synteny.vcf"
+              target="_blank"
+              class="table-link"
+            >
+              Human_GWAS_Synteny.vcf
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left no-wrap">VCF</td>
@@ -230,37 +300,50 @@
             <ul>
               <li>
                 <b>source</b>: the source data is from the
-                <a href="https://www.ebi.ac.uk/gwas/docs/file-downloads" target="_blank">EBI GWAS database</a>,
-                in particular, 1.0.2 all associations with added ontology annotations
+                <a
+                  href="https://www.ebi.ac.uk/gwas/docs/file-downloads"
+                  target="_blank"
+                  >EBI GWAS database</a
+                >, in particular, 1.0.2 all associations with added ontology
+                annotations
               </li>
               <li>
-                <b>description</b>: contains GWAS loci that match the term 'type II diabetes mellitus'.
-                Note that GWAS hits classified with multiple terms including 'type II diabetes mellitus'
-                were not included. This file was converted into a standard VCF format with
-                4 additional fields: AF - allele frequency, CG - mapped gene symbols, LT - ontology term for loci,
-                and PMID - the study's PubMed ID.
+                <b>description</b>: contains GWAS loci that match the term 'type
+                II diabetes mellitus'. Note that GWAS hits classified with
+                multiple terms including 'type II diabetes mellitus' were not
+                included. This file was converted into a standard VCF format
+                with 4 additional fields: AF - allele frequency, CG - mapped
+                gene symbols, LT - ontology term for loci, and PMID - the
+                study's PubMed ID.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_CytoBand_Synteny.gff3"
-              target="_blank" class="table-link">
-              Human_CytoBand_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Human_CytoBand_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Human_CytoBand_Synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: UCSC - https://www.ucsc.edu/ - release 12 Jun, 2020
+                <b>source</b>: UCSC - https://www.ucsc.edu/ - release 12 Jun,
+                2020
               </li>
               <li>
-                <b>description</b>: the original (UCSC) file has been converted into standard GFF3 format and renamed.
-                <br/>
+                <b>description</b>: the original (UCSC) file has been converted
+                into standard GFF3 format and renamed.
+                <br />
                 Column 9 contains 3 attributes: 'ID' - the provided UCSC ID,
-                'Location' - the p/q arm position of this band, and 'Color' - the stain color of this band.
+                'Location' - the p/q arm position of this band, and 'Color' -
+                the stain color of this band.
               </li>
             </ul>
           </td>
@@ -270,7 +353,10 @@
     <!-- END Human Data -->
 
     <h4>Rat Data</h4>
-    <p>Data files from Rat source data. For ontologies pertaining to Rat see the <b>General Data</b> section.</p>
+    <p>
+      Data files from Rat source data. For ontologies pertaining to Rat see the
+      <b>General Data</b> section.
+    </p>
     <table class="table">
       <thead>
         <tr>
@@ -282,86 +368,112 @@
       <tbody>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_GenomeFeatures_Synteny.gff3"
-              target="_blank" class="table-link">
-              Rat_GenomeFeatures_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_GenomeFeatures_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Rat_GenomeFeatures_Synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: The Rat Genome Database - https://rgd.mcw.edu/rgdweb/homepage/ - release 12 Jun, 2020
+                <b>source</b>: The Rat Genome Database -
+                https://rgd.mcw.edu/rgdweb/homepage/ - release 12 Jun, 2020
               </li>
               <li>
-                <b>description</b>: standard GFF3 format file with the following Column 9 properties;
-                'ID', 'Symbol', 'Name', 'Dbxref', and 'Biotype'.
-                <br/>
-                The file contains all exons from the rn6 assembly for Rat, which is the most current genome assembly.
+                <b>description</b>: standard GFF3 format file with the following
+                Column 9 properties; 'ID', 'Symbol', 'Name', 'Dbxref', and
+                'Biotype'.
+                <br />
+                The file contains all exons from the rn6 assembly for Rat, which
+                is the most current genome assembly.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_QTL_Synteny.gff3.gz"
-              target="_blank" class="table-link">
-              Rat_QTL_Synteny.gff3.gz <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_QTL_Synteny.gff3.gz"
+              target="_blank"
+              class="table-link"
+            >
+              Rat_QTL_Synteny.gff3.gz
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left no-wrap">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: The Rat Genome Database - https://rgd.mcw.edu/rgdweb/homepage/ - release 9 Jul, 2020
+                <b>source</b>: The Rat Genome Database -
+                https://rgd.mcw.edu/rgdweb/homepage/ - release 9 Jul, 2020
               </li>
               <li>
                 <b>description</b>: features in this file have the type QTL.
-                <br/>The Column 9 field contains 3 attributes - 'ID' is the feature's RGD ID,
-                'Name' is the QTL's official name, and 'Dbxref' is RGD's ID again.
+                <br />The Column 9 field contains 3 attributes - 'ID' is the
+                feature's RGD ID, 'Name' is the QTL's official name, and
+                'Dbxref' is RGD's ID again.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_GeneAssociation_GO_Synteny.gaf"
-              target="_blank" class="table-link">
-              Rat_GeneAssociation_GO_Synteny.gaf <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_GeneAssociation_GO_Synteny.gaf"
+              target="_blank"
+              class="table-link"
+            >
+              Rat_GeneAssociation_GO_Synteny.gaf
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">GAF</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: The Rat Genome Database - https://rgd.mcw.edu/rgdweb/homepage/ - release 14 Jan, 2021
+                <b>source</b>: The Rat Genome Database -
+                https://rgd.mcw.edu/rgdweb/homepage/ - release 14 Jan, 2021
               </li>
               <li>
-                <b>description</b>: standard GAF format file in which the feature with annotation
-                is stored in the second column and the specific ontology annotation term
-                is stored in the fourth column. File headers provide a more complete description.
+                <b>description</b>: standard GAF format file in which the
+                feature with annotation is stored in the second column and the
+                specific ontology annotation term is stored in the fourth
+                column. File headers provide a more complete description.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_CytoBand_Synteny.gff3"
-              target="_blank" class="table-link">
-              Rat_CytoBand_Synteny.gff3 <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/Rat_CytoBand_Synteny.gff3"
+              target="_blank"
+              class="table-link"
+            >
+              Rat_CytoBand_Synteny.gff3
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left no-wrap">GFF3</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: UCSC - https://www.ucsc.edu/ - release 12 Jun, 2020
+                <b>source</b>: UCSC - https://www.ucsc.edu/ - release 12 Jun,
+                2020
               </li>
               <li>
-                <b>description</b>: the original (UCSC) file has been converted into standard GFF3 format and renamed.
-                <br/>
+                <b>description</b>: the original (UCSC) file has been converted
+                into standard GFF3 format and renamed.
+                <br />
                 Column 9 contains 3 attributes: 'ID' - the provided UCSC ID,
-                'Location' - the p/q arm position of this band, and 'Color' - the stain color of this band.
+                'Location' - the p/q arm position of this band, and 'Color' -
+                the stain color of this band.
               </li>
             </ul>
           </td>
@@ -382,65 +494,94 @@
       <tbody>
         <tr>
           <td class="left no-wrap line-height-12">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/MouseHuman_Homologs_Synteny.tsv"
-              target="_blank" class="table-link">
-              MouseHuman_Homologs_Synteny.tsv <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/MouseHuman_Homologs_Synteny.tsv"
+              target="_blank"
+              class="table-link"
+            >
+              MouseHuman_Homologs_Synteny.tsv
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
-            <br/><br/>
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/RatHuman_Homologs_Synteny.tsv"
-              target="_blank" class="table-link">
-              RatHuman_Homologs_Synteny.tsv <clr-icon shape="pop-out" size="14"></clr-icon>
+            <br /><br />
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/RatHuman_Homologs_Synteny.tsv"
+              target="_blank"
+              class="table-link"
+            >
+              RatHuman_Homologs_Synteny.tsv
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
-            <br/><br/>
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/RatMouse_Homologs_Synteny.tsv"
-              target="_blank" class="table-link">
-              RatMouse_Homologs_Synteny.tsv <clr-icon shape="pop-out" size="14"></clr-icon>
+            <br /><br />
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/RatMouse_Homologs_Synteny.tsv"
+              target="_blank"
+              class="table-link"
+            >
+              RatMouse_Homologs_Synteny.tsv
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">TSV</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: MouseMine - http://www.mousemine.org/mousemine/begin.do
+                <b>source</b>: MouseMine -
+                http://www.mousemine.org/mousemine/begin.do
               </li>
               <li>
-                <b>description</b>: a homolog is defined as two features, one from
-                each - reference and comparison - genome, that correspond to each other.
-                Each homolog is a single line of the file and includes its species ID,
-                feature ID, feature symbol, feature chromosome, feature start, and feature end.
+                <b>description</b>: a homolog is defined as two features, one
+                from each - reference and comparison - genome, that correspond
+                to each other. Each homolog is a single line of the file and
+                includes its species ID, feature ID, feature symbol, feature
+                chromosome, feature start, and feature end.
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/HumanRat_Blocks_Synteny.txt"
-              target="_blank" class="table-link">
-              HumanRat_Blocks_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/HumanRat_Blocks_Synteny.txt"
+              target="_blank"
+              class="table-link"
+            >
+              HumanRat_Blocks_Synteny.txt
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
-            <br/><br/>
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/RatMouse_Blocks_Synteny.txt"
-              target="_blank" class="table-link">
-              RatMouse_Blocks_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            <br /><br />
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/RatMouse_Blocks_Synteny.txt"
+              target="_blank"
+              class="table-link"
+            >
+              RatMouse_Blocks_Synteny.txt
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
-            <br/><br/>
-            <a href="http://www.informatics.jax.org/downloads/SyntenyBrowser/MouseHuman_Blocks_Synteny.txt"
-              target="_blank" class="table-link">
-              MouseHuman_Blocks_Synteny.txt <clr-icon shape="pop-out" size="14"></clr-icon>
+            <br /><br />
+            <a
+              href="http://www.informatics.jax.org/downloads/SyntenyBrowser/MouseHuman_Blocks_Synteny.txt"
+              target="_blank"
+              class="table-link"
+            >
+              MouseHuman_Blocks_Synteny.txt
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left no-wrap">TSV</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: MouseMine - http://www.mousemine.org/mousemine/begin.do
+                <b>source</b>: MouseMine -
+                http://www.mousemine.org/mousemine/begin.do
               </li>
               <li>
-                <b>description</b>: a syntenic block is defined as one region in a genome with a
-                start, an end, and a chromosome that corresponds to another region in another
-                genome also having a start, an end, and a chromosome. Each block will also have a
-                strand value, either '+' or '-' that determines if the block's features run in the
-                same direction or in the opposite directions. The last column requires an ID.
+                <b>description</b>: a syntenic block is defined as one region in
+                a genome with a start, an end, and a chromosome that corresponds
+                to another region in another genome also having a start, an end,
+                and a chromosome. Each block will also have a strand value,
+                either '+' or '-' that determines if the block's features run in
+                the same direction or in the opposite directions. The last
+                column requires an ID.
               </li>
             </ul>
           </td>
@@ -462,8 +603,11 @@
       <tbody>
         <tr>
           <td class="left no-wrap">
-            <a href="http://current.geneontology.org/ontology/go-basic.obo"
-              target="_blank" class="table-link">
+            <a
+              href="http://current.geneontology.org/ontology/go-basic.obo"
+              target="_blank"
+              class="table-link"
+            >
               go-basic.obo <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
@@ -471,40 +615,53 @@
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: The Gene Ontology Resource - http://geneontology.org/page/download-ontology - release 01 Jan, 2021
+                <b>source</b>: The Gene Ontology Resource -
+                http://geneontology.org/page/download-ontology - release 01 Jan,
+                2021
               </li>
               <li>
-                <b>description</b>: describes a gene/gene product in detail, considering three
-                main aspects: its molecular function, the biological process in which
-                it participates, and its cellular location
+                <b>description</b>: describes a gene/gene product in detail,
+                considering three main aspects: its molecular function, the
+                biological process in which it participates, and its cellular
+                location
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology"
-              target="_blank" class="table-link">
-              MPheno_OBO.ontology <clr-icon shape="pop-out" size="14"></clr-icon>
+            <a
+              href="http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology"
+              target="_blank"
+              class="table-link"
+            >
+              MPheno_OBO.ontology
+              <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
           <td class="left">OBO</td>
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: Mouse Genome Informatics - http://www.informatics.jax.org/downloads/reports/index.html - release 12 Jan, 2021
+                <b>source</b>: Mouse Genome Informatics -
+                http://www.informatics.jax.org/downloads/reports/index.html -
+                release 12 Jan, 2021
               </li>
               <li>
-                <b>description</b>: contains pre-coordinated phenotype terms, definitions and synonyms
-                that can be used to describe mammalian phenotypes
+                <b>description</b>: contains pre-coordinated phenotype terms,
+                definitions and synonyms that can be used to describe mammalian
+                phenotypes
               </li>
             </ul>
           </td>
         </tr>
         <tr>
           <td class="left no-wrap">
-            <a href="https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/master/src/ontology/HumanDO.obo"
-              target="_blank" class="table-link">
+            <a
+              href="https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/master/src/ontology/HumanDO.obo"
+              target="_blank"
+              class="table-link"
+            >
               HumanDO.obo <clr-icon shape="pop-out" size="14"></clr-icon>
             </a>
           </td>
@@ -512,10 +669,13 @@
           <td class="left line-height-12">
             <ul>
               <li>
-                <b>source</b>: The OBO Foundry - http://www.obofoundry.org/ontology/doid.html - release 22 Dec, 2020
+                <b>source</b>: The OBO Foundry -
+                http://www.obofoundry.org/ontology/doid.html - release 22 Dec,
+                2020
               </li>
               <li>
-                <b>description</b>: describes the classification of human diseases organized by etiology
+                <b>description</b>: describes the classification of human
+                diseases organized by etiology
               </li>
             </ul>
           </td>

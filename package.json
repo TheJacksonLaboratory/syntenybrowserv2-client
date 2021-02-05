@@ -1,18 +1,16 @@
 {
-  "name": "synteny",
-  "version": "0.3.1",
+  "name": "synteny-browser",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "tests": "ng test",
     "headless-tests": "ng test -c headless",
-    "tslint": "ng lint",
     "lint": "eslint ./src -f table --ext .ts; exit 0",
     "fix-prettier": "prettier --write './src/**/*.{ts,js,css,html}'; exit 0",
     "fix-eslint": "eslint ./src -f table --ext .ts --fix; exit 0",
-    "fix": "npm run fix-prettier && npm run fix-eslint",
-    "e2e": "ng e2e"
+    "fix": "npm run fix-prettier && npm run fix-eslint"
   },
   "private": true,
   "dependencies": {
@@ -38,7 +36,6 @@
     "d3-scale": "^3.2.1",
     "d3-tip": "^0.9.1",
     "ngx-device-detector": "^1.3.20",
-    "protractor": "^5.4.2",
     "rxjs": "^6.5.3",
     "save-svg-as-png": "^1.4.14",
     "zone.js": "~0.9.1"

@@ -1,3 +1,5 @@
+// It's just easier to keep these mock classes in the same file as the testing
+// suite since they're only used in this file
 /* eslint-disable max-classes-per-file */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
