@@ -5,7 +5,7 @@ import { AppRoutingModule } from '../app-routing.module';
 
 import { DocsComponent } from './docs.component';
 
-import { DocsConfigsComponent } from './sections/docs-configs.component';
+import { DocsConfigsComponent } from './sections/docs-configs/docs-configs.component';
 import { DocsContributorsComponent } from './sections/docs-contributors.component';
 import { DocsDataPrepComponent } from './sections/docs-data-prep/docs-data-prep.component';
 import { DocsDockerComponent } from './sections/docs-docker/docs-docker.component';
