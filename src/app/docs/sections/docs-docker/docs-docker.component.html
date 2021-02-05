@@ -1,0 +1,46 @@
+<div class="content-container">
+  <div class="content-area">
+    <div class="clr-row">
+      <div class="clr-col-12">
+      <h2>Running the Synteny Browser using Docker</h2>
+      <h4>Prerequisites</h4>
+      <ol>
+        <li>
+          A bash terminal (Mac OS X & Linux will have this included)
+          or a way of running shell scripts
+        </li>
+        <li>Docker installed on your machine</li>
+      </ol>
+      </div>
+    </div>
+
+    <div class="clr-row">
+      <div class="clr-col-md-12 clr-col-lg-6">
+        <h4>
+          <clr-icon shape="users" size="18"></clr-icon>
+          Client (Front-End) Side
+        </h4>
+      </div>
+      <div class="clr-col-md-12 clr-col-lg-6">
+        <h4>
+          <clr-icon shape="file-group" size="18"></clr-icon>
+          RESTful Microservice
+        </h4>
+        <p>
+          Start docker on your machine and once running, pull the image using
+          <br/>
+          docker pull lamoua/synbrowser
+          <br/>
+          Once the image is done pulling from DockerHub, run the container
+          <br/>
+          docker run -p 5001:5001 synbrowser:latest
+          <br/>
+          This should set off the container as well as start the Python Flask
+          server. Navigating to the specified location (which should be
+          localhost:5001 by default), should bring you to the JAX Synteny
+          Browser interface running from the container.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

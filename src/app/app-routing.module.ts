@@ -9,7 +9,7 @@ import { SyntenyBrowserComponent } from './synteny-browser/synteny-browser.compo
 import { DocsTutorialComponent } from './docs/sections/docs-tutorial.component';
 import { DocsDataPrepComponent } from './docs/sections/docs-data-prep/docs-data-prep.component';
 import { DocsFeaturesComponent } from './docs/sections/docs-features/docs-features.component';
-import { DocsDockerComponent } from './docs/sections/docs-docker.component';
+import { DocsDockerComponent } from './docs/sections/docs-docker/docs-docker.component';
 import { DocsConfigsComponent } from './docs/sections/docs-configs.component';
 import { DocsContributorsComponent } from './docs/sections/docs-contributors.component';
 import { LungCancerExampleComponent } from './examples/use-cases/lung-cancer.component';
