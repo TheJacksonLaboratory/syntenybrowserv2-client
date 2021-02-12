@@ -2,6 +2,8 @@
 
 This application utilizes Angular 8
 
+This repository contains the source code for the Synteny Browser (v2) Angular client application. You can find the source for the first version of Synteny Browser [here](https://github.com/TheJacksonLaboratory/syntenybrowser).
+
 ## Installation and Setup
 
 **Prerequisites:** Node (we're running 12.18.3) and NPM (we're running 6.14.6)
