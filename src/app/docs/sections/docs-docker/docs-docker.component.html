@@ -17,29 +17,108 @@
     <div class="clr-row">
       <div class="clr-col-md-12 clr-col-lg-6">
         <h4>
-          <clr-icon shape="users" size="18"></clr-icon>
+          <clr-icon shape="container" size="18"></clr-icon>
           Client (Front-End) Side
         </h4>
+        <br>
+        <p>1. Clone the client (front-end) code from
+          <a href="https://github.com/TheJacksonLaboratory/syntenybrowserv2-client" target="_blank">GitHub</a>
+          and navigate to the cloned project root.
+        </p>
+        <pre><code>git clone https://github.com/TheJacksonLaboratory/syntenybrowserv2-client.git</code></pre>
+        <br>
+        <p>
+          2. Run the below command to build an image called <em><b>synteny-ui</b></em>
+          (this can take some time).
+        </p>
+        <pre><code>docker build . --tag=synteny-ui</code></pre>
+        <p>
+          <b>Note</b>: a successful build will end with lines like these:
+        </p>
+        <pre class="no-padding">
+          <code class="font-08em black">
+      => [stage-1 2/2] COPY --from=build /app/dist /usr/share/nginx/html                              0.1s
+      => exporting to image                                                                           0.2s
+      => => exporting layers                                                                          0.2s
+      => => writing image sha256:0c9c2713f8d8cebc433188f57f7ed016f752ba3d2ccb29136af680da5d82e315     0.0s
+      => => naming to docker.io/library/synteny-ui
+          </code>
+        </pre>
+        <br />
+        <p>
+          3. Start a container based on the created Docker image -
+          <em><b>synteny-ui</b></em>
+        </p>
+        <pre><code>docker run -p 4200:80 synteny-ui</code></pre>
+        <br />
+        <p>
+          4. The application UI will be available at:
+        </p>
+        <pre><code>http://localhost:4200</code></pre>
+        <p>
+          <b>Note</b>: at this point the local UI container will be connected to
+          the JAX Synteny Browser's public API.
+          <br />
+          To connect it to a local API instance instead, please follwo the
+          instructions to run the API microservice locally and change the
+          config. Then redo from step 2.
+        </p>
       </div>
       <div class="clr-col-md-12 clr-col-lg-6">
         <h4>
           <clr-icon shape="file-group" size="18"></clr-icon>
           RESTful Microservice
         </h4>
+        <br />
+        <p>1. Clone the API (back-end) code from
+          <a href="https://github.com/TheJacksonLaboratory/syntenybrowserv2-client" target="_blank">GitHub</a>
+          and navigate to the cloned project root.
+        </p>
+        <pre><code>git clone https://github.com/TheJacksonLaboratory/syntenybrowserv2-api.git</code></pre>
+        <br />
         <p>
+          2. Run the below command to build an image called <em><b>synteny-api</b></em>
+          (this can take some time).
+        </p>
+        <pre><code>docker build . --tag=synteny-api</code></pre>
+        <p>
+          <b>Note</b>: a successful build will end with lines like these:
+        </p>
+        <pre class="no-padding">
+          <code class="font-08em black">
+      => [stage-1 2/2] COPY --from=build /app/dist /usr/share/nginx/html                              0.1s
+      => exporting to image                                                                           0.2s
+      => => exporting layers                                                                          0.2s
+      => => writing image sha256:0c9c2713f8d8cebc433188f57f7ed016f752ba3d2ccb29136af680da5d82e315     0.0s
+      => => naming to docker.io/library/synteny-ui
+          </code>
+        </pre>
+        <br />
+        <p>
+          3. Start a container based on the created Docker image -
+          <em><b>synteny-api</b></em>
+        </p>
+        <pre><code>docker run -p 8000:8000 synteny-api</code></pre>
+        <br />
+        <p>
+          4. The application API will be available at:
+        </p>
+        <pre><code>http://localhost:8000/api</code></pre>
+
+        <!-- <p>
           Start docker on your machine and once running, pull the image using
-          <br/>
-          docker pull lamoua/synbrowser
-          <br/>
+        </p>
+          <pre><code>docker pull lamoua/synbrowser</code></pre>
+        <p>
           Once the image is done pulling from DockerHub, run the container
-          <br/>
-          docker run -p 5001:5001 synbrowser:latest
-          <br/>
+        </p>
+          <pre><code>docker run -p 5001:5001 synbrowser:latest</code></pre>
+        <p>
           This should set off the container as well as start the Python Flask
           server. Navigating to the specified location (which should be
           localhost:5001 by default), should bring you to the JAX Synteny
           Browser interface running from the container.
-        </p>
+        </p> -->
       </div>
     </div>
   </div>

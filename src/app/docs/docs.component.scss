@@ -2,10 +2,6 @@ p {
   margin-top: 0;
 }
 
-.p6 {
-  margin-top: .2em !important;
-}
-
 pre {
   background-color:#EEEEEE;
   padding-left: 25px;
@@ -21,6 +17,22 @@ code {
 
 ul {
   list-style-position: outside;
+}
+
+.font-08em {
+  font-size: .8em;
+}
+
+.black {
+  color: #373954;
+}
+
+.no-padding {
+  padding: 0;
+}
+
+.p6 {
+  margin-top: .2em !important;
 }
 
 .no-wrap {
