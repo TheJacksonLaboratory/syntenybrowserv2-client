@@ -19,7 +19,6 @@ ENV PATH /sb/node_modules/.bin:$PATH
 # install and cache app dependencies
 COPY package.json /sb/package.json
 RUN npm install
-RUN npm install -g @angular/cli@8.3.20
 
 # add sb
 COPY . /sb
