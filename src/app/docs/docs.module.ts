@@ -10,7 +10,7 @@ import { DocsContributorsComponent } from './sections/docs-contributors.componen
 import { DocsDataPrepComponent } from './sections/docs-data-prep/docs-data-prep.component';
 import { DocsDockerComponent } from './sections/docs-docker/docs-docker.component';
 import { DocsFeaturesComponent } from './sections/docs-features/docs-features.component';
-import { DocsTutorialComponent } from './sections/docs-tutorial.component';
+import { DocsDatabaseComponent } from './sections/docs-database.component';
 
 @NgModule({
   imports: [AppRoutingModule, ClarityModule, ClrSelectModule, CommonModule],
@@ -21,7 +21,7 @@ import { DocsTutorialComponent } from './sections/docs-tutorial.component';
     DocsDataPrepComponent,
     DocsDockerComponent,
     DocsFeaturesComponent,
-    DocsTutorialComponent,
+    DocsDatabaseComponent,
   ],
   exports: [],
 })
