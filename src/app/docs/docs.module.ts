@@ -5,12 +5,12 @@ import { AppRoutingModule } from '../app-routing.module';
 
 import { DocsComponent } from './docs.component';
 
-import { DocsConfigsComponent } from './sections/docs-configs.component';
+import { DocsConfigsComponent } from './sections/docs-configs/docs-configs.component';
 import { DocsContributorsComponent } from './sections/docs-contributors.component';
 import { DocsDataPrepComponent } from './sections/docs-data-prep/docs-data-prep.component';
-import { DocsDockerComponent } from './sections/docs-docker.component';
+import { DocsDockerComponent } from './sections/docs-docker/docs-docker.component';
 import { DocsFeaturesComponent } from './sections/docs-features/docs-features.component';
-import { DocsTutorialComponent } from './sections/docs-tutorial.component';
+import { DocsDatabaseComponent } from './sections/docs-database.component';
 
 @NgModule({
   imports: [AppRoutingModule, ClarityModule, ClrSelectModule, CommonModule],
@@ -21,7 +21,7 @@ import { DocsTutorialComponent } from './sections/docs-tutorial.component';
     DocsDataPrepComponent,
     DocsDockerComponent,
     DocsFeaturesComponent,
-    DocsTutorialComponent,
+    DocsDatabaseComponent,
   ],
   exports: [],
 })

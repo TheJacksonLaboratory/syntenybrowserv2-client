@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'docs-tutorial',
+  selector: 'docs-database',
   template: `
     <div class="content-container">
       <div class="content-area">
@@ -88,4 +88,4 @@ import { Component } from '@angular/core';
   `,
   styleUrls: ['../docs.component.scss'],
 })
-export class DocsTutorialComponent {}
+export class DocsDatabaseComponent {}
