@@ -7,5 +7,5 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['./../../docs.component.scss'],
 })
 export class DocsDataPrepComponent {
-  private dataUrl: string = environment.sourceData;
+  dataUrl: string = environment.sourceData;
 }
