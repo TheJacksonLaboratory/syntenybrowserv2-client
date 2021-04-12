@@ -8,5 +8,4 @@ import { environment } from '../../../../environments/environment';
 })
 export class DocsDataPrepComponent {
   private dataUrl: string = environment.sourceData;
-  // console.log(dataUrl);
 }
