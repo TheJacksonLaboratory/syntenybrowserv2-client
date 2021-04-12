@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
             Data Sources/Formats
           </a>
           <a class="nav-link" [routerLink]="['docker']" routerLinkActive="active">
-            Docker
+            Docker Setup
           </a>
           <a class="nav-link" [routerLink]="['configs']" routerLinkActive="active">
             Species Config Files

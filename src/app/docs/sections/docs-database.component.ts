@@ -1,91 +1,85 @@
 import { Component } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'docs-database',
   template: `
     <div class="content-container">
       <div class="content-area">
-        <h2>Tutorial</h2>
-        <p>
-          This tutorial describes how you can use the JAX Synteny Browser online with pre-loaded
-          mouse and human data or how to install the application locally and use it with your
-          personal data. First, let's look at the application's architecture.
-        </p>
-        <h4>Prerequisites</h4>
-        <p>
-          To follow the steps in this tutorial you will require the followng packages:
-        </p>
-        <ul>
-          <li>
-            Docker(<a href="https://www.docker.com/community-edition" target="_blank"
-              >https://www.docker.com/community-edition</a
-            >): Docker is a program that lets you run "containers" hosting software and its
-            dependencies
-          </li>
-          <li>Python 3.x</li>
-          <li>synbrowser-manage:</li>
-        </ul>
-        <h4><b>Application Architecture</b></h4>
-        <br />
-        <img
-          id="sb-architecture-diagram"
-          src="../assets/synteny-architecture.png"
-          alt="The JAX Synteny Browser Architecture Diagram"
-          width="467"
-          height="191"
-        />
-        <p style="float: none">
-          The main components behind the JAX Synteny Browser's implementation are listed below:
-        </p>
-        <ul>
-          <li><b>Data Sources and Processing</b>:</li>
-          <li>
-            <b>Database &amp; Config Files</b>: the data is stored and extracted from an SQLite
-            database, which is updated quarterly. In addition, two user-defined configuration files,
-            one for each species (reference and comparison), provide specific application level
-            settings and meta-data such as ontologies and features.
-          </li>
-          <li>
-            <b>Application Layer and Service API</b>: the application layer exposes the data as a
-            microserivce to clients. The microservie is callable from external web clients via
-            several available endpoints.
-          </li>
-          <li><b>User Interface and Visualization</b>:</li>
-        </ul>
-        <div style="clear: both;"></div>
-        <h4><b>Use Online</b></h4>
-        <p>
-          The easiest way to start using the application is online. You don't need to load any data
-          or setup any configuration files. The online version comes with preloaded mouse and human
-          data, and pre-configured. Check our detailed user manual or look through our examples to
-          start quickly exploring some possible scenarios.
-        </p>
-        <h4><b>Running Synteny Browser Locally</b></h4>
-        <br />
-        <ul>
-          <li>
-            <b>Install Client</b>
+      <div class="clr-row">
+        <div class="clr-col-md-12">
+          <h2 class="top-0">Database Setup</h2>
+        </div>
+      </div>
+        <div class="clr-row">
+          <div class="clr-col-md-12 clr-col-lg-6">
+            <h3>Option 1: Download a preloaded database</h3>
+            <br/>
             <p>
-              The Client is implemented using Angular and can be downloaded from this location. You
-              can install it locally and run it from your computer. To do so follow the following
-              steps. First, install Angular following the steps at this page:
-              <br />
-              Then, download the client code from this link and put it in folder.
+              A ready-made database is available from Box
+              <a href="https://thejacksonlaboratory.box.com/s/i7ru2r9mx2dmzx5m0mbb5w80l6ovd6az" target="_blank">here</a>
+              named 'syntenybrowser-db.zip' and, when decompressed, will yield a
+              file named 'synteny.db'. This .db file will need to be located in
+              the root syntenybrowser/ directory before running the application,
+              otherwise the application will not run.
             </p>
-          </li>
-          <li>
-            <b>Complete Installation</b>
+          </div>
+          <div class="clr-col-md-12 clr-col-lg-6">
+            <h3>Option 2: Load a database yourself</h3>
+            <br />
             <p>
-              Installing the complete application will require you to download and install the
-              client using the instructions in the section above. In addition, you will need to
-              install a Python-enabled server. We have a Docker instance. Check our Docker section.
-              If you do not want to use Docker you can follow the steps below.
+              &bull; To create and load your own database, clone the loading scripts from
+              <a href="{{githubETL}}" target="_blank">GitHub</a>
+              and navigate to the cloned project's root directory.
             </p>
-          </li>
-        </ul>
+            <pre><code>git clone {{githubETL}}.git</code></pre>
+            <p>
+              Next, create a new <em>data/</em>
+              directory and download all your source files in it. To find more
+              about the applicable data and formats, read the
+              <a [routerLink]="['/docs/data-prep']">Data Sources/Formats</a> page.
+              The curated source files currenly used in
+              the application can be found in this <a href="{{dataUrl}}" target="_blank">public repo</a>.
+              And the newest ontology files can be downloaded from their respective respositories.
+              <br/>
+              &bull; Create an empty (Python3 recommended) virtual environment in the project's root.
+            </p>
+            <pre><code>python -m venv venv-db</code></pre>
+            <p>&bull; Once created, activate the virtual environment:</p>
+            <pre><code>source venv-db/bin/activate</code></pre>
+            <p>&bull; Install necessary packages:</p>
+            <pre><code>pip install -r requirements.txt</code></pre>
+            <p>
+              &bull; Run the database creation script with the required parameter
+              (On Windows, one option is to use Git Bash):
+            </p>
+            <pre><code>./create_database.sh synteny.db</code></pre>
+            <p>
+              This will take several minutes and when it's finished, it will yield a file named 'synteny.db'
+              in root syntenybrowser/ directory (the database file needs to be located here so don't move it).
+              Shut down the venv-db virtual environment:
+            </p>
+            <pre><code>deactivate</code></pre>
+          </div>
+        </div>
+
+        <div class="clr-row">
+          <div class="clr-col-md-12">
+            <h2 class="top-0">System Architecture</h2>
+            <img
+              id="sb-architecture-diagram"
+              src="../assets/synbrowser-architecture1.png"
+              alt="The JAX Synteny Browser Architecture Diagram"
+              title="The JAX Synteny Browser Architecture Diagram"
+            />
+          </div>
+        </div>
       </div>
     </div>
   `,
   styleUrls: ['../docs.component.scss'],
 })
-export class DocsDatabaseComponent {}
+export class DocsDatabaseComponent {
+  dataUrl: string = environment.sourceData;
+  githubETL: string = environment.GitHubETL;
+}

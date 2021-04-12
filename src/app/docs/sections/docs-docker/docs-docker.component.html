@@ -2,18 +2,24 @@
   <div class="content-area">
     <div class="clr-row">
       <div class="clr-col-12">
-        <h2>Running the Synteny Browser using Docker</h2>
-        <h4>Prerequisites</h4>
-        <ol>
-          <li>
-            A bash terminal (Mac OS X &amp; Linux will have this included)
-            or a way of running shell scripts
-          </li>
-          <li>Docker installed on your machine</li>
-          <li>To run the RESTful API Microservice you'll need a database.
-            To do this, you have two options: (1) download a preloaded database or (2) load a database yourself.
-          </li>
-        </ol>
+        <h2 class="top-0">Running the Application with Docker</h2>
+        <h4 class="">Prerequisites</h4>
+        <p>
+          - A bash terminal (Mac OS X &amp; Linux will have this included)
+          or a way of running shell scripts
+          <br />
+          - Docker installed on your machine so that you can
+          build images and run containers
+          <br />
+          - An account at the Docker Hub registry so that you can pull Docker images.
+          It is free to create an account so if you don't already have one, check out this
+          <a href="https://hub.docker.com" target="_blank">link</a> to create one.
+          <br />
+          - To run the Microservice API you'll need a database and you have two
+          <a [routerLink]="['/docs/database']">options</a>:
+          (1) either download a preloaded database or (2) load a database yourself.
+        </p>
+        <br />
         <p>For questions and feedback please <a [routerLink]="['/about']">contact</a> the support team.</p>
       </div>
     </div>
@@ -24,13 +30,13 @@
           <clr-icon shape="container" size="18"></clr-icon>
           UI (Front-End) Setup
         </h4>
-        <br>
+        <br />
         <p>1. Clone the client (front-end) code from
-          <a href="https://github.com/TheJacksonLaboratory/syntenybrowserv2-client" target="_blank">GitHub</a>
+          <a href="{{githubUI}}" target="_blank">GitHub</a>
           and navigate to the project's root.
         </p>
-        <pre><code>> git clone https://github.com/TheJacksonLaboratory/syntenybrowserv2-client.git</code></pre>
-        <br>
+        <pre><code>> git clone {{githubUI}}.git</code></pre>
+        <br />
         <p>
           2. Run the below command to build an image <em><b>synteny-ui</b></em>
           (this can take up to 5 mins).
@@ -76,14 +82,14 @@
       <div class="clr-col-md-12 clr-col-lg-6">
         <h4>
           <clr-icon shape="file-group" size="18"></clr-icon>
-          RESTful API Microservice
+          Microservice (Back-End) API
         </h4>
         <br />
         <p>1. Clone the API (back-end) code from
-          <a href="https://github.com/TheJacksonLaboratory/syntenybrowserv2-api" target="_blank">GitHub</a>
+          <a href="{{githubAPI}}" target="_blank">GitHub</a>
           and navigate to the cloned project root.
         </p>
-        <pre><code>> git clone https://github.com/TheJacksonLaboratory/syntenybrowserv2-api.git</code></pre>
+        <pre><code>> git clone {{githubAPI}}.git</code></pre>
         <br />
         <p>
           2. Run the below command to build an image called <em><b>synteny-api</b></em>.
