@@ -39,7 +39,7 @@ There is also a function to auto-fix errors and warnings which will typically ta
 
 If the linting fixer seems to have made undesired changes throughout the codebase, it is likely due to the fixers making their changes out of order. Try running `npm run fix-eslint` to isolate the ESLint fixes which will hopefully overwrite those made my Prettier.  
  
- On the rare occassion that an ESLint error cannot be resolved properly. You can disable **a particular rule** by adding `/* eslint-disable <name of the lint rule to disable> */` on the line above the line in question (see `app/synteny-browser/classes/table-data.ts`). If the rule to disable occurs several times in a file putting the disable comment at the top of the file will disable the rule for the entire file (see `app/synteny-browser/block-view-browser/block-view-browser.component.ts`). Any instance of a rule disable must be preceded by an explanation as to why the rule is being disabled.
+ On the rare occasion that an ESLint error cannot be resolved properly. You can disable **a particular rule** by adding `/* eslint-disable <name of the lint rule to disable> */` on the line above the line in question (see `app/synteny-browser/classes/table-data.ts`). If the rule to disable occurs several times in a file putting the disable comment at the top of the file will disable the rule for the entire file (see `app/synteny-browser/block-view-browser/block-view-browser.component.ts`). Any instance of a rule disable must be preceded by an explanation as to why the rule is being disabled.
 
 ## Contributing
 

@@ -7,6 +7,5 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['../../docs.component.scss'],
 })
 export class DocsDockerComponent {
-  githubUI: string = environment.GitHubUI;
-  githubAPI: string = environment.GitHubAPI;
+  sourceCode = environment.sourceCode;
 }
