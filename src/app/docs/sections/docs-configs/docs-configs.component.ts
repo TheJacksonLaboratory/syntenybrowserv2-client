@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { EMPTY_MOUSE, MOUSE } from '../../../synteny-browser/testing/constants/mock-species';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'docs-configs',
@@ -7,6 +8,8 @@ import { EMPTY_MOUSE, MOUSE } from '../../../synteny-browser/testing/constants/m
   styleUrls: ['../../docs.component.scss'],
 })
 export class DocsConfigsComponent {
+  sourceCode = environment.sourceCode;
+
   formattedJSON(property: string = null): string {
     if (!property) {
       return JSON.stringify(EMPTY_MOUSE, null, '  ');

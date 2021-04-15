@@ -68,7 +68,7 @@ import { Component } from '@angular/core';
                   <b>Qualifiers:</b> if filtering by symbol/ID attribute you will get the option to
                   filter by exact match ('that equals') or more fuzzy matching ('that is like').
                   <i
-                    >For example, if you were viewing Mouse as the reference species, chromosome 14,
+                    >For example, if you were viewing mouse as the reference species, chromosome 14,
                     and wanted to highlight a series of genes whose symbol starts with ‘traj’ (for
                     which there are several), you’d be able to highlight all of them no matter what
                     numeric suffix they have.</i

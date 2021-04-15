@@ -41,13 +41,13 @@
           <a href="{{ sourceCode.client }}" target="_blank">GitHub</a>
           and navigate to the project's root.
         </p>
-        <pre><code>> git clone {{sourceCode.client}}.git</code></pre>
+        <pre><code>&gt; git clone {{sourceCode.client}}.git</code></pre>
         <br />
         <p>
           2. Run the below command to build an image <em><b>synteny-ui</b></em>
           (this can take up to 5 mins).
         </p>
-        <pre><code>> docker build . --tag=synteny-ui</code></pre>
+        <pre><code>&gt; docker build . --tag=synteny-ui</code></pre>
         <p><b>Note</b>: a successful build will end with lines like these:</p>
         <pre class="padding-0">
           <code class="font-08em">
@@ -63,7 +63,7 @@
           3. Start a container based on the created Docker image -
           <em><b>synteny-ui</b></em>
         </p>
-        <pre><code>> docker run -p 4200:80 -d --rm synteny-ui</code></pre>
+        <pre><code>&gt; docker run -p 4200:80 -d --rm synteny-ui</code></pre>
         <br />
         <p>
           4. Use a browser to open the application UI at:
@@ -96,14 +96,14 @@
           <a href="{{ sourceCode.api }}" target="_blank">GitHub</a>
           and navigate to the cloned project root.
         </p>
-        <pre><code>> git clone {{sourceCode.api}}.git</code></pre>
+        <pre><code>&gt; git clone {{sourceCode.api}}.git</code></pre>
         <br />
         <p>
           2. Run the below command to build an image called
           <em><b>synteny-api</b></em
           >.
         </p>
-        <pre><code>> docker build . --tag=synteny-api</code></pre>
+        <pre><code>&gt; docker build . --tag=synteny-api</code></pre>
         <p><b>Note</b>: a successful build will end with lines like these:</p>
         <pre class="padding-0">
           <code class="font-08em">
@@ -119,7 +119,7 @@
           3. Start a container based on the created Docker image -
           <em><b>synteny-api</b></em>
         </p>
-        <pre><code>> docker run -p 8000:8000 -d --rm synteny-api</code></pre>
+        <pre><code>&gt; docker run -p 8000:8000 -d --rm synteny-api</code></pre>
         <br />
         <p>
           4. Use a browser to open the application API at:
