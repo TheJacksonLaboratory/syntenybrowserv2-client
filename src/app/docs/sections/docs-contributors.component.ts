@@ -7,14 +7,17 @@ import { Component } from '@angular/core';
       <div class="content-area">
         <h2>Contributor Guidelines</h2>
         <p>
-          Contributions are in the form of issues, code, documentation are always very welcome. The
+          Contributions in the form of issues, code, or documentation are always welcome. The
           following are a set of guidelines to help ensure that contributions can be smoothly merged
-          into the existing code base:
+          into the existing code base, but please also refer to each repository README and
+          documentation for other repository-specific guidelines:
         </p>
         <ol>
           <li>
-            All code contributions should be accompanied by a test. Tests can be placed into the
-            test folder.
+            All code contributions should be accompanied by at least one test. Test files should be
+            organized following the current conventions in the respective repository. If these
+            conventions are not clear or if you have questions about where to write tests, feel free
+            to reach out to our support email.
           </li>
           <li>
             All added functions should include a jsdoc string for javascript code or a numpy style

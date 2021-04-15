@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-docs',
@@ -14,7 +15,7 @@ import { Component } from '@angular/core';
           </a>
           <!-- TODO: change this URL once we get a production/externally visible instance set up -->
           <a class="nav-link" href="http://sb-test01.jax.org/api/" target="_blank">
-            API <clr-icon shape="pop-out" size="14"></clr-icon>
+            Live API <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
           <a class="nav-link" [routerLink]="['data-prep']" routerLinkActive="active">
             Data Sources/Formats
@@ -28,20 +29,11 @@ import { Component } from '@angular/core';
           <a class="nav-link" [routerLink]="['contributors']" routerLinkActive="active">
             Contributor Guidelines
           </a>
-          <!-- TODO: change this URL once we get a the Github repo(s) set up -->
-          <a
-            class="nav-link"
-            href="https://github.com/TheJacksonLaboratory/syntenybrowserv2-client"
-            target="_blank"
-          >
-            Client Source Code (Github) <clr-icon shape="pop-out" size="14"></clr-icon>
+          <a class="nav-link" href="{{ sourceCodeURLs.client }}" target="_blank">
+            Client Source Code <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
-          <a
-            class="nav-link"
-            href="https://github.com/TheJacksonLaboratory/syntenybrowser"
-            target="_blank"
-          >
-            Service Source Code (Github) <clr-icon shape="pop-out" size="14"></clr-icon>
+          <a class="nav-link" href="{{ sourceCodeURLs.api }}" target="_blank">
+            Service Source Code <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
         </section>
       </nav>
@@ -52,4 +44,6 @@ import { Component } from '@angular/core';
   `,
   styleUrls: ['./docs.component.scss'],
 })
-export class DocsComponent {}
+export class DocsComponent {
+  sourceCodeURLs = environment.sourceCode;
+}

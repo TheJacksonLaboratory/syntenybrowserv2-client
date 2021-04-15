@@ -154,7 +154,9 @@ export class BrowserInterval {
     }
 
     // if we didn't find a block, assume that the starting block is the first
-    if (!block) block = this.blockEnds[ends[ends.length - 1]];
+    if (!block) {
+      block = this.blockEnds[ends[ends.length - 1]];
+    }
 
     this.compStartChr = block.compChr;
 
@@ -192,7 +194,9 @@ export class BrowserInterval {
     }
 
     // if we didn't find a block, assume that the starting block is the last
-    if (!block) block = this.blockStarts[strts[strts.length - 1]];
+    if (!block) {
+      block = this.blockStarts[strts[strts.length - 1]];
+    }
 
     this.compEndChr = block.compChr;
 

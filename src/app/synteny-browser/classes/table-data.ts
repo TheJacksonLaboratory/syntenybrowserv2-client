@@ -223,7 +223,9 @@ export class TableData<T> {
   private compare(a: T, b: T, sortBy: string): number {
     if (typeof a[sortBy] !== 'undefined' && typeof b[sortBy] !== 'undefined') {
       const comp = this.getSorter(sortBy);
-      if (comp) return comp.compare(a, b);
+      if (comp) {
+        return comp.compare(a, b);
+      }
     }
 
     return 0;

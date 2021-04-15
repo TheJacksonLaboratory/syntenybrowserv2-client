@@ -1,5 +1,5 @@
 // d3 mouse events require defining unnamed callback functions (which is flagged by the
-// func-names rule) and if the event referece is used in the callbacks 'this' needs to
+// func-names rule) and if the event reference is used in the callbacks 'this' needs to
 // refer to the event, not the BlockViewBrowser component
 /* eslint-disable func-names, @typescript-eslint/no-this-alias */
 
@@ -74,7 +74,7 @@ export class BlockViewBrowserComponent {
   // width of the block view browser container
   width = 1200;
 
-  // height of the blocke view browser container
+  // height of the block view browser container
   height = 430;
 
   // distance from top of SVG to the top of the chromosome view
@@ -218,8 +218,7 @@ export class BlockViewBrowserComponent {
             `<span><b>Type:</b> ${data.type}</span><br/>` +
             `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
             `<span><b>Start:</b> ${data.start}</span><br/>` +
-            `<span><b>End:</b> ${data.end}</span><br/>` +
-            `<span><b>Strand:</b> ${data.strand}</span>`
+            `<span><b>End:</b> ${data.end}</span><br/>`
           );
         }
         if (d.isQTL) {
@@ -447,7 +446,7 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Marks all genes that are currently highlighted as unhighighlighted
+   * Marks all genes that are currently highlighted as unhighlighted
    */
   unhighlightGene(): void {
     // remove highlighted status of any genes marked as highlighted
@@ -662,19 +661,8 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns the label text for the specified condition title (adds formatting)
-   * @param {string} conditionTitle - the title of the condition
-   */
-  getConditionLabel(conditionTitle: string): string {
-    return conditionTitle
-      .replace(/=/g, ' = ')
-      .replace(/!/g, '')
-      .replace(/\+/g, ' ');
-  }
-
-  /**
    * Returns the keys of the tooltip's content attribute
-   * @param {any} tooltipObject - the obect to get keys for
+   * @param {any} tooltipObject - the object to get keys for
    */
   getTTItems(tooltipObject: any): string[] {
     return Object.keys(tooltipObject);
@@ -791,6 +779,7 @@ export class BlockViewBrowserComponent {
     const featureIDs = features.map(f => f.id);
 
     this.http.getHomologs(refID, compID, this.refChr).subscribe(homologs => {
+      // console.log(homologs);
       this.selectedCompGenes = [];
 
       this.progress += 0.3;
@@ -1256,7 +1245,9 @@ export class BlockViewBrowserComponent {
         const e = d3.event;
 
         // ignore brush via zoom occurrences
-        if (e.sourceEvent && e.sourceEvent.type === 'zoom') return;
+        if (e.sourceEvent && e.sourceEvent.type === 'zoom') {
+          return;
+        }
 
         const s: number[] = e.selection;
 
@@ -1300,7 +1291,9 @@ export class BlockViewBrowserComponent {
         const e = d3.event;
 
         // ignore zoom via brush occurrences
-        if (e.sourceEvent && e.sourceEvent.type === 'brush') return;
+        if (e.sourceEvent && e.sourceEvent.type === 'brush') {
+          return;
+        }
 
         const t = e.transform;
 
@@ -1343,14 +1336,14 @@ export class BlockViewBrowserComponent {
   /**
    * Returns a linear scale that will convert a genomic location or distance to
    * pixels (or the other way around if inverted)
-   * @param {number} BPwidth - the size of the current reference chromosome
+   * @param {number} bpWidth - the size of the current reference chromosome
    */
-  private getRefScale(BPwidth: number): d3.ScaleLinear<number, number> {
+  private getRefScale(bpWidth: number): d3.ScaleLinear<number, number> {
     // set the range max to 'width - 1' to keep the last tick line of axes
     // from hiding on the right side of the svg
     return d3
       .scaleLinear()
-      .domain([0, BPwidth])
+      .domain([0, bpWidth])
       .range([0, this.width - 1]);
   }
 

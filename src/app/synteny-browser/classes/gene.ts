@@ -22,9 +22,6 @@ export class Gene {
   // list of gene symbols of genes in the "other" species' genome (ref or comp)
   homologIDs: string[];
 
-  // strand the gene is located on
-  strand: string;
-
   // gene type
   type: string;
 
@@ -80,14 +77,13 @@ export class Gene {
     this.symbol = gene.symbol;
     this.id = gene.id;
     this.chr = gene.chr;
-    this.strand = gene.strand;
     this.type = gene.type;
     this.yPos = this.getYPos(vHeight);
     this.homologIDs = gene.homologs;
     this.selected = gene.sel;
 
     this.blockID = gene.blockID || null;
-    this.orientationMatches = gene.orientationMatches !== null ? gene.orientationMatches : null;
+    this.orientationMatches = gene.orientationMatches === null ? null : gene.orientationMatches;
 
     // get the transcript of the gene
     this.transcript = gene.exons;
@@ -101,7 +97,7 @@ export class Gene {
   }
 
   /**
-   * Marks the gene as a non-highlighed gene
+   * Marks the gene as a non-highlighted gene
    */
   unhighlight(): void {
     this.highlighted = false;
@@ -174,7 +170,7 @@ export class Gene {
   getYPos(trackHeight: number): number {
     // 1.11 gets us close enough to edges without any elements overflowing
     const range = trackHeight / 1.11;
-    // 1.13 pushes all elements down slightly to accomodate for the labels
+    // 1.13 pushes all elements down slightly to accommodate for the labels
     const offset = ((this.start % 1000) / 1000) * range - range / 1.13;
 
     return (trackHeight - 10) / 1.12 + offset + 6;
@@ -230,7 +226,6 @@ export class Gene {
       chr: this.chr,
       start: `${this.format(this.start)}bp`,
       end: `${this.format(this.end)}bp`,
-      strand: this.strand,
     };
   }
 
@@ -244,12 +239,11 @@ export class Gene {
       'Gene ID': this.id,
       Type: this.type,
       Location: `Chr${this.chr}: ${this.format(this.start)}bp - ${this.format(this.end)}bp`,
-      Strand: this.strand,
     };
   }
 
   /**
-   * Returns the data necesarry to include for the gene in a download CSV of
+   * Returns the data necessary to include for the gene in a download CSV of
    * filter results
    * @param {string} refSpeciesName - common name of the current ref species
    * @param {string} compSpeciesName - common name of the current comp species
@@ -304,7 +298,7 @@ export class Gene {
   }
 
   /**
-   * Returns the x and y positions (in px) of a copmarison gene based on the
+   * Returns the x and y positions (in px) of a comparison gene based on the
    * specified scale, using either true coordinates or matching coordinates based
    * on the trueCoords flag
    * @param {ScaleLinear<number, number>} scale - scale to use to get start point

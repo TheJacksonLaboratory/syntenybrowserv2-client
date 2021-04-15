@@ -175,7 +175,7 @@ export class Filter {
    * conditions for the purposes of being included in the file representing the
    * table
    */
-  get TSVRowForFilter(): string {
+  get tsvRowForFilter(): string {
     return [this.mode, this.species, this.title].join('\t');
   }
 

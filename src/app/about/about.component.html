@@ -8,20 +8,21 @@
           application that allows researchers to select or highlight features
           based on annotated biological properties in reference and comparison
           genomes in the context of regions of conserved synteny (a condition in
-          which shared ancestry is reflected as similar genome feature content and
-          order along a chromosome in a different species) between the two
+          which shared ancestry is reflected as similar genome feature content
+          and order along a chromosome in a different species) between the two
           genomes.
         </p>
         <p>
-          While it is genome-agnostic, the online JAX Synteny Browser is preloaded
-          and configured for comparing Mouse, Rat and Human genomes along with
-          feature annotations for Gene Ontology (all species), Disease Ontology
-          (Human), and Mammalian Phenotype Ontology (Mouse &amp; Rat). The
-          application is open-source so if additional species or ontologies are of
-          interest to you, assuming that you have access to the necessary source
-          data (see the Data Prep and Config Files pages for more information).
-          You could load a custom version of the backend and view the custom set
-          of data using a local version of the client application as well.
+          While it is genome-agnostic, the online JAX Synteny Browser is
+          preloaded and configured for comparing mouse, rat and human genomes
+          along with feature annotations for Gene Ontology (all species),
+          Disease Ontology (human), and Mammalian Phenotype Ontology (mouse
+          &amp; rat). The application is open-source so if additional species or
+          ontologies are of interest to you, assuming that you have access to
+          the necessary source data (see the Data Prep and Config Files pages
+          for more information), you can load a custom version of the database
+          and API and view the custom set of data using a local version of the
+          client application as well.
         </p>
       </div>
     </div>
@@ -34,8 +35,8 @@
           <a href="https://www.jax.org/people/anna-lamoureux" target="_blank">
             Anna Lamoureux, B.S.
           </a>
-          &mdash; Scientific Software Engineer; UX/UI design &amp;
-          Angular development
+          &mdash; Scientific Software Engineer; UX/UI design &amp; Angular
+          development
         </p>
 
         <p>
@@ -99,33 +100,33 @@
         <h4><clr-icon shape="code" size="18"></clr-icon>Source Code</h4>
 
         <p>
-          All code for the JAX Synteny Browser is open source and available
-          under the JAX Non-Commericial Licence.
+          All code for JAX Synteny Browser is open source and available under
+          the JAX Non-Commercial Licence:
         </p>
 
         <p>
           <img src="../assets/github-mark-32.png" height="16" width="16" />
-          <a href="https://github.com/TheJacksonLaboratory/syntenybrowserv2-client" target="_blank">Client Angular Application</a>
+          <a href="{{ sourceCode.client }}" target="_blank"
+            >Client Angular Application</a
+          >
         </p>
         <p>
-          <!-- TODO: Add final API Github repo URL when we have it -->
           <img src="../assets/github-mark-32.png" height="16" width="16" />
-          <a href="" target="_blank">Flask RestPlus API &amp; ETL Scripts</a>
+          <a href="{{ sourceCode.api }}" target="_blank">Flask RestPlus API</a>
+        </p>
+        <p>
+          <img src="../assets/github-mark-32.png" height="16" width="16" />
+          <a href="{{ sourceCode.etl }}" target="_blank">ETL Scripts</a>
         </p>
         <p>
           <clr-icon shape="file-group" size="16"></clr-icon>
-          <a
-            href="http://www.informatics.jax.org/downloads/SyntenyBrowser/"
-            target="_blank"
-          >
-            Source Data (MGI)</a
-          >
+          <a href="{{ sourceData }}" target="_blank"> Source Data (MGI)</a>
         </p>
       </div>
 
       <div class="clr-col-md-12 clr-col-lg-6">
         <h4><clr-icon shape="file-group" size="18"></clr-icon>Citation</h4>
-        <p style="width: 80%">
+        <p class="citation">
           Kolishovski, G., Lamoureux, A., Hale, P. <i>et al</i>. The JAX Synteny
           Browser for mouse-human comparative genomics. <i>Mammalian Genome</i>
           <b> 30</b>, 353–361 (2019).<br />

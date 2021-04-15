@@ -24,7 +24,7 @@ import { Component } from '@angular/core';
             <clr-stack-label> Anatomy of a Filter </clr-stack-label>
             <clr-stack-block class="block-body">
               <p>
-                Createa a new filter by clicking the 'Add Filter' button to the right of the filter
+                Creates a new filter by clicking the 'Add Filter' button to the right of the filter
                 list. Once a new filter is created, using the options and dropdown menu, you are
                 provided options to construct the filter instructions. If the condition you select
                 requires an input value, a field to enter that input will become available.
@@ -60,15 +60,15 @@ import { Component } from '@angular/core';
                   looking for exact matches ('that equals'), or "like" matches.
                 </li>
                 <li>
-                  <b>Ontology Term:</b> provies you with a menu of available ontologies based on the
-                  selected species. After selecting a specific ontology, an input/select menu will
-                  appear for you to search for and select the ontology term you're looking for.
+                  <b>Ontology Term:</b> provides you with a menu of available ontologies based on
+                  the selected species. After selecting a specific ontology, an input/select menu
+                  will appear for you to search for and select the ontology term you're looking for.
                 </li>
                 <li>
                   <b>Qualifiers:</b> if filtering by symbol/ID attribute you will get the option to
                   filter by exact match ('that equals') or more fuzzy matching ('that is like').
                   <i
-                    >For example, if you were viewing Mouse as the reference species, chromosome 14,
+                    >For example, if you were viewing mouse as the reference species, chromosome 14,
                     and wanted to highlight a series of genes whose symbol starts with ‘traj’ (for
                     which there are several), you’d be able to highlight all of them no matter what
                     numeric suffix they have.</i

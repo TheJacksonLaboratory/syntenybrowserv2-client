@@ -138,7 +138,7 @@ export class BlockViewFilterComponent implements OnInit {
     const rows = this.filteredGenes.map(g => g.getFilterMetadata(ref, comp));
 
     const lines = `[FILTER DATA]\nfilter type\tspecies\tcondition(s)\n${this.createdFilters
-      .map(f => f.TSVRowForFilter)
+      .map(f => f.tsvRowForFilter)
       .join('\n')}\n\n[RESULTS DATA]\n${Object.keys(rows[0]).join('\t')}\n${rows
       .map(r => Object.values(r).join('\t'))
       .join('\n')}`;
@@ -279,7 +279,7 @@ export class BlockViewFilterComponent implements OnInit {
       const highlightFilters = filters.filter(f => !f.hides());
 
       // order matters here because if a gene satisfies an 'exclude' criteria AND
-      // an 'include' criteria, the include should take precendence over the
+      // an 'include' criteria, the include should take precedence over the
       // exclude; in other words, if a gene satisfies AT LEAST ONE condition, it
       // should be filtered
       if (hidingFilters.length) {
@@ -318,7 +318,7 @@ export class BlockViewFilterComponent implements OnInit {
           const associations = genes.filter(g => assocIDs.indexOf(g.id) >= 0);
 
           associations.forEach(a => {
-            !f.hides() ? a.filter() : a.hide();
+            f.hides() ? a.hide() : a.filter();
 
             // add the filter label of the filter it matches
             a.filters.push(f.filterLabel);
@@ -343,7 +343,7 @@ export class BlockViewFilterComponent implements OnInit {
       const matches = genes.filter(g => {
         for (let i = 0; i < attributeFilters.length; i += 1) {
           if (attributeFilters[i].matchesFilter(g)) {
-            !attributeFilters[i].hides() ? g.filter() : g.hide();
+            attributeFilters[i].hides() ? g.hide() : g.filter();
 
             // add the filter label of the filter it matches
             g.filters.push(attributeFilters[i].filterLabel);

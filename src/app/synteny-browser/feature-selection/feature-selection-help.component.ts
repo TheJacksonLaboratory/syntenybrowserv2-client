@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
         <ul>
           <li>
             Use the table(s) to mark genes or QTLs of interest (QTLs are only available for species
-            that have them loaded into the database, which currently are Mouse and Rat).
+            that have them loaded into the database, which currently are mouse and rat).
           </li>
           <li>
             Clicking on rows in a table containing features will mark that feature as selected.

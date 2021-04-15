@@ -97,13 +97,20 @@ export class QuickNavigationComponent {
 
   /**
    * Returns the interval for the current navigation type where array[0] is the
-   * start postion and array[1] is the end position (both in bp)
+   * start position and array[1] is the end position (both in bp)
    */
   getInterval(): number[] {
     if (this.isGenomicInterval()) {
       return this.getGenomicInterval();
     }
     return this.getCytogenticInterval();
+  }
+
+  /**
+   * Returns true if the current type of navigation is genomic interval entry
+   */
+  isGenomicInterval(): boolean {
+    return this.navType === 'genomic';
   }
 
   /**
@@ -152,17 +159,10 @@ export class QuickNavigationComponent {
   }
 
   /**
-   * Returns the cytoband associated with the spcified location
+   * Returns the cytoband associated with the specified location
    * @param {string} bandLoc - the location value for the band to search for
    */
   private findBandByLoc(bandLoc: string): any {
     return this.cytobands.filter(b => b.location === bandLoc)[0];
-  }
-
-  /**
-   * Returns true if the current type of navigation is genomic interval entry
-   */
-  private isGenomicInterval(): boolean {
-    return this.navType === 'genomic';
   }
 }

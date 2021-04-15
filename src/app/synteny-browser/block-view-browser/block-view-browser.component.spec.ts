@@ -575,7 +575,6 @@ describe('BlockViewBrowserComponent', () => {
       'Gene ID': 'MGI:1916147',
       Type: 'protein coding gene',
       Location: 'Chr1: 183,086,266bp - 183,221,522bp',
-      Strand: '-1',
     });
     expect(component.clicktip.resources).toEqual([
       { url: 'http://www.informatics.jax.org/marker/', name: 'MGI' },
@@ -598,7 +597,6 @@ describe('BlockViewBrowserComponent', () => {
       'Gene ID': '84976',
       Type: 'gene',
       Location: 'Chr1: 222,814,514bp - 223,005,995bp',
-      Strand: '1',
     });
     expect(component.clicktip.resources).toEqual([
       { url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI' },
@@ -871,7 +869,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(component.getHomologousRefGenes().length).toBe(4);
   });
 
-  it('gets the correct comparison scale for a gene in a matching orientation sytenic block', () => {
+  it('gets the correct comparison scale for a gene in a matching orientation syntenic block', () => {
     component.render();
 
     let scale = component.getScale(component.compGenes[3]);
@@ -886,7 +884,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
   });
 
-  it('gets the correct comparison scale for a gene in a non-matching orientation sytenic block', () => {
+  it('gets the correct comparison scale for a gene in a non-matching orientation syntenic block', () => {
     component.render();
 
     let scale = component.getScale(component.compGenes[0]);
@@ -902,7 +900,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
   });
 
-  it('gets the correct static comparison scale for a gene in a matching orientation sytenic block', () => {
+  it('gets the correct static comparison scale for a gene in a matching orientation syntenic block', () => {
     component.render();
 
     let scale = component.getStaticCompScale(component.compGenes[3]);
@@ -922,7 +920,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(scale.range()).toEqual([642.6384986981075, 686.1650598591447]);
   });
 
-  it('gets the correct static comparison scale for a gene in a non-matching orientation sytenic block', () => {
+  it('gets the correct static comparison scale for a gene in a non-matching orientation syntenic block', () => {
     component.render();
 
     let scale = component.getStaticCompScale(component.compGenes[0]);
@@ -943,7 +941,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(scale.range()).toEqual([1118.0561955350622, 1197.188943697713]);
   });
 
-  it('gets the correct comparison scale for a GWAS location in a matching orientation sytenic block', () => {
+  it('gets the correct comparison scale for a GWAS location in a matching orientation syntenic block', () => {
     component.render();
 
     let scale = component.getScale(component.humanGWAS[4]);
@@ -958,7 +956,7 @@ describe('BlockViewBrowserComponent', () => {
     expect(scale.range()).toEqual([770.8865748532305, 798.7483500741905]);
   });
 
-  it('gets the correct comparison scale for a GWAS location in a non-matching orientation sytenic block', () => {
+  it('gets the correct comparison scale for a GWAS location in a non-matching orientation syntenic block', () => {
     component.render();
 
     let scale = component.getScale(component.humanGWAS[20]);
