@@ -39,16 +39,16 @@ import { environment } from '../../../environments/environment';
             </p>
             <pre><code>git clone {{etlSourceCode}}.git</code></pre>
             <p>
-              &bull; Create a new <em>data/</em> directory in the cloned project's
-              root directory and download all your source files in it. To find more about
-              data sources and formats, refer to the
+              &bull; Create a new <em>data/</em> directory in the cloned project's root directory
+              and download all your source files in it. To find more about data sources and formats,
+              refer to the
               <a [routerLink]="['/docs/data-prep']">Data Sources/Formats</a>
               page. The curated source files currently used in the application can be found in this
-              <a href="{{ dataUrl }}" target="_blank">public server</a>. The most current ontology files
-              should be accessible from their respective official ontology websites.
+              <a href="{{ dataUrl }}" target="_blank">public server</a>. The most current ontology
+              files should be accessible from their respective official ontology websites.
               <br />
-              &bull; Create an empty (Python3 recommended) virtual environment in the project's
-              root directory.
+              &bull; Create an empty (Python3 recommended) virtual environment in the project's root
+              directory.
             </p>
             <pre><code>python -m venv venv-db</code></pre>
             <p>&bull; Once created, activate the virtual environment:</p>
@@ -56,8 +56,9 @@ import { environment } from '../../../environments/environment';
             <p>&bull; Install necessary packages:</p>
             <pre><code>pip install -r requirements.txt</code></pre>
             <p>
-              &bull; Run the database creation script with the name of the database file as the single
-              required parameter (if on Windows, you may need to use a tool like Git Bash for this):
+              &bull; Run the database creation script with the name of the database file as the
+              single required parameter (if on Windows, you may need to use a tool like Git Bash for
+              this):
             </p>
             <pre><code>./create_database.sh synteny.db</code></pre>
             <p>
