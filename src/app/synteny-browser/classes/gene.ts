@@ -83,7 +83,7 @@ export class Gene {
     this.selected = gene.sel;
 
     this.blockID = gene.blockID || null;
-    this.orientationMatches = gene.orientationMatches !== null ? gene.orientationMatches : null;
+    this.orientationMatches = gene.orientationMatches === null ? null : gene.orientationMatches;
 
     // get the transcript of the gene
     this.transcript = gene.exons;

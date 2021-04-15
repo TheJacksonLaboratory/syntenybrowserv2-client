@@ -661,17 +661,6 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Returns the label text for the specified condition title (adds formatting)
-   * @param {string} conditionTitle - the title of the condition
-   */
-  getConditionLabel(conditionTitle: string): string {
-    return conditionTitle
-      .replace(/=/g, ' = ')
-      .replace(/!/g, '')
-      .replace(/\+/g, ' ');
-  }
-
-  /**
    * Returns the keys of the tooltip's content attribute
    * @param {any} tooltipObject - the object to get keys for
    */
@@ -837,7 +826,6 @@ export class BlockViewBrowserComponent {
     });
 
     this.http.getGenes(refID, this.refChr).subscribe(genes => {
-      console.log(genes);
       this.selectedRefGenes = [];
       this.progress += 0.3;
 
@@ -1257,7 +1245,9 @@ export class BlockViewBrowserComponent {
         const e = d3.event;
 
         // ignore brush via zoom occurrences
-        if (e.sourceEvent && e.sourceEvent.type === 'zoom') return;
+        if (e.sourceEvent && e.sourceEvent.type === 'zoom') {
+          return;
+        }
 
         const s: number[] = e.selection;
 
@@ -1301,7 +1291,9 @@ export class BlockViewBrowserComponent {
         const e = d3.event;
 
         // ignore zoom via brush occurrences
-        if (e.sourceEvent && e.sourceEvent.type === 'brush') return;
+        if (e.sourceEvent && e.sourceEvent.type === 'brush') {
+          return;
+        }
 
         const t = e.transform;
 
@@ -1344,14 +1336,14 @@ export class BlockViewBrowserComponent {
   /**
    * Returns a linear scale that will convert a genomic location or distance to
    * pixels (or the other way around if inverted)
-   * @param {number} BPwidth - the size of the current reference chromosome
+   * @param {number} bpWidth - the size of the current reference chromosome
    */
-  private getRefScale(BPwidth: number): d3.ScaleLinear<number, number> {
+  private getRefScale(bpWidth: number): d3.ScaleLinear<number, number> {
     // set the range max to 'width - 1' to keep the last tick line of axes
     // from hiding on the right side of the svg
     return d3
       .scaleLinear()
-      .domain([0, BPwidth])
+      .domain([0, bpWidth])
       .range([0, this.width - 1]);
   }
 

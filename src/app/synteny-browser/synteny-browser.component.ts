@@ -63,15 +63,15 @@ export class SyntenyBrowserComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.data.species) {
+    if (this.data.species) {
+      this.species.setSpecies(this.data.species);
+      this.updateSpecies();
+    } else {
       this.http.getSpecies().subscribe(species => {
         this.species.setSpecies(species);
         this.data.species = species;
         this.updateSpecies();
       });
-    } else {
-      this.species.setSpecies(this.data.species);
-      this.updateSpecies();
     }
   }
 
@@ -100,9 +100,6 @@ export class SyntenyBrowserComponent implements OnInit {
     this.features.load();
 
     this.data.retrieveOntologyTerms();
-
-    // TODO: this is here for work on filters
-    // this.automateFlowToWorkOnFilters();
   }
 
   /**
@@ -152,18 +149,6 @@ export class SyntenyBrowserComponent implements OnInit {
     bvb.showFilteredGenes(filteredGenes);
 
     this.filterOpen = false;
-  }
-
-  /**
-   * Temporary automated helper method to get to the filter dialog quickly
-   */
-  private automateFlowToWorkOnFilters(): void {
-    setTimeout(() => {
-      this.genomeView.renderChordMapForChr('14');
-      this.getChromosomeFeatures();
-
-      this.filterOpen = true;
-    }, 1000);
   }
 }
 

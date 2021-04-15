@@ -37,7 +37,7 @@ import { Component } from '@angular/core';
               </li>
               <li>
                 Block view navigation - allows you to zoom and pan using buttons if you don't have a
-                trackpad that supports scrolling or a scrollwheel, or you prefer to not interact
+                trackpad that supports scrolling or a mouse scroll wheel, or you prefer to not interact
                 with the browser using scrolling.
 
                 <ul>
@@ -159,7 +159,7 @@ import { Component } from '@angular/core';
               <li>
                 Selected genes will appear as small red lines above the chromosome view. Any
                 homologs in the comparison genome to selected reference genes appear as small red
-                lines below the chromsome view.
+                lines below the chromosome view.
               </li>
               <li>
                 Selected QTLs will appear as purple lines (or dots, if the QTL is very small).
@@ -233,7 +233,7 @@ import { Component } from '@angular/core';
                     for that point. Instead, assuming that there is at least one syntenic region in
                     view, the comparison start will be the same as the genomic "start" of the first
                     visible syntenic region in the comparison track and the comparison end will be
-                    the same as the genomic "end" of the last visible sytenic region in the
+                    the same as the genomic "end" of the last visible syntenic region in the
                     comparison track (see the section about the 'Show synteny in true orientation'
                     option for more information about why start and end are in quotes, here).
                   </li>

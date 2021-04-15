@@ -55,17 +55,10 @@ export class Species {
   }
 
   /**
-   * Returns the chromsome values in the genome
+   * Returns the chromosome values in the genome
    */
   getChromosomes(): string[] {
     return Object.keys(this.genome);
-  }
-
-  /**
-   * Returns the sum of all chromosomes in the genome (total size of the genome)
-   */
-  getGenomeSize(): number {
-    return Object.values(this.genome).reduce((a: number, b: number) => a + b) as number;
   }
 
   /**

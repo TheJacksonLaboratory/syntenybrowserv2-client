@@ -373,8 +373,12 @@ export class GenomeViewComponent implements OnInit {
       const qtls = chrFeatures.filter(f => !f.isGene).map(qtl => qtl.id);
       const features = [];
 
-      if (genes.length) features.push(...genes);
-      if (qtls.length) features.push(...qtls);
+      if (genes.length) {
+        features.push(...genes);
+      }
+      if (qtls.length) {
+        features.push(...qtls);
+      }
 
       this.highlightFeatures.emit(features);
     } else {

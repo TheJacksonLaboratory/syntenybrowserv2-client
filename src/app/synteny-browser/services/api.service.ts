@@ -80,7 +80,7 @@ export class ApiService {
   }
 
   /**
-   * Returns a list of genes for a specified reference chromsome and comparison
+   * Returns a list of genes for a specified reference chromosome and comparison
    * species that are homologous in the specified reference species
    * @param {string} refID - stringified taxon ID for reference species
    * @param {string} compID - stringified taxon ID for comparison species

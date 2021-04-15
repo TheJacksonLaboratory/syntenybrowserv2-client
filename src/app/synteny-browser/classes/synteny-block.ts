@@ -115,7 +115,7 @@ export class SyntenyBlock {
   }
 
   /**
-   * Returns the color of the block if the specified chr (the chromsome hovered
+   * Returns the color of the block if the specified chr (the chromosome hovered
    * over) matches the comparison chromosome or if the specified chromosome is
    * null (indicating no current hover); if neither of these conditions are true,
    * then return grey

@@ -48,15 +48,23 @@ export class TypeComparator implements ClrDatagridComparatorInterface<any> {
 export class ChrComparator implements ClrDatagridComparatorInterface<any> {
   compare(a, b): number {
     // if a.chr is y, b comes first
-    if (a.chr.toLowerCase() === 'y') return 1;
+    if (a.chr.toLowerCase() === 'y') {
+      return 1;
+    }
     // if b.chr is y, a comes first
-    if (b.chr.toLowerCase() === 'y') return -1;
+    if (b.chr.toLowerCase() === 'y') {
+      return -1;
+    }
     // if neither a.chr or b.chr are y and a.chr is x, then b.chr must
     // be a number and comes first
-    if (a.chr.toLowerCase() === 'x') return 1;
+    if (a.chr.toLowerCase() === 'x') {
+      return 1;
+    }
     // if neither a.chr or b.chr are y and b.chr is x, then a.chr must
     // be a number and comes first
-    if (b.chr.toLowerCase() === 'x') return -1;
+    if (b.chr.toLowerCase() === 'x') {
+      return -1;
+    }
     // if neither a.chr or b.chr are x or y, then compare numerical chr values
     return Number(a.chr) - Number(b.chr);
   }

@@ -80,7 +80,7 @@ export class CircularGenomeMap {
 
   /**
    * Returns the radians for the start position of the chromosome at the
-   * specified index (which includes the preceeding chromosomes and the spacing
+   * specified index (which includes the preceding chromosomes and the spacing
    * between them)
    * @param {number} i - the index of the chromosome to get the radian start for
    */

@@ -39,9 +39,9 @@ import { environment } from '../../../environments/environment';
               directory and download all your source files in it. To find more
               about the applicable data and formats, read the
               <a [routerLink]="['/docs/data-prep']">Data Sources/Formats</a> page.
-              The curated source files currenly used in
+              The curated source files currently used in
               the application can be found in this <a href="{{dataUrl}}" target="_blank">public repo</a>.
-              And the newest ontology files can be downloaded from their respective respositories.
+              And the newest ontology files can be downloaded from their respective repositories.
               <br/>
               &bull; Create an empty (Python3 recommended) virtual environment in the project's root.
             </p>
@@ -57,7 +57,7 @@ import { environment } from '../../../environments/environment';
             <pre><code>./create_database.sh synteny.db</code></pre>
             <p>
               This will take several minutes and when it's finished, it will yield a file named 'synteny.db'
-              in root syntenybrowser/ directory (the database file needs to be located here so don't move it).
+               (the database file needs to be located in the service's root directory).
               Shut down the venv-db virtual environment:
             </p>
             <pre><code>deactivate</code></pre>

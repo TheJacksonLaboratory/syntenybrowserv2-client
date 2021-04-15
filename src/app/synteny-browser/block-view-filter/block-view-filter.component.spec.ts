@@ -281,7 +281,7 @@ describe('BlockViewFilterComponent', () => {
     expect(component.currentFilter.inputNeeded).toBe(true);
 
     // the simple title should have a missing word as that word is set by
-    // clicking throught he dropdown menu to get to the qualifier select
+    // clicking through the dropdown menu to get to the qualifier select
     expect(component.currentFilter.filterByButtonText).toBe(' by symbol like');
   });
 

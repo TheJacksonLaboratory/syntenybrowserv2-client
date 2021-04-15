@@ -24,7 +24,7 @@ import { Component } from '@angular/core';
             <clr-stack-label> Anatomy of a Filter </clr-stack-label>
             <clr-stack-block class="block-body">
               <p>
-                Createa a new filter by clicking the 'Add Filter' button to the right of the filter
+                Creates a new filter by clicking the 'Add Filter' button to the right of the filter
                 list. Once a new filter is created, using the options and dropdown menu, you are
                 provided options to construct the filter instructions. If the condition you select
                 requires an input value, a field to enter that input will become available.
@@ -60,7 +60,7 @@ import { Component } from '@angular/core';
                   looking for exact matches ('that equals'), or "like" matches.
                 </li>
                 <li>
-                  <b>Ontology Term:</b> provies you with a menu of available ontologies based on the
+                  <b>Ontology Term:</b> provides you with a menu of available ontologies based on the
                   selected species. After selecting a specific ontology, an input/select menu will
                   appear for you to search for and select the ontology term you're looking for.
                 </li>

@@ -164,7 +164,7 @@ import { Component } from '@angular/core';
       (close)="zoomedPhoto = null"
     >
       <div class="modal-body">
-        <img *ngIf="zoomedPhoto" src="{{ zoomedPhoto }}" />
+        <img *ngIf="zoomedPhoto" src="{{ zoomedPhoto }}" alt="zoomed photo"/>
       </div>
     </clr-modal>
   `,
