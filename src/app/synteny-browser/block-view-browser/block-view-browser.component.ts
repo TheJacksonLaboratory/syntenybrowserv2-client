@@ -1,5 +1,5 @@
 // d3 mouse events require defining unnamed callback functions (which is flagged by the
-// func-names rule) and if the event referece is used in the callbacks 'this' needs to
+// func-names rule) and if the event reference is used in the callbacks 'this' needs to
 // refer to the event, not the BlockViewBrowser component
 /* eslint-disable func-names, @typescript-eslint/no-this-alias */
 
@@ -74,7 +74,7 @@ export class BlockViewBrowserComponent {
   // width of the block view browser container
   width = 1200;
 
-  // height of the blocke view browser container
+  // height of the block view browser container
   height = 430;
 
   // distance from top of SVG to the top of the chromosome view
@@ -218,8 +218,7 @@ export class BlockViewBrowserComponent {
             `<span><b>Type:</b> ${data.type}</span><br/>` +
             `<span><b>Chromosome:</b> ${data.chr}</span><br/>` +
             `<span><b>Start:</b> ${data.start}</span><br/>` +
-            `<span><b>End:</b> ${data.end}</span><br/>` +
-            `<span><b>Strand:</b> ${data.strand}</span>`
+            `<span><b>End:</b> ${data.end}</span><br/>`
           );
         }
         if (d.isQTL) {
@@ -447,7 +446,7 @@ export class BlockViewBrowserComponent {
   }
 
   /**
-   * Marks all genes that are currently highlighted as unhighighlighted
+   * Marks all genes that are currently highlighted as unhighlighted
    */
   unhighlightGene(): void {
     // remove highlighted status of any genes marked as highlighted
@@ -674,7 +673,7 @@ export class BlockViewBrowserComponent {
 
   /**
    * Returns the keys of the tooltip's content attribute
-   * @param {any} tooltipObject - the obect to get keys for
+   * @param {any} tooltipObject - the object to get keys for
    */
   getTTItems(tooltipObject: any): string[] {
     return Object.keys(tooltipObject);
@@ -791,6 +790,7 @@ export class BlockViewBrowserComponent {
     const featureIDs = features.map(f => f.id);
 
     this.http.getHomologs(refID, compID, this.refChr).subscribe(homologs => {
+      // console.log(homologs);
       this.selectedCompGenes = [];
 
       this.progress += 0.3;
@@ -837,6 +837,7 @@ export class BlockViewBrowserComponent {
     });
 
     this.http.getGenes(refID, this.refChr).subscribe(genes => {
+      console.log(genes);
       this.selectedRefGenes = [];
       this.progress += 0.3;
 
