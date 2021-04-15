@@ -8,5 +8,6 @@ import { environment } from '../../environments/environment';
 })
 export class AboutComponent {
   sourceCode = environment.sourceCode;
+
   sourceData = environment.sourceData;
 }

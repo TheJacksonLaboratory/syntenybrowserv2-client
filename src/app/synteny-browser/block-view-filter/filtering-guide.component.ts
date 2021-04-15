@@ -60,9 +60,9 @@ import { Component } from '@angular/core';
                   looking for exact matches ('that equals'), or "like" matches.
                 </li>
                 <li>
-                  <b>Ontology Term:</b> provides you with a menu of available ontologies based on the
-                  selected species. After selecting a specific ontology, an input/select menu will
-                  appear for you to search for and select the ontology term you're looking for.
+                  <b>Ontology Term:</b> provides you with a menu of available ontologies based on
+                  the selected species. After selecting a specific ontology, an input/select menu
+                  will appear for you to search for and select the ontology term you're looking for.
                 </li>
                 <li>
                   <b>Qualifiers:</b> if filtering by symbol/ID attribute you will get the option to

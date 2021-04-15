@@ -123,7 +123,7 @@ import { Component } from '@angular/core';
     >
       <h3 class="title">Header</h3>
       <div class="modal-body">
-        <img *ngIf="zoomedPhoto" src="{{ zoomedPhoto }}" alt="zoomed photo"/>
+        <img *ngIf="zoomedPhoto" src="{{ zoomedPhoto }}" alt="zoomed photo" />
       </div>
     </clr-modal>
   `,

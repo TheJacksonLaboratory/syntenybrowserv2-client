@@ -37,8 +37,8 @@ import { Component } from '@angular/core';
               </li>
               <li>
                 Block view navigation - allows you to zoom and pan using buttons if you don't have a
-                trackpad that supports scrolling or a mouse scroll wheel, or you prefer to not interact
-                with the browser using scrolling.
+                trackpad that supports scrolling or a mouse scroll wheel, or you prefer to not
+                interact with the browser using scrolling.
 
                 <ul>
                   <li>

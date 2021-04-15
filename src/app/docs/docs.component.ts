@@ -29,18 +29,10 @@ import { environment } from '../../environments/environment';
           <a class="nav-link" [routerLink]="['contributors']" routerLinkActive="active">
             Contributor Guidelines
           </a>
-          <a
-            class="nav-link"
-            href="{{sourceCodeURLs.client}}"
-            target="_blank"
-          >
+          <a class="nav-link" href="{{ sourceCodeURLs.client }}" target="_blank">
             Client Source Code <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
-          <a
-            class="nav-link"
-            href="{{sourceCodeURLs.api}}"
-            target="_blank"
-          >
+          <a class="nav-link" href="{{ sourceCodeURLs.api }}" target="_blank">
             Service Source Code <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
         </section>
