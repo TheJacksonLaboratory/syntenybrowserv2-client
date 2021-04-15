@@ -574,8 +574,7 @@ describe('BlockViewBrowserComponent', () => {
       'Gene Symbol': 'Disp1',
       'Gene ID': 'MGI:1916147',
       Type: 'protein coding gene',
-      Location: 'Chr1: 183,086,266bp - 183,221,522bp',
-      Strand: '-1',
+      Location: 'Chr1: 183,086,266bp - 183,221,522bp'
     });
     expect(component.clicktip.resources).toEqual([
       { url: 'http://www.informatics.jax.org/marker/', name: 'MGI' },
@@ -597,8 +596,7 @@ describe('BlockViewBrowserComponent', () => {
       'Gene Symbol': 'DISP1',
       'Gene ID': '84976',
       Type: 'gene',
-      Location: 'Chr1: 222,814,514bp - 223,005,995bp',
-      Strand: '1',
+      Location: 'Chr1: 222,814,514bp - 223,005,995bp'
     });
     expect(component.clicktip.resources).toEqual([
       { url: 'https://www.ncbi.nlm.nih.gov/gene/', name: 'NCBI' },
