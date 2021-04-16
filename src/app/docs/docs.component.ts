@@ -13,8 +13,7 @@ import { environment } from '../../environments/environment';
           <a class="nav-link" [routerLink]="['database']" routerLinkActive="active">
             Database
           </a>
-          <!-- TODO: change this URL once we get a production/externally visible instance set up -->
-          <a class="nav-link" href="http://sb-test01.jax.org/api/" target="_blank">
+          <a class="nav-link" href="http://syntenybrowser.jax.org/api" target="_blank">
             Live API <clr-icon shape="pop-out" size="14"></clr-icon>
           </a>
           <a class="nav-link" [routerLink]="['data-prep']" routerLinkActive="active">

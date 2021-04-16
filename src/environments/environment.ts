@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  api: 'http://sb-test01.jax.org/api', // TODO: change to production API when ready
+  api: 'https://syntenybrowser.jax.org/api',
   sourceCode: {
     etl: 'https://github.com/TheJacksonLaboratory/syntenybrowserv2-etl',
     client: 'https://github.com/TheJacksonLaboratory/syntenybrowserv2-client',
